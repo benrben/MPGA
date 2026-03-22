@@ -1,0 +1,24 @@
+{
+  "name": "mpga",
+  "version": "1.0.0",
+  "description": "Make Project Great Again — evidence-backed context engineering for AI-assisted development",
+  "author": {
+    "name": "MPGA Contributors"
+  },
+  "repository": "https://github.com/mpga-dev/mpga",
+  "license": "MIT",
+  "keywords": [
+    "context-engineering",
+    "evidence",
+    "tdd",
+    "drift-detection",
+    "spec-driven"
+  ],
+  "setup": {
+    "script": "scripts/setup.sh",
+    "description": "Builds the bundled MPGA CLI from source (npm install + tsc)"
+  },
+  "bin": {
+    "mpga": "bin/mpga.sh"
+  }
+}

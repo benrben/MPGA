@@ -1,0 +1,73 @@
+{
+  "name": "mpga",
+  "version": "1.0.0",
+  "description": "Make Project Great Again — evidence-backed context engineering for AI-assisted development",
+  "keywords": [
+    "context-engineering",
+    "evidence",
+    "tdd",
+    "drift-detection",
+    "ai-coding",
+    "claude",
+    "cursor",
+    "copilot",
+    "code-quality",
+    "developer-tools"
+  ],
+  "license": "MIT",
+  "author": "Ben Reich",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/benreich/mpga.git"
+  },
+  "homepage": "https://github.com/benreich/mpga#readme",
+  "bugs": {
+    "url": "https://github.com/benreich/mpga/issues"
+  },
+  "bin": {
+    "mpga": "./bin/mpga.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "bin"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist coverage",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src/ --ext .ts",
+    "lint:fix": "eslint src/ --ext .ts --fix",
+    "format": "prettier --write 'src/**/*.ts'",
+    "format:check": "prettier --check 'src/**/*.ts'",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run typecheck && npm run lint && npm run test",
+    "prepublishOnly": "npm run check && npm run build"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^12.1.0",
+    "fast-glob": "^3.3.2",
+    "gray-matter": "^4.0.3",
+    "js-yaml": "^4.1.0",
+    "ora": "^8.1.1"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^22.0.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "@vitest/coverage-v8": "^2.0.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
