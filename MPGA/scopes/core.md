@@ -2,7 +2,7 @@
 
 ## Summary
 
-The **core** module contains 3 files (359 lines).
+The **core** module contains 5 files (565 lines).
 
 <!-- TODO: Describe what this area does and what is intentionally out of scope -->
 
@@ -24,8 +24,9 @@ Main entry points — open these first to understand this behavior:
 
 **Called by scopes:**
 
-- ← commands
+- ← mpga-plugin
 - ← board
+- ← commands
 - ← generators
 
 ## What happens
@@ -49,9 +50,9 @@ Main entry points — open these first to understand this behavior:
 **Sibling scopes:**
 
 - [mpga-plugin](./mpga-plugin.md)
-- [commands](./commands.md)
 - [board](./board.md)
 - [evidence](./evidence.md)
+- [commands](./commands.md)
 - [generators](./generators.md)
 
 **Parent:** [INDEX.md](../INDEX.md)
@@ -60,8 +61,9 @@ Main entry points — open these first to understand this behavior:
 
 **Depended on by:**
 
-- ← [commands](./commands.md)
+- ← [mpga-plugin](./mpga-plugin.md)
 - ← [board](./board.md)
+- ← [commands](./commands.md)
 - ← [generators](./generators.md)
 
 <!-- TODO: Shared concepts or data with other scopes -->
@@ -70,8 +72,9 @@ Main entry points — open these first to understand this behavior:
 
 ```mermaid
 graph LR
-    commands --> core
+    mpga_plugin --> core
     board --> core
+    commands --> core
     generators --> core
 ```
 
@@ -88,6 +91,7 @@ graph LR
 
 | Claim | Evidence |
 |-------|----------|
+| `KnowledgeLayerConfig` (interface) | [E] mpga-plugin/cli/src/core/config.ts :: KnowledgeLayerConfig |
 | `MpgaConfig` (interface) | [E] mpga-plugin/cli/src/core/config.ts :: MpgaConfig |
 | `DEFAULT_CONFIG` (const) | [E] mpga-plugin/cli/src/core/config.ts :: DEFAULT_CONFIG |
 | `findProjectRoot` (function) | [E] mpga-plugin/cli/src/core/config.ts :: findProjectRoot |
@@ -95,8 +99,13 @@ graph LR
 | `saveConfig` (function) | [E] mpga-plugin/cli/src/core/config.ts :: saveConfig |
 | `getConfigValue` (function) | [E] mpga-plugin/cli/src/core/config.ts :: getConfigValue |
 | `setConfigValue` (function) | [E] mpga-plugin/cli/src/core/config.ts :: setConfigValue |
+| `VERSION` (const) | [E] mpga-plugin/cli/src/core/logger.ts :: VERSION |
+| `banner` (function) | [E] mpga-plugin/cli/src/core/logger.ts :: banner |
+| `miniBanner` (function) | [E] mpga-plugin/cli/src/core/logger.ts :: miniBanner |
 | `log` (const) | [E] mpga-plugin/cli/src/core/logger.ts :: log |
 | `progressBar` (function) | [E] mpga-plugin/cli/src/core/logger.ts :: progressBar |
+| `gradeColor` (function) | [E] mpga-plugin/cli/src/core/logger.ts :: gradeColor |
+| `statusBadge` (function) | [E] mpga-plugin/cli/src/core/logger.ts :: statusBadge |
 | `FileInfo` (interface) | [E] mpga-plugin/cli/src/core/scanner.ts :: FileInfo |
 | `ScanResult` (interface) | [E] mpga-plugin/cli/src/core/scanner.ts :: ScanResult |
 | `detectLanguage` (function) | [E] mpga-plugin/cli/src/core/scanner.ts :: detectLanguage |
@@ -107,8 +116,10 @@ graph LR
 
 ## Files
 
-- `mpga-plugin/cli/src/core/config.ts` (185 lines, typescript)
-- `mpga-plugin/cli/src/core/logger.ts` (29 lines, typescript)
+- `mpga-plugin/cli/src/core/config.test.ts` (84 lines, typescript)
+- `mpga-plugin/cli/src/core/config.ts` (196 lines, typescript)
+- `mpga-plugin/cli/src/core/logger.test.ts` (40 lines, typescript)
+- `mpga-plugin/cli/src/core/logger.ts` (100 lines, typescript)
 - `mpga-plugin/cli/src/core/scanner.ts` (145 lines, typescript)
 
 ## Deeper splits
@@ -118,7 +129,7 @@ graph LR
 ## Confidence and notes
 
 - **Confidence:** low — auto-generated, not yet verified
-- **Evidence coverage:** 0/16 verified
+- **Evidence coverage:** 0/22 verified
 - **Last verified:** 2026-03-22
 - **Drift risk:** unknown
 - <!-- TODO: Note anything unknown, ambiguous, or still to verify -->

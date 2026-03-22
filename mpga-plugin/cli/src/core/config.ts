@@ -1,6 +1,14 @@
 import fs from 'fs';
 import path from 'path';
 
+/** Optional INDEX.md content merged on sync (see renderIndexMd). */
+export interface KnowledgeLayerConfig {
+  /** If non-empty, replaces default convention placeholder bullets. */
+  conventions?: string[];
+  /** Per-file one-line roles for the INDEX key-files table (partial map is OK). */
+  keyFileRoles?: Record<string, string>;
+}
+
 export interface MpgaConfig {
   version: string;
   project: {
@@ -58,6 +66,8 @@ export interface MpgaConfig {
     showEvidenceStatus: boolean;
     githubSync: boolean;
   };
+  /** Custom INDEX conventions and key-file roles (persist across `mpga sync`). */
+  knowledgeLayer?: KnowledgeLayerConfig;
 }
 
 export const DEFAULT_CONFIG: MpgaConfig = {

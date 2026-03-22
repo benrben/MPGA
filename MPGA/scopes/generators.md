@@ -2,7 +2,7 @@
 
 ## Summary
 
-The **generators** module contains 3 files (610 lines).
+The **generators** module contains 4 files (686 lines).
 
 <!-- TODO: Describe what this area does and what is intentionally out of scope -->
 
@@ -47,10 +47,10 @@ Main entry points — open these first to understand this behavior:
 **Sibling scopes:**
 
 - [mpga-plugin](./mpga-plugin.md)
-- [commands](./commands.md)
 - [board](./board.md)
 - [core](./core.md)
 - [evidence](./evidence.md)
+- [commands](./commands.md)
 
 **Parent:** [INDEX.md](../INDEX.md)
 
@@ -100,7 +100,8 @@ graph LR
 ## Files
 
 - `mpga-plugin/cli/src/generators/graph-md.ts` (177 lines, typescript)
-- `mpga-plugin/cli/src/generators/index-md.ts` (77 lines, typescript)
+- `mpga-plugin/cli/src/generators/index-md.test.ts` (67 lines, typescript)
+- `mpga-plugin/cli/src/generators/index-md.ts` (86 lines, typescript)
 - `mpga-plugin/cli/src/generators/scope-md.ts` (356 lines, typescript)
 
 ## Deeper splits

@@ -69,5 +69,31 @@
     "showTddStage": true,
     "showEvidenceStatus": true,
     "githubSync": false
+  },
+  "knowledgeLayer": {
+    "conventions": [
+      "Read `MPGA/INDEX.md` before substantive work; cite `[E] path:lines` when stating how code behaves.",
+      "The MPGA CLI package lives in `mpga-plugin/cli` (ESM TypeScript, `.js` import specifiers); build with `npm run build` there so `dist/` matches source.",
+      "Generated knowledge output is under repo-root `MPGA/`; `project.ignore` includes `MPGA/` so scans do not recurse into the layer.",
+      "Prefer extending existing Commander commands and generators (`sync`, `export`, `evidence`, `drift`) over parallel scripts.",
+      "Vitest tests live under `mpga-plugin/cli/src/**`; run `npm run check` in `mpga-plugin/cli` before shipping CLI changes."
+    ],
+    "keyFileRoles": {
+      "mpga-plugin/cli/src/commands/export.ts": "Multi-target export (Claude, Cursor, Codex, Gemini, Antigravity): agents, skills, rules, AGENTS.md.",
+      "mpga-plugin/cli/src/commands/board.ts": "Board CLI: columns, tasks, `board show`, moves, Markdown board view.",
+      "mpga-plugin/cli/src/generators/scope-md.ts": "Builds per-scope markdown from scan + graph (symbols, files, evidence table).",
+      "mpga-plugin/cli/src/commands/scope.ts": "Scope subcommands: list, show, split suggestions, evidence stats.",
+      "mpga-plugin/cli/src/commands/milestone.ts": "Milestone lifecycle under `MPGA/milestones` and board linkage.",
+      "mpga-plugin/cli/src/commands/session.ts": "Session handoff and context export under `MPGA/sessions`.",
+      "mpga-plugin/cli/src/core/config.ts": "Loads `mpga.config.json`, defaults, deep merge, project root discovery.",
+      "mpga-plugin/cli/src/commands/init.ts": "Bootstraps `MPGA/` tree, templates for INDEX and GRAPH.",
+      "mpga-plugin/cli/src/board/board.ts": "Board JSON state: load/save, columns, stats, task IDs.",
+      "mpga-plugin/cli/src/generators/graph-md.ts": "Dependency graph from relative imports; orphans, circular deps, Mermaid.",
+      "mpga-plugin/cli/src/commands/sync.ts": "Full or incremental sync: scan, GRAPH, scopes, INDEX.",
+      "mpga-plugin/cli/src/generators/index-md.ts": "Renders `INDEX.md` identity, key files, scope registry (uses `knowledgeLayer` when set).",
+      "mpga-plugin/cli/src/commands/evidence.ts": "Evidence verify, heal, coverage, manual link registration.",
+      "mpga-plugin/cli/src/evidence/drift.ts": "Drift detection between evidence links and codebase symbols.",
+      "mpga-plugin/cli/src/cli.ts": "Commander app setup: registers all `register*` command modules."
+    }
   }
 }

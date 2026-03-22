@@ -2,7 +2,7 @@
 
 ## Summary
 
-The **mpga-plugin** module contains 7 files (132 lines).
+The **mpga-plugin** module contains 8 files (182 lines).
 
 <!-- TODO: Describe what this area does and what is intentionally out of scope -->
 
@@ -15,7 +15,7 @@ Main entry points — open these first to understand this behavior:
 
 ## Context / stack / skills
 
-- **Languages:** shell, javascript, typescript
+- **Languages:** shell, typescript, javascript
 - **Symbol types:** function
 - <!-- TODO: Add relevant frameworks, integrations, and expertise areas -->
 
@@ -43,10 +43,10 @@ Main entry points — open these first to understand this behavior:
 
 **Sibling scopes:**
 
-- [commands](./commands.md)
 - [board](./board.md)
 - [core](./core.md)
 - [evidence](./evidence.md)
+- [commands](./commands.md)
 - [generators](./generators.md)
 
 **Parent:** [INDEX.md](../INDEX.md)
@@ -55,6 +55,7 @@ Main entry points — open these first to understand this behavior:
 
 **Depends on:**
 
+- → [core](./core.md)
 - → [commands](./commands.md)
 
 <!-- TODO: Shared concepts or data with other scopes -->
@@ -63,6 +64,7 @@ Main entry points — open these first to understand this behavior:
 
 ```mermaid
 graph LR
+    mpga_plugin --> core
     mpga_plugin --> commands
 ```
 
@@ -84,12 +86,13 @@ graph LR
 ## Files
 
 - `mpga-plugin/bin/mpga.sh` (17 lines, shell)
-- `mpga-plugin/cli/bin/mpga.js` (4 lines, javascript)
-- `mpga-plugin/cli/src/cli.ts` (42 lines, typescript)
-- `mpga-plugin/cli/src/index.ts` (5 lines, typescript)
+- `mpga-plugin/cli/vitest.config.ts` (19 lines, typescript)
 - `mpga-plugin/scripts/check-cli.sh` (20 lines, shell)
 - `mpga-plugin/scripts/format-evidence.sh` (16 lines, shell)
 - `mpga-plugin/scripts/setup.sh` (28 lines, shell)
+- `mpga-plugin/cli/bin/mpga.js` (4 lines, javascript)
+- `mpga-plugin/cli/src/cli.ts` (73 lines, typescript)
+- `mpga-plugin/cli/src/index.ts` (5 lines, typescript)
 
 ## Deeper splits
 

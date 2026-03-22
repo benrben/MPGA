@@ -2,7 +2,7 @@
 
 ## Summary
 
-The **board** module contains 3 files (439 lines).
+The **board** module contains 4 files (518 lines).
 
 <!-- TODO: Describe what this area does and what is intentionally out of scope -->
 
@@ -47,9 +47,9 @@ Main entry points — open these first to understand this behavior:
 **Sibling scopes:**
 
 - [mpga-plugin](./mpga-plugin.md)
-- [commands](./commands.md)
 - [core](./core.md)
 - [evidence](./evidence.md)
+- [commands](./commands.md)
 - [generators](./generators.md)
 
 **Parent:** [INDEX.md](../INDEX.md)
@@ -112,6 +112,7 @@ graph LR
 
 - `mpga-plugin/cli/src/board/board-md.ts` (125 lines, typescript)
 - `mpga-plugin/cli/src/board/board.ts` (181 lines, typescript)
+- `mpga-plugin/cli/src/board/task.test.ts` (79 lines, typescript)
 - `mpga-plugin/cli/src/board/task.ts` (133 lines, typescript)
 
 ## Deeper splits

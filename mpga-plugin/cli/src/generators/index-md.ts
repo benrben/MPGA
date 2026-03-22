@@ -35,15 +35,24 @@ export function renderIndexMd(
   lines.push('## Key files');
   lines.push('| File | Role | Evidence |');
   lines.push('|------|------|----------|');
+  const roleMap = config.knowledgeLayer?.keyFileRoles ?? {};
   const topFiles = [...scanResult.files].sort((a, b) => b.lines - a.lines).slice(0, 10);
   for (const f of topFiles) {
-    lines.push(`| ${f.filepath} | (describe role) | [E] ${f.filepath}:1-${Math.min(50, f.lines)} |`);
+    const role = roleMap[f.filepath] ?? '(describe role)';
+    lines.push(`| ${f.filepath} | ${role} | [E] ${f.filepath}:1-${Math.min(50, f.lines)} |`);
   }
   lines.push('');
 
   lines.push('## Conventions');
-  lines.push('- (Add your project conventions here)');
-  lines.push('- (e.g. "All API routes follow REST naming: /api/v1/<resource>")');
+  const customConventions = config.knowledgeLayer?.conventions?.filter((c) => c.trim().length > 0);
+  if (customConventions && customConventions.length > 0) {
+    for (const c of customConventions) {
+      lines.push(`- ${c}`);
+    }
+  } else {
+    lines.push('- (Add your project conventions here)');
+    lines.push('- (e.g. "All API routes follow REST naming: /api/v1/<resource>")');
+  }
   lines.push('');
 
   lines.push('## Agent trigger table');

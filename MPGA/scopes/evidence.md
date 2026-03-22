@@ -2,7 +2,7 @@
 
 ## Summary
 
-The **evidence** module contains 4 files (500 lines).
+The **evidence** module contains 5 files (662 lines).
 
 <!-- TODO: Describe what this area does and what is intentionally out of scope -->
 
@@ -10,7 +10,7 @@ The **evidence** module contains 4 files (500 lines).
 
 Main entry points — open these first to understand this behavior:
 
-- [E] `mpga-plugin/cli/src/evidence/drift.ts`
+- [E] `mpga-plugin/cli/src/evidence/parser.test.ts`
 
 ## Context / stack / skills
 
@@ -47,9 +47,9 @@ Main entry points — open these first to understand this behavior:
 **Sibling scopes:**
 
 - [mpga-plugin](./mpga-plugin.md)
-- [commands](./commands.md)
 - [board](./board.md)
 - [core](./core.md)
+- [commands](./commands.md)
 - [generators](./generators.md)
 
 **Parent:** [INDEX.md](../INDEX.md)
@@ -107,6 +107,7 @@ graph LR
 
 - `mpga-plugin/cli/src/evidence/ast.ts` (134 lines, typescript)
 - `mpga-plugin/cli/src/evidence/drift.ts` (151 lines, typescript)
+- `mpga-plugin/cli/src/evidence/parser.test.ts` (162 lines, typescript)
 - `mpga-plugin/cli/src/evidence/parser.ts` (123 lines, typescript)
 - `mpga-plugin/cli/src/evidence/resolver.ts` (92 lines, typescript)
 

@@ -2,12 +2,13 @@
 
 ## Module dependencies
 
+mpga-plugin → core
 mpga-plugin → commands
+board → core
 commands → core
 commands → board
 commands → evidence
 commands → generators
-board → core
 generators → core
 
 ## Circular dependencies
@@ -15,24 +16,25 @@ generators → core
 
 ## Orphan modules
 - mpga-plugin/bin/mpga.sh
-- mpga-plugin/cli/bin/mpga.js
-- mpga-plugin/cli/src/cli.ts
-- mpga-plugin/cli/src/index.ts
+- mpga-plugin/cli/vitest.config.ts
 - mpga-plugin/scripts/check-cli.sh
 - mpga-plugin/scripts/format-evidence.sh
 - mpga-plugin/scripts/setup.sh
-- mpga-plugin/cli/src/commands/config.ts
-- mpga-plugin/cli/src/commands/drift.ts
-- mpga-plugin/cli/src/commands/export.ts
+- mpga-plugin/cli/bin/mpga.js
+- mpga-plugin/cli/src/cli.ts
+- mpga-plugin/cli/src/index.ts
+- mpga-plugin/cli/src/board/board-md.ts
+- mpga-plugin/cli/src/board/task.test.ts
 
 ## Mermaid export
 ```mermaid
 graph TD
+    mpga_plugin --> core
     mpga_plugin --> commands
+    board --> core
     commands --> core
     commands --> board
     commands --> evidence
     commands --> generators
-    board --> core
     generators --> core
 ```

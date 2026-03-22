@@ -2,7 +2,7 @@
 
 ## Summary
 
-The **commands** module contains 14 files (3,060 lines).
+The **commands** module contains 14 files (3,058 lines).
 
 <!-- TODO: Describe what this area does and what is intentionally out of scope -->
 
@@ -116,13 +116,13 @@ graph LR
 - `mpga-plugin/cli/src/commands/evidence.ts` (151 lines, typescript)
 - `mpga-plugin/cli/src/commands/export.ts` (1080 lines, typescript)
 - `mpga-plugin/cli/src/commands/graph.ts` (67 lines, typescript)
-- `mpga-plugin/cli/src/commands/health.ts` (129 lines, typescript)
+- `mpga-plugin/cli/src/commands/health.ts` (128 lines, typescript)
 - `mpga-plugin/cli/src/commands/init.ts` (185 lines, typescript)
 - `mpga-plugin/cli/src/commands/milestone.ts` (215 lines, typescript)
 - `mpga-plugin/cli/src/commands/scan.ts` (77 lines, typescript)
 - `mpga-plugin/cli/src/commands/scope.ts` (229 lines, typescript)
 - `mpga-plugin/cli/src/commands/session.ts` (189 lines, typescript)
-- `mpga-plugin/cli/src/commands/status.ts` (115 lines, typescript)
+- `mpga-plugin/cli/src/commands/status.ts` (114 lines, typescript)
 - `mpga-plugin/cli/src/commands/sync.ts` (82 lines, typescript)
 
 ## Deeper splits

@@ -9,6 +9,15 @@
             "command": "/Users/benreich/MPGA/mpga-plugin/bin/mpga.sh drift --quick 2>/dev/null || true"
           }
         ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/benreich/MPGA/mpga-plugin/bin/mpga.sh drift --quick 2>/dev/null || true"
+          }
+        ]
       }
     ]
   }
