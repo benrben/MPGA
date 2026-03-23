@@ -13,10 +13,7 @@ export interface ResolvedEvidence {
   healedFrom?: string; // description of what changed
 }
 
-export function resolveEvidence(
-  link: EvidenceLink,
-  projectRoot: string
-): ResolvedEvidence {
+export function resolveEvidence(link: EvidenceLink, projectRoot: string): ResolvedEvidence {
   if (!link.filepath) {
     return { status: 'stale', confidence: 0 };
   }
@@ -33,7 +30,13 @@ export function resolveEvidence(
 
   // Step 1: Try exact line range
   if (link.startLine && link.endLine) {
-    const rangeValid = verifyRange(link.filepath, link.startLine, link.endLine, link.symbol, projectRoot);
+    const rangeValid = verifyRange(
+      link.filepath,
+      link.startLine,
+      link.endLine,
+      link.symbol,
+      projectRoot,
+    );
     if (rangeValid) {
       return { status: 'valid', confidence: 1.0, startLine: link.startLine, endLine: link.endLine };
     }
@@ -49,7 +52,9 @@ export function resolveEvidence(
         confidence: 0.9,
         startLine: location.startLine,
         endLine: location.endLine,
-        healedFrom: healed ? `line range changed: was ${link.startLine}-${link.endLine}, now ${location.startLine}-${location.endLine}` : undefined,
+        healedFrom: healed
+          ? `line range changed: was ${link.startLine}-${link.endLine}, now ${location.startLine}-${location.endLine}`
+          : undefined,
       };
     }
   }
@@ -86,6 +91,6 @@ export interface VerifyResult {
 
 export function verifyAllLinks(links: EvidenceLink[], projectRoot: string): VerifyResult[] {
   return links
-    .filter(l => l.type === 'valid' || l.type === 'stale')
-    .map(link => ({ link, resolved: resolveEvidence(link, projectRoot) }));
+    .filter((l) => l.type === 'valid' || l.type === 'stale')
+    .map((link) => ({ link, resolved: resolveEvidence(link, projectRoot) }));
 }

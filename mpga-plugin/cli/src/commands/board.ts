@@ -4,7 +4,12 @@ import { Command } from 'commander';
 import { log } from '../core/logger.js';
 import { findProjectRoot } from '../core/config.js';
 import {
-  loadBoard, saveBoard, recalcStats, addTask, moveTask, findTaskFile
+  loadBoard,
+  saveBoard,
+  recalcStats,
+  addTask,
+  moveTask,
+  findTaskFile,
 } from '../board/board.js';
 import { parseTaskFile, renderTaskFile, loadAllTasks, Column, Priority } from '../board/task.js';
 import { renderBoardMd } from '../board/board-md.js';
@@ -17,9 +22,7 @@ function getTasksDir(projectRoot: string): string {
 }
 
 export function registerBoard(program: Command): void {
-  const cmd = program
-    .command('board')
-    .description('Task board management');
+  const cmd = program.command('board').description('Task board management');
 
   // board show
   cmd
@@ -127,14 +130,17 @@ export function registerBoard(program: Command): void {
       }
 
       const task = parseTaskFile(taskFile);
-      if (!task) { log.error('Could not parse task file'); process.exit(1); }
+      if (!task) {
+        log.error('Could not parse task file');
+        process.exit(1);
+      }
 
       task.assigned = opts.agent ?? 'agent';
       task.updated = new Date().toISOString();
 
       const oldColumn = task.column;
       task.column = 'in-progress';
-      board.columns[oldColumn] = board.columns[oldColumn].filter(id => id !== taskId);
+      board.columns[oldColumn] = board.columns[oldColumn].filter((id) => id !== taskId);
       board.columns['in-progress'].push(taskId);
 
       fs.writeFileSync(taskFile, renderTaskFile(task));
@@ -154,10 +160,16 @@ export function registerBoard(program: Command): void {
       const tasksDir = getTasksDir(projectRoot);
 
       const taskFile = findTaskFile(tasksDir, taskId);
-      if (!taskFile) { log.error(`Task '${taskId}' not found`); process.exit(1); }
+      if (!taskFile) {
+        log.error(`Task '${taskId}' not found`);
+        process.exit(1);
+      }
 
       const task = parseTaskFile(taskFile);
-      if (!task) { log.error('Could not parse task'); process.exit(1); }
+      if (!task) {
+        log.error('Could not parse task');
+        process.exit(1);
+      }
 
       task.assigned = agent;
       task.updated = new Date().toISOString();
@@ -180,10 +192,16 @@ export function registerBoard(program: Command): void {
       const tasksDir = getTasksDir(projectRoot);
 
       const taskFile = findTaskFile(tasksDir, taskId);
-      if (!taskFile) { log.error(`Task '${taskId}' not found`); process.exit(1); }
+      if (!taskFile) {
+        log.error(`Task '${taskId}' not found`);
+        process.exit(1);
+      }
 
       const task = parseTaskFile(taskFile);
-      if (!task) { log.error('Could not parse task'); process.exit(1); }
+      if (!task) {
+        log.error('Could not parse task');
+        process.exit(1);
+      }
 
       if (opts.status) task.status = opts.status;
       if (opts.priority) task.priority = opts.priority as Priority;
@@ -211,10 +229,16 @@ export function registerBoard(program: Command): void {
       const tasksDir = getTasksDir(projectRoot);
 
       const taskFile = findTaskFile(tasksDir, taskId);
-      if (!taskFile) { log.error(`Task '${taskId}' not found`); process.exit(1); }
+      if (!taskFile) {
+        log.error(`Task '${taskId}' not found`);
+        process.exit(1);
+      }
 
       const task = parseTaskFile(taskFile);
-      if (!task) { log.error('Could not parse task'); process.exit(1); }
+      if (!task) {
+        log.error('Could not parse task');
+        process.exit(1);
+      }
 
       task.status = 'blocked';
       task.body += `\n\n## Blocked\n${new Date().toISOString()}: ${reason}\n`;
@@ -239,10 +263,16 @@ export function registerBoard(program: Command): void {
       const tasksDir = getTasksDir(projectRoot);
 
       const taskFile = findTaskFile(tasksDir, taskId);
-      if (!taskFile) { log.error(`Task '${taskId}' not found`); process.exit(1); }
+      if (!taskFile) {
+        log.error(`Task '${taskId}' not found`);
+        process.exit(1);
+      }
 
       const task = parseTaskFile(taskFile);
-      if (!task) { log.error('Could not parse task'); process.exit(1); }
+      if (!task) {
+        log.error('Could not parse task');
+        process.exit(1);
+      }
 
       task.status = null;
       task.updated = new Date().toISOString();
@@ -265,7 +295,7 @@ export function registerBoard(program: Command): void {
       const tasksDir = getTasksDir(projectRoot);
 
       const tasks = loadAllTasks(tasksDir);
-      const taskMap = new Map(tasks.map(t => [t.id, t]));
+      const taskMap = new Map(tasks.map((t) => [t.id, t]));
 
       function printDeps(id: string, indent = 0): void {
         const task = taskMap.get(id);
@@ -282,7 +312,7 @@ export function registerBoard(program: Command): void {
       printDeps(taskId);
 
       // Also show what this task blocks
-      const blocks = tasks.filter(t => t.depends_on.includes(taskId));
+      const blocks = tasks.filter((t) => t.depends_on.includes(taskId));
       if (blocks.length > 0) {
         console.log('');
         log.dim('This task blocks:');
@@ -311,7 +341,9 @@ export function registerBoard(program: Command): void {
       console.log(`  Done:            ${stats.done} (${stats.progress_pct}%)`);
       console.log(`  In flight:       ${stats.in_flight}`);
       console.log(`  Blocked:         ${stats.blocked}`);
-      console.log(`  Evidence:        ${stats.evidence_produced}/${stats.evidence_expected} links produced`);
+      console.log(
+        `  Evidence:        ${stats.evidence_produced}/${stats.evidence_expected} links produced`,
+      );
 
       const tasks = loadAllTasks(tasksDir);
       const byPriority: Record<string, number> = { critical: 0, high: 0, medium: 0, low: 0 };

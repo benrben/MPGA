@@ -3,15 +3,25 @@ import { Task, Column, loadAllTasks } from './task.js';
 import { progressBar } from '../core/logger.js';
 
 const TDD_ICONS: Record<string, string> = {
-  green: '🟢', red: '🔴', blue: '🔵', review: '📋', done: '✅',
+  green: '🟢',
+  red: '🔴',
+  blue: '🔵',
+  review: '📋',
+  done: '✅',
 };
 
 const PRIORITY_ICONS: Record<string, string> = {
-  critical: '🔴', high: '🟠', medium: '🟡', low: '⚪',
+  critical: '🔴',
+  high: '🟠',
+  medium: '🟡',
+  low: '⚪',
 };
 
 const STATUS_ICONS: Record<string, string> = {
-  blocked: '🔴 blocked', stale: '🟡 stale', rework: '🔁 rework', paused: '⏸️ paused',
+  blocked: '🔴 blocked',
+  stale: '🟡 stale',
+  rework: '🔁 rework',
+  paused: '⏸️ paused',
 };
 
 const WIP_LIMITS_DEFAULT: Record<string, number> = { 'in-progress': 3, testing: 3, review: 2 };
@@ -19,7 +29,12 @@ const WIP_LIMITS_DEFAULT: Record<string, number> = { 'in-progress': 3, testing: 
 export function renderBoardMd(board: BoardState, tasksDir: string): string {
   const tasks = loadAllTasks(tasksDir);
   const byColumn: Record<Column, Task[]> = {
-    backlog: [], todo: [], 'in-progress': [], testing: [], review: [], done: []
+    backlog: [],
+    todo: [],
+    'in-progress': [],
+    testing: [],
+    review: [],
+    done: [],
   };
   for (const task of tasks) {
     if (byColumn[task.column]) byColumn[task.column].push(task);
@@ -31,9 +46,15 @@ export function renderBoardMd(board: BoardState, tasksDir: string): string {
   const milestone = board.milestone ?? 'No active milestone';
   lines.push(`# Board: ${milestone}`, '');
 
-  lines.push(`**Progress: ${progressBar(stats.done, stats.total)}** (${stats.done}/${stats.total} tasks)`);
-  lines.push(`**Evidence: ${progressBar(stats.evidence_produced, stats.evidence_expected)}** (${stats.evidence_produced}/${stats.evidence_expected} links produced)`);
-  lines.push(`**Health: ${stats.blocked > 0 ? `⚠ ${stats.blocked} blocked task(s)` : '✓ No blocked tasks'}**`);
+  lines.push(
+    `**Progress: ${progressBar(stats.done, stats.total)}** (${stats.done}/${stats.total} tasks)`,
+  );
+  lines.push(
+    `**Evidence: ${progressBar(stats.evidence_produced, stats.evidence_expected)}** (${stats.evidence_produced}/${stats.evidence_expected} links produced)`,
+  );
+  lines.push(
+    `**Health: ${stats.blocked > 0 ? `⚠ ${stats.blocked} blocked task(s)` : '✓ No blocked tasks'}**`,
+  );
   lines.push('');
 
   // In-progress
@@ -46,7 +67,9 @@ export function renderBoardMd(board: BoardState, tasksDir: string): string {
     for (const t of inProgress) {
       const tdd = t.tdd_stage ? TDD_ICONS[t.tdd_stage] + ' ' + t.tdd_stage : '—';
       const status = t.status ? STATUS_ICONS[t.status] + ' ' : '';
-      lines.push(`| ${t.id} | ${status}${t.title} | ${t.assigned ?? '—'} | ${tdd} | ${PRIORITY_ICONS[t.priority]} ${t.priority} |`);
+      lines.push(
+        `| ${t.id} | ${status}${t.title} | ${t.assigned ?? '—'} | ${tdd} | ${PRIORITY_ICONS[t.priority]} ${t.priority} |`,
+      );
     }
     lines.push('');
   }
@@ -59,7 +82,9 @@ export function renderBoardMd(board: BoardState, tasksDir: string): string {
     lines.push('|----|------|-------|-----|----------|');
     for (const t of testing) {
       const tdd = t.tdd_stage ? TDD_ICONS[t.tdd_stage] + ' ' + t.tdd_stage : '—';
-      lines.push(`| ${t.id} | ${t.title} | ${t.assigned ?? '—'} | ${tdd} | ${PRIORITY_ICONS[t.priority]} ${t.priority} |`);
+      lines.push(
+        `| ${t.id} | ${t.title} | ${t.assigned ?? '—'} | ${tdd} | ${PRIORITY_ICONS[t.priority]} ${t.priority} |`,
+      );
     }
     lines.push('');
   }
@@ -71,10 +96,13 @@ export function renderBoardMd(board: BoardState, tasksDir: string): string {
     lines.push('| ID | Task | Agent | Evidence | Priority |');
     lines.push('|----|------|-------|----------|----------|');
     for (const t of review) {
-      const evPct = t.evidence_expected.length > 0
-        ? `${t.evidence_produced.length}/${t.evidence_expected.length} ✓`
-        : '—';
-      lines.push(`| ${t.id} | ${t.title} | ${t.assigned ?? '—'} | ${evPct} | ${PRIORITY_ICONS[t.priority]} ${t.priority} |`);
+      const evPct =
+        t.evidence_expected.length > 0
+          ? `${t.evidence_produced.length}/${t.evidence_expected.length} ✓`
+          : '—';
+      lines.push(
+        `| ${t.id} | ${t.title} | ${t.assigned ?? '—'} | ${evPct} | ${PRIORITY_ICONS[t.priority]} ${t.priority} |`,
+      );
     }
     lines.push('');
   }
@@ -87,7 +115,9 @@ export function renderBoardMd(board: BoardState, tasksDir: string): string {
     lines.push('|----|------|-----------|----------|');
     for (const t of todo) {
       const deps = t.depends_on.length > 0 ? t.depends_on.join(', ') : '—';
-      lines.push(`| ${t.id} | ${t.title} | ${deps} | ${PRIORITY_ICONS[t.priority]} ${t.priority} |`);
+      lines.push(
+        `| ${t.id} | ${t.title} | ${deps} | ${PRIORITY_ICONS[t.priority]} ${t.priority} |`,
+      );
     }
     lines.push('');
   }

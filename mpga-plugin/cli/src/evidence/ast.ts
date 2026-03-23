@@ -12,8 +12,11 @@ export interface SymbolLocation {
 export function detectLanguage(filepath: string): string {
   const ext = path.extname(filepath).toLowerCase();
   const map: Record<string, string> = {
-    '.ts': 'typescript', '.tsx': 'typescript',
-    '.js': 'javascript', '.jsx': 'javascript', '.mjs': 'javascript',
+    '.ts': 'typescript',
+    '.tsx': 'typescript',
+    '.js': 'javascript',
+    '.jsx': 'javascript',
+    '.mjs': 'javascript',
     '.py': 'python',
     '.go': 'go',
     '.rs': 'rust',
@@ -32,14 +35,42 @@ function extractSymbolsRegex(content: string, language: string): SymbolLocation[
 
   const patterns: Array<{ re: RegExp; type: SymbolLocation['type']; langs: string[] }> = [
     // TypeScript/JavaScript
-    { re: /^(?:export\s+)?(?:async\s+)?function\s+(\w+)/, type: 'function', langs: ['typescript', 'javascript'] },
-    { re: /^(?:export\s+)?(?:abstract\s+)?class\s+(\w+)/, type: 'class', langs: ['typescript', 'javascript'] },
-    { re: /^(?:export\s+)?(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s+)?\(/, type: 'function', langs: ['typescript', 'javascript'] },
-    { re: /^(?:export\s+)?(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s+)?function/, type: 'function', langs: ['typescript', 'javascript'] },
-    { re: /^(?:export\s+)?(?:const|let|var)\s+(\w+)/, type: 'variable', langs: ['typescript', 'javascript'] },
-    { re: /^(?:export\s+)?(?:type|interface)\s+(\w+)/, type: 'type', langs: ['typescript', 'javascript'] },
+    {
+      re: /^(?:export\s+)?(?:async\s+)?function\s+(\w+)/,
+      type: 'function',
+      langs: ['typescript', 'javascript'],
+    },
+    {
+      re: /^(?:export\s+)?(?:abstract\s+)?class\s+(\w+)/,
+      type: 'class',
+      langs: ['typescript', 'javascript'],
+    },
+    {
+      re: /^(?:export\s+)?(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s+)?\(/,
+      type: 'function',
+      langs: ['typescript', 'javascript'],
+    },
+    {
+      re: /^(?:export\s+)?(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s+)?function/,
+      type: 'function',
+      langs: ['typescript', 'javascript'],
+    },
+    {
+      re: /^(?:export\s+)?(?:const|let|var)\s+(\w+)/,
+      type: 'variable',
+      langs: ['typescript', 'javascript'],
+    },
+    {
+      re: /^(?:export\s+)?(?:type|interface)\s+(\w+)/,
+      type: 'type',
+      langs: ['typescript', 'javascript'],
+    },
     // Method patterns (inside class)
-    { re: /^\s+(?:async\s+)?(\w+)\s*\([^)]*\)\s*(?::\s*\w+\s*)?{/, type: 'method', langs: ['typescript', 'javascript'] },
+    {
+      re: /^\s+(?:async\s+)?(\w+)\s*\([^)]*\)\s*(?::\s*\w+\s*)?{/,
+      type: 'method',
+      langs: ['typescript', 'javascript'],
+    },
     // Python
     { re: /^def\s+(\w+)/, type: 'function', langs: ['python'] },
     { re: /^class\s+(\w+)/, type: 'class', langs: ['python'] },
@@ -53,12 +84,20 @@ function extractSymbolsRegex(content: string, language: string): SymbolLocation[
     { re: /^(?:pub\s+)?struct\s+(\w+)/, type: 'class', langs: ['rust'] },
     { re: /^(?:pub\s+)?trait\s+(\w+)/, type: 'type', langs: ['rust'] },
     // Java/C#
-    { re: /(?:public|private|protected|static|\s)+\w+\s+(\w+)\s*\(/, type: 'function', langs: ['java', 'csharp'] },
-    { re: /(?:public|private|protected)?\s+(?:abstract\s+)?class\s+(\w+)/, type: 'class', langs: ['java', 'csharp'] },
+    {
+      re: /(?:public|private|protected|static|\s)+\w+\s+(\w+)\s*\(/,
+      type: 'function',
+      langs: ['java', 'csharp'],
+    },
+    {
+      re: /(?:public|private|protected)?\s+(?:abstract\s+)?class\s+(\w+)/,
+      type: 'class',
+      langs: ['java', 'csharp'],
+    },
     { re: /(?:public\s+)?interface\s+(\w+)/, type: 'type', langs: ['java', 'csharp'] },
   ];
 
-  const relevantPatterns = patterns.filter(p => p.langs.includes(language));
+  const relevantPatterns = patterns.filter((p) => p.langs.includes(language));
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
@@ -105,10 +144,10 @@ export function extractSymbols(filepath: string, projectRoot: string): SymbolLoc
 export function findSymbol(
   filepath: string,
   symbolName: string,
-  projectRoot: string
+  projectRoot: string,
 ): SymbolLocation | null {
   const symbols = extractSymbols(filepath, projectRoot);
-  return symbols.find(s => s.name === symbolName) ?? null;
+  return symbols.find((s) => s.name === symbolName) ?? null;
 }
 
 // Verify that a line range contains the expected symbol
@@ -117,7 +156,7 @@ export function verifyRange(
   startLine: number,
   endLine: number,
   symbol: string | undefined,
-  projectRoot: string
+  projectRoot: string,
 ): boolean {
   const fullPath = path.join(projectRoot, filepath);
   if (!fs.existsSync(fullPath)) return false;

@@ -20,8 +20,12 @@ export interface ScanResult {
 }
 
 const LANGUAGE_MAP: Record<string, string> = {
-  ts: 'typescript', tsx: 'typescript',
-  js: 'javascript', jsx: 'javascript', mjs: 'javascript', cjs: 'javascript',
+  ts: 'typescript',
+  tsx: 'typescript',
+  js: 'javascript',
+  jsx: 'javascript',
+  mjs: 'javascript',
+  cjs: 'javascript',
   py: 'python',
   go: 'go',
   rs: 'rust',
@@ -36,13 +40,19 @@ const LANGUAGE_MAP: Record<string, string> = {
   sql: 'sql',
   md: 'markdown',
   json: 'json',
-  yaml: 'yaml', yml: 'yaml',
+  yaml: 'yaml',
+  yml: 'yaml',
   toml: 'toml',
 };
 
 const ENTRY_PATTERNS = [
-  'src/index.*', 'src/main.*', 'index.*', 'main.*',
-  'app.*', 'server.*', 'cmd/main.*',
+  'src/index.*',
+  'src/main.*',
+  'index.*',
+  'main.*',
+  'app.*',
+  'server.*',
+  'cmd/main.*',
 ];
 
 export function detectLanguage(filepath: string): string {
@@ -59,8 +69,12 @@ export function countLines(filepath: string): number {
   }
 }
 
-export async function scan(projectRoot: string, ignore: string[], deep = false): Promise<ScanResult> {
-  const ignorePatterns = ignore.map(p => `**/${p}/**`).concat(ignore);
+export async function scan(
+  projectRoot: string,
+  ignore: string[],
+  deep = false,
+): Promise<ScanResult> {
+  const ignorePatterns = ignore.map((p) => `**/${p}/**`).concat(ignore);
 
   const globs = deep
     ? ['**/*.{ts,tsx,js,jsx,mjs,cjs,py,go,rs,java,cs,rb,php,swift,kt,sh,sql}']
@@ -73,7 +87,7 @@ export async function scan(projectRoot: string, ignore: string[], deep = false):
     absolute: false,
   });
 
-  const files: FileInfo[] = rawFiles.map(rel => {
+  const files: FileInfo[] = rawFiles.map((rel) => {
     const abs = path.join(projectRoot, rel);
     const lines = countLines(abs);
     const language = detectLanguage(rel);
@@ -99,9 +113,10 @@ export async function scan(projectRoot: string, ignore: string[], deep = false):
 
   // Top-level dirs
   const topLevelDirs = fs.existsSync(projectRoot)
-    ? fs.readdirSync(projectRoot, { withFileTypes: true })
-        .filter(e => e.isDirectory() && !ignore.includes(e.name) && !e.name.startsWith('.'))
-        .map(e => e.name)
+    ? fs
+        .readdirSync(projectRoot, { withFileTypes: true })
+        .filter((e) => e.isDirectory() && !ignore.includes(e.name) && !e.name.startsWith('.'))
+        .map((e) => e.name)
     : [];
 
   return {
@@ -117,11 +132,12 @@ export async function scan(projectRoot: string, ignore: string[], deep = false):
 
 export function detectProjectType(scanResult: ScanResult): string {
   const { languages, files } = scanResult;
-  const hasFile = (pattern: string) => files.some(f => f.filepath.includes(pattern));
+  const hasFile = (pattern: string) => files.some((f) => f.filepath.includes(pattern));
 
   if (languages.typescript && hasFile('next.config')) return 'Next.js';
   if (languages.typescript && hasFile('react')) return 'React';
-  if (languages.typescript && (hasFile('express') || hasFile('fastify') || hasFile('koa'))) return 'Node.js API';
+  if (languages.typescript && (hasFile('express') || hasFile('fastify') || hasFile('koa')))
+    return 'Node.js API';
   if (languages.typescript) return 'TypeScript';
   if (languages.python && hasFile('django')) return 'Django';
   if (languages.python && hasFile('fastapi')) return 'FastAPI';
@@ -138,7 +154,10 @@ export function getTopLanguage(scanResult: ScanResult): string {
   let topLang = 'unknown';
   let topLines = 0;
   for (const [lang, stats] of Object.entries(languages)) {
-    if (stats.lines > topLines) { topLines = stats.lines; topLang = lang; }
+    if (stats.lines > topLines) {
+      topLines = stats.lines;
+      topLang = lang;
+    }
   }
   return topLang;
 }

@@ -2,7 +2,13 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import { DEFAULT_CONFIG, loadConfig, saveConfig, getConfigValue, setConfigValue } from './config.js';
+import {
+  DEFAULT_CONFIG,
+  loadConfig,
+  saveConfig,
+  getConfigValue,
+  setConfigValue,
+} from './config.js';
 
 describe('DEFAULT_CONFIG', () => {
   it('has expected default values', () => {

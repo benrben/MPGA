@@ -33,7 +33,9 @@ export function registerDrift(program: Command): void {
         // Minimal output for hooks
         const staleTotal = report.scopes.reduce((s, r) => s + r.staleLinks, 0);
         if (staleTotal > 0) {
-          log.warn(`Drift detected: ${staleTotal} stale evidence link(s). Run \`mpga evidence heal\` to fix.`);
+          log.warn(
+            `Drift detected: ${staleTotal} stale evidence link(s). Run \`mpga evidence heal\` to fix.`,
+          );
         }
         if (opts.ci && !report.ciPass) process.exit(1);
         return;
@@ -50,20 +52,27 @@ export function registerDrift(program: Command): void {
       }
 
       for (const scope of report.scopes) {
-        const icon = scope.healthPct >= 80
-          ? chalk.green('✓ healthy')
-          : scope.healthPct >= 50
-            ? chalk.yellow('⚠ drift')
-            : chalk.red('✗ stale');
+        const icon =
+          scope.healthPct >= 80
+            ? chalk.green('✓ healthy')
+            : scope.healthPct >= 50
+              ? chalk.yellow('⚠ drift')
+              : chalk.red('✗ stale');
 
-        console.log(`  ${scope.scope.padEnd(20)} ${icon}   ${scope.validLinks}/${scope.totalLinks} links valid  (${scope.healthPct}%)`);
+        console.log(
+          `  ${scope.scope.padEnd(20)} ${icon}   ${scope.validLinks}/${scope.totalLinks} links valid  (${scope.healthPct}%)`,
+        );
 
         if (opts.report) {
           for (const item of scope.staleItems) {
-            log.dim(`    ✗ stale: ${item.link.filepath}${item.link.startLine ? `:${item.link.startLine}` : ''} — ${item.reason}`);
+            log.dim(
+              `    ✗ stale: ${item.link.filepath}${item.link.startLine ? `:${item.link.startLine}` : ''} — ${item.reason}`,
+            );
           }
           for (const item of scope.healedItems) {
-            log.dim(`    ~ healed: ${item.link.filepath} line range updated to ${item.newStart}-${item.newEnd}`);
+            log.dim(
+              `    ~ healed: ${item.link.filepath} line range updated to ${item.newStart}-${item.newEnd}`,
+            );
           }
         }
       }

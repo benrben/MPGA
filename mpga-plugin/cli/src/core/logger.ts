@@ -66,7 +66,7 @@ export const log = {
     console.log(`${pad}${chalk.dim(key.padEnd(18))} ${value}`);
   },
   table: (rows: string[][]) => {
-    const widths = rows[0].map((_, i) => Math.max(...rows.map(r => (r[i] ?? '').length)));
+    const widths = rows[0].map((_, i) => Math.max(...rows.map((r) => (r[i] ?? '').length)));
     for (const row of rows) {
       console.log('  ' + row.map((cell, i) => cell.padEnd(widths[i])).join('  '));
     }
@@ -84,15 +84,17 @@ export function progressBar(value: number, total: number, width = 20): string {
 
 export function gradeColor(grade: string): string {
   switch (grade) {
-    case 'A': return chalk.green.bold(grade);
-    case 'B': return chalk.blue.bold(grade);
-    case 'C': return chalk.yellow.bold(grade);
-    default: return chalk.red.bold(grade);
+    case 'A':
+      return chalk.green.bold(grade);
+    case 'B':
+      return chalk.blue.bold(grade);
+    case 'C':
+      return chalk.yellow.bold(grade);
+    default:
+      return chalk.red.bold(grade);
   }
 }
 
 export function statusBadge(ok: boolean, label: string): string {
-  return ok
-    ? chalk.green('✓') + ' ' + label
-    : chalk.red('✗') + ' ' + label;
+  return ok ? chalk.green('✓') + ' ' + label : chalk.red('✗') + ' ' + label;
 }

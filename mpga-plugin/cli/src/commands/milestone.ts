@@ -20,12 +20,13 @@ function getMilestonesDir(projectRoot: string): string {
 
 function listMilestones(milestonesDir: string): MilestoneInfo[] {
   if (!fs.existsSync(milestonesDir)) return [];
-  return fs.readdirSync(milestonesDir)
-    .filter(d => {
+  return fs
+    .readdirSync(milestonesDir)
+    .filter((d) => {
       const full = path.join(milestonesDir, d);
       return fs.statSync(full).isDirectory() && d.match(/^M\d+/);
     })
-    .map(d => {
+    .map((d) => {
       const dirPath = path.join(milestonesDir, d);
       const m = d.match(/^(M\d+)-(.+)/);
       const summaryPath = path.join(dirPath, 'SUMMARY.md');
@@ -41,15 +42,13 @@ function listMilestones(milestonesDir: string): MilestoneInfo[] {
 
 function nextMilestoneId(milestonesDir: string): string {
   const existing = listMilestones(milestonesDir);
-  const nums = existing.map(m => parseInt(m.id.replace('M', ''))).filter(n => !isNaN(n));
+  const nums = existing.map((m) => parseInt(m.id.replace('M', ''))).filter((n) => !isNaN(n));
   const max = nums.length > 0 ? Math.max(...nums) : 0;
   return `M${String(max + 1).padStart(3, '0')}`;
 }
 
 export function registerMilestone(program: Command): void {
-  const cmd = program
-    .command('milestone')
-    .description('Milestone workflow management');
+  const cmd = program.command('milestone').description('Milestone workflow management');
 
   // milestone new
   cmd
@@ -61,7 +60,10 @@ export function registerMilestone(program: Command): void {
       fs.mkdirSync(milestonesDir, { recursive: true });
 
       const id = nextMilestoneId(milestonesDir);
-      const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      const slug = name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '');
       const dirName = `${id}-${slug}`;
       const dirPath = path.join(milestonesDir, dirName);
 
@@ -71,7 +73,9 @@ export function registerMilestone(program: Command): void {
       const today = now.split('T')[0];
 
       // PLAN.md
-      fs.writeFileSync(path.join(dirPath, 'PLAN.md'), `# ${id}: ${name} — Plan
+      fs.writeFileSync(
+        path.join(dirPath, 'PLAN.md'),
+        `# ${id}: ${name} — Plan
 
 ## Objective
 (describe what this milestone achieves)
@@ -84,10 +88,13 @@ export function registerMilestone(program: Command): void {
 
 ## Created
 ${today}
-`);
+`,
+      );
 
       // CONTEXT.md
-      fs.writeFileSync(path.join(dirPath, 'CONTEXT.md'), `# ${id}: ${name} — Context
+      fs.writeFileSync(
+        path.join(dirPath, 'CONTEXT.md'),
+        `# ${id}: ${name} — Context
 
 ## Background
 (why this milestone, what problem it solves)
@@ -102,7 +109,8 @@ ${today}
 | Decision | Rationale | Date |
 |----------|-----------|------|
 | | | |
-`);
+`,
+      );
 
       // Link milestone to board
       const boardDir = path.join(projectRoot, 'MPGA', 'board');
@@ -195,7 +203,9 @@ ${today}
 
       // Write SUMMARY.md
       recalcStats(board, tasksDir);
-      fs.writeFileSync(path.join(milestoneDir, 'SUMMARY.md'), `# ${board.milestone} — Summary
+      fs.writeFileSync(
+        path.join(milestoneDir, 'SUMMARY.md'),
+        `# ${board.milestone} — Summary
 
 ## Completed: ${today}
 
@@ -205,7 +215,8 @@ ${today}
 
 ## Outcome
 (describe what was delivered)
-`);
+`,
+      );
 
       log.success(`Milestone '${board.milestone}' marked complete.`);
       log.dim(`  Summary saved to MPGA/milestones/${board.milestone}/SUMMARY.md`);

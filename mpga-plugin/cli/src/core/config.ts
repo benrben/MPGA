@@ -83,7 +83,7 @@ export const DEFAULT_CONFIG: MpgaConfig = {
     lineRanges: true,
     astAnchors: true,
     autoHeal: true,
-    coverageThreshold: 0.20,
+    coverageThreshold: 0.2,
   },
   drift: {
     ciThreshold: 80,
@@ -188,7 +188,7 @@ function deepMerge(base: unknown, override: unknown): unknown {
   for (const key of Object.keys(override as Record<string, unknown>)) {
     result[key] = deepMerge(
       (base as Record<string, unknown>)[key],
-      (override as Record<string, unknown>)[key]
+      (override as Record<string, unknown>)[key],
     );
   }
   return result;

@@ -109,31 +109,47 @@ Some text
 describe('formatEvidenceLink', () => {
   it('formats a valid link with symbol', () => {
     const link: EvidenceLink = {
-      raw: '', type: 'valid', filepath: 'src/a.ts',
-      startLine: 1, endLine: 10, symbol: 'foo', confidence: 1.0,
+      raw: '',
+      type: 'valid',
+      filepath: 'src/a.ts',
+      startLine: 1,
+      endLine: 10,
+      symbol: 'foo',
+      confidence: 1.0,
     };
     expect(formatEvidenceLink(link)).toBe('[E] src/a.ts:1-10 :: foo()');
   });
 
   it('formats a valid link without line range', () => {
     const link: EvidenceLink = {
-      raw: '', type: 'valid', filepath: 'src/a.ts',
-      symbol: 'foo', confidence: 1.0,
+      raw: '',
+      type: 'valid',
+      filepath: 'src/a.ts',
+      symbol: 'foo',
+      confidence: 1.0,
     };
     expect(formatEvidenceLink(link)).toBe('[E] src/a.ts :: foo()');
   });
 
   it('formats unknown links', () => {
     const link: EvidenceLink = {
-      raw: '', type: 'unknown', description: 'something', confidence: 0,
+      raw: '',
+      type: 'unknown',
+      description: 'something',
+      confidence: 0,
     };
     expect(formatEvidenceLink(link)).toBe('[Unknown] something');
   });
 
   it('formats stale links', () => {
     const link: EvidenceLink = {
-      raw: '', type: 'stale', staleDate: '2026-03-20',
-      filepath: 'src/a.ts', startLine: 1, endLine: 5, confidence: 0,
+      raw: '',
+      type: 'stale',
+      staleDate: '2026-03-20',
+      filepath: 'src/a.ts',
+      startLine: 1,
+      endLine: 5,
+      confidence: 0,
     };
     expect(formatEvidenceLink(link)).toBe('[Stale:2026-03-20] src/a.ts:1-5');
   });

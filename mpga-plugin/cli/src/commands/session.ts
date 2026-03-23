@@ -11,9 +11,7 @@ function getSessionsDir(projectRoot: string): string {
 }
 
 export function registerSession(program: Command): void {
-  const cmd = program
-    .command('session')
-    .description('Session management and context handoff');
+  const cmd = program.command('session').description('Session management and context handoff');
 
   // session handoff
   cmd
@@ -28,13 +26,13 @@ export function registerSession(program: Command): void {
       const boardDir = path.join(projectRoot, 'MPGA', 'board');
       const tasksDir = path.join(boardDir, 'tasks');
 
-      const board = fs.existsSync(path.join(boardDir, 'board.json'))
-        ? loadBoard(boardDir)
-        : null;
+      const board = fs.existsSync(path.join(boardDir, 'board.json')) ? loadBoard(boardDir) : null;
       if (board) recalcStats(board, tasksDir);
 
       const tasks = loadAllTasks(tasksDir);
-      const inProgress = tasks.filter(t => ['in-progress', 'testing', 'review'].includes(t.column));
+      const inProgress = tasks.filter((t) =>
+        ['in-progress', 'testing', 'review'].includes(t.column),
+      );
 
       const now = new Date();
       const dateStr = now.toISOString().split('T')[0];
@@ -52,9 +50,16 @@ ${opts.accomplished ?? '(describe what was done this session)'}
 - **In flight:** ${inProgress.length} task(s)
 
 ## In-flight tasks
-${inProgress.length === 0 ? '(none)' : inProgress.map(t =>
-  `- **${t.id}**: ${t.title} [${t.column}${t.tdd_stage ? `, TDD: ${t.tdd_stage}` : ''}${t.assigned ? `, assigned: ${t.assigned}` : ''}]`
-).join('\n')}
+${
+  inProgress.length === 0
+    ? '(none)'
+    : inProgress
+        .map(
+          (t) =>
+            `- **${t.id}**: ${t.title} [${t.column}${t.tdd_stage ? `, TDD: ${t.tdd_stage}` : ''}${t.assigned ? `, assigned: ${t.assigned}` : ''}]`,
+        )
+        .join('\n')
+}
 
 ## Decisions made
 | Decision | Rationale |
@@ -68,11 +73,12 @@ ${inProgress.length === 0 ? '(none)' : inProgress.map(t =>
 (list key files changed this session)
 
 ## Next action
-${inProgress.length > 0
-  ? `Resume task ${inProgress[0].id}: ${inProgress[0].title} — run \`mpga board claim ${inProgress[0].id}\``
-  : board && board.columns.todo.length > 0
-    ? `Pick up next todo task — run \`mpga board show\``
-    : 'No immediate next step — run `mpga status` to assess'
+${
+  inProgress.length > 0
+    ? `Resume task ${inProgress[0].id}: ${inProgress[0].title} — run \`mpga board claim ${inProgress[0].id}\``
+    : board && board.columns.todo.length > 0
+      ? `Pick up next todo task — run \`mpga board show\``
+      : 'No immediate next step — run `mpga status` to assess'
 }
 
 ## How to resume
@@ -105,8 +111,9 @@ ${inProgress.length > 0
         return;
       }
 
-      const files = fs.readdirSync(sessionsDir)
-        .filter(f => f.endsWith('-handoff.md'))
+      const files = fs
+        .readdirSync(sessionsDir)
+        .filter((f) => f.endsWith('-handoff.md'))
         .sort()
         .reverse();
 
@@ -163,7 +170,7 @@ ${inProgress.length > 0
       // Scope docs
       const scopesDir = path.join(mpgaDir, 'scopes');
       if (fs.existsSync(scopesDir)) {
-        for (const f of fs.readdirSync(scopesDir).filter(f => f.endsWith('.md'))) {
+        for (const f of fs.readdirSync(scopesDir).filter((f) => f.endsWith('.md'))) {
           const lines = fs.readFileSync(path.join(scopesDir, f), 'utf-8').split('\n').length;
           estimates.push({ name: `scopes/${f}`, lines, tier: 'Tier 2 (warm)' });
         }
@@ -177,7 +184,7 @@ ${inProgress.length > 0
       }
       console.log('');
       console.log(`  Total MPGA context:  ${total} lines (~${Math.round(total * 4)} tokens)`);
-      const pct = Math.round((total * 4 / 200000) * 100);
+      const pct = Math.round(((total * 4) / 200000) * 100);
       console.log(`  % of 200K window:    ~${pct}%`);
       console.log('');
 

@@ -6,15 +6,20 @@ import { taskFilename, renderTaskFile, parseTaskFile, Task } from './task.js';
 
 describe('taskFilename', () => {
   it('generates a slug from title', () => {
-    expect(taskFilename('T001', 'Add authentication middleware')).toBe('T001-add-authentication-middleware.md');
+    expect(taskFilename('T001', 'Add authentication middleware')).toBe(
+      'T001-add-authentication-middleware.md',
+    );
   });
 
   it('handles special characters', () => {
-    expect(taskFilename('T002', 'Fix bug #42: login fails!')).toBe('T002-fix-bug-42-login-fails.md');
+    expect(taskFilename('T002', 'Fix bug #42: login fails!')).toBe(
+      'T002-fix-bug-42-login-fails.md',
+    );
   });
 
   it('truncates long titles', () => {
-    const longTitle = 'This is a very long task title that exceeds the maximum slug length for filenames';
+    const longTitle =
+      'This is a very long task title that exceeds the maximum slug length for filenames';
     const filename = taskFilename('T003', longTitle);
     expect(filename.length).toBeLessThan(60);
     expect(filename).toMatch(/^T003-.+\.md$/);

@@ -9,20 +9,21 @@ import { findProjectRoot, loadConfig } from '../core/config.js';
 // The markdown instructions live in mpga-plugin/agents/<slug>.md.
 
 interface AgentMeta {
-  slug: string;           // filename slug (e.g. "green-dev")
-  name: string;           // display name
-  description: string;    // one-line description for agent routing
-  model: string;          // preferred model
-  readonly: boolean;      // Cursor: cannot write files
-  isBackground: boolean;  // Cursor: can run in parallel
-  sandboxMode: string;    // Codex: workspace | none
+  slug: string; // filename slug (e.g. "green-dev")
+  name: string; // display name
+  description: string; // one-line description for agent routing
+  model: string; // preferred model
+  readonly: boolean; // Cursor: cannot write files
+  isBackground: boolean; // Cursor: can run in parallel
+  sandboxMode: string; // Codex: workspace | none
 }
 
 const AGENTS: AgentMeta[] = [
   {
     slug: 'green-dev',
     name: 'mpga-green-dev',
-    description: 'Write failing tests FIRST for a task. Use at the start of every TDD cycle. Never writes implementation code.',
+    description:
+      'Write failing tests FIRST for a task. Use at the start of every TDD cycle. Never writes implementation code.',
     model: 'claude-sonnet-4-6',
     readonly: false,
     isBackground: false,
@@ -31,7 +32,8 @@ const AGENTS: AgentMeta[] = [
   {
     slug: 'red-dev',
     name: 'mpga-red-dev',
-    description: 'Write minimal implementation to make a failing test pass. Use after green-dev has written tests. Never modifies tests.',
+    description:
+      'Write minimal implementation to make a failing test pass. Use after green-dev has written tests. Never modifies tests.',
     model: 'claude-sonnet-4-6',
     readonly: false,
     isBackground: false,
@@ -40,7 +42,8 @@ const AGENTS: AgentMeta[] = [
   {
     slug: 'blue-dev',
     name: 'mpga-blue-dev',
-    description: 'Refactor passing code for quality without changing behavior. Use after red-dev. Updates evidence links in scope docs.',
+    description:
+      'Refactor passing code for quality without changing behavior. Use after red-dev. Updates evidence links in scope docs.',
     model: 'claude-sonnet-4-6',
     readonly: false,
     isBackground: false,
@@ -49,7 +52,8 @@ const AGENTS: AgentMeta[] = [
   {
     slug: 'scout',
     name: 'mpga-scout',
-    description: 'Read-only codebase explorer. Traces execution paths, maps dependencies, and builds evidence links. Never modifies files.',
+    description:
+      'Read-only codebase explorer. Traces execution paths, maps dependencies, and builds evidence links. Never modifies files.',
     model: 'claude-sonnet-4-6',
     readonly: true,
     isBackground: true,
@@ -58,7 +62,8 @@ const AGENTS: AgentMeta[] = [
   {
     slug: 'architect',
     name: 'mpga-architect',
-    description: 'Structural analysis agent. Generates and updates GRAPH.md and scope docs from scout findings. Every claim must cite evidence.',
+    description:
+      'Structural analysis agent. Generates and updates GRAPH.md and scope docs from scout findings. Every claim must cite evidence.',
     model: 'claude-opus-4-6',
     readonly: false,
     isBackground: false,
@@ -67,7 +72,8 @@ const AGENTS: AgentMeta[] = [
   {
     slug: 'auditor',
     name: 'mpga-auditor',
-    description: 'Evidence integrity checker. Verifies evidence links resolve, flags stale links, calculates scope health. Read-only — only flags, never auto-fixes.',
+    description:
+      'Evidence integrity checker. Verifies evidence links resolve, flags stale links, calculates scope health. Read-only — only flags, never auto-fixes.',
     model: 'claude-sonnet-4-6',
     readonly: true,
     isBackground: true,
@@ -76,7 +82,8 @@ const AGENTS: AgentMeta[] = [
   {
     slug: 'researcher',
     name: 'mpga-researcher',
-    description: 'Domain research before planning. Reads scope docs, identifies knowledge gaps, investigates library options and pitfalls.',
+    description:
+      'Domain research before planning. Reads scope docs, identifies knowledge gaps, investigates library options and pitfalls.',
     model: 'claude-opus-4-6',
     readonly: true,
     isBackground: false,
@@ -85,7 +92,8 @@ const AGENTS: AgentMeta[] = [
   {
     slug: 'reviewer',
     name: 'mpga-reviewer',
-    description: 'Two-stage code reviewer. Stage 1: spec compliance + evidence validity. Stage 2: code quality + security. Critical issues block progress.',
+    description:
+      'Two-stage code reviewer. Stage 1: spec compliance + evidence validity. Stage 2: code quality + security. Critical issues block progress.',
     model: 'claude-opus-4-6',
     readonly: true,
     isBackground: false,
@@ -94,7 +102,8 @@ const AGENTS: AgentMeta[] = [
   {
     slug: 'verifier',
     name: 'mpga-verifier',
-    description: 'Post-execution verification. Runs test suite, checks for stubs, verifies evidence links updated, confirms milestone progress.',
+    description:
+      'Post-execution verification. Runs test suite, checks for stubs, verifies evidence links updated, confirms milestone progress.',
     model: 'claude-sonnet-4-6',
     readonly: true,
     isBackground: false,
@@ -103,8 +112,16 @@ const AGENTS: AgentMeta[] = [
 ];
 
 const SKILL_NAMES = [
-  'sync-project', 'brainstorm', 'plan', 'develop', 'drift-check',
-  'ask', 'onboard', 'ship', 'handoff', 'map-codebase',
+  'sync-project',
+  'brainstorm',
+  'plan',
+  'develop',
+  'drift-check',
+  'ask',
+  'onboard',
+  'ship',
+  'handoff',
+  'map-codebase',
 ];
 
 // ─── Plugin root finder ───────────────────────────────────────────────────────
@@ -113,7 +130,10 @@ function findPluginRoot(): string | null {
   // When running from compiled CLI at mpga-plugin/cli/dist/commands/export.js,
   // __dirname is dist/commands/ — plugin root is three levels up: ../../..
   const candidate = path.resolve(__dirname, '../../..');
-  if (fs.existsSync(path.join(candidate, 'skills')) && fs.existsSync(path.join(candidate, 'agents'))) {
+  if (
+    fs.existsSync(path.join(candidate, 'skills')) &&
+    fs.existsSync(path.join(candidate, 'agents'))
+  ) {
     return candidate;
   }
   // Fallback: MPGA_PLUGIN_ROOT env var (set by bin/mpga.sh as PLUGIN_ROOT)
@@ -147,10 +167,7 @@ function copySkillsTo(targetSkillsDir: string, pluginRoot: string | null, toolNa
 
     // Fallback: write a minimal SKILL.md if plugin root not available
     if (!fs.existsSync(path.join(destDir, 'SKILL.md'))) {
-      fs.writeFileSync(
-        path.join(destDir, 'SKILL.md'),
-        generateFallbackSkillMd(skillName)
-      );
+      fs.writeFileSync(path.join(destDir, 'SKILL.md'), generateFallbackSkillMd(skillName));
     }
   }
 }
@@ -176,14 +193,14 @@ function copyDir(src: string, dest: string, toolName: string): void {
 function generateFallbackSkillMd(skillName: string): string {
   const descriptions: Record<string, string> = {
     'sync-project': 'Rebuild the MPGA knowledge layer from the current codebase state',
-    'brainstorm': 'Socratic design refinement before writing any code',
-    'plan': 'Generate an evidence-based task breakdown for a milestone',
-    'develop': 'Orchestrate the TDD cycle for a task (green → red → blue → review)',
+    brainstorm: 'Socratic design refinement before writing any code',
+    plan: 'Generate an evidence-based task breakdown for a milestone',
+    develop: 'Orchestrate the TDD cycle for a task (green → red → blue → review)',
     'drift-check': 'Validate evidence links and detect stale scope docs',
-    'ask': 'Answer questions about the codebase using MPGA scope docs as citations',
-    'onboard': 'Guided tour of the codebase using the MPGA knowledge layer',
-    'ship': 'Verify, commit, update evidence, and advance milestone',
-    'handoff': 'Export session state for cross-context continuity',
+    ask: 'Answer questions about the codebase using MPGA scope docs as citations',
+    onboard: 'Guided tour of the codebase using the MPGA knowledge layer',
+    ship: 'Verify, commit, update evidence, and advance milestone',
+    handoff: 'Export session state for cross-context continuity',
     'map-codebase': 'Parallel scout agents analyze the full codebase and generate scopes',
   };
 
@@ -206,7 +223,10 @@ function readAgentInstructions(pluginRoot: string | null, slug: string): string 
     const agentPath = path.join(pluginRoot, 'agents', `${slug}.md`);
     if (fs.existsSync(agentPath)) {
       // Strip the H1 title line — it becomes redundant with the YAML frontmatter
-      return fs.readFileSync(agentPath, 'utf-8').replace(/^# Agent:.*\n/, '').trimStart();
+      return fs
+        .readFileSync(agentPath, 'utf-8')
+        .replace(/^# Agent:.*\n/, '')
+        .trimStart();
     }
   }
   return `See MPGA documentation for full ${slug} agent protocol.`;
@@ -257,7 +277,10 @@ export function registerExport(program: Command): void {
     .option('--claude', 'Generate CLAUDE.md + .claude/skills/ for Claude Code')
     .option('--cursor', 'Generate .cursor/rules/*.mdc + .cursor/skills/ + .cursor/agents/')
     .option('--codex', 'Generate AGENTS.md + .codex/skills/ + .codex/agents/*.toml')
-    .option('--antigravity', 'Generate GEMINI.md + .agent/skills/ + .antigravity/rules/ + .agents/workflows/')
+    .option(
+      '--antigravity',
+      'Generate GEMINI.md + .agent/skills/ + .antigravity/rules/ + .agents/workflows/',
+    )
     .option('--all', 'Generate for all tools')
     .option('--global', 'Generate user-level config instead of project config')
     .option('--workflows', 'Include workflow files (Antigravity)')
@@ -289,9 +312,17 @@ export function registerExport(program: Command): void {
         if (opts.global) {
           log.info('Append the following to ~/.claude/CLAUDE.md:');
           log.info('\n' + generateClaudeGlobal());
-          deployClaudePlugin(path.join(process.env.HOME ?? '~', '.claude'), pluginRoot, projectRoot, true);
+          deployClaudePlugin(
+            path.join(process.env.HOME ?? '~', '.claude'),
+            pluginRoot,
+            projectRoot,
+            true,
+          );
         } else {
-          fs.writeFileSync(path.join(projectRoot, 'CLAUDE.md'), generateClaudeMd(indexContent, projectName));
+          fs.writeFileSync(
+            path.join(projectRoot, 'CLAUDE.md'),
+            generateClaudeMd(indexContent, projectName),
+          );
           log.success('Generated CLAUDE.md');
           deployClaudePlugin(path.join(projectRoot, '.claude'), pluginRoot, projectRoot, false);
         }
@@ -314,7 +345,7 @@ export function registerExport(program: Command): void {
           for (const agent of AGENTS) {
             fs.writeFileSync(
               path.join(globalAgentsDir, `${agent.name}.md`),
-              generateCursorAgentMd(agent, pluginRoot)
+              generateCursorAgentMd(agent, pluginRoot),
             );
           }
           log.success(`Generated ~/.cursor/agents/ (${AGENTS.length} agents)`);
@@ -322,10 +353,16 @@ export function registerExport(program: Command): void {
           // Rules
           const rulesDir = path.join(projectRoot, '.cursor', 'rules');
           fs.mkdirSync(rulesDir, { recursive: true });
-          fs.writeFileSync(path.join(rulesDir, 'mpga-project.mdc'), generateCursorProjectMdc(indexContent, projectName));
+          fs.writeFileSync(
+            path.join(rulesDir, 'mpga-project.mdc'),
+            generateCursorProjectMdc(indexContent, projectName),
+          );
           fs.writeFileSync(path.join(rulesDir, 'mpga-evidence.mdc'), generateCursorEvidenceMdc());
           fs.writeFileSync(path.join(rulesDir, 'mpga-tdd.mdc'), generateCursorTddMdc());
-          fs.writeFileSync(path.join(rulesDir, 'mpga-scopes.mdc'), generateCursorScopesMdc(mpgaDir));
+          fs.writeFileSync(
+            path.join(rulesDir, 'mpga-scopes.mdc'),
+            generateCursorScopesMdc(mpgaDir),
+          );
           log.success('Generated .cursor/rules/ (4 MDC files)');
           // Skills
           const cursorSkillsDir = path.join(projectRoot, '.cursor', 'skills');
@@ -337,7 +374,7 @@ export function registerExport(program: Command): void {
           for (const agent of AGENTS) {
             fs.writeFileSync(
               path.join(cursorAgentsDir, `${agent.name}.md`),
-              generateCursorAgentMd(agent, pluginRoot)
+              generateCursorAgentMd(agent, pluginRoot),
             );
           }
           log.success(`.cursor/agents/ (${AGENTS.length} agents)`);
@@ -362,13 +399,16 @@ export function registerExport(program: Command): void {
           for (const agent of AGENTS) {
             fs.writeFileSync(
               path.join(globalAgentsDir, `${agent.name}.toml`),
-              generateCodexAgentToml(agent, pluginRoot)
+              generateCodexAgentToml(agent, pluginRoot),
             );
           }
           log.success(`Generated ~/.codex/agents/ (${AGENTS.length} TOML agents)`);
         } else {
           // Root AGENTS.md
-          fs.writeFileSync(path.join(projectRoot, 'AGENTS.md'), generateAgentsMd(indexContent, projectName));
+          fs.writeFileSync(
+            path.join(projectRoot, 'AGENTS.md'),
+            generateAgentsMd(indexContent, projectName),
+          );
           // MPGA layer nav guide
           fs.writeFileSync(path.join(mpgaDir, 'AGENTS.md'), generateMpgaLayerAgentsMd());
           // Subdirectory AGENTS.md files for detected scopes
@@ -385,7 +425,7 @@ export function registerExport(program: Command): void {
           for (const agent of AGENTS) {
             fs.writeFileSync(
               path.join(codexAgentsDir, `${agent.name}.toml`),
-              generateCodexAgentToml(agent, pluginRoot)
+              generateCodexAgentToml(agent, pluginRoot),
             );
           }
           log.success(`.codex/agents/ (${AGENTS.length} TOML agents)`);
@@ -396,16 +436,27 @@ export function registerExport(program: Command): void {
       // ── Antigravity ───────────────────────────────────────────────────────────
       if (opts.antigravity || doAll) {
         if (opts.global) {
-          const agGlobalSkillsDir = path.join(process.env.HOME ?? '~', '.gemini', 'antigravity', 'skills');
+          const agGlobalSkillsDir = path.join(
+            process.env.HOME ?? '~',
+            '.gemini',
+            'antigravity',
+            'skills',
+          );
           copySkillsTo(agGlobalSkillsDir, pluginRoot, 'antigravity');
           log.success(`Generated ~/.gemini/antigravity/skills/ (${SKILL_NAMES.length} skills)`);
           const agGlobalRulesDir = path.join(process.env.HOME ?? '~', '.antigravity', 'rules');
           fs.mkdirSync(agGlobalRulesDir, { recursive: true });
-          fs.writeFileSync(path.join(agGlobalRulesDir, 'mpga-global.md'), generateAntigravityGlobal());
+          fs.writeFileSync(
+            path.join(agGlobalRulesDir, 'mpga-global.md'),
+            generateAntigravityGlobal(),
+          );
           log.success('Generated ~/.antigravity/rules/mpga-global.md');
         } else {
           // GEMINI.md constitution
-          fs.writeFileSync(path.join(projectRoot, 'GEMINI.md'), generateGeminiMd(indexContent, projectName));
+          fs.writeFileSync(
+            path.join(projectRoot, 'GEMINI.md'),
+            generateGeminiMd(indexContent, projectName),
+          );
           log.success('Generated GEMINI.md');
           // Skills in .agent/skills/
           const agSkillsDir = path.join(projectRoot, '.agent', 'skills');
@@ -414,16 +465,31 @@ export function registerExport(program: Command): void {
           // Rules in .antigravity/rules/
           const rulesDir = path.join(projectRoot, '.antigravity', 'rules');
           fs.mkdirSync(rulesDir, { recursive: true });
-          fs.writeFileSync(path.join(rulesDir, 'mpga-context.md'), generateAntigravityContextMd(indexContent, projectName));
-          fs.writeFileSync(path.join(rulesDir, 'mpga-evidence.md'), generateAntigravityEvidenceMd());
+          fs.writeFileSync(
+            path.join(rulesDir, 'mpga-context.md'),
+            generateAntigravityContextMd(indexContent, projectName),
+          );
+          fs.writeFileSync(
+            path.join(rulesDir, 'mpga-evidence.md'),
+            generateAntigravityEvidenceMd(),
+          );
           fs.writeFileSync(path.join(rulesDir, 'mpga-tdd.md'), generateAntigravityTddMd());
           log.success('Generated .antigravity/rules/ (3 files)');
           // Workflows in .agents/workflows/ — always generated for antigravity
           const workflowsDir = path.join(projectRoot, '.agents', 'workflows');
           fs.mkdirSync(workflowsDir, { recursive: true });
-          fs.writeFileSync(path.join(workflowsDir, 'mpga-plan.md'), generateAntigravityPlanWorkflow());
-          fs.writeFileSync(path.join(workflowsDir, 'mpga-develop.md'), generateAntigravityDevelopWorkflow());
-          fs.writeFileSync(path.join(workflowsDir, 'mpga-review.md'), generateAntigravityReviewWorkflow());
+          fs.writeFileSync(
+            path.join(workflowsDir, 'mpga-plan.md'),
+            generateAntigravityPlanWorkflow(),
+          );
+          fs.writeFileSync(
+            path.join(workflowsDir, 'mpga-develop.md'),
+            generateAntigravityDevelopWorkflow(),
+          );
+          fs.writeFileSync(
+            path.join(workflowsDir, 'mpga-review.md'),
+            generateAntigravityReviewWorkflow(),
+          );
           log.success('Generated .agents/workflows/ (3 workflow files)');
           // Knowledge Items seeding
           if (opts.knowledge) {
@@ -462,7 +528,12 @@ export function registerExport(program: Command): void {
 //   agents/<slug>.md             (9 agents)
 //   commands/<cmd>.md            (12 /mpga:* commands)
 //   settings.json                (hooks merged with existing)
-function deployClaudePlugin(claudeDir: string, pluginRoot: string | null, projectRoot: string, isGlobal: boolean): void {
+function deployClaudePlugin(
+  claudeDir: string,
+  pluginRoot: string | null,
+  projectRoot: string,
+  isGlobal: boolean,
+): void {
   fs.mkdirSync(claudeDir, { recursive: true });
 
   // Skills
@@ -470,7 +541,9 @@ function deployClaudePlugin(claudeDir: string, pluginRoot: string | null, projec
   log.success(`.claude/skills/ (${SKILL_NAMES.length} skills)`);
 
   if (!pluginRoot) {
-    log.warn('Plugin root not found — skipping agents, commands, and hooks. Set MPGA_PLUGIN_ROOT to fix.');
+    log.warn(
+      'Plugin root not found — skipping agents, commands, and hooks. Set MPGA_PLUGIN_ROOT to fix.',
+    );
     return;
   }
 
@@ -479,10 +552,12 @@ function deployClaudePlugin(claudeDir: string, pluginRoot: string | null, projec
   const agentsDest = path.join(claudeDir, 'agents');
   if (fs.existsSync(agentsSrc)) {
     fs.mkdirSync(agentsDest, { recursive: true });
-    for (const f of fs.readdirSync(agentsSrc).filter(n => n.endsWith('.md'))) {
+    for (const f of fs.readdirSync(agentsSrc).filter((n) => n.endsWith('.md'))) {
       fs.copyFileSync(path.join(agentsSrc, f), path.join(agentsDest, f));
     }
-    log.success(`.claude/agents/ (${fs.readdirSync(agentsSrc).filter(n => n.endsWith('.md')).length} agents)`);
+    log.success(
+      `.claude/agents/ (${fs.readdirSync(agentsSrc).filter((n) => n.endsWith('.md')).length} agents)`,
+    );
   }
 
   // Commands (project-scoped only — global commands go in ~/.claude/commands/)
@@ -491,10 +566,12 @@ function deployClaudePlugin(claudeDir: string, pluginRoot: string | null, projec
     const commandsDest = path.join(claudeDir, 'commands');
     if (fs.existsSync(commandsSrc)) {
       fs.mkdirSync(commandsDest, { recursive: true });
-      for (const f of fs.readdirSync(commandsSrc).filter(n => n.endsWith('.md'))) {
+      for (const f of fs.readdirSync(commandsSrc).filter((n) => n.endsWith('.md'))) {
         fs.copyFileSync(path.join(commandsSrc, f), path.join(commandsDest, f));
       }
-      log.success(`.claude/commands/ (${fs.readdirSync(commandsSrc).filter(n => n.endsWith('.md')).length} /mpga:* commands)`);
+      log.success(
+        `.claude/commands/ (${fs.readdirSync(commandsSrc).filter((n) => n.endsWith('.md')).length} /mpga:* commands)`,
+      );
     }
   }
 
@@ -507,13 +584,17 @@ function deployClaudePlugin(claudeDir: string, pluginRoot: string | null, projec
     // Replace ${CLAUDE_PLUGIN_ROOT} with the actual plugin path
     const hooksStr = JSON.stringify(hooks).replace(
       /\$\{CLAUDE_PLUGIN_ROOT\}/g,
-      pluginRoot.replace(/\\/g, '/')
+      pluginRoot.replace(/\\/g, '/'),
     );
     const resolvedHooks = JSON.parse(hooksStr);
 
     let settings: Record<string, unknown> = {};
     if (fs.existsSync(settingsPath)) {
-      try { settings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8')); } catch { /* ignore */ }
+      try {
+        settings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
+      } catch {
+        /* ignore */
+      }
     }
     // Merge hooks (append PostToolUse entries, don't duplicate)
     const existing = (settings.hooks as Record<string, unknown[]> | undefined) ?? {};
@@ -667,11 +748,12 @@ function generateCursorScopesMdc(mpgaDir: string): string {
   let scopeLines = '- (no scopes yet — run `mpga sync` to generate)';
 
   if (fs.existsSync(scopesDir)) {
-    const scopes = fs.readdirSync(scopesDir)
-      .filter(f => f.endsWith('.md'))
-      .map(f => f.replace('.md', ''));
+    const scopes = fs
+      .readdirSync(scopesDir)
+      .filter((f) => f.endsWith('.md'))
+      .map((f) => f.replace('.md', ''));
     if (scopes.length > 0) {
-      scopeLines = scopes.map(s => `- ${s} → @MPGA/scopes/${s}.md`).join('\n');
+      scopeLines = scopes.map((s) => `- ${s} → @MPGA/scopes/${s}.md`).join('\n');
     }
   }
 
@@ -792,19 +874,22 @@ Do NOT modify files in this directory manually. Use:
 }
 
 function generateSubdirAgentsMd(projectRoot: string, scopesDir: string): void {
-  const scopes = fs.readdirSync(scopesDir).filter(f => f.endsWith('.md'));
+  const scopes = fs.readdirSync(scopesDir).filter((f) => f.endsWith('.md'));
   for (const scopeFile of scopes) {
     const scopeName = scopeFile.replace('.md', '');
     const scopeContent = fs.readFileSync(path.join(scopesDir, scopeFile), 'utf-8');
     const evidenceLinks = (scopeContent.match(/\[E\] .+/g) ?? []).slice(0, 5);
-    const evidenceSection = evidenceLinks.length > 0
-      ? evidenceLinks.map(l => `- ${l}`).join('\n')
-      : '- (run `mpga sync` to populate evidence links)';
+    const evidenceSection =
+      evidenceLinks.length > 0
+        ? evidenceLinks.map((l) => `- ${l}`).join('\n')
+        : '- (run `mpga sync` to populate evidence links)';
 
     const srcDir = path.join(projectRoot, 'src', scopeName);
     if (!fs.existsSync(srcDir)) continue;
 
-    fs.writeFileSync(path.join(srcDir, 'AGENTS.md'), `# ${scopeName} Module — MPGA Scope
+    fs.writeFileSync(
+      path.join(srcDir, 'AGENTS.md'),
+      `# ${scopeName} Module — MPGA Scope
 
 For detailed evidence-backed documentation of this module,
 read: MPGA/scopes/${scopeName}.md
@@ -814,7 +899,8 @@ ${evidenceSection}
 
 ## Dependencies
 See MPGA/scopes/${scopeName}.md for full dependency graph.
-`);
+`,
+    );
   }
 }
 
@@ -1058,22 +1144,25 @@ function seedAntigravityKnowledgeItems(projectRoot: string, scopesDir: string): 
   const kiDir = path.join(projectRoot, '.antigravity', 'knowledge');
   fs.mkdirSync(kiDir, { recursive: true });
 
-  const scopes = fs.readdirSync(scopesDir).filter(f => f.endsWith('.md'));
+  const scopes = fs.readdirSync(scopesDir).filter((f) => f.endsWith('.md'));
   for (const scopeFile of scopes) {
     const scopeName = scopeFile.replace('.md', '');
     const scopeContent = fs.readFileSync(path.join(scopesDir, scopeFile), 'utf-8');
     const evidenceLinks = (scopeContent.match(/\[E\] .+/g) ?? []).slice(0, 10);
 
-    fs.writeFileSync(path.join(kiDir, `mpga-${scopeName}.md`), `# Knowledge: ${scopeName} module
+    fs.writeFileSync(
+      path.join(kiDir, `mpga-${scopeName}.md`),
+      `# Knowledge: ${scopeName} module
 
 Source: MPGA/scopes/${scopeName}.md
 Auto-seeded by \`mpga export --antigravity --knowledge\`
 
 ## Key evidence
-${evidenceLinks.map(l => `- ${l}`).join('\n') || '- (run `mpga sync` to populate)'}
+${evidenceLinks.map((l) => `- ${l}`).join('\n') || '- (run `mpga sync` to populate)'}
 
 ## Full scope
 Read MPGA/scopes/${scopeName}.md for the complete evidence-backed scope document.
-`);
+`,
+    );
   }
 }

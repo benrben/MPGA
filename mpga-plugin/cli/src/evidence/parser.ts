@@ -28,7 +28,10 @@ const DEPRECATED_RE = /\[Deprecated\]\s+(\S+?)(?::(\d+)-(\d+))?\s*(?:::\s*(.+))?
 
 // Strip markdown artifacts (backticks, trailing table pipes) from parsed values
 function cleanParsed(s: string): string {
-  return s.replace(/`/g, '').replace(/\s*\|?\s*$/, '').trim();
+  return s
+    .replace(/`/g, '')
+    .replace(/\s*\|?\s*$/, '')
+    .trim();
 }
 
 export function parseEvidenceLink(line: string): EvidenceLink | null {
@@ -83,8 +86,9 @@ export function parseEvidenceLink(line: string): EvidenceLink | null {
 }
 
 export function parseEvidenceLinks(content: string): EvidenceLink[] {
-  return content.split('\n')
-    .map(line => parseEvidenceLink(line))
+  return content
+    .split('\n')
+    .map((line) => parseEvidenceLink(line))
     .filter((l): l is EvidenceLink => l !== null);
 }
 
@@ -110,13 +114,18 @@ export function formatEvidenceLink(link: EvidenceLink): string {
 }
 
 export function evidenceStats(links: EvidenceLink[]): {
-  total: number; valid: number; stale: number; unknown: number; deprecated: number; healthPct: number;
+  total: number;
+  valid: number;
+  stale: number;
+  unknown: number;
+  deprecated: number;
+  healthPct: number;
 } {
   const total = links.length;
-  const valid = links.filter(l => l.type === 'valid').length;
-  const stale = links.filter(l => l.type === 'stale').length;
-  const unknown = links.filter(l => l.type === 'unknown').length;
-  const deprecated = links.filter(l => l.type === 'deprecated').length;
+  const valid = links.filter((l) => l.type === 'valid').length;
+  const stale = links.filter((l) => l.type === 'stale').length;
+  const unknown = links.filter((l) => l.type === 'unknown').length;
+  const deprecated = links.filter((l) => l.type === 'deprecated').length;
   const healthPct = total === 0 ? 100 : Math.round((valid / total) * 100);
   return { total, valid, stale, unknown, deprecated, healthPct };
 }

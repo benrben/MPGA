@@ -42,8 +42,13 @@ export function createEmptyBoard(): BoardState {
     updated: new Date().toISOString(),
     columns: { backlog: [], todo: [], 'in-progress': [], testing: [], review: [], done: [] },
     stats: {
-      total: 0, done: 0, in_flight: 0, blocked: 0,
-      progress_pct: 0, evidence_produced: 0, evidence_expected: 0,
+      total: 0,
+      done: 0,
+      in_flight: 0,
+      blocked: 0,
+      progress_pct: 0,
+      evidence_produced: 0,
+      evidence_expected: 0,
     },
     wip_limits: { 'in-progress': 3, testing: 3, review: 2 },
     next_task_id: 1,
@@ -53,9 +58,11 @@ export function createEmptyBoard(): BoardState {
 export function recalcStats(board: BoardState, tasksDir: string): BoardState {
   const tasks = loadAllTasks(tasksDir);
   const total = tasks.length;
-  const done = tasks.filter(t => t.column === 'done').length;
-  const inFlight = tasks.filter(t => ['in-progress', 'testing', 'review'].includes(t.column)).length;
-  const blocked = tasks.filter(t => t.status === 'blocked').length;
+  const done = tasks.filter((t) => t.column === 'done').length;
+  const inFlight = tasks.filter((t) =>
+    ['in-progress', 'testing', 'review'].includes(t.column),
+  ).length;
+  const blocked = tasks.filter((t) => t.status === 'blocked').length;
   const evidenceProduced = tasks.reduce((s, t) => s + t.evidence_produced.length, 0);
   const evidenceExpected = tasks.reduce((s, t) => s + t.evidence_expected.length, 0);
 
@@ -71,7 +78,12 @@ export function recalcStats(board: BoardState, tasksDir: string): BoardState {
 
   // Rebuild columns
   const columns: Record<Column, string[]> = {
-    backlog: [], todo: [], 'in-progress': [], testing: [], review: [], done: []
+    backlog: [],
+    todo: [],
+    'in-progress': [],
+    testing: [],
+    review: [],
+    done: [],
   };
   for (const task of tasks) {
     if (columns[task.column]) columns[task.column].push(task.id);
@@ -104,7 +116,7 @@ export function addTask(
     depends?: string[];
     tags?: string[];
     milestone?: string;
-  }
+  },
 ): Task {
   const id = nextTaskId(board);
   const now = new Date().toISOString();
@@ -142,7 +154,7 @@ export function moveTask(
   tasksDir: string,
   taskId: string,
   toColumn: Column,
-  force = false
+  force = false,
 ): { success: boolean; error?: string } {
   // Check WIP limit
   if (!force && !checkWipLimit(board, toColumn)) {
@@ -160,7 +172,7 @@ export function moveTask(
 
   // Remove from old column
   const oldColumn = task.column;
-  board.columns[oldColumn] = board.columns[oldColumn].filter(id => id !== taskId);
+  board.columns[oldColumn] = board.columns[oldColumn].filter((id) => id !== taskId);
 
   // Add to new column
   task.column = toColumn;
@@ -175,6 +187,8 @@ export function moveTask(
 
 export function findTaskFile(tasksDir: string, taskId: string): string | null {
   if (!fs.existsSync(tasksDir)) return null;
-  const files = fs.readdirSync(tasksDir).filter(f => f.startsWith(taskId + '-') || f.startsWith(taskId + '.'));
+  const files = fs
+    .readdirSync(tasksDir)
+    .filter((f) => f.startsWith(taskId + '-') || f.startsWith(taskId + '.'));
   return files.length > 0 ? path.join(tasksDir, files[0]) : null;
 }

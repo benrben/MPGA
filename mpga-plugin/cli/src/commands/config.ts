@@ -2,12 +2,16 @@ import fs from 'fs';
 import path from 'path';
 import { Command } from 'commander';
 import { log } from '../core/logger.js';
-import { loadConfig, saveConfig, getConfigValue, setConfigValue, findProjectRoot } from '../core/config.js';
+import {
+  loadConfig,
+  saveConfig,
+  getConfigValue,
+  setConfigValue,
+  findProjectRoot,
+} from '../core/config.js';
 
 export function registerConfig(program: Command): void {
-  const cmd = program
-    .command('config')
-    .description('View and update MPGA configuration');
+  const cmd = program.command('config').description('View and update MPGA configuration');
 
   cmd
     .command('show')

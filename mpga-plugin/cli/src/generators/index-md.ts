@@ -7,7 +7,7 @@ export function renderIndexMd(
   config: MpgaConfig,
   scopes: ScopeInfo[],
   activeMilestone: string | null,
-  evidenceCoverage: number
+  evidenceCoverage: number,
 ): string {
   const now = new Date().toISOString();
   const projectType = detectProjectType(scanResult);
@@ -26,7 +26,9 @@ export function renderIndexMd(
   lines.push(`- **Size:** ~${totalLines.toLocaleString()} lines across ${totalFiles} files`);
   lines.push(`- **Languages:** ${langSummary}`);
   lines.push(`- **Last sync:** ${now}`);
-  lines.push(`- **Evidence coverage:** ${Math.round(evidenceCoverage * 100)}% (target: ${Math.round(config.evidence.coverageThreshold * 100)}%)`);
+  lines.push(
+    `- **Evidence coverage:** ${Math.round(evidenceCoverage * 100)}% (target: ${Math.round(config.evidence.coverageThreshold * 100)}%)`,
+  );
   lines.push('');
 
   // Key files table — top 10 by size

@@ -115,12 +115,17 @@ export function registerInit(program: Command): void {
         try {
           const scanResult = await scan(projectRoot, config.project.ignore);
           projectType = detectProjectType(scanResult);
-          log.success(`Detected: ${projectType} (${scanResult.totalFiles} files, ${scanResult.totalLines.toLocaleString()} lines)`);
+          log.success(
+            `Detected: ${projectType} (${scanResult.totalFiles} files, ${scanResult.totalLines.toLocaleString()} lines)`,
+          );
 
           // Auto-detect languages
-          const langs = Object.keys(scanResult.languages).filter(l => l !== 'other' && l !== 'markdown');
+          const langs = Object.keys(scanResult.languages).filter(
+            (l) => l !== 'other' && l !== 'markdown',
+          );
           if (langs.length > 0) config.project.languages = langs;
-          if (scanResult.entryPoints.length > 0) config.project.entryPoints = scanResult.entryPoints;
+          if (scanResult.entryPoints.length > 0)
+            config.project.entryPoints = scanResult.entryPoints;
         } catch (e) {
           log.warn('Scan failed, proceeding with defaults');
         }
@@ -135,7 +140,7 @@ export function registerInit(program: Command): void {
       // Write INDEX.md
       fs.writeFileSync(
         path.join(mpgaDir, 'INDEX.md'),
-        INDEX_TEMPLATE(projectName, projectType, now)
+        INDEX_TEMPLATE(projectName, projectType, now),
       );
       log.success('Created MPGA/INDEX.md');
 
@@ -150,22 +155,27 @@ export function registerInit(program: Command): void {
         updated: now,
         columns: { backlog: [], todo: [], 'in-progress': [], testing: [], review: [], done: [] },
         stats: {
-          total: 0, done: 0, in_flight: 0, blocked: 0,
-          progress_pct: 0, evidence_produced: 0, evidence_expected: 0,
+          total: 0,
+          done: 0,
+          in_flight: 0,
+          blocked: 0,
+          progress_pct: 0,
+          evidence_produced: 0,
+          evidence_expected: 0,
         },
         wip_limits: { 'in-progress': 3, testing: 3, review: 2 },
         next_task_id: 1,
       };
       fs.writeFileSync(
         path.join(mpgaDir, 'board', 'board.json'),
-        JSON.stringify(boardState, null, 2) + '\n'
+        JSON.stringify(boardState, null, 2) + '\n',
       );
       log.success('Created MPGA/board/board.json');
 
       // Write BOARD.md
       fs.writeFileSync(
         path.join(mpgaDir, 'board', 'BOARD.md'),
-        '# Board\n\nNo tasks yet. Run `/mpga:plan` to generate tasks from a milestone.\n'
+        '# Board\n\nNo tasks yet. Run `/mpga:plan` to generate tasks from a milestone.\n',
       );
       log.success('Created MPGA/board/BOARD.md');
 

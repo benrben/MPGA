@@ -29,7 +29,7 @@ export interface DriftReport {
 export async function runDriftCheck(
   projectRoot: string,
   ciThreshold: number,
-  scopeFilter?: string
+  scopeFilter?: string,
 ): Promise<DriftReport> {
   const mpgaDir = path.join(projectRoot, 'MPGA');
   const scopesDir = path.join(mpgaDir, 'scopes');
@@ -50,40 +50,43 @@ export async function runDriftCheck(
     };
   }
 
-  const scopeFiles = fs.readdirSync(scopesDir)
-    .filter(f => f.endsWith('.md'))
-    .filter(f => !scopeFilter || f === `${scopeFilter}.md`);
+  const scopeFiles = fs
+    .readdirSync(scopesDir)
+    .filter((f) => f.endsWith('.md'))
+    .filter((f) => !scopeFilter || f === `${scopeFilter}.md`);
 
   for (const scopeFile of scopeFiles) {
     const scopeName = scopeFile.replace('.md', '');
     const scopePath = path.join(scopesDir, scopeFile);
     const content = fs.readFileSync(scopePath, 'utf-8');
-    const links = parseEvidenceLinks(content).filter(l => l.type === 'valid' || l.type === 'stale');
+    const links = parseEvidenceLinks(content).filter(
+      (l) => l.type === 'valid' || l.type === 'stale',
+    );
 
     const results = verifyAllLinks(links, projectRoot);
 
-    const valid = results.filter(r => r.resolved.status === 'valid').length;
-    const healed = results.filter(r => r.resolved.status === 'healed').length;
-    const stale = results.filter(r => r.resolved.status === 'stale').length;
+    const valid = results.filter((r) => r.resolved.status === 'valid').length;
+    const healed = results.filter((r) => r.resolved.status === 'healed').length;
+    const stale = results.filter((r) => r.resolved.status === 'stale').length;
     const total = results.length;
     const healthPct = total === 0 ? 100 : Math.round(((valid + healed) / total) * 100);
 
     const staleItems = results
-      .filter(r => r.resolved.status === 'stale')
-      .map(r => {
+      .filter((r) => r.resolved.status === 'stale')
+      .map((r) => {
         const fullPath = r.link.filepath ? path.join(projectRoot, r.link.filepath) : null;
         const fileExists = fullPath ? fs.existsSync(fullPath) : false;
         const reason = !r.link.filepath
           ? 'No filepath in evidence link'
           : !fileExists
-          ? `File not found: ${r.link.filepath}`
-          : `Symbol not found in file`;
+            ? `File not found: ${r.link.filepath}`
+            : `Symbol not found in file`;
         return { link: r.link, reason };
       });
 
     const healedItems = results
-      .filter(r => r.resolved.status === 'healed')
-      .map(r => ({
+      .filter((r) => r.resolved.status === 'healed')
+      .map((r) => ({
         link: r.link,
         newStart: r.resolved.startLine ?? 0,
         newEnd: r.resolved.endLine ?? 0,
@@ -125,8 +128,8 @@ export function healScopeFile(report: ScopeDriftReport): { healed: number; conte
   let healed = 0;
 
   // Sort by symbol length descending to prevent shorter symbols from matching inside longer ones
-  const sortedItems = [...report.healedItems].sort((a, b) =>
-    (b.link.symbol?.length ?? 0) - (a.link.symbol?.length ?? 0)
+  const sortedItems = [...report.healedItems].sort(
+    (a, b) => (b.link.symbol?.length ?? 0) - (a.link.symbol?.length ?? 0),
   );
   for (const item of sortedItems) {
     const newLink = `[E] ${item.link.filepath}:${item.newStart}-${item.newEnd}${item.link.symbol ? ` :: ${item.link.symbol}()` : ''}`;
@@ -134,9 +137,10 @@ export function healScopeFile(report: ScopeDriftReport): { healed: number; conte
     if (!item.link.filepath) continue;
     const fp = item.link.filepath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const sym = item.link.symbol ? item.link.symbol.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') : null;
-    const rangePattern = item.link.startLine && item.link.endLine
-      ? `:${item.link.startLine}-${item.link.endLine}`
-      : '(?::\\d+-\\d+)?';
+    const rangePattern =
+      item.link.startLine && item.link.endLine
+        ? `:${item.link.startLine}-${item.link.endLine}`
+        : '(?::\\d+-\\d+)?';
     const symPattern = sym ? `\\s*::\\s*${sym}\\s*(?:\\(\\))?` : '(?:\\s*::\\s*\\S+(?:\\(\\))?)?';
     const re = new RegExp(`\\[E\\]\\s+\`?${fp}\`?${rangePattern}${symPattern}`);
     const match = re.exec(updated);

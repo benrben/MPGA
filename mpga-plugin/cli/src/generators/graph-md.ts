@@ -107,24 +107,28 @@ export async function buildGraph(scanResult: ScanResult, config?: MpgaConfig): P
   const circular: Array<[string, string]> = [];
   for (const { from, to } of dependencies) {
     // Check if there's also a to→from path
-    const reverse = dependencies.some(d => d.from === to && d.to === from);
+    const reverse = dependencies.some((d) => d.from === to && d.to === from);
     if (reverse) {
-      const already = circular.some(([a, b]) => (a === to && b === from) || (a === from && b === to));
+      const already = circular.some(
+        ([a, b]) => (a === to && b === from) || (a === from && b === to),
+      );
       if (!already) circular.push([from, to]);
     }
   }
 
   // Find orphans (files with no imports and no importers)
-  const hasImporters = new Set(dependencies.map(d => d.to));
-  const hasImports = new Set(dependencies.map(d => d.from));
+  const hasImporters = new Set(dependencies.map((d) => d.to));
+  const hasImports = new Set(dependencies.map((d) => d.from));
   const orphans = files
-    .filter(f => {
+    .filter((f) => {
       const mod = f.filepath; // use exact filepath for orphan detection
-      return !hasImporters.has(path.basename(mod, path.extname(mod))) &&
-             !hasImports.has(path.basename(mod, path.extname(mod)));
+      return (
+        !hasImporters.has(path.basename(mod, path.extname(mod))) &&
+        !hasImports.has(path.basename(mod, path.extname(mod)))
+      );
     })
     .slice(0, 10) // cap to avoid huge lists
-    .map(f => f.filepath);
+    .map((f) => f.filepath);
 
   return { dependencies, circular, orphans, modules: [...modules] };
 }
@@ -166,7 +170,9 @@ export function renderGraphMd(graph: GraphData): string {
       const key = `${from}-->${to}`;
       if (!seen.has(key)) {
         seen.add(key);
-        lines.push(`    ${from.replace(/[^a-zA-Z0-9_]/g, '_')} --> ${to.replace(/[^a-zA-Z0-9_]/g, '_')}`);
+        lines.push(
+          `    ${from.replace(/[^a-zA-Z0-9_]/g, '_')} --> ${to.replace(/[^a-zA-Z0-9_]/g, '_')}`,
+        );
       }
     }
   }

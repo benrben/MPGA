@@ -39,12 +39,13 @@ export function registerScan(program: Command): void {
 
       console.log('');
       log.bold('Languages');
-      const langEntries = Object.entries(result.languages)
-        .sort((a, b) => b[1].lines - a[1].lines);
+      const langEntries = Object.entries(result.languages).sort((a, b) => b[1].lines - a[1].lines);
       for (const [lang, stats] of langEntries) {
         const pct = Math.round((stats.lines / totalLines) * 100);
         const bar = '█'.repeat(Math.round(pct / 5)) + '░'.repeat(20 - Math.round(pct / 5));
-        console.log(`  ${lang.padEnd(12)} ${bar} ${pct}%  (${stats.files} files, ${stats.lines.toLocaleString()} lines)`);
+        console.log(
+          `  ${lang.padEnd(12)} ${bar} ${pct}%  (${stats.files} files, ${stats.lines.toLocaleString()} lines)`,
+        );
       }
 
       if (result.entryPoints.length > 0) {

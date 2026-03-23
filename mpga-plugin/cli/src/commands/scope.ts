@@ -10,9 +10,7 @@ function getScopesDir(projectRoot: string): string {
 }
 
 export function registerScope(program: Command): void {
-  const cmd = program
-    .command('scope')
-    .description('Manage scope documents');
+  const cmd = program.command('scope').description('Manage scope documents');
 
   // scope list
   cmd
@@ -27,7 +25,7 @@ export function registerScope(program: Command): void {
         return;
       }
 
-      const files = fs.readdirSync(scopesDir).filter(f => f.endsWith('.md'));
+      const files = fs.readdirSync(scopesDir).filter((f) => f.endsWith('.md'));
       if (files.length === 0) {
         log.info('No scopes found. Run `mpga sync` to generate them.');
         return;
@@ -43,12 +41,7 @@ export function registerScope(program: Command): void {
         const health = healthMatch ? healthMatch[1] : '? unknown';
         const verifiedMatch = content.match(/\*\*Last verified:\*\* (.+)/);
         const verified = verifiedMatch ? verifiedMatch[1] : '?';
-        rows.push([
-          file.replace('.md', ''),
-          health,
-          `${stats.valid}/${stats.total}`,
-          verified,
-        ]);
+        rows.push([file.replace('.md', ''), health, `${stats.valid}/${stats.total}`, verified]);
       }
       log.table(rows);
     });
@@ -72,7 +65,9 @@ export function registerScope(program: Command): void {
 
       console.log(content);
       console.log('');
-      log.dim(`─── Evidence: ${stats.valid} valid, ${stats.stale} stale, ${stats.unknown} unknown (${stats.healthPct}% health) ───`);
+      log.dim(
+        `─── Evidence: ${stats.valid} valid, ${stats.stale} stale, ${stats.unknown} unknown (${stats.healthPct}% health) ───`,
+      );
     });
 
   // scope add <name>
@@ -192,7 +187,7 @@ export function registerScope(program: Command): void {
         return;
       }
 
-      const files = fs.readdirSync(scopesDir).filter(f => f.endsWith('.md'));
+      const files = fs.readdirSync(scopesDir).filter((f) => f.endsWith('.md'));
       const terms = question.toLowerCase().split(/\s+/);
       const matches: Array<{ name: string; score: number; excerpt: string }> = [];
 

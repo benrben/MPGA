@@ -7,9 +7,7 @@ import { scan } from '../core/scanner.js';
 import { buildGraph, renderGraphMd } from '../generators/graph-md.js';
 
 export function registerGraph(program: Command): void {
-  const cmd = program
-    .command('graph')
-    .description('Dependency graph management');
+  const cmd = program.command('graph').description('Dependency graph management');
 
   cmd
     .command('show')
@@ -51,7 +49,9 @@ export function registerGraph(program: Command): void {
           const key = `${from}-->${to}`;
           if (!seen.has(key)) {
             seen.add(key);
-            lines.push(`    ${from.replace(/[^a-zA-Z0-9_]/g, '_')} --> ${to.replace(/[^a-zA-Z0-9_]/g, '_')}`);
+            lines.push(
+              `    ${from.replace(/[^a-zA-Z0-9_]/g, '_')} --> ${to.replace(/[^a-zA-Z0-9_]/g, '_')}`,
+            );
           }
         }
         lines.push('```');

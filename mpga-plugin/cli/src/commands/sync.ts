@@ -29,14 +29,18 @@ export function registerSync(program: Command): void {
       // Step 1: Scan
       log.info('Scanning codebase...');
       const scanResult = await scan(projectRoot, config.project.ignore, true);
-      log.success(`Scanned ${scanResult.totalFiles} files (${scanResult.totalLines.toLocaleString()} lines)`);
+      log.success(
+        `Scanned ${scanResult.totalFiles} files (${scanResult.totalLines.toLocaleString()} lines)`,
+      );
 
       // Step 2: Build dependency graph
       log.info('Building dependency graph...');
       const graph = await buildGraph(scanResult, config);
       const graphMd = renderGraphMd(graph);
       fs.writeFileSync(path.join(mpgaDir, 'GRAPH.md'), graphMd);
-      log.success(`GRAPH.md — ${graph.dependencies.length} dependencies, ${graph.circular.length} circular`);
+      log.success(
+        `GRAPH.md — ${graph.dependencies.length} dependencies, ${graph.circular.length} circular`,
+      );
 
       // Step 3: Generate scope docs
       log.info('Generating scope documents...');
@@ -60,9 +64,9 @@ export function registerSync(program: Command): void {
       let activeMilestone: string | null = null;
       const milestonesDir = path.join(mpgaDir, 'milestones');
       if (fs.existsSync(milestonesDir)) {
-        const mDirs = fs.readdirSync(milestonesDir).filter(d =>
-          fs.statSync(path.join(milestonesDir, d)).isDirectory()
-        );
+        const mDirs = fs
+          .readdirSync(milestonesDir)
+          .filter((d) => fs.statSync(path.join(milestonesDir, d)).isDirectory());
         if (mDirs.length > 0) activeMilestone = mDirs[mDirs.length - 1];
       }
 

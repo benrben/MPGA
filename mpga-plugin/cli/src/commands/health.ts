@@ -39,7 +39,7 @@ export function registerHealth(program: Command): void {
       // Gather scope count
       const scopesDir = path.join(mpgaDir, 'scopes');
       const scopeCount = fs.existsSync(scopesDir)
-        ? fs.readdirSync(scopesDir).filter(f => f.endsWith('.md')).length
+        ? fs.readdirSync(scopesDir).filter((f) => f.endsWith('.md')).length
         : 0;
 
       const health = {
@@ -66,26 +66,37 @@ export function registerHealth(program: Command): void {
       console.log(`\n  ${chalk.dim('Grade')}  ${gradeColor(health.overallGrade)}\n`);
 
       // ── Evidence ──
-      console.log(`  ${statusBadge(driftReport.overallHealthPct >= 80, 'Evidence health')}   ${driftReport.overallHealthPct}%  ${chalk.dim(`(CI threshold: ${config.drift.ciThreshold}%)`)}`);
-      console.log(`    ${progressBar(driftReport.validLinks, driftReport.totalLinks)}  ${chalk.dim(`${driftReport.validLinks}/${driftReport.totalLinks} links`)}`);
+      console.log(
+        `  ${statusBadge(driftReport.overallHealthPct >= 80, 'Evidence health')}   ${driftReport.overallHealthPct}%  ${chalk.dim(`(CI threshold: ${config.drift.ciThreshold}%)`)}`,
+      );
+      console.log(
+        `    ${progressBar(driftReport.validLinks, driftReport.totalLinks)}  ${chalk.dim(`${driftReport.validLinks}/${driftReport.totalLinks} links`)}`,
+      );
 
       if (opts.verbose && driftReport.scopes.length > 0) {
         log.blank();
         for (const scope of driftReport.scopes) {
           const icon = scope.healthPct >= 80 ? chalk.green('✓') : chalk.yellow('⚠');
-          console.log(`    ${icon} ${chalk.white(scope.scope.padEnd(20))} ${scope.healthPct}% ${chalk.dim(`(${scope.validLinks}/${scope.totalLinks})`)}`);
+          console.log(
+            `    ${icon} ${chalk.white(scope.scope.padEnd(20))} ${scope.healthPct}% ${chalk.dim(`(${scope.validLinks}/${scope.totalLinks})`)}`,
+          );
         }
       }
 
       // ── Scopes ──
       log.blank();
-      console.log(`  ${statusBadge(scopeCount > 0, 'Scopes')}            ${scopeCount} document(s)`);
+      console.log(
+        `  ${statusBadge(scopeCount > 0, 'Scopes')}            ${scopeCount} document(s)`,
+      );
 
       // ── Board ──
       if (boardStats) {
         log.blank();
-        console.log(`  ${statusBadge(boardStats.blocked === 0, 'Task board')}        ${boardStats.done}/${boardStats.total} tasks ${chalk.dim(`(${boardStats.progress_pct}%)`)}`);
-        if (boardStats.blocked > 0) console.log(`    ${chalk.yellow('⚠')} ${boardStats.blocked} blocked task(s)`);
+        console.log(
+          `  ${statusBadge(boardStats.blocked === 0, 'Task board')}        ${boardStats.done}/${boardStats.total} tasks ${chalk.dim(`(${boardStats.progress_pct}%)`)}`,
+        );
+        if (boardStats.blocked > 0)
+          console.log(`    ${chalk.yellow('⚠')} ${boardStats.blocked} blocked task(s)`);
       }
 
       // ── Last sync ──

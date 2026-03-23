@@ -18,12 +18,16 @@ describe('extractModuleSummary', () => {
 
   it('extracts multi-line JSDoc, skipping @tags', () => {
     const content = `/**\n * Board management utilities.\n * Handles task lifecycle.\n * @module board\n */\nimport fs from 'fs';`;
-    expect(extractModuleSummary(content)).toBe('Board management utilities. Handles task lifecycle.');
+    expect(extractModuleSummary(content)).toBe(
+      'Board management utilities. Handles task lifecycle.',
+    );
   });
 
   it('extracts leading // comment block', () => {
     const content = `// Scanner module\n// Walks the filesystem and collects file info\nimport path from 'path';`;
-    expect(extractModuleSummary(content)).toBe('Scanner module Walks the filesystem and collects file info');
+    expect(extractModuleSummary(content)).toBe(
+      'Scanner module Walks the filesystem and collects file info',
+    );
   });
 
   it('returns null when no leading comment exists', () => {
@@ -68,7 +72,7 @@ describe('detectFrameworks', () => {
     // detectFrameworks itself doesn't deduplicate — groupIntoScopes does via Set
     // But within a single call, the Set in detectFrameworks handles it
     const result = detectFrameworks(content);
-    expect(result.filter(f => f === 'Express')).toHaveLength(1);
+    expect(result.filter((f) => f === 'Express')).toHaveLength(1);
   });
 });
 
@@ -82,7 +86,9 @@ describe('extractJSDocForExport', () => {
 
   it('extracts first non-tag lines from multi-line JSDoc', () => {
     const content = `/**\n * Save the board to disk.\n * Writes JSON format.\n * @param board - the board state\n */\nexport function saveBoard(board: any) {}`;
-    expect(extractJSDocForExport(content, 'saveBoard')).toBe('Save the board to disk. Writes JSON format.');
+    expect(extractJSDocForExport(content, 'saveBoard')).toBe(
+      'Save the board to disk. Writes JSON format.',
+    );
   });
 
   it('returns null when no JSDoc is present', () => {
@@ -132,9 +138,7 @@ describe('extractAnnotations', () => {
 describe('renderScopeMd', () => {
   const baseScope: ScopeInfo = {
     name: 'auth',
-    files: [
-      { filepath: 'src/auth/index.ts', lines: 100, language: 'typescript', size: 2000 },
-    ],
+    files: [{ filepath: 'src/auth/index.ts', lines: 100, language: 'typescript', size: 2000 }],
     exports: [{ symbol: 'login', filepath: 'src/auth/index.ts', kind: 'function' }],
     dependencies: ['db'],
     reverseDeps: ['api'],
@@ -152,7 +156,12 @@ describe('renderScopeMd', () => {
   });
 
   it('shows module summary when available', () => {
-    const scope = { ...baseScope, moduleSummaries: [{ filepath: 'src/auth/index.ts', summary: 'Authentication and session management.' }] };
+    const scope = {
+      ...baseScope,
+      moduleSummaries: [
+        { filepath: 'src/auth/index.ts', summary: 'Authentication and session management.' },
+      ],
+    };
     const md = renderScopeMd(scope, '/proj');
     expect(md).toContain('Authentication and session management.');
     expect(md).not.toContain('<!-- TODO: Describe what this area does');
@@ -179,7 +188,12 @@ describe('renderScopeMd', () => {
     const scope = {
       ...baseScope,
       exportDescriptions: [
-        { symbol: 'login', filepath: 'src/auth/index.ts', kind: 'function', description: 'Authenticate a user with credentials.' },
+        {
+          symbol: 'login',
+          filepath: 'src/auth/index.ts',
+          kind: 'function',
+          description: 'Authenticate a user with credentials.',
+        },
       ],
     };
     const md = renderScopeMd(scope, '/proj');
@@ -196,7 +210,11 @@ describe('renderScopeMd', () => {
     const scope = {
       ...baseScope,
       rulesAndConstraints: [
-        { filepath: 'src/auth/index.ts', symbol: 'login', annotation: '@throws Error if credentials are invalid' },
+        {
+          filepath: 'src/auth/index.ts',
+          symbol: 'login',
+          annotation: '@throws Error if credentials are invalid',
+        },
       ],
     };
     const md = renderScopeMd(scope, '/proj');

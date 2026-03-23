@@ -30,7 +30,11 @@ export interface Task {
 }
 
 export function taskFilename(id: string, title: string): string {
-  const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40);
+  const slug = title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, 40);
   return `${id}-${slug}.md`;
 }
 
@@ -56,7 +60,9 @@ export function renderTaskFile(task: Task): string {
     time_estimate: task.time_estimate,
   };
 
-  const body = task.body || `# ${task.id}: ${task.title}
+  const body =
+    task.body ||
+    `# ${task.id}: ${task.title}
 
 ## Description
 (describe the task)
@@ -82,7 +88,7 @@ export function renderTaskFile(task: Task): string {
 
   const fm = Object.entries(frontmatter)
     .map(([k, v]) => {
-      if (Array.isArray(v)) return `${k}: [${v.map(i => JSON.stringify(i)).join(', ')}]`;
+      if (Array.isArray(v)) return `${k}: [${v.map((i) => JSON.stringify(i)).join(', ')}]`;
       if (v === null) return `${k}: null`;
       if (typeof v === 'string') return `${k}: ${JSON.stringify(v)}`;
       return `${k}: ${v}`;
@@ -125,8 +131,9 @@ export function parseTaskFile(filepath: string): Task | null {
 
 export function loadAllTasks(tasksDir: string): Task[] {
   if (!fs.existsSync(tasksDir)) return [];
-  return fs.readdirSync(tasksDir)
-    .filter(f => f.endsWith('.md'))
-    .map(f => parseTaskFile(path.join(tasksDir, f)))
+  return fs
+    .readdirSync(tasksDir)
+    .filter((f) => f.endsWith('.md'))
+    .map((f) => parseTaskFile(path.join(tasksDir, f)))
     .filter((t): t is Task => t !== null);
 }

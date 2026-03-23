@@ -17,7 +17,12 @@ export interface ScopeInfo {
   /** Frameworks/libraries detected from imports */
   detectedFrameworks: string[];
   /** Exported functions with their JSDoc descriptions */
-  exportDescriptions: Array<{ symbol: string; filepath: string; kind: string; description: string }>;
+  exportDescriptions: Array<{
+    symbol: string;
+    filepath: string;
+    kind: string;
+    description: string;
+  }>;
   /** JSDoc annotations: @throws, @deprecated, etc. */
   rulesAndConstraints: Array<{ filepath: string; symbol: string; annotation: string }>;
 }
@@ -34,7 +39,8 @@ function extractExports(filepath: string, content: string): ExportedSymbol[] {
   const seen = new Set<string>();
 
   // TypeScript/JS exports
-  const tsRe = /export\s+(?:default\s+)?(?:async\s+)?(function|class|const|let|var|type|interface|enum)\s+(\w+)/g;
+  const tsRe =
+    /export\s+(?:default\s+)?(?:async\s+)?(function|class|const|let|var|type|interface|enum)\s+(\w+)/g;
   let m;
   while ((m = tsRe.exec(content)) !== null) {
     const kind = m[1] === 'let' || m[1] === 'var' ? 'variable' : m[1];
@@ -67,17 +73,40 @@ function extractExports(filepath: string, content: string): ExportedSymbol[] {
 
 // Known frameworks/libraries to detect from imports
 const FRAMEWORK_MAP: Record<string, string> = {
-  express: 'Express', fastify: 'Fastify', hono: 'Hono', koa: 'Koa',
-  react: 'React', 'react-dom': 'React', vue: 'Vue', svelte: 'Svelte',
-  next: 'Next.js', nuxt: 'Nuxt', angular: 'Angular',
-  commander: 'Commander', yargs: 'Yargs', inquirer: 'Inquirer',
-  zod: 'Zod', joi: 'Joi', ajv: 'Ajv',
-  prisma: 'Prisma', drizzle: 'Drizzle', typeorm: 'TypeORM', sequelize: 'Sequelize',
-  vitest: 'Vitest', jest: 'Jest', mocha: 'Mocha',
-  tailwindcss: 'Tailwind CSS', 'styled-components': 'styled-components',
-  graphql: 'GraphQL', trpc: 'tRPC', axios: 'Axios',
-  mongoose: 'Mongoose', knex: 'Knex',
-  flask: 'Flask', django: 'Django', fastapi: 'FastAPI',
+  express: 'Express',
+  fastify: 'Fastify',
+  hono: 'Hono',
+  koa: 'Koa',
+  react: 'React',
+  'react-dom': 'React',
+  vue: 'Vue',
+  svelte: 'Svelte',
+  next: 'Next.js',
+  nuxt: 'Nuxt',
+  angular: 'Angular',
+  commander: 'Commander',
+  yargs: 'Yargs',
+  inquirer: 'Inquirer',
+  zod: 'Zod',
+  joi: 'Joi',
+  ajv: 'Ajv',
+  prisma: 'Prisma',
+  drizzle: 'Drizzle',
+  typeorm: 'TypeORM',
+  sequelize: 'Sequelize',
+  vitest: 'Vitest',
+  jest: 'Jest',
+  mocha: 'Mocha',
+  tailwindcss: 'Tailwind CSS',
+  'styled-components': 'styled-components',
+  graphql: 'GraphQL',
+  trpc: 'tRPC',
+  axios: 'Axios',
+  mongoose: 'Mongoose',
+  knex: 'Knex',
+  flask: 'Flask',
+  django: 'Django',
+  fastapi: 'FastAPI',
 };
 
 /** Extract the leading module-level comment (JSDoc or // block) from file content */
@@ -89,8 +118,8 @@ export function extractModuleSummary(content: string): string | null {
     if (beforeComment === '') {
       const cleaned = jsdocMatch[1]
         .split('\n')
-        .map(l => l.replace(/^\s*\*\s?/, '').trim())
-        .filter(l => !l.startsWith('@') && l.length > 0)
+        .map((l) => l.replace(/^\s*\*\s?/, '').trim())
+        .filter((l) => !l.startsWith('@') && l.length > 0)
         .join(' ')
         .trim();
       if (cleaned.length > 0) return cleaned;
@@ -110,7 +139,10 @@ export function extractModuleSummary(content: string): string | null {
     }
   }
   if (commentLines.length > 0) {
-    const joined = commentLines.filter(l => l.length > 0).join(' ').trim();
+    const joined = commentLines
+      .filter((l) => l.length > 0)
+      .join(' ')
+      .trim();
     if (joined.length > 0) return joined;
   }
 
@@ -137,15 +169,15 @@ export function extractJSDocForExport(content: string, symbolName: string): stri
   // Match /** ... */ immediately before an export containing the symbol name
   const escaped = symbolName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const re = new RegExp(
-    `/\\*\\*([\\s\\S]*?)\\*/\\s*export\\s+(?:default\\s+)?(?:async\\s+)?(?:function|class|const|let|var|type|interface|enum)\\s+${escaped}\\b`
+    `/\\*\\*([\\s\\S]*?)\\*/\\s*export\\s+(?:default\\s+)?(?:async\\s+)?(?:function|class|const|let|var|type|interface|enum)\\s+${escaped}\\b`,
   );
   const match = content.match(re);
   if (!match) return null;
 
   const lines = match[1]
     .split('\n')
-    .map(l => l.replace(/^\s*\*\s?/, '').trim())
-    .filter(l => l.length > 0 && !l.startsWith('@'));
+    .map((l) => l.replace(/^\s*\*\s?/, '').trim())
+    .filter((l) => l.length > 0 && !l.startsWith('@'));
 
   return lines.length > 0 ? lines.join(' ').trim() : null;
 }
@@ -154,13 +186,13 @@ export function extractJSDocForExport(content: string, symbolName: string): stri
 export function extractAnnotations(content: string, symbolName: string): string[] {
   const escaped = symbolName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const re = new RegExp(
-    `/\\*\\*([\\s\\S]*?)\\*/\\s*export\\s+(?:default\\s+)?(?:async\\s+)?(?:function|class|const|let|var|type|interface|enum)\\s+${escaped}\\b`
+    `/\\*\\*([\\s\\S]*?)\\*/\\s*export\\s+(?:default\\s+)?(?:async\\s+)?(?:function|class|const|let|var|type|interface|enum)\\s+${escaped}\\b`,
   );
   const match = content.match(re);
   if (!match) return [];
 
   const annotations: string[] = [];
-  const lines = match[1].split('\n').map(l => l.replace(/^\s*\*\s?/, '').trim());
+  const lines = match[1].split('\n').map((l) => l.replace(/^\s*\*\s?/, '').trim());
   for (const line of lines) {
     if (line.startsWith('@throws') || line.startsWith('@deprecated')) {
       annotations.push(line);
@@ -183,7 +215,7 @@ function detectEntryPoints(files: FileInfo[]): string[] {
   ];
   const entries: string[] = [];
   for (const file of files) {
-    if (entryPatterns.some(p => p.test(file.filepath))) {
+    if (entryPatterns.some((p) => p.test(file.filepath))) {
       entries.push(file.filepath);
     }
   }
@@ -229,7 +261,11 @@ export function getScopeName(filepath: string, scopeDepth: number | 'auto'): str
 }
 
 // Group files into scopes by directory structure
-export function groupIntoScopes(scanResult: ScanResult, graph?: GraphData, config?: MpgaConfig): ScopeInfo[] {
+export function groupIntoScopes(
+  scanResult: ScanResult,
+  graph?: GraphData,
+  config?: MpgaConfig,
+): ScopeInfo[] {
   const { root, files } = scanResult;
   const groups = new Map<string, FileInfo[]>();
   const scopeDepth = config?.scopes?.scopeDepth ?? 'auto';
@@ -257,7 +293,12 @@ export function groupIntoScopes(scanResult: ScanResult, graph?: GraphData, confi
     const deps = new Set<string>();
     const moduleSummaries: Array<{ filepath: string; summary: string }> = [];
     const allFrameworks: string[] = [];
-    const exportDescriptions: Array<{ symbol: string; filepath: string; kind: string; description: string }> = [];
+    const exportDescriptions: Array<{
+      symbol: string;
+      filepath: string;
+      kind: string;
+      description: string;
+    }> = [];
     const rulesAndConstraints: Array<{ filepath: string; symbol: string; annotation: string }> = [];
 
     // Compute entry points first so we can extract summaries from them
@@ -289,10 +330,20 @@ export function groupIntoScopes(scanResult: ScanResult, graph?: GraphData, confi
       // Extract JSDoc descriptions and annotations for exports
       for (const exp of fileExports) {
         const desc = extractJSDocForExport(content, exp.symbol);
-        if (desc) exportDescriptions.push({ symbol: exp.symbol, filepath: exp.filepath, kind: exp.kind, description: desc });
+        if (desc)
+          exportDescriptions.push({
+            symbol: exp.symbol,
+            filepath: exp.filepath,
+            kind: exp.kind,
+            description: desc,
+          });
         const annotations = extractAnnotations(content, exp.symbol);
         for (const ann of annotations) {
-          rulesAndConstraints.push({ filepath: file.filepath, symbol: exp.symbol, annotation: ann });
+          rulesAndConstraints.push({
+            filepath: file.filepath,
+            symbol: exp.symbol,
+            annotation: ann,
+          });
         }
       }
 
@@ -302,7 +353,10 @@ export function groupIntoScopes(scanResult: ScanResult, graph?: GraphData, confi
       while ((m = importRe.exec(content)) !== null) {
         const imp = m[1];
         if (!imp.startsWith('.')) continue;
-        const resolved = path.relative(root, path.resolve(path.join(root, path.dirname(file.filepath)), imp));
+        const resolved = path.relative(
+          root,
+          path.resolve(path.join(root, path.dirname(file.filepath)), imp),
+        );
         const impGroup = getScopeName(resolved, scopeDepth);
         if (impGroup !== name && groups.has(impGroup)) deps.add(impGroup);
       }
@@ -335,7 +389,9 @@ export function renderScopeMd(scope: ScopeInfo, _projectRoot: string): string {
   // ── Summary ──
   lines.push(`# Scope: ${scope.name}`, '');
   lines.push('## Summary', '');
-  lines.push(`The **${scope.name}** module contains ${scope.files.length} files (${scope.files.reduce((s, f) => s + f.lines, 0).toLocaleString()} lines).`);
+  lines.push(
+    `The **${scope.name}** module contains ${scope.files.length} files (${scope.files.reduce((s, f) => s + f.lines, 0).toLocaleString()} lines).`,
+  );
   lines.push('');
   if (scope.moduleSummaries.length > 0) {
     for (const ms of scope.moduleSummaries) {
@@ -343,7 +399,9 @@ export function renderScopeMd(scope: ScopeInfo, _projectRoot: string): string {
     }
     lines.push('');
   } else {
-    lines.push('<!-- TODO: Describe what this area does and what is intentionally out of scope -->');
+    lines.push(
+      '<!-- TODO: Describe what this area does and what is intentionally out of scope -->',
+    );
     lines.push('');
   }
 
@@ -361,12 +419,12 @@ export function renderScopeMd(scope: ScopeInfo, _projectRoot: string): string {
 
   // ── Context / stack / skills ──
   lines.push('## Context / stack / skills', '');
-  const langSet = new Set(scope.files.map(f => f.language));
-  const langs = [...langSet].filter(l => l !== 'other');
+  const langSet = new Set(scope.files.map((f) => f.language));
+  const langs = [...langSet].filter((l) => l !== 'other');
   if (langs.length > 0) {
     lines.push(`- **Languages:** ${langs.join(', ')}`);
   }
-  const symbolKinds = new Set(scope.exports.map(e => e.kind));
+  const symbolKinds = new Set(scope.exports.map((e) => e.kind));
   if (symbolKinds.size > 0) {
     lines.push(`- **Symbol types:** ${[...symbolKinds].join(', ')}`);
   }
@@ -396,7 +454,10 @@ export function renderScopeMd(scope: ScopeInfo, _projectRoot: string): string {
     }
     lines.push('');
   } else {
-    lines.push('<!-- TODO: Describe the flow in plain language: inputs, main steps, outputs or side effects -->', '');
+    lines.push(
+      '<!-- TODO: Describe the flow in plain language: inputs, main steps, outputs or side effects -->',
+      '',
+    );
   }
 
   // ── Rules and edge cases ──
@@ -407,7 +468,10 @@ export function renderScopeMd(scope: ScopeInfo, _projectRoot: string): string {
     }
     lines.push('');
   } else {
-    lines.push('<!-- TODO: Constraints, validation, permissions, failures, retries, empty states -->', '');
+    lines.push(
+      '<!-- TODO: Constraints, validation, permissions, failures, retries, empty states -->',
+      '',
+    );
   }
 
   // ── Concrete examples ──
@@ -416,11 +480,14 @@ export function renderScopeMd(scope: ScopeInfo, _projectRoot: string): string {
 
   // ── UI ──
   lines.push('## UI', '');
-  lines.push('<!-- TODO: Screens or flows if relevant — intent, layout, interactions, data shown/submitted. Remove this section if not applicable. -->', '');
+  lines.push(
+    '<!-- TODO: Screens or flows if relevant — intent, layout, interactions, data shown/submitted. Remove this section if not applicable. -->',
+    '',
+  );
 
   // ── Navigation ──
   lines.push('## Navigation', '');
-  const siblings = scope.allScopeNames.filter(s => s !== scope.name);
+  const siblings = scope.allScopeNames.filter((s) => s !== scope.name);
   if (siblings.length > 0) {
     lines.push('**Sibling scopes:**', '');
     for (const s of siblings) {
@@ -465,7 +532,9 @@ export function renderScopeMd(scope: ScopeInfo, _projectRoot: string): string {
     }
     lines.push('```');
   } else {
-    lines.push('<!-- TODO: Add flow, sequence, or boundary diagrams that match the written story -->');
+    lines.push(
+      '<!-- TODO: Add flow, sequence, or boundary diagrams that match the written story -->',
+    );
   }
   lines.push('');
 
@@ -503,7 +572,10 @@ export function renderScopeMd(scope: ScopeInfo, _projectRoot: string): string {
 
   // ── Deeper splits ──
   lines.push('## Deeper splits', '');
-  lines.push('<!-- TODO: Pointers to smaller sub-topic scopes if this capability is large enough to split -->', '');
+  lines.push(
+    '<!-- TODO: Pointers to smaller sub-topic scopes if this capability is large enough to split -->',
+    '',
+  );
 
   // ── Confidence and notes ──
   lines.push('## Confidence and notes', '');

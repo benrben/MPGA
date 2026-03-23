@@ -33,7 +33,7 @@ export function registerStatus(program: Command): void {
 
       // Count scopes
       const scopes = fs.existsSync(scopesDir)
-        ? fs.readdirSync(scopesDir).filter(f => f.endsWith('.md'))
+        ? fs.readdirSync(scopesDir).filter((f) => f.endsWith('.md'))
         : [];
 
       // Read INDEX.md for last sync info
@@ -48,14 +48,20 @@ export function registerStatus(program: Command): void {
       }
 
       if (opts.json) {
-        console.log(JSON.stringify({
-          initialized: true,
-          lastSync,
-          evidenceCoverage,
-          scopes: scopes.length,
-          board: boardState?.stats ?? null,
-          config: { name: config.project.name },
-        }, null, 2));
+        console.log(
+          JSON.stringify(
+            {
+              initialized: true,
+              lastSync,
+              evidenceCoverage,
+              scopes: scopes.length,
+              board: boardState?.stats ?? null,
+              config: { name: config.project.name },
+            },
+            null,
+            2,
+          ),
+        );
         return;
       }
 
@@ -68,7 +74,11 @@ export function registerStatus(program: Command): void {
       log.kv('Last sync', lastSync, 4);
       log.kv('Scopes', String(scopes.length), 4);
       log.kv('Evidence', evidenceCoverage, 4);
-      log.kv('INDEX.md', fs.existsSync(indexPath) ? chalk.green('✓ present') : chalk.red('✗ missing'), 4);
+      log.kv(
+        'INDEX.md',
+        fs.existsSync(indexPath) ? chalk.green('✓ present') : chalk.red('✗ missing'),
+        4,
+      );
 
       if (scopes.length > 0) {
         log.section('  🗂  Scopes');
@@ -88,7 +98,11 @@ export function registerStatus(program: Command): void {
         log.section('  📋 Task Board');
         const milestone = boardState.milestone ?? chalk.dim('none');
         log.kv('Milestone', String(milestone), 4);
-        log.kv('Progress', `${progressBar(stats.done, stats.total)}  ${chalk.dim(`${stats.done}/${stats.total}`)}`, 4);
+        log.kv(
+          'Progress',
+          `${progressBar(stats.done, stats.total)}  ${chalk.dim(`${stats.done}/${stats.total}`)}`,
+          4,
+        );
         if (stats.in_flight > 0) log.kv('In flight', chalk.yellow(String(stats.in_flight)), 4);
         if (stats.blocked > 0) log.kv('Blocked', chalk.red(String(stats.blocked)), 4);
 
@@ -104,7 +118,11 @@ export function registerStatus(program: Command): void {
       log.section('  ⚙  Configuration');
       log.kv('Project', config.project.name, 4);
       log.kv('Languages', config.project.languages.join(', '), 4);
-      log.kv('Evidence', `${config.evidence.strategy}, ${Math.round(config.evidence.coverageThreshold * 100)}% target`, 4);
+      log.kv(
+        'Evidence',
+        `${config.evidence.strategy}, ${Math.round(config.evidence.coverageThreshold * 100)}% target`,
+        4,
+      );
       log.kv('CI threshold', `${config.drift.ciThreshold}%`, 4);
 
       log.blank();

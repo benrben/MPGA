@@ -8,9 +8,7 @@ import { formatEvidenceLink } from '../evidence/parser.js';
 import { runDriftCheck, healScopeFile } from '../evidence/drift.js';
 
 export function registerEvidence(program: Command): void {
-  const cmd = program
-    .command('evidence')
-    .description('Evidence link management');
+  const cmd = program.command('evidence').description('Evidence link management');
 
   // evidence verify
   cmd
@@ -33,8 +31,15 @@ export function registerEvidence(program: Command): void {
       log.header('Evidence Verification');
 
       for (const scope of report.scopes) {
-        const icon = scope.healthPct >= 80 ? chalk.green('✓') : scope.healthPct >= 50 ? chalk.yellow('⚠') : chalk.red('✗');
-        console.log(`\n${icon} ${chalk.bold(scope.scope)}  ${scope.healthPct}% (${scope.validLinks}/${scope.totalLinks} valid)`);
+        const icon =
+          scope.healthPct >= 80
+            ? chalk.green('✓')
+            : scope.healthPct >= 50
+              ? chalk.yellow('⚠')
+              : chalk.red('✗');
+        console.log(
+          `\n${icon} ${chalk.bold(scope.scope)}  ${scope.healthPct}% (${scope.validLinks}/${scope.totalLinks} valid)`,
+        );
 
         if (scope.staleItems.length > 0) {
           log.dim('  Stale links:');
@@ -45,20 +50,26 @@ export function registerEvidence(program: Command): void {
         if (scope.healedItems.length > 0) {
           log.dim('  Healed links:');
           for (const item of scope.healedItems) {
-            log.dim(`    ${item.link.filepath}:${item.newStart}-${item.newEnd} (was ${item.link.startLine}-${item.link.endLine})`);
+            log.dim(
+              `    ${item.link.filepath}:${item.newStart}-${item.newEnd} (was ${item.link.startLine}-${item.link.endLine})`,
+            );
           }
         }
       }
 
       console.log('');
       log.bold('Overall');
-      console.log(`  Health:  ${progressBar(report.validLinks, report.totalLinks)} (${report.validLinks}/${report.totalLinks})`);
+      console.log(
+        `  Health:  ${progressBar(report.validLinks, report.totalLinks)} (${report.validLinks}/${report.totalLinks})`,
+      );
       if (report.totalLinks === 0) {
         log.info('No evidence links found. Run `mpga sync` to generate them.');
       } else if (report.overallHealthPct >= 80) {
         log.success(`Evidence health: ${report.overallHealthPct}%`);
       } else {
-        log.warn(`Evidence health: ${report.overallHealthPct}% — run \`mpga evidence heal\` to fix stale links`);
+        log.warn(
+          `Evidence health: ${report.overallHealthPct}% — run \`mpga evidence heal\` to fix stale links`,
+        );
       }
     });
 
@@ -88,8 +99,12 @@ export function registerEvidence(program: Command): void {
 
       const staleCount = report.scopes.reduce((s, r) => s + r.staleLinks, 0);
       if (totalHealed > 0) log.success(`Total healed: ${totalHealed} link(s)`);
-      if (staleCount > 0) log.warn(`${staleCount} link(s) could not be healed (symbol not found) — manual review required`);
-      if (totalHealed === 0 && staleCount === 0) log.success('All evidence links are already valid.');
+      if (staleCount > 0)
+        log.warn(
+          `${staleCount} link(s) could not be healed (symbol not found) — manual review required`,
+        );
+      if (totalHealed === 0 && staleCount === 0)
+        log.success('All evidence links are already valid.');
     });
 
   // evidence coverage
@@ -107,7 +122,9 @@ export function registerEvidence(program: Command): void {
 
       for (const scope of report.scopes) {
         const bar = progressBar(scope.validLinks, scope.totalLinks);
-        console.log(`  ${scope.scope.padEnd(20)} ${bar}  (${scope.validLinks}/${scope.totalLinks})`);
+        console.log(
+          `  ${scope.scope.padEnd(20)} ${bar}  (${scope.validLinks}/${scope.totalLinks})`,
+        );
       }
 
       console.log('');
