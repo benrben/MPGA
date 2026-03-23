@@ -12,6 +12,10 @@ const minimalScope: ScopeInfo = {
   reverseDeps: [],
   entryPoints: [],
   allScopeNames: ['alpha'],
+  moduleSummaries: [],
+  detectedFrameworks: [],
+  exportDescriptions: [],
+  rulesAndConstraints: [],
 };
 
 const scanTwoFiles: ScanResult = {

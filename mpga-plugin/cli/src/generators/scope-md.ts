@@ -12,6 +12,14 @@ export interface ScopeInfo {
   reverseDeps: string[];
   entryPoints: string[];
   allScopeNames: string[];
+  /** Module-level comments extracted from entry point files */
+  moduleSummaries: Array<{ filepath: string; summary: string }>;
+  /** Frameworks/libraries detected from imports */
+  detectedFrameworks: string[];
+  /** Exported functions with their JSDoc descriptions */
+  exportDescriptions: Array<{ symbol: string; filepath: string; kind: string; description: string }>;
+  /** JSDoc annotations: @throws, @deprecated, etc. */
+  rulesAndConstraints: Array<{ filepath: string; symbol: string; annotation: string }>;
 }
 
 // Symbol kinds we detect
@@ -58,6 +66,110 @@ function extractExports(filepath: string, content: string): ExportedSymbol[] {
   }
 
   return exports;
+}
+
+// Known frameworks/libraries to detect from imports
+const FRAMEWORK_MAP: Record<string, string> = {
+  express: 'Express', fastify: 'Fastify', hono: 'Hono', koa: 'Koa',
+  react: 'React', 'react-dom': 'React', vue: 'Vue', svelte: 'Svelte',
+  next: 'Next.js', nuxt: 'Nuxt', angular: 'Angular',
+  commander: 'Commander', yargs: 'Yargs', inquirer: 'Inquirer',
+  zod: 'Zod', joi: 'Joi', ajv: 'Ajv',
+  prisma: 'Prisma', drizzle: 'Drizzle', typeorm: 'TypeORM', sequelize: 'Sequelize',
+  vitest: 'Vitest', jest: 'Jest', mocha: 'Mocha',
+  tailwindcss: 'Tailwind CSS', 'styled-components': 'styled-components',
+  graphql: 'GraphQL', trpc: 'tRPC', axios: 'Axios',
+  mongoose: 'Mongoose', knex: 'Knex',
+  flask: 'Flask', django: 'Django', fastapi: 'FastAPI',
+};
+
+/** Extract the leading module-level comment (JSDoc or // block) from file content */
+export function extractModuleSummary(content: string): string | null {
+  // Try JSDoc block comment at the top (before any import/code)
+  const jsdocMatch = content.match(/^\s*\/\*\*([\s\S]*?)\*\//);
+  if (jsdocMatch) {
+    const beforeComment = content.slice(0, jsdocMatch.index ?? 0).trim();
+    if (beforeComment === '') {
+      const cleaned = jsdocMatch[1]
+        .split('\n')
+        .map(l => l.replace(/^\s*\*\s?/, '').trim())
+        .filter(l => !l.startsWith('@') && l.length > 0)
+        .join(' ')
+        .trim();
+      if (cleaned.length > 0) return cleaned;
+    }
+  }
+
+  // Try leading // comment block
+  const lines = content.split('\n');
+  const commentLines: string[] = [];
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (trimmed === '' && commentLines.length === 0) continue;
+    if (trimmed.startsWith('//')) {
+      commentLines.push(trimmed.replace(/^\/\/\s?/, '').trim());
+    } else {
+      break;
+    }
+  }
+  if (commentLines.length > 0) {
+    const joined = commentLines.filter(l => l.length > 0).join(' ').trim();
+    if (joined.length > 0) return joined;
+  }
+
+  return null;
+}
+
+/** Detect known frameworks/libraries from import statements */
+export function detectFrameworks(content: string): string[] {
+  const found = new Set<string>();
+  const importRe = /(?:from|import|require)\s*\(?\s*['"]([^'"./][^'"]*)['"]/g;
+  let m;
+  while ((m = importRe.exec(content)) !== null) {
+    // Get the package name (handle scoped packages like @foo/bar)
+    const raw = m[1];
+    const pkg = raw.startsWith('@') ? raw.split('/').slice(0, 2).join('/') : raw.split('/')[0];
+    const framework = FRAMEWORK_MAP[pkg];
+    if (framework) found.add(framework);
+  }
+  return [...found];
+}
+
+/** Extract JSDoc description for a specific exported symbol */
+export function extractJSDocForExport(content: string, symbolName: string): string | null {
+  // Match /** ... */ immediately before an export containing the symbol name
+  const escaped = symbolName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const re = new RegExp(
+    `/\\*\\*([\\s\\S]*?)\\*/\\s*export\\s+(?:default\\s+)?(?:async\\s+)?(?:function|class|const|let|var|type|interface|enum)\\s+${escaped}\\b`
+  );
+  const match = content.match(re);
+  if (!match) return null;
+
+  const lines = match[1]
+    .split('\n')
+    .map(l => l.replace(/^\s*\*\s?/, '').trim())
+    .filter(l => l.length > 0 && !l.startsWith('@'));
+
+  return lines.length > 0 ? lines.join(' ').trim() : null;
+}
+
+/** Extract constraint annotations (@throws, @deprecated, @param with validation) from JSDoc */
+export function extractAnnotations(content: string, symbolName: string): string[] {
+  const escaped = symbolName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const re = new RegExp(
+    `/\\*\\*([\\s\\S]*?)\\*/\\s*export\\s+(?:default\\s+)?(?:async\\s+)?(?:function|class|const|let|var|type|interface|enum)\\s+${escaped}\\b`
+  );
+  const match = content.match(re);
+  if (!match) return [];
+
+  const annotations: string[] = [];
+  const lines = match[1].split('\n').map(l => l.replace(/^\s*\*\s?/, '').trim());
+  for (const line of lines) {
+    if (line.startsWith('@throws') || line.startsWith('@deprecated')) {
+      annotations.push(line);
+    }
+  }
+  return annotations;
 }
 
 // Detect entry-point files within a scope
@@ -146,6 +258,14 @@ export function groupIntoScopes(scanResult: ScanResult, graph?: GraphData, confi
   for (const [name, groupFiles] of groups.entries()) {
     const allExports: ExportedSymbol[] = [];
     const deps = new Set<string>();
+    const moduleSummaries: Array<{ filepath: string; summary: string }> = [];
+    const allFrameworks: string[] = [];
+    const exportDescriptions: Array<{ symbol: string; filepath: string; kind: string; description: string }> = [];
+    const rulesAndConstraints: Array<{ filepath: string; symbol: string; annotation: string }> = [];
+
+    // Compute entry points first so we can extract summaries from them
+    const entryPoints = detectEntryPoints(groupFiles);
+    const entryPointSet = new Set(entryPoints);
 
     for (const file of groupFiles) {
       const fullPath = path.join(root, file.filepath);
@@ -156,7 +276,28 @@ export function groupIntoScopes(scanResult: ScanResult, graph?: GraphData, confi
       } catch {
         continue;
       }
-      allExports.push(...extractExports(file.filepath, content));
+
+      const fileExports = extractExports(file.filepath, content);
+      allExports.push(...fileExports);
+
+      // Extract module summary from entry point files
+      if (entryPointSet.has(file.filepath)) {
+        const summary = extractModuleSummary(content);
+        if (summary) moduleSummaries.push({ filepath: file.filepath, summary });
+      }
+
+      // Detect frameworks
+      allFrameworks.push(...detectFrameworks(content));
+
+      // Extract JSDoc descriptions and annotations for exports
+      for (const exp of fileExports) {
+        const desc = extractJSDocForExport(content, exp.symbol);
+        if (desc) exportDescriptions.push({ symbol: exp.symbol, filepath: exp.filepath, kind: exp.kind, description: desc });
+        const annotations = extractAnnotations(content, exp.symbol);
+        for (const ann of annotations) {
+          rulesAndConstraints.push({ filepath: file.filepath, symbol: exp.symbol, annotation: ann });
+        }
+      }
 
       // Detect inter-scope dependencies
       const importRe = /(?:from|import)\s+['"]([^'"]+)['"]/g;
@@ -170,7 +311,6 @@ export function groupIntoScopes(scanResult: ScanResult, graph?: GraphData, confi
       }
     }
 
-    const entryPoints = detectEntryPoints(groupFiles);
     const reverseDeps = reverseDepsMap.get(name) ? [...reverseDepsMap.get(name)!] : [];
 
     scopes.push({
@@ -181,6 +321,10 @@ export function groupIntoScopes(scanResult: ScanResult, graph?: GraphData, confi
       reverseDeps,
       entryPoints,
       allScopeNames,
+      moduleSummaries,
+      detectedFrameworks: [...new Set(allFrameworks)],
+      exportDescriptions,
+      rulesAndConstraints,
     });
   }
 
@@ -196,8 +340,15 @@ export function renderScopeMd(scope: ScopeInfo, projectRoot: string): string {
   lines.push('## Summary', '');
   lines.push(`The **${scope.name}** module contains ${scope.files.length} files (${scope.files.reduce((s, f) => s + f.lines, 0).toLocaleString()} lines).`);
   lines.push('');
-  lines.push('<!-- TODO: Describe what this area does and what is intentionally out of scope -->');
-  lines.push('');
+  if (scope.moduleSummaries.length > 0) {
+    for (const ms of scope.moduleSummaries) {
+      lines.push(`${ms.summary}`);
+    }
+    lines.push('');
+  } else {
+    lines.push('<!-- TODO: Describe what this area does and what is intentionally out of scope -->');
+    lines.push('');
+  }
 
   // ── Where to start in code ──
   lines.push('## Where to start in code', '');
@@ -222,7 +373,11 @@ export function renderScopeMd(scope: ScopeInfo, projectRoot: string): string {
   if (symbolKinds.size > 0) {
     lines.push(`- **Symbol types:** ${[...symbolKinds].join(', ')}`);
   }
-  lines.push('- <!-- TODO: Add relevant frameworks, integrations, and expertise areas -->');
+  if (scope.detectedFrameworks.length > 0) {
+    lines.push(`- **Frameworks:** ${scope.detectedFrameworks.join(', ')}`);
+  } else {
+    lines.push('- <!-- TODO: Add relevant frameworks, integrations, and expertise areas -->');
+  }
   lines.push('');
 
   // ── Who and what triggers it ──
@@ -238,11 +393,25 @@ export function renderScopeMd(scope: ScopeInfo, projectRoot: string): string {
 
   // ── What happens ──
   lines.push('## What happens', '');
-  lines.push('<!-- TODO: Describe the flow in plain language: inputs, main steps, outputs or side effects -->', '');
+  if (scope.exportDescriptions.length > 0) {
+    for (const ed of scope.exportDescriptions) {
+      lines.push(`- **${ed.symbol}** (${ed.kind}) — ${ed.description} [E] \`${ed.filepath}\``);
+    }
+    lines.push('');
+  } else {
+    lines.push('<!-- TODO: Describe the flow in plain language: inputs, main steps, outputs or side effects -->', '');
+  }
 
   // ── Rules and edge cases ──
   lines.push('## Rules and edge cases', '');
-  lines.push('<!-- TODO: Constraints, validation, permissions, failures, retries, empty states -->', '');
+  if (scope.rulesAndConstraints.length > 0) {
+    for (const rc of scope.rulesAndConstraints) {
+      lines.push(`- \`${rc.symbol}\`: ${rc.annotation} [E] \`${rc.filepath}\``);
+    }
+    lines.push('');
+  } else {
+    lines.push('<!-- TODO: Constraints, validation, permissions, failures, retries, empty states -->', '');
+  }
 
   // ── Concrete examples ──
   lines.push('## Concrete examples', '');
