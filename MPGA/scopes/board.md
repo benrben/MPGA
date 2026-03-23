@@ -2,7 +2,7 @@
 
 ## Summary
 
-The **board** module contains 4 files (518 lines).
+The **board** module contains 4 files (574 lines).
 
 <!-- TODO: Describe what this area does and what is intentionally out of scope -->
 
@@ -16,7 +16,7 @@ Main entry points — open these first to understand this behavior:
 
 - **Languages:** typescript
 - **Symbol types:** function, interface, type
-- <!-- TODO: Add relevant frameworks, integrations, and expertise areas -->
+- **Frameworks:** Vitest
 
 ## Who and what triggers it
 
@@ -47,10 +47,10 @@ Main entry points — open these first to understand this behavior:
 **Sibling scopes:**
 
 - [mpga-plugin](./mpga-plugin.md)
-- [core](./core.md)
 - [evidence](./evidence.md)
-- [commands](./commands.md)
 - [generators](./generators.md)
+- [core](./core.md)
+- [commands](./commands.md)
 
 **Parent:** [INDEX.md](../INDEX.md)
 
@@ -110,10 +110,10 @@ graph LR
 
 ## Files
 
-- `mpga-plugin/cli/src/board/board-md.ts` (125 lines, typescript)
-- `mpga-plugin/cli/src/board/board.ts` (181 lines, typescript)
-- `mpga-plugin/cli/src/board/task.test.ts` (79 lines, typescript)
-- `mpga-plugin/cli/src/board/task.ts` (133 lines, typescript)
+- `mpga-plugin/cli/src/board/board-md.ts` (155 lines, typescript)
+- `mpga-plugin/cli/src/board/board.ts` (195 lines, typescript)
+- `mpga-plugin/cli/src/board/task.test.ts` (84 lines, typescript)
+- `mpga-plugin/cli/src/board/task.ts` (140 lines, typescript)
 
 ## Deeper splits
 
@@ -123,10 +123,10 @@ graph LR
 
 - **Confidence:** low — auto-generated, not yet verified
 - **Evidence coverage:** 0/20 verified
-- **Last verified:** 2026-03-22
+- **Last verified:** 2026-03-23
 - **Drift risk:** unknown
 - <!-- TODO: Note anything unknown, ambiguous, or still to verify -->
 
 ## Change history
 
-- 2026-03-22: Initial scope generation via `mpga sync`
+- 2026-03-23: Initial scope generation via `mpga sync`

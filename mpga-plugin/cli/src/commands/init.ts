@@ -25,10 +25,10 @@ const INDEX_TEMPLATE = (name: string, projectType: string, date: string) => `# P
 ## Agent trigger table
 | Task pattern | Agent | Scopes to load |
 |-------------|-------|-----------------|
-| "add/modify authentication" | green-dev → red-dev → blue-dev | auth, database |
+| "add/modify authentication" | red-dev → green-dev → blue-dev | auth, database |
 | "explore how X works" | scout | (auto-detect) |
 | "plan feature X" | researcher → architect | (auto-detect) |
-| "fix bug in X" | scout → green-dev → red-dev | (auto-detect) |
+| "fix bug in X" | scout → red-dev → green-dev | (auto-detect) |
 | "refactor X" | architect → blue-dev | (auto-detect) |
 
 ## Scope registry

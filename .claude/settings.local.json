@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(MPGA_SH=\"/Users/benreich/MPGA/mpga-plugin/bin/mpga.sh\")",
-      "Bash(bash \"$MPGA_SH\" status)"
-    ]
-  }
-}

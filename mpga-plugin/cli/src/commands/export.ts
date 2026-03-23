@@ -9,7 +9,7 @@ import { findProjectRoot, loadConfig } from '../core/config.js';
 // The markdown instructions live in mpga-plugin/agents/<slug>.md.
 
 interface AgentMeta {
-  slug: string; // filename slug (e.g. "green-dev")
+  slug: string; // filename slug (e.g. "red-dev")
   name: string; // display name
   description: string; // one-line description for agent routing
   model: string; // preferred model
@@ -20,20 +20,20 @@ interface AgentMeta {
 
 const AGENTS: AgentMeta[] = [
   {
-    slug: 'green-dev',
-    name: 'mpga-green-dev',
+    slug: 'red-dev',
+    name: 'mpga-red-dev',
     description:
-      'Write failing tests FIRST for a task. Use at the start of every TDD cycle. Never writes implementation code.',
+      'Write failing tests FIRST for a task. Use at the start of every TDD cycle (RED = failing test bar). Never writes implementation code.',
     model: 'claude-sonnet-4-6',
     readonly: false,
     isBackground: false,
     sandboxMode: 'workspace',
   },
   {
-    slug: 'red-dev',
-    name: 'mpga-red-dev',
+    slug: 'green-dev',
+    name: 'mpga-green-dev',
     description:
-      'Write minimal implementation to make a failing test pass. Use after green-dev has written tests. Never modifies tests.',
+      'Write minimal implementation to make a failing test pass (GREEN = passing test bar). Use after red-dev has written tests. Never modifies tests.',
     model: 'claude-sonnet-4-6',
     readonly: false,
     isBackground: false,
@@ -43,7 +43,7 @@ const AGENTS: AgentMeta[] = [
     slug: 'blue-dev',
     name: 'mpga-blue-dev',
     description:
-      'Refactor passing code for quality without changing behavior. Use after red-dev. Updates evidence links in scope docs.',
+      'Refactor passing code and tests for quality without changing behavior. Use after green-dev. Updates evidence links in scope docs.',
     model: 'claude-sonnet-4-6',
     readonly: false,
     isBackground: false,
@@ -150,7 +150,7 @@ function findPluginRoot(): string | null {
  * Copy or recreate SKILL.md packages from the plugin's skills/ directory
  * into the target tool's skills directory.
  */
-function copySkillsTo(targetSkillsDir: string, pluginRoot: string | null, toolName: string): void {
+function copySkillsTo(targetSkillsDir: string, pluginRoot: string | null, toolName: string, cliPath?: string): void {
   fs.mkdirSync(targetSkillsDir, { recursive: true });
 
   for (const skillName of SKILL_NAMES) {
@@ -160,7 +160,7 @@ function copySkillsTo(targetSkillsDir: string, pluginRoot: string | null, toolNa
     if (pluginRoot) {
       const srcDir = path.join(pluginRoot, 'skills', skillName);
       if (fs.existsSync(srcDir)) {
-        copyDir(srcDir, destDir, toolName);
+        copyDir(srcDir, destDir, toolName, cliPath);
         continue;
       }
     }
@@ -172,17 +172,20 @@ function copySkillsTo(targetSkillsDir: string, pluginRoot: string | null, toolNa
   }
 }
 
-function copyDir(src: string, dest: string, toolName: string): void {
+function copyDir(src: string, dest: string, toolName: string, cliPath?: string): void {
   for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
     const srcPath = path.join(src, entry.name);
     const destPath = path.join(dest, entry.name);
     if (entry.isDirectory()) {
       fs.mkdirSync(destPath, { recursive: true });
-      copyDir(srcPath, destPath, toolName);
+      copyDir(srcPath, destPath, toolName, cliPath);
     } else {
       let content = fs.readFileSync(srcPath, 'utf-8');
-      // Rewrite CLAUDE_PLUGIN_ROOT references to use npx mpga for non-Claude tools
-      if (toolName !== 'claude') {
+      if (toolName === 'claude' && cliPath) {
+        // Resolve to portable relative path from project root
+        content = content.replace(/\$\{CLAUDE_PLUGIN_ROOT\}\/bin\/mpga\.sh/g, cliPath);
+      } else if (toolName !== 'claude') {
+        // Rewrite CLAUDE_PLUGIN_ROOT references to use npx mpga for non-Claude tools
         content = content.replace(/\$\{CLAUDE_PLUGIN_ROOT\}\/bin\/mpga\.sh/g, 'npx mpga');
       }
       fs.writeFileSync(destPath, content);
@@ -195,7 +198,7 @@ function generateFallbackSkillMd(skillName: string): string {
     'sync-project': 'Rebuild the MPGA knowledge layer from the current codebase state',
     brainstorm: 'Socratic design refinement before writing any code',
     plan: 'Generate an evidence-based task breakdown for a milestone',
-    develop: 'Orchestrate the TDD cycle for a task (green → red → blue → review)',
+    develop: 'Orchestrate the TDD cycle for a task (red → green → blue → review)',
     'drift-check': 'Validate evidence links and detect stale scope docs',
     ask: 'Answer questions about the codebase using MPGA scope docs as citations',
     onboard: 'Guided tour of the codebase using the MPGA knowledge layer',
@@ -536,8 +539,23 @@ function deployClaudePlugin(
 ): void {
   fs.mkdirSync(claudeDir, { recursive: true });
 
+  // Compute a portable CLI path relative to the project root.
+  // For project-scoped exports this yields e.g. "mpga-plugin/bin/mpga.sh".
+  // For global exports we must use the absolute path as a fallback.
+  let cliPath: string | undefined;
+  if (pluginRoot) {
+    const relPlugin = path.relative(projectRoot, pluginRoot);
+    if (!relPlugin.startsWith('..') && !path.isAbsolute(relPlugin)) {
+      // Plugin lives inside the project tree — use relative path
+      cliPath = path.posix.join(...relPlugin.split(path.sep), 'bin', 'mpga.sh');
+    } else {
+      // Plugin is outside the project (global install, etc.) — absolute path
+      cliPath = path.join(pluginRoot, 'bin', 'mpga.sh').replace(/\\/g, '/');
+    }
+  }
+
   // Skills
-  copySkillsTo(path.join(claudeDir, 'skills'), pluginRoot, 'claude');
+  copySkillsTo(path.join(claudeDir, 'skills'), pluginRoot, 'claude', cliPath);
   log.success(`.claude/skills/ (${SKILL_NAMES.length} skills)`);
 
   if (!pluginRoot) {
@@ -567,7 +585,12 @@ function deployClaudePlugin(
     if (fs.existsSync(commandsSrc)) {
       fs.mkdirSync(commandsDest, { recursive: true });
       for (const f of fs.readdirSync(commandsSrc).filter((n) => n.endsWith('.md'))) {
-        fs.copyFileSync(path.join(commandsSrc, f), path.join(commandsDest, f));
+        // Resolve ${CLAUDE_PLUGIN_ROOT} in command files too
+        let content = fs.readFileSync(path.join(commandsSrc, f), 'utf-8');
+        if (cliPath) {
+          content = content.replace(/\$\{CLAUDE_PLUGIN_ROOT\}\/bin\/mpga\.sh/g, cliPath);
+        }
+        fs.writeFileSync(path.join(commandsDest, f), content);
       }
       log.success(
         `.claude/commands/ (${fs.readdirSync(commandsSrc).filter((n) => n.endsWith('.md')).length} /mpga:* commands)`,
@@ -581,10 +604,10 @@ function deployClaudePlugin(
     const settingsPath = path.join(claudeDir, 'settings.json');
     const hooks = JSON.parse(fs.readFileSync(hooksSrc, 'utf-8'));
 
-    // Replace ${CLAUDE_PLUGIN_ROOT} with the actual plugin path
+    // Replace ${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh with the portable CLI path
     const hooksStr = JSON.stringify(hooks).replace(
-      /\$\{CLAUDE_PLUGIN_ROOT\}/g,
-      pluginRoot.replace(/\\/g, '/'),
+      /\$\{CLAUDE_PLUGIN_ROOT\}\/bin\/mpga\.sh/g,
+      cliPath ?? pluginRoot.replace(/\\/g, '/') + '/bin/mpga.sh',
     );
     const resolvedHooks = JSON.parse(hooksStr);
 
@@ -596,13 +619,9 @@ function deployClaudePlugin(
         /* ignore */
       }
     }
-    // Merge hooks (append PostToolUse entries, don't duplicate)
-    const existing = (settings.hooks as Record<string, unknown[]> | undefined) ?? {};
-    for (const [event, entries] of Object.entries(resolvedHooks.hooks ?? {})) {
-      const existingEntries = (existing[event] as unknown[] | undefined) ?? [];
-      existing[event] = [...existingEntries, ...(entries as unknown[])];
-    }
-    settings.hooks = existing;
+    // Replace hooks entirely (not append) to avoid duplicates on re-export
+    const merged = resolvedHooks.hooks ?? {};
+    settings.hooks = merged;
     fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
     log.success('.claude/settings.json (hooks configured)');
   }
@@ -648,7 +667,7 @@ When you detect an MPGA/ directory in any project:
 1. Read MPGA/INDEX.md first — it is the project's truth map
 2. Use evidence links [E] to ground every code claim
 3. Mark unknowns explicitly as [Unknown]
-4. Follow the TDD cycle: green-dev → red-dev → blue-dev
+4. Follow the TDD cycle: red-dev → green-dev → blue-dev
 5. Check MPGA/board/BOARD.md for current task state
 6. Run \`mpga drift --quick\` after modifying files
 7. Update scope docs when code changes affect evidence links

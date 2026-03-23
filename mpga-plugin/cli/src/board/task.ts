@@ -74,8 +74,8 @@ export function renderTaskFile(task: Task): string {
 (will be populated as work progresses)
 
 ## TDD trace
-- 🟢 green-dev: (pending)
 - 🔴 red-dev: (pending)
+- 🟢 green-dev: (pending)
 - 🔵 blue-dev: (pending)
 - 📋 reviewer: (pending)
 

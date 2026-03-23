@@ -2,7 +2,7 @@
 
 ## Summary
 
-The **evidence** module contains 5 files (662 lines).
+The **evidence** module contains 5 files (735 lines).
 
 <!-- TODO: Describe what this area does and what is intentionally out of scope -->
 
@@ -16,7 +16,7 @@ Main entry points — open these first to understand this behavior:
 
 - **Languages:** typescript
 - **Symbol types:** interface, function, type
-- <!-- TODO: Add relevant frameworks, integrations, and expertise areas -->
+- **Frameworks:** Vitest
 
 ## Who and what triggers it
 
@@ -48,9 +48,9 @@ Main entry points — open these first to understand this behavior:
 
 - [mpga-plugin](./mpga-plugin.md)
 - [board](./board.md)
+- [generators](./generators.md)
 - [core](./core.md)
 - [commands](./commands.md)
-- [generators](./generators.md)
 
 **Parent:** [INDEX.md](../INDEX.md)
 
@@ -105,11 +105,11 @@ graph LR
 
 ## Files
 
-- `mpga-plugin/cli/src/evidence/ast.ts` (134 lines, typescript)
-- `mpga-plugin/cli/src/evidence/drift.ts` (151 lines, typescript)
-- `mpga-plugin/cli/src/evidence/parser.test.ts` (162 lines, typescript)
-- `mpga-plugin/cli/src/evidence/parser.ts` (123 lines, typescript)
-- `mpga-plugin/cli/src/evidence/resolver.ts` (92 lines, typescript)
+- `mpga-plugin/cli/src/evidence/ast.ts` (173 lines, typescript)
+- `mpga-plugin/cli/src/evidence/drift.ts` (155 lines, typescript)
+- `mpga-plugin/cli/src/evidence/parser.test.ts` (178 lines, typescript)
+- `mpga-plugin/cli/src/evidence/parser.ts` (132 lines, typescript)
+- `mpga-plugin/cli/src/evidence/resolver.ts` (97 lines, typescript)
 
 ## Deeper splits
 
@@ -119,10 +119,10 @@ graph LR
 
 - **Confidence:** low — auto-generated, not yet verified
 - **Evidence coverage:** 0/20 verified
-- **Last verified:** 2026-03-22
+- **Last verified:** 2026-03-23
 - **Drift risk:** unknown
 - <!-- TODO: Note anything unknown, ambiguous, or still to verify -->
 
 ## Change history
 
-- 2026-03-22: Initial scope generation via `mpga sync`
+- 2026-03-23: Initial scope generation via `mpga sync`

@@ -17,11 +17,15 @@ Main entry points — open these first to understand this behavior:
 
 - **Languages:** shell, typescript, javascript
 - **Symbol types:** function
-- <!-- TODO: Add relevant frameworks, integrations, and expertise areas -->
+- **Frameworks:** Vitest, Commander
 
 ## Who and what triggers it
 
 <!-- TODO: Users, systems, schedules, or APIs that kick off this behavior -->
+
+**Called by scopes:**
+
+- ← generators
 
 ## What happens
 
@@ -44,10 +48,10 @@ Main entry points — open these first to understand this behavior:
 **Sibling scopes:**
 
 - [board](./board.md)
-- [core](./core.md)
 - [evidence](./evidence.md)
-- [commands](./commands.md)
 - [generators](./generators.md)
+- [core](./core.md)
+- [commands](./commands.md)
 
 **Parent:** [INDEX.md](../INDEX.md)
 
@@ -58,6 +62,10 @@ Main entry points — open these first to understand this behavior:
 - → [core](./core.md)
 - → [commands](./commands.md)
 
+**Depended on by:**
+
+- ← [generators](./generators.md)
+
 <!-- TODO: Shared concepts or data with other scopes -->
 
 ## Diagram
@@ -66,6 +74,7 @@ Main entry points — open these first to understand this behavior:
 graph LR
     mpga_plugin --> core
     mpga_plugin --> commands
+    generators --> mpga_plugin
 ```
 
 ## Traces
@@ -102,10 +111,10 @@ graph LR
 
 - **Confidence:** low — auto-generated, not yet verified
 - **Evidence coverage:** 0/1 verified
-- **Last verified:** 2026-03-22
+- **Last verified:** 2026-03-23
 - **Drift risk:** unknown
 - <!-- TODO: Note anything unknown, ambiguous, or still to verify -->
 
 ## Change history
 
-- 2026-03-22: Initial scope generation via `mpga sync`
+- 2026-03-23: Initial scope generation via `mpga sync`

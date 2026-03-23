@@ -2,7 +2,7 @@
 
 ## Summary
 
-The **commands** module contains 14 files (3,058 lines).
+The **commands** module contains 14 files (3,262 lines).
 
 <!-- TODO: Describe what this area does and what is intentionally out of scope -->
 
@@ -16,7 +16,7 @@ Main entry points — open these first to understand this behavior:
 
 - **Languages:** typescript
 - **Symbol types:** function
-- <!-- TODO: Add relevant frameworks, integrations, and expertise areas -->
+- **Frameworks:** Commander
 
 ## Who and what triggers it
 
@@ -48,9 +48,9 @@ Main entry points — open these first to understand this behavior:
 
 - [mpga-plugin](./mpga-plugin.md)
 - [board](./board.md)
-- [core](./core.md)
 - [evidence](./evidence.md)
 - [generators](./generators.md)
+- [core](./core.md)
 
 **Parent:** [INDEX.md](../INDEX.md)
 
@@ -110,20 +110,20 @@ graph LR
 
 ## Files
 
-- `mpga-plugin/cli/src/commands/board.ts` (368 lines, typescript)
-- `mpga-plugin/cli/src/commands/config.ts` (74 lines, typescript)
-- `mpga-plugin/cli/src/commands/drift.ts` (99 lines, typescript)
-- `mpga-plugin/cli/src/commands/evidence.ts` (151 lines, typescript)
-- `mpga-plugin/cli/src/commands/export.ts` (1080 lines, typescript)
+- `mpga-plugin/cli/src/commands/board.ts` (399 lines, typescript)
+- `mpga-plugin/cli/src/commands/config.ts` (78 lines, typescript)
+- `mpga-plugin/cli/src/commands/drift.ts` (107 lines, typescript)
+- `mpga-plugin/cli/src/commands/evidence.ts` (167 lines, typescript)
+- `mpga-plugin/cli/src/commands/export.ts` (1169 lines, typescript)
 - `mpga-plugin/cli/src/commands/graph.ts` (67 lines, typescript)
-- `mpga-plugin/cli/src/commands/health.ts` (128 lines, typescript)
-- `mpga-plugin/cli/src/commands/init.ts` (185 lines, typescript)
-- `mpga-plugin/cli/src/commands/milestone.ts` (215 lines, typescript)
-- `mpga-plugin/cli/src/commands/scan.ts` (77 lines, typescript)
-- `mpga-plugin/cli/src/commands/scope.ts` (229 lines, typescript)
-- `mpga-plugin/cli/src/commands/session.ts` (189 lines, typescript)
-- `mpga-plugin/cli/src/commands/status.ts` (114 lines, typescript)
-- `mpga-plugin/cli/src/commands/sync.ts` (82 lines, typescript)
+- `mpga-plugin/cli/src/commands/health.ts` (139 lines, typescript)
+- `mpga-plugin/cli/src/commands/init.ts` (195 lines, typescript)
+- `mpga-plugin/cli/src/commands/milestone.ts` (226 lines, typescript)
+- `mpga-plugin/cli/src/commands/scan.ts` (76 lines, typescript)
+- `mpga-plugin/cli/src/commands/scope.ts` (224 lines, typescript)
+- `mpga-plugin/cli/src/commands/session.ts` (196 lines, typescript)
+- `mpga-plugin/cli/src/commands/status.ts` (133 lines, typescript)
+- `mpga-plugin/cli/src/commands/sync.ts` (86 lines, typescript)
 
 ## Deeper splits
 
@@ -133,10 +133,10 @@ graph LR
 
 - **Confidence:** low — auto-generated, not yet verified
 - **Evidence coverage:** 0/14 verified
-- **Last verified:** 2026-03-22
+- **Last verified:** 2026-03-23
 - **Drift risk:** unknown
 - <!-- TODO: Note anything unknown, ambiguous, or still to verify -->
 
 ## Change history
 
-- 2026-03-22: Initial scope generation via `mpga sync`
+- 2026-03-23: Initial scope generation via `mpga sync`

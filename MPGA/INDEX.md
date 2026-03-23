@@ -2,24 +2,24 @@
 
 ## Identity
 - **Type:** TypeScript
-- **Size:** ~5,671 lines across 40 files
+- **Size:** ~6,503 lines across 41 files
 - **Languages:** typescript (99%), shell (1%), javascript (0%)
-- **Last sync:** 2026-03-22T15:48:53.192Z
-- **Evidence coverage:** 0% (target: 20%)
+- **Last sync:** 2026-03-23T16:51:28.925Z
+- **Evidence coverage:** 0% (target: 80%)
 
 ## Key files
 | File | Role | Evidence |
 |------|------|----------|
 | mpga-plugin/cli/src/commands/export.ts | Multi-target export (Claude, Cursor, Codex, Gemini, Antigravity): agents, skills, rules, AGENTS.md. | [E] mpga-plugin/cli/src/commands/export.ts:1-50 |
-| mpga-plugin/cli/src/commands/board.ts | Board CLI: columns, tasks, `board show`, moves, Markdown board view. | [E] mpga-plugin/cli/src/commands/board.ts:1-50 |
 | mpga-plugin/cli/src/generators/scope-md.ts | Builds per-scope markdown from scan + graph (symbols, files, evidence table). | [E] mpga-plugin/cli/src/generators/scope-md.ts:1-50 |
-| mpga-plugin/cli/src/commands/scope.ts | Scope subcommands: list, show, split suggestions, evidence stats. | [E] mpga-plugin/cli/src/commands/scope.ts:1-50 |
+| mpga-plugin/cli/src/commands/board.ts | Board CLI: columns, tasks, `board show`, moves, Markdown board view. | [E] mpga-plugin/cli/src/commands/board.ts:1-50 |
 | mpga-plugin/cli/src/commands/milestone.ts | Milestone lifecycle under `MPGA/milestones` and board linkage. | [E] mpga-plugin/cli/src/commands/milestone.ts:1-50 |
+| mpga-plugin/cli/src/generators/scope-md.test.ts | (describe role) | [E] mpga-plugin/cli/src/generators/scope-md.test.ts:1-50 |
+| mpga-plugin/cli/src/commands/scope.ts | Scope subcommands: list, show, split suggestions, evidence stats. | [E] mpga-plugin/cli/src/commands/scope.ts:1-50 |
 | mpga-plugin/cli/src/core/config.ts | Loads `mpga.config.json`, defaults, deep merge, project root discovery. | [E] mpga-plugin/cli/src/core/config.ts:1-50 |
 | mpga-plugin/cli/src/commands/session.ts | Session handoff and context export under `MPGA/sessions`. | [E] mpga-plugin/cli/src/commands/session.ts:1-50 |
-| mpga-plugin/cli/src/commands/init.ts | Bootstraps `MPGA/` tree, templates for INDEX and GRAPH. | [E] mpga-plugin/cli/src/commands/init.ts:1-50 |
 | mpga-plugin/cli/src/board/board.ts | Board JSON state: load/save, columns, stats, task IDs. | [E] mpga-plugin/cli/src/board/board.ts:1-50 |
-| mpga-plugin/cli/src/generators/graph-md.ts | Dependency graph from relative imports; orphans, circular deps, Mermaid. | [E] mpga-plugin/cli/src/generators/graph-md.ts:1-50 |
+| mpga-plugin/cli/src/commands/init.ts | Bootstraps `MPGA/` tree, templates for INDEX and GRAPH. | [E] mpga-plugin/cli/src/commands/init.ts:1-50 |
 
 ## Conventions
 - Read `MPGA/INDEX.md` before substantive work; cite `[E] path:lines` when stating how code behaves.
@@ -31,21 +31,21 @@
 ## Agent trigger table
 | Task pattern | Agent | Scopes to load |
 |-------------|-------|-----------------|
-| "add/modify authentication" | green-dev → red-dev → blue-dev | auth, database |
+| "add/modify authentication" | red-dev → green-dev → blue-dev | auth, database |
 | "explore how X works" | scout | (auto-detect) |
 | "plan feature X" | researcher → architect | (auto-detect) |
-| "fix bug in X" | scout → green-dev → red-dev | (auto-detect) |
+| "fix bug in X" | scout → red-dev → green-dev | (auto-detect) |
 | "refactor X" | architect → blue-dev | (auto-detect) |
 
 ## Scope registry
 | Scope | Status | Evidence links | Last verified |
 |-------|--------|---------------|---------------|
-| mpga-plugin | ✓ fresh | 0/1 | 2026-03-22 |
-| board | ✓ fresh | 0/20 | 2026-03-22 |
-| core | ✓ fresh | 0/22 | 2026-03-22 |
-| evidence | ✓ fresh | 0/20 | 2026-03-22 |
-| commands | ✓ fresh | 0/14 | 2026-03-22 |
-| generators | ✓ fresh | 0/9 | 2026-03-22 |
+| mpga-plugin | ✓ fresh | 0/1 | 2026-03-23 |
+| board | ✓ fresh | 0/20 | 2026-03-23 |
+| evidence | ✓ fresh | 0/20 | 2026-03-23 |
+| generators | ✓ fresh | 0/22 | 2026-03-23 |
+| core | ✓ fresh | 0/22 | 2026-03-23 |
+| commands | ✓ fresh | 0/14 | 2026-03-23 |
 
 ## Active milestone
 - (none)

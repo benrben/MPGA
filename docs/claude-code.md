@@ -41,7 +41,7 @@ The plugin provides agents, commands, and hooks:
 
 ```
 mpga-plugin/
-├── agents/           # 9 agents: green-dev, red-dev, blue-dev, scout, ...
+├── agents/           # 9 agents: red-dev, green-dev, blue-dev, scout, ...
 ├── commands/         # 12 /mpga:* commands
 ├── hooks/            # PostToolUse drift check (triggers mpga drift --quick)
 └── skills/           # 10 skill definitions (source of truth)
@@ -99,7 +99,7 @@ mpga export --claude --global
 ```
 /mpga:milestone new "Payment refactor"
 /mpga:plan            ← generates evidence-based task breakdown on the board
-/mpga:execute         ← runs TDD cycle: green-dev → red-dev → blue-dev → reviewer
+/mpga:execute         ← runs TDD cycle: red-dev → green-dev → blue-dev → reviewer
 /mpga:ship            ← verify + commit + update evidence + archive tasks
 ```
 

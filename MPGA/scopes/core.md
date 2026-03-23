@@ -2,7 +2,7 @@
 
 ## Summary
 
-The **core** module contains 5 files (565 lines).
+The **core** module contains 5 files (591 lines).
 
 <!-- TODO: Describe what this area does and what is intentionally out of scope -->
 
@@ -16,7 +16,7 @@ Main entry points — open these first to understand this behavior:
 
 - **Languages:** typescript
 - **Symbol types:** interface, const, function
-- <!-- TODO: Add relevant frameworks, integrations, and expertise areas -->
+- **Frameworks:** Vitest
 
 ## Who and what triggers it
 
@@ -26,12 +26,12 @@ Main entry points — open these first to understand this behavior:
 
 - ← mpga-plugin
 - ← board
-- ← commands
 - ← generators
+- ← commands
 
 ## What happens
 
-<!-- TODO: Describe the flow in plain language: inputs, main steps, outputs or side effects -->
+- **KnowledgeLayerConfig** (interface) — Optional INDEX.md content merged on sync (see renderIndexMd). [E] `mpga-plugin/cli/src/core/config.ts`
 
 ## Rules and edge cases
 
@@ -52,8 +52,8 @@ Main entry points — open these first to understand this behavior:
 - [mpga-plugin](./mpga-plugin.md)
 - [board](./board.md)
 - [evidence](./evidence.md)
-- [commands](./commands.md)
 - [generators](./generators.md)
+- [commands](./commands.md)
 
 **Parent:** [INDEX.md](../INDEX.md)
 
@@ -63,8 +63,8 @@ Main entry points — open these first to understand this behavior:
 
 - ← [mpga-plugin](./mpga-plugin.md)
 - ← [board](./board.md)
-- ← [commands](./commands.md)
 - ← [generators](./generators.md)
+- ← [commands](./commands.md)
 
 <!-- TODO: Shared concepts or data with other scopes -->
 
@@ -74,8 +74,8 @@ Main entry points — open these first to understand this behavior:
 graph LR
     mpga_plugin --> core
     board --> core
-    commands --> core
     generators --> core
+    commands --> core
 ```
 
 ## Traces
@@ -116,11 +116,11 @@ graph LR
 
 ## Files
 
-- `mpga-plugin/cli/src/core/config.test.ts` (84 lines, typescript)
+- `mpga-plugin/cli/src/core/config.test.ts` (90 lines, typescript)
 - `mpga-plugin/cli/src/core/config.ts` (196 lines, typescript)
 - `mpga-plugin/cli/src/core/logger.test.ts` (40 lines, typescript)
-- `mpga-plugin/cli/src/core/logger.ts` (100 lines, typescript)
-- `mpga-plugin/cli/src/core/scanner.ts` (145 lines, typescript)
+- `mpga-plugin/cli/src/core/logger.ts` (101 lines, typescript)
+- `mpga-plugin/cli/src/core/scanner.ts` (164 lines, typescript)
 
 ## Deeper splits
 
@@ -130,10 +130,10 @@ graph LR
 
 - **Confidence:** low — auto-generated, not yet verified
 - **Evidence coverage:** 0/22 verified
-- **Last verified:** 2026-03-22
+- **Last verified:** 2026-03-23
 - **Drift risk:** unknown
 - <!-- TODO: Note anything unknown, ambiguous, or still to verify -->
 
 ## Change history
 
-- 2026-03-22: Initial scope generation via `mpga sync`
+- 2026-03-23: Initial scope generation via `mpga sync`

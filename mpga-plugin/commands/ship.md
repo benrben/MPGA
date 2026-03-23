@@ -27,6 +27,7 @@ Follow conventional commits:
 
 ## Pre-ship checklist
 - [ ] All tests passing
+- [ ] Test coverage at or above 80% (target 100%) — coverage below 80% blocks shipping
 - [ ] No stubs or TODOs in committed code
 - [ ] Scope evidence links updated
 - [ ] Board tasks moved to done

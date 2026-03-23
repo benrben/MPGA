@@ -35,6 +35,7 @@
   ],
   "scripts": {
     "build": "tsc",
+    "postbuild": "cd ../.. && node mpga-plugin/cli/dist/index.js export --claude",
     "dev": "tsc --watch",
     "clean": "rm -rf dist coverage",
     "test": "vitest run",

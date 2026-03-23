@@ -58,10 +58,10 @@ export function renderIndexMd(
   lines.push('## Agent trigger table');
   lines.push('| Task pattern | Agent | Scopes to load |');
   lines.push('|-------------|-------|-----------------|');
-  lines.push('| "add/modify authentication" | green-dev → red-dev → blue-dev | auth, database |');
+  lines.push('| "add/modify authentication" | red-dev → green-dev → blue-dev | auth, database |');
   lines.push('| "explore how X works" | scout | (auto-detect) |');
   lines.push('| "plan feature X" | researcher → architect | (auto-detect) |');
-  lines.push('| "fix bug in X" | scout → green-dev → red-dev | (auto-detect) |');
+  lines.push('| "fix bug in X" | scout → red-dev → green-dev | (auto-detect) |');
   lines.push('| "refactor X" | architect → blue-dev | (auto-detect) |');
   lines.push('');
 

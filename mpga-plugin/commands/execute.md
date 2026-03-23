@@ -9,12 +9,14 @@ For each task in `todo` column (or the specified task):
 1. Move task to in-progress: `${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh board claim <task-id>`
 2. Read the task card: `cat MPGA/board/tasks/<task-file>.md`
 3. Read relevant scope docs
-4. **TDD Cycle:**
-   a. Spawn `green-dev` agent → write failing tests → confirm red
-   b. Spawn `red-dev` agent → implement to pass tests → confirm green
-   c. Spawn `blue-dev` agent → refactor → confirm tests still green
-   d. Spawn `reviewer` agent → two-stage review
-   e. If reviewer issues CRITICAL → loop back to appropriate agent
+4. **TDD Micro-Cycle:**
+   a. Spawn `red-dev` → writes ONE failing test (degenerate case first) — bar turns RED
+   b. Spawn `green-dev` → makes that ONE test pass with minimal code — bar turns GREEN
+   c. Repeat a–b, building complexity: degenerate → simple → complex → edge cases
+   d. If green-dev signals retreat-to-green → spawn `blue-dev` for structural refactoring, then resume a–b
+   e. When all acceptance criteria covered → spawn `blue-dev` → refactor production code AND tests (without changing assertions) → confirm green
+   f. Spawn `reviewer` agent → two-stage review (including testability + degenerate case checks)
+   g. If reviewer issues CRITICAL → loop back to appropriate agent
 5. After each file write: drift check runs automatically (via hook)
 6. If reviewer passes → move to done: `${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh board move <id> done`
 7. Record evidence produced: `${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh board update <id> --evidence-add "<link>"`

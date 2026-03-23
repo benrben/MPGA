@@ -20,7 +20,7 @@
     "lineRanges": true,
     "astAnchors": true,
     "autoHeal": true,
-    "coverageThreshold": 0.2
+    "coverageThreshold": 0.8
   },
   "drift": {
     "ciThreshold": 80,
