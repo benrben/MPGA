@@ -1,6 +1,4 @@
-import fs from 'fs';
-import path from 'path';
-import { ScanResult, detectProjectType, getTopLanguage } from '../core/scanner.js';
+import { ScanResult, detectProjectType } from '../core/scanner.js';
 import { MpgaConfig } from '../core/config.js';
 import { ScopeInfo } from './scope-md.js';
 

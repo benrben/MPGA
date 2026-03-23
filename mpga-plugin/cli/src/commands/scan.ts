@@ -1,8 +1,7 @@
 import { Command } from 'commander';
-import chalk from 'chalk';
 import { log } from '../core/logger.js';
 import { loadConfig, findProjectRoot } from '../core/config.js';
-import { scan, detectProjectType, getTopLanguage } from '../core/scanner.js';
+import { scan, detectProjectType } from '../core/scanner.js';
 
 export function registerScan(program: Command): void {
   program
@@ -29,7 +28,6 @@ export function registerScan(program: Command): void {
       }
 
       const projectType = detectProjectType(result);
-      const topLang = getTopLanguage(result);
       const totalLines = result.totalLines;
 
       console.log('');

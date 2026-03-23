@@ -5,7 +5,7 @@ import chalk from 'chalk';
 import { log, progressBar, miniBanner, gradeColor, statusBadge } from '../core/logger.js';
 import { findProjectRoot, loadConfig } from '../core/config.js';
 import { runDriftCheck } from '../evidence/drift.js';
-import { loadBoard, recalcStats } from '../board/board.js';
+import { BoardState, loadBoard, recalcStats } from '../board/board.js';
 
 export function registerHealth(program: Command): void {
   program
@@ -29,7 +29,7 @@ export function registerHealth(program: Command): void {
       // Gather board health
       const boardDir = path.join(mpgaDir, 'board');
       const tasksDir = path.join(boardDir, 'tasks');
-      let boardStats: any = null;
+      let boardStats: BoardState['stats'] | null = null;
       if (fs.existsSync(path.join(boardDir, 'board.json'))) {
         const board = loadBoard(boardDir);
         recalcStats(board, tasksDir);

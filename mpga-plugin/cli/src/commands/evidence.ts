@@ -4,8 +4,7 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import { log, progressBar } from '../core/logger.js';
 import { loadConfig, findProjectRoot } from '../core/config.js';
-import { parseEvidenceLinks, formatEvidenceLink, evidenceStats } from '../evidence/parser.js';
-import { verifyAllLinks } from '../evidence/resolver.js';
+import { formatEvidenceLink } from '../evidence/parser.js';
 import { runDriftCheck, healScopeFile } from '../evidence/drift.js';
 
 export function registerEvidence(program: Command): void {

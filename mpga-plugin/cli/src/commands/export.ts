@@ -527,7 +527,7 @@ function deployClaudePlugin(claudeDir: string, pluginRoot: string | null, projec
   }
 }
 
-function generateClaudeMd(indexContent: string, projectName: string): string {
+function generateClaudeMd(indexContent: string, _projectName: string): string {
   const milestonesMatch = indexContent.match(/## Active milestone\n([\s\S]*?)(?=\n##|$)/);
   const milestone = milestonesMatch ? milestonesMatch[1].trim() : '(none)';
 
@@ -576,7 +576,7 @@ When you detect an MPGA/ directory in any project:
 
 // ─── Cursor generators ────────────────────────────────────────────────────────
 
-function generateCursorProjectMdc(indexContent: string, projectName: string): string {
+function generateCursorProjectMdc(indexContent: string, _projectName: string): string {
   const milestonesMatch = indexContent.match(/## Active milestone\n([\s\S]*?)(?=\n##|$)/);
   const milestone = milestonesMatch ? milestonesMatch[1].trim() : '(none)';
 
@@ -710,7 +710,7 @@ function generateCursorGlobal(): string {
 
 // ─── Codex / Gemini CLI generators ───────────────────────────────────────────
 
-function generateAgentsMd(indexContent: string, projectName: string): string {
+function generateAgentsMd(indexContent: string, _projectName: string): string {
   return `# MPGA — Evidence-Backed Context Engineering
 
 This project uses MPGA to maintain a verified knowledge layer.
@@ -846,7 +846,7 @@ When working in ANY project that contains an MPGA/ directory:
 
 // ─── Antigravity generators ───────────────────────────────────────────────────
 
-function generateGeminiMd(indexContent: string, projectName: string): string {
+function generateGeminiMd(indexContent: string, _projectName: string): string {
   const milestonesMatch = indexContent.match(/## Active milestone\n([\s\S]*?)(?=\n##|$)/);
   const milestone = milestonesMatch ? milestonesMatch[1].trim() : '(none)';
 
@@ -886,7 +886,7 @@ Generated: ${new Date().toISOString()}
 `;
 }
 
-function generateAntigravityContextMd(indexContent: string, projectName: string): string {
+function generateAntigravityContextMd(indexContent: string, _projectName: string): string {
   const milestonesMatch = indexContent.match(/## Active milestone\n([\s\S]*?)(?=\n##|$)/);
   const milestone = milestonesMatch ? milestonesMatch[1].trim() : '(none)';
 

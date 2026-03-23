@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import { EvidenceLink, parseEvidenceLinks, formatEvidenceLink } from './parser.js';
-import { resolveEvidence, VerifyResult, verifyAllLinks } from './resolver.js';
+import { EvidenceLink, parseEvidenceLinks } from './parser.js';
+import { verifyAllLinks } from './resolver.js';
 
 export interface ScopeDriftReport {
   scope: string;

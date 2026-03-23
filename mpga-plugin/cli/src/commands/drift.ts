@@ -1,8 +1,7 @@
 import fs from 'fs';
-import path from 'path';
 import { Command } from 'commander';
 import chalk from 'chalk';
-import { log, progressBar } from '../core/logger.js';
+import { log } from '../core/logger.js';
 import { loadConfig, findProjectRoot } from '../core/config.js';
 import { runDriftCheck, healScopeFile } from '../evidence/drift.js';
 

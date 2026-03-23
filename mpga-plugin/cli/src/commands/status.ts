@@ -2,8 +2,9 @@ import fs from 'fs';
 import path from 'path';
 import { Command } from 'commander';
 import chalk from 'chalk';
-import { log, progressBar, miniBanner, gradeColor } from '../core/logger.js';
+import { log, progressBar, miniBanner } from '../core/logger.js';
 import { loadConfig, findProjectRoot } from '../core/config.js';
+import { BoardState } from '../board/board.js';
 
 export function registerStatus(program: Command): void {
   program
@@ -25,7 +26,7 @@ export function registerStatus(program: Command): void {
       const scopesDir = path.join(mpgaDir, 'scopes');
 
       // Read board state
-      let boardState: any = null;
+      let boardState: BoardState | null = null;
       if (fs.existsSync(boardPath)) {
         boardState = JSON.parse(fs.readFileSync(boardPath, 'utf-8'));
       }

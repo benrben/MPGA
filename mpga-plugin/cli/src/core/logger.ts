@@ -13,7 +13,6 @@ const BRAND = {
 // ── ASCII cap banner (matches MPGA.png logo) ─────────────────
 const r = BRAND.red;
 const rb = BRAND.redBg;
-const w = BRAND.white;
 const g = BRAND.gear;
 const d = BRAND.dim;
 const CAP_BANNER = [

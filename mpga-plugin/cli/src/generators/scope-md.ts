@@ -22,9 +22,6 @@ export interface ScopeInfo {
   rulesAndConstraints: Array<{ filepath: string; symbol: string; annotation: string }>;
 }
 
-// Symbol kinds we detect
-type SymbolKind = 'function' | 'class' | 'const' | 'type' | 'interface' | 'enum' | 'variable' | 'def';
-
 interface ExportedSymbol {
   symbol: string;
   filepath: string;
@@ -331,7 +328,7 @@ export function groupIntoScopes(scanResult: ScanResult, graph?: GraphData, confi
   return scopes;
 }
 
-export function renderScopeMd(scope: ScopeInfo, projectRoot: string): string {
+export function renderScopeMd(scope: ScopeInfo, _projectRoot: string): string {
   const now = new Date().toISOString().split('T')[0];
   const lines: string[] = [];
 

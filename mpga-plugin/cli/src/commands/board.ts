@@ -1,11 +1,10 @@
 import fs from 'fs';
 import path from 'path';
 import { Command } from 'commander';
-import chalk from 'chalk';
-import { log, progressBar } from '../core/logger.js';
-import { findProjectRoot, loadConfig } from '../core/config.js';
+import { log } from '../core/logger.js';
+import { findProjectRoot } from '../core/config.js';
 import {
-  loadBoard, saveBoard, recalcStats, addTask, moveTask, findTaskFile, nextTaskId
+  loadBoard, saveBoard, recalcStats, addTask, moveTask, findTaskFile
 } from '../board/board.js';
 import { parseTaskFile, renderTaskFile, loadAllTasks, Column, Priority } from '../board/task.js';
 import { renderBoardMd } from '../board/board-md.js';
@@ -297,7 +296,7 @@ export function registerBoard(program: Command): void {
     .description('Board statistics')
     .option('--velocity', 'Tasks completed per session')
     .option('--burndown', 'Remaining work over time')
-    .action((opts) => {
+    .action((_opts) => {
       const projectRoot = findProjectRoot() ?? process.cwd();
       const boardDir = getBoardDir(projectRoot);
       const tasksDir = getTasksDir(projectRoot);

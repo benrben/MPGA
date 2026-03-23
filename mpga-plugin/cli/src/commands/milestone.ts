@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { Command } from 'commander';
 import { log } from '../core/logger.js';
-import { findProjectRoot, loadConfig } from '../core/config.js';
+import { findProjectRoot } from '../core/config.js';
 import { loadBoard, saveBoard, recalcStats } from '../board/board.js';
 import { renderBoardMd } from '../board/board-md.js';
 
