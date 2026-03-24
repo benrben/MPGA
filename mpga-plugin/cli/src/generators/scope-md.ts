@@ -4,13 +4,24 @@ import { ScanResult, FileInfo } from '../core/scanner.js';
 import { GraphData } from './graph-md.js';
 import { MpgaConfig } from '../core/config.js';
 
+/**
+ * Describes a single scope (logical grouping of files by directory structure),
+ * including its files, exports, dependency relationships, and extracted metadata.
+ */
 export interface ScopeInfo {
+  /** Scope name, derived from directory structure (e.g., "evidence", "commands") */
   name: string;
+  /** All files belonging to this scope */
   files: FileInfo[];
+  /** Exported symbols extracted from scope files */
   exports: Array<{ symbol: string; filepath: string; kind: string }>;
+  /** Names of other scopes that this scope depends on */
   dependencies: string[];
+  /** Names of other scopes that depend on this scope */
   reverseDeps: string[];
+  /** Conventional entry point files detected within this scope (e.g., index.ts, main.ts) */
   entryPoints: string[];
+  /** Names of all scopes in the project, used for sibling navigation */
   allScopeNames: string[];
   /** Module-level comments extracted from entry point files */
   moduleSummaries: Array<{ filepath: string; summary: string }>;
@@ -109,7 +120,13 @@ const FRAMEWORK_MAP: Record<string, string> = {
   fastapi: 'FastAPI',
 };
 
-/** Extract the leading module-level comment (JSDoc or // block) from file content */
+/**
+ * Extracts the leading module-level comment (JSDoc block or consecutive // lines)
+ * from the top of a file's content, before any imports or code.
+ *
+ * @param content - The full text content of a source file
+ * @returns The extracted summary text with comment markers stripped, or null if no leading comment is found
+ */
 export function extractModuleSummary(content: string): string | null {
   // Try JSDoc block comment at the top (before any import/code)
   const jsdocMatch = content.match(/^\s*\/\*\*([\s\S]*?)\*\//);
@@ -228,10 +245,14 @@ function detectEntryPoints(files: FileInfo[]): string[] {
 }
 
 /**
- * Determine the scope name for a file based on its path.
- * With scopeDepth='auto', finds the deepest "source-like" directory
- * (src/, lib/, core/, commands/, etc.) and uses its subdirectories as scopes.
- * With a numeric depth, uses that many path segments.
+ * Determines the scope name for a file based on its path. With `scopeDepth='auto'`,
+ * finds the deepest "source-like" directory (src/, lib/, app/, etc.) and uses its
+ * immediate subdirectory as the scope name. With a numeric depth, uses that many
+ * leading path segments joined by '/'.
+ *
+ * @param filepath - Relative file path (e.g., "src/evidence/parser.ts")
+ * @param scopeDepth - Either `'auto'` for intelligent scope detection, or a number specifying how many path segments to use
+ * @returns The scope name string (e.g., "evidence"), or "root" for top-level files
  */
 export function getScopeName(filepath: string, scopeDepth: number | 'auto'): string {
   const parts = filepath.split('/');
@@ -260,7 +281,16 @@ export function getScopeName(filepath: string, scopeDepth: number | 'auto'): str
   return parts.slice(0, depth).join('/');
 }
 
-// Group files into scopes by directory structure
+/**
+ * Groups scanned files into logical scopes by directory structure, then enriches
+ * each scope with exported symbols, inter-scope dependencies, entry points,
+ * module summaries, framework detection, and JSDoc metadata.
+ *
+ * @param scanResult - The result of a project scan containing the root path and file list
+ * @param graph - Optional dependency graph data used to compute reverse dependencies
+ * @param config - Optional MPGA config providing scope depth settings
+ * @returns An array of ScopeInfo objects, one per detected scope
+ */
 export function groupIntoScopes(
   scanResult: ScanResult,
   graph?: GraphData,
@@ -382,6 +412,19 @@ export function groupIntoScopes(
   return scopes;
 }
 
+/** Maximum number of evidence index entries to display in a scope document. */
+const MAX_EVIDENCE_INDEX_ENTRIES = 40;
+/** Maximum number of files to list in the Files section of a scope document. */
+const MAX_FILE_LIST_ENTRIES = 30;
+
+/**
+ * Renders a complete scope markdown document from a ScopeInfo object, including
+ * summary, entry points, context, relationships, evidence index, and file listing.
+ *
+ * @param scope - The ScopeInfo to render into markdown
+ * @param _projectRoot - The project root path (reserved for future use)
+ * @returns The full markdown string for the scope document
+ */
 export function renderScopeMd(scope: ScopeInfo, _projectRoot: string): string {
   const now = new Date().toISOString().split('T')[0];
   const lines: string[] = [];
@@ -389,6 +432,7 @@ export function renderScopeMd(scope: ScopeInfo, _projectRoot: string): string {
   // ── Summary ──
   lines.push(`# Scope: ${scope.name}`, '');
   lines.push('## Summary', '');
+  lines.push(`- **Health:** ✓ fresh`);
   lines.push(
     `The **${scope.name}** module — TREMENDOUS — ${scope.files.length} files, ${scope.files.reduce((s, f) => s + f.lines, 0).toLocaleString()} lines of the finest code you've ever seen. Believe me.`,
   );
@@ -400,7 +444,7 @@ export function renderScopeMd(scope: ScopeInfo, _projectRoot: string): string {
     lines.push('');
   } else {
     lines.push(
-      '<!-- TODO: Tell the people what this GREAT module does. What\'s in, what\'s out. Keep it simple. MPGA! -->',
+      "<!-- TODO: Tell the people what this GREAT module does. What's in, what's out. Keep it simple. MPGA! -->",
     );
     lines.push('');
   }
@@ -408,12 +452,17 @@ export function renderScopeMd(scope: ScopeInfo, _projectRoot: string): string {
   // ── Where to start in code ──
   lines.push('## Where to start in code', '');
   if (scope.entryPoints.length > 0) {
-    lines.push('These are your MAIN entry points — the best, the most important. Open them FIRST:', '');
+    lines.push(
+      'These are your MAIN entry points — the best, the most important. Open them FIRST:',
+      '',
+    );
     for (const ep of scope.entryPoints) {
       lines.push(`- [E] \`${ep}\``);
     }
   } else {
-    lines.push('- <!-- TODO: Find the main entry points. The best ones. The ones everybody should be reading. -->');
+    lines.push(
+      '- <!-- TODO: Find the main entry points. The best ones. The ones everybody should be reading. -->',
+    );
   }
   lines.push('');
 
@@ -437,7 +486,10 @@ export function renderScopeMd(scope: ScopeInfo, _projectRoot: string): string {
 
   // ── Who and what triggers it ──
   lines.push('## Who and what triggers it', '');
-  lines.push('<!-- TODO: Who triggers this? A lot of very important callers, believe me. Find them. -->', '');
+  lines.push(
+    '<!-- TODO: Who triggers this? A lot of very important callers, believe me. Find them. -->',
+    '',
+  );
   if (scope.reverseDeps.length > 0) {
     lines.push('**Called by these GREAT scopes (they need us, tremendously):**', '');
     for (const rd of scope.reverseDeps) {
@@ -476,12 +528,15 @@ export function renderScopeMd(scope: ScopeInfo, _projectRoot: string): string {
 
   // ── Concrete examples ──
   lines.push('## Concrete examples', '');
-  lines.push('<!-- TODO: REAL examples. "When X happens, Y happens." Simple. Powerful. Like a deal. -->', '');
+  lines.push(
+    '<!-- TODO: REAL examples. "When X happens, Y happens." Simple. Powerful. Like a deal. -->',
+    '',
+  );
 
   // ── UI ──
   lines.push('## UI', '');
   lines.push(
-    '<!-- TODO: Screens, flows, the beautiful UI. No UI? Cut this section. We don\'t keep dead weight. -->',
+    "<!-- TODO: Screens, flows, the beautiful UI. No UI? Cut this section. We don't keep dead weight. -->",
     '',
   );
 
@@ -516,7 +571,10 @@ export function renderScopeMd(scope: ScopeInfo, _projectRoot: string): string {
   if (scope.dependencies.length === 0 && scope.reverseDeps.length === 0) {
     lines.push('- (no dependencies — TOTALLY INDEPENDENT. Very strong.)', '');
   }
-  lines.push('<!-- TODO: What deals does this scope make with other scopes? Document them. -->', '');
+  lines.push(
+    '<!-- TODO: What deals does this scope make with other scopes? Document them. -->',
+    '',
+  );
 
   // ── Diagram ──
   lines.push('## Diagram', '');
@@ -532,15 +590,16 @@ export function renderScopeMd(scope: ScopeInfo, _projectRoot: string): string {
     }
     lines.push('```');
   } else {
-    lines.push(
-      '<!-- TODO: A BEAUTIFUL diagram. Flow, sequence, boundaries. Make it GREAT. -->',
-    );
+    lines.push('<!-- TODO: A BEAUTIFUL diagram. Flow, sequence, boundaries. Make it GREAT. -->');
   }
   lines.push('');
 
   // ── Traces ──
   lines.push('## Traces', '');
-  lines.push('<!-- TODO: Step-by-step traces. Follow the code like a WINNER follows a deal. Use this table:', '');
+  lines.push(
+    '<!-- TODO: Step-by-step traces. Follow the code like a WINNER follows a deal. Use this table:',
+    '',
+  );
   lines.push('| Step | Layer | What happens | Evidence |');
   lines.push('|------|-------|-------------|----------|');
   lines.push('| 1 | (layer) | (description) | [E] file:line |');
@@ -551,11 +610,11 @@ export function renderScopeMd(scope: ScopeInfo, _projectRoot: string): string {
   if (scope.exports.length > 0) {
     lines.push('| Claim | Evidence |');
     lines.push('|-------|----------|');
-    for (const exp of scope.exports.slice(0, 40)) {
+    for (const exp of scope.exports.slice(0, MAX_EVIDENCE_INDEX_ENTRIES)) {
       lines.push(`| \`${exp.symbol}\` (${exp.kind}) | [E] ${exp.filepath} :: ${exp.symbol} |`);
     }
-    if (scope.exports.length > 40) {
-      lines.push(`| ... | ${scope.exports.length - 40} more symbols |`);
+    if (scope.exports.length > MAX_EVIDENCE_INDEX_ENTRIES) {
+      lines.push(`| ... | ${scope.exports.length - MAX_EVIDENCE_INDEX_ENTRIES} more symbols |`);
     }
   } else {
     lines.push('- (no exports detected — working behind the scenes. Very mysterious.)');
@@ -564,26 +623,29 @@ export function renderScopeMd(scope: ScopeInfo, _projectRoot: string): string {
 
   // ── Files ──
   lines.push('## Files', '');
-  for (const file of scope.files.slice(0, 30)) {
+  for (const file of scope.files.slice(0, MAX_FILE_LIST_ENTRIES)) {
     lines.push(`- \`${file.filepath}\` (${file.lines} lines, ${file.language})`);
   }
-  if (scope.files.length > 30) lines.push(`- ... and ${scope.files.length - 30} more files`);
+  if (scope.files.length > MAX_FILE_LIST_ENTRIES)
+    lines.push(`- ... and ${scope.files.length - MAX_FILE_LIST_ENTRIES} more files`);
   lines.push('');
 
   // ── Deeper splits ──
   lines.push('## Deeper splits', '');
-  lines.push(
-    '<!-- TODO: Too big? Split it. Make each piece LEAN and GREAT. -->',
-    '',
-  );
+  lines.push('<!-- TODO: Too big? Split it. Make each piece LEAN and GREAT. -->', '');
 
   // ── Confidence and notes ──
   lines.push('## Confidence and notes', '');
-  lines.push(`- **Confidence:** LOW (for now) — auto-generated, not yet verified. But it's going to be PERFECT.`);
+  lines.push(
+    `- **Confidence:** LOW (for now) — auto-generated, not yet verified. But it's going to be PERFECT.`,
+  );
   lines.push(`- **Evidence coverage:** 0/${scope.exports.length} verified`);
   lines.push(`- **Last verified:** ${now}`);
   lines.push(`- **Drift risk:** unknown`);
-  lines.push('- <!-- TODO: Note anything unknown or ambiguous. We don\'t hide problems — we FIX them. -->', '');
+  lines.push(
+    "- <!-- TODO: Note anything unknown or ambiguous. We don't hide problems — we FIX them. -->",
+    '',
+  );
 
   // ── Change history ──
   lines.push('## Change history', '');

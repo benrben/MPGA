@@ -1,19 +1,39 @@
 {
   "version": "1.0.0",
-  "milestone": null,
-  "updated": "2026-03-22T15:07:49.176Z",
+  "milestone": "M001-drain-the-swamp-fix-all-rally-scandals",
+  "updated": "2026-03-24T13:21:42.582Z",
   "columns": {
     "backlog": [],
-    "todo": [],
-    "in-progress": [],
+    "todo": [
+      "T002",
+      "T003",
+      "T004",
+      "T005",
+      "T006",
+      "T007",
+      "T008",
+      "T009",
+      "T010",
+      "T011",
+      "T012",
+      "T013",
+      "T014",
+      "T015",
+      "T016",
+      "T017",
+      "T018"
+    ],
+    "in-progress": [
+      "T001"
+    ],
     "testing": [],
     "review": [],
     "done": []
   },
   "stats": {
-    "total": 0,
+    "total": 18,
     "done": 0,
-    "in_flight": 0,
+    "in_flight": 1,
     "blocked": 0,
     "progress_pct": 0,
     "evidence_produced": 0,
@@ -24,5 +44,5 @@
     "testing": 3,
     "review": 2
   },
-  "next_task_id": 1
+  "next_task_id": 19
 }

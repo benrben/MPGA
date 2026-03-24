@@ -8,6 +8,9 @@ export interface SymbolLocation {
   endLine: number;
 }
 
+/** Maximum number of lines to scan forward when finding the end of a code block. */
+const MAX_BLOCK_SCAN_LINES = 200;
+
 // Language detection by file extension
 export function detectLanguage(filepath: string): string {
   const ext = path.extname(filepath).toLowerCase();
@@ -107,7 +110,7 @@ function extractSymbolsRegex(content: string, language: string): SymbolLocation[
         // Find end of block (simple heuristic: next same-indent line or end of file)
         let endLine = i + 1;
         const indent = line.match(/^(\s*)/)?.[1]?.length ?? 0;
-        for (let j = i + 1; j < Math.min(i + 200, lines.length); j++) {
+        for (let j = i + 1; j < Math.min(i + MAX_BLOCK_SCAN_LINES, lines.length); j++) {
           const jLine = lines[j];
           if (jLine.trim() === '') continue;
           const jIndent = jLine.match(/^(\s*)/)?.[1]?.length ?? 0;

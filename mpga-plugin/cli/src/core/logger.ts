@@ -32,6 +32,15 @@ const CAP_BANNER = [
 
 const CAP_MINI = `${BRAND.red('🧢')} ${BRAND.accent('MPGA')} ${chalk.dim('— Make Project Great Again')}`;
 
+/** Width of the mini banner divider line. */
+const MINI_BANNER_WIDTH = 42;
+/** Width of the key-value label column for aligned output. */
+const KV_LABEL_WIDTH = 18;
+/** Default width of the progress bar in characters. */
+const DEFAULT_PROGRESS_BAR_WIDTH = 20;
+/** Width of section divider lines. */
+const DIVIDER_WIDTH = 40;
+
 export const VERSION = '1.0.0';
 
 export function banner(): void {
@@ -41,7 +50,7 @@ export function banner(): void {
 export function miniBanner(): void {
   console.log('');
   console.log(CAP_MINI);
-  console.log(chalk.dim('─'.repeat(42)));
+  console.log(chalk.dim('─'.repeat(MINI_BANNER_WIDTH)));
 }
 
 export const log = {
@@ -63,7 +72,7 @@ export const log = {
   },
   kv: (key: string, value: string, indent = 2) => {
     const pad = ' '.repeat(indent);
-    console.log(`${pad}${chalk.dim(key.padEnd(18))} ${value}`);
+    console.log(`${pad}${chalk.dim(key.padEnd(KV_LABEL_WIDTH))} ${value}`);
   },
   table: (rows: string[][]) => {
     const widths = rows[0].map((_, i) => Math.max(...rows.map((r) => (r[i] ?? '').length)));
@@ -71,11 +80,15 @@ export const log = {
       console.log('  ' + row.map((cell, i) => cell.padEnd(widths[i])).join('  '));
     }
   },
-  divider: () => console.log(chalk.dim('  ' + '─'.repeat(40))),
+  divider: () => console.log(chalk.dim('  ' + '─'.repeat(DIVIDER_WIDTH))),
   blank: () => console.log(''),
 };
 
-export function progressBar(value: number, total: number, width = 20): string {
+export function progressBar(
+  value: number,
+  total: number,
+  width = DEFAULT_PROGRESS_BAR_WIDTH,
+): string {
   const pct = total === 0 ? 0 : value / total;
   const filled = Math.round(pct * width);
   const bar = chalk.green('█'.repeat(filled)) + chalk.dim('░'.repeat(width - filled));

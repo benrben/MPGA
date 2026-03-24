@@ -2,9 +2,10 @@
 
 ## Summary
 
-The **generators** module — TREMENDOUS — 5 files, 1,177 lines of the finest code you've ever seen. Believe me.
+- **Health:** ✓ fresh
+The **generators** module — TREMENDOUS — 6 files, 1,281 lines of the finest code you've ever seen. Believe me.
 
-<!-- TODO: Tell the people what this GREAT module does. What's in, what's out. Keep it simple. MPGA! -->
+The generators module produces all MPGA knowledge-layer documents from raw scan and graph data. Three generators, three outputs: `graph-md.ts` builds the inter-scope dependency graph and writes `GRAPH.md`; `scope-md.ts` groups files into scopes, extracts symbols/JSDoc/frameworks, and renders per-scope markdown; `index-md.ts` assembles `INDEX.md` — the project identity table, key files, conventions, scope registry, and active milestone. No generator touches the filesystem directly; they return strings. The caller (`sync` command) owns all writes. [E] `mpga-plugin/cli/src/commands/sync.ts:39-86`
 
 ## Where to start in code
 
@@ -15,12 +16,14 @@ These are your MAIN entry points — the best, the most important. Open them FIR
 ## Context / stack / skills
 
 - **Languages:** typescript
-- **Symbol types:** interface, function
+- **Symbol types:** const, function, interface
 - **Frameworks:** Vitest, Express, Zod
 
 ## Who and what triggers it
 
-<!-- TODO: Who triggers this? A lot of very important callers, believe me. Find them. -->
+The `sync` command is the sole direct caller. It runs all three generators in sequence — graph first, then scopes, then index — and writes results to disk. [E] `mpga-plugin/cli/src/commands/sync.ts:38-86`
+
+`renderScopeMd` and `groupIntoScopes` are also called from `mpga sync --incremental` mode; in that mode, scope files that already exist on disk are skipped. [E] `mpga-plugin/cli/src/commands/sync.ts:55-57`
 
 **Called by these GREAT scopes (they need us, tremendously):**
 
@@ -28,31 +31,58 @@ These are your MAIN entry points — the best, the most important. Open them FIR
 
 ## What happens
 
-- **extractModuleSummary** (function) — Module-level comments extracted from entry point files */ moduleSummaries: Array<{ filepath: string; summary: string }>; /** Frameworks/libraries detected from imports */ detectedFrameworks: string[]; /** Exported functions with their JSDoc descriptions */ exportDescriptions: Array<{ symbol: string; filepath: string; kind: string; description: string; }>; /** JSDoc annotations: @throws, @deprecated, etc. */ rulesAndConstraints: Array<{ filepath: string; symbol: string; annotation: string }>; } interface ExportedSymbol { symbol: string; filepath: string; kind: string; } // Extract exported symbols with their kind function extractExports(filepath: string, content: string): ExportedSymbol[] { const exports: ExportedSymbol[] = []; const seen = new Set<string>(); // TypeScript/JS exports const tsRe = /export\s+(?:default\s+)?(?:async\s+)?(function|class|const|let|var|type|interface|enum)\s+(\w+)/g; let m; while ((m = tsRe.exec(content)) !== null) { const kind = m[1] === 'let' || m[1] === 'var' ? 'variable' : m[1]; if (!seen.has(m[2])) { seen.add(m[2]); exports.push({ symbol: m[2], filepath, kind }); } } // Python def/class at module level const pyRe = /^(def|class)\s+(\w+)/gm; while ((m = pyRe.exec(content)) !== null) { if (!seen.has(m[2])) { seen.add(m[2]); exports.push({ symbol: m[2], filepath, kind: m[1] }); } } // Go func const goRe = /^func\s+(\w+)/gm; while ((m = goRe.exec(content)) !== null) { if (!seen.has(m[1])) { seen.add(m[1]); exports.push({ symbol: m[1], filepath, kind: 'function' }); } } return exports; } // Known frameworks/libraries to detect from imports const FRAMEWORK_MAP: Record<string, string> = { express: 'Express', fastify: 'Fastify', hono: 'Hono', koa: 'Koa', react: 'React', 'react-dom': 'React', vue: 'Vue', svelte: 'Svelte', next: 'Next.js', nuxt: 'Nuxt', angular: 'Angular', commander: 'Commander', yargs: 'Yargs', inquirer: 'Inquirer', zod: 'Zod', joi: 'Joi', ajv: 'Ajv', prisma: 'Prisma', drizzle: 'Drizzle', typeorm: 'TypeORM', sequelize: 'Sequelize', vitest: 'Vitest', jest: 'Jest', mocha: 'Mocha', tailwindcss: 'Tailwind CSS', 'styled-components': 'styled-components', graphql: 'GraphQL', trpc: 'tRPC', axios: 'Axios', mongoose: 'Mongoose', knex: 'Knex', flask: 'Flask', django: 'Django', fastapi: 'FastAPI', }; /** Extract the leading module-level comment (JSDoc or // block) from file content [E] `mpga-plugin/cli/src/generators/scope-md.ts`
-- **detectFrameworks** (function) — Module-level comments extracted from entry point files */ moduleSummaries: Array<{ filepath: string; summary: string }>; /** Frameworks/libraries detected from imports */ detectedFrameworks: string[]; /** Exported functions with their JSDoc descriptions */ exportDescriptions: Array<{ symbol: string; filepath: string; kind: string; description: string; }>; /** JSDoc annotations: @throws, @deprecated, etc. */ rulesAndConstraints: Array<{ filepath: string; symbol: string; annotation: string }>; } interface ExportedSymbol { symbol: string; filepath: string; kind: string; } // Extract exported symbols with their kind function extractExports(filepath: string, content: string): ExportedSymbol[] { const exports: ExportedSymbol[] = []; const seen = new Set<string>(); // TypeScript/JS exports const tsRe = /export\s+(?:default\s+)?(?:async\s+)?(function|class|const|let|var|type|interface|enum)\s+(\w+)/g; let m; while ((m = tsRe.exec(content)) !== null) { const kind = m[1] === 'let' || m[1] === 'var' ? 'variable' : m[1]; if (!seen.has(m[2])) { seen.add(m[2]); exports.push({ symbol: m[2], filepath, kind }); } } // Python def/class at module level const pyRe = /^(def|class)\s+(\w+)/gm; while ((m = pyRe.exec(content)) !== null) { if (!seen.has(m[2])) { seen.add(m[2]); exports.push({ symbol: m[2], filepath, kind: m[1] }); } } // Go func const goRe = /^func\s+(\w+)/gm; while ((m = goRe.exec(content)) !== null) { if (!seen.has(m[1])) { seen.add(m[1]); exports.push({ symbol: m[1], filepath, kind: 'function' }); } } return exports; } // Known frameworks/libraries to detect from imports const FRAMEWORK_MAP: Record<string, string> = { express: 'Express', fastify: 'Fastify', hono: 'Hono', koa: 'Koa', react: 'React', 'react-dom': 'React', vue: 'Vue', svelte: 'Svelte', next: 'Next.js', nuxt: 'Nuxt', angular: 'Angular', commander: 'Commander', yargs: 'Yargs', inquirer: 'Inquirer', zod: 'Zod', joi: 'Joi', ajv: 'Ajv', prisma: 'Prisma', drizzle: 'Drizzle', typeorm: 'TypeORM', sequelize: 'Sequelize', vitest: 'Vitest', jest: 'Jest', mocha: 'Mocha', tailwindcss: 'Tailwind CSS', 'styled-components': 'styled-components', graphql: 'GraphQL', trpc: 'tRPC', axios: 'Axios', mongoose: 'Mongoose', knex: 'Knex', flask: 'Flask', django: 'Django', fastapi: 'FastAPI', }; /** Extract the leading module-level comment (JSDoc or // block) from file content */ export function extractModuleSummary(content: string): string | null { // Try JSDoc block comment at the top (before any import/code) const jsdocMatch = content.match(/^\s*\/\*\*([\s\S]*?)\*\//); if (jsdocMatch) { const beforeComment = content.slice(0, jsdocMatch.index ?? 0).trim(); if (beforeComment === '') { const cleaned = jsdocMatch[1] .split('\n') .map((l) => l.replace(/^\s*\*\s?/, '').trim()) .filter((l) => !l.startsWith('@') && l.length > 0) .join(' ') .trim(); if (cleaned.length > 0) return cleaned; } } // Try leading // comment block const lines = content.split('\n'); const commentLines: string[] = []; for (const line of lines) { const trimmed = line.trim(); if (trimmed === '' && commentLines.length === 0) continue; if (trimmed.startsWith('//')) { commentLines.push(trimmed.replace(/^\/\/\s?/, '').trim()); } else { break; } } if (commentLines.length > 0) { const joined = commentLines .filter((l) => l.length > 0) .join(' ') .trim(); if (joined.length > 0) return joined; } return null; } /** Detect known frameworks/libraries from import statements [E] `mpga-plugin/cli/src/generators/scope-md.ts`
-- **extractJSDocForExport** (function) — Module-level comments extracted from entry point files */ moduleSummaries: Array<{ filepath: string; summary: string }>; /** Frameworks/libraries detected from imports */ detectedFrameworks: string[]; /** Exported functions with their JSDoc descriptions */ exportDescriptions: Array<{ symbol: string; filepath: string; kind: string; description: string; }>; /** JSDoc annotations: @throws, @deprecated, etc. */ rulesAndConstraints: Array<{ filepath: string; symbol: string; annotation: string }>; } interface ExportedSymbol { symbol: string; filepath: string; kind: string; } // Extract exported symbols with their kind function extractExports(filepath: string, content: string): ExportedSymbol[] { const exports: ExportedSymbol[] = []; const seen = new Set<string>(); // TypeScript/JS exports const tsRe = /export\s+(?:default\s+)?(?:async\s+)?(function|class|const|let|var|type|interface|enum)\s+(\w+)/g; let m; while ((m = tsRe.exec(content)) !== null) { const kind = m[1] === 'let' || m[1] === 'var' ? 'variable' : m[1]; if (!seen.has(m[2])) { seen.add(m[2]); exports.push({ symbol: m[2], filepath, kind }); } } // Python def/class at module level const pyRe = /^(def|class)\s+(\w+)/gm; while ((m = pyRe.exec(content)) !== null) { if (!seen.has(m[2])) { seen.add(m[2]); exports.push({ symbol: m[2], filepath, kind: m[1] }); } } // Go func const goRe = /^func\s+(\w+)/gm; while ((m = goRe.exec(content)) !== null) { if (!seen.has(m[1])) { seen.add(m[1]); exports.push({ symbol: m[1], filepath, kind: 'function' }); } } return exports; } // Known frameworks/libraries to detect from imports const FRAMEWORK_MAP: Record<string, string> = { express: 'Express', fastify: 'Fastify', hono: 'Hono', koa: 'Koa', react: 'React', 'react-dom': 'React', vue: 'Vue', svelte: 'Svelte', next: 'Next.js', nuxt: 'Nuxt', angular: 'Angular', commander: 'Commander', yargs: 'Yargs', inquirer: 'Inquirer', zod: 'Zod', joi: 'Joi', ajv: 'Ajv', prisma: 'Prisma', drizzle: 'Drizzle', typeorm: 'TypeORM', sequelize: 'Sequelize', vitest: 'Vitest', jest: 'Jest', mocha: 'Mocha', tailwindcss: 'Tailwind CSS', 'styled-components': 'styled-components', graphql: 'GraphQL', trpc: 'tRPC', axios: 'Axios', mongoose: 'Mongoose', knex: 'Knex', flask: 'Flask', django: 'Django', fastapi: 'FastAPI', }; /** Extract the leading module-level comment (JSDoc or // block) from file content */ export function extractModuleSummary(content: string): string | null { // Try JSDoc block comment at the top (before any import/code) const jsdocMatch = content.match(/^\s*\/\*\*([\s\S]*?)\*\//); if (jsdocMatch) { const beforeComment = content.slice(0, jsdocMatch.index ?? 0).trim(); if (beforeComment === '') { const cleaned = jsdocMatch[1] .split('\n') .map((l) => l.replace(/^\s*\*\s?/, '').trim()) .filter((l) => !l.startsWith('@') && l.length > 0) .join(' ') .trim(); if (cleaned.length > 0) return cleaned; } } // Try leading // comment block const lines = content.split('\n'); const commentLines: string[] = []; for (const line of lines) { const trimmed = line.trim(); if (trimmed === '' && commentLines.length === 0) continue; if (trimmed.startsWith('//')) { commentLines.push(trimmed.replace(/^\/\/\s?/, '').trim()); } else { break; } } if (commentLines.length > 0) { const joined = commentLines .filter((l) => l.length > 0) .join(' ') .trim(); if (joined.length > 0) return joined; } return null; } /** Detect known frameworks/libraries from import statements */ export function detectFrameworks(content: string): string[] { const found = new Set<string>(); const importRe = /(?:from|import|require)\s*\(?\s*['"]([^'"./][^'"]*)['"]/g; let m; while ((m = importRe.exec(content)) !== null) { // Get the package name (handle scoped packages like @foo/bar) const raw = m[1]; const pkg = raw.startsWith('@') ? raw.split('/').slice(0, 2).join('/') : raw.split('/')[0]; const framework = FRAMEWORK_MAP[pkg]; if (framework) found.add(framework); } return [...found]; } /** Extract JSDoc description for a specific exported symbol [E] `mpga-plugin/cli/src/generators/scope-md.ts`
-- **extractAnnotations** (function) — Module-level comments extracted from entry point files */ moduleSummaries: Array<{ filepath: string; summary: string }>; /** Frameworks/libraries detected from imports */ detectedFrameworks: string[]; /** Exported functions with their JSDoc descriptions */ exportDescriptions: Array<{ symbol: string; filepath: string; kind: string; description: string; }>; /** JSDoc annotations: @throws, @deprecated, etc. */ rulesAndConstraints: Array<{ filepath: string; symbol: string; annotation: string }>; } interface ExportedSymbol { symbol: string; filepath: string; kind: string; } // Extract exported symbols with their kind function extractExports(filepath: string, content: string): ExportedSymbol[] { const exports: ExportedSymbol[] = []; const seen = new Set<string>(); // TypeScript/JS exports const tsRe = /export\s+(?:default\s+)?(?:async\s+)?(function|class|const|let|var|type|interface|enum)\s+(\w+)/g; let m; while ((m = tsRe.exec(content)) !== null) { const kind = m[1] === 'let' || m[1] === 'var' ? 'variable' : m[1]; if (!seen.has(m[2])) { seen.add(m[2]); exports.push({ symbol: m[2], filepath, kind }); } } // Python def/class at module level const pyRe = /^(def|class)\s+(\w+)/gm; while ((m = pyRe.exec(content)) !== null) { if (!seen.has(m[2])) { seen.add(m[2]); exports.push({ symbol: m[2], filepath, kind: m[1] }); } } // Go func const goRe = /^func\s+(\w+)/gm; while ((m = goRe.exec(content)) !== null) { if (!seen.has(m[1])) { seen.add(m[1]); exports.push({ symbol: m[1], filepath, kind: 'function' }); } } return exports; } // Known frameworks/libraries to detect from imports const FRAMEWORK_MAP: Record<string, string> = { express: 'Express', fastify: 'Fastify', hono: 'Hono', koa: 'Koa', react: 'React', 'react-dom': 'React', vue: 'Vue', svelte: 'Svelte', next: 'Next.js', nuxt: 'Nuxt', angular: 'Angular', commander: 'Commander', yargs: 'Yargs', inquirer: 'Inquirer', zod: 'Zod', joi: 'Joi', ajv: 'Ajv', prisma: 'Prisma', drizzle: 'Drizzle', typeorm: 'TypeORM', sequelize: 'Sequelize', vitest: 'Vitest', jest: 'Jest', mocha: 'Mocha', tailwindcss: 'Tailwind CSS', 'styled-components': 'styled-components', graphql: 'GraphQL', trpc: 'tRPC', axios: 'Axios', mongoose: 'Mongoose', knex: 'Knex', flask: 'Flask', django: 'Django', fastapi: 'FastAPI', }; /** Extract the leading module-level comment (JSDoc or // block) from file content */ export function extractModuleSummary(content: string): string | null { // Try JSDoc block comment at the top (before any import/code) const jsdocMatch = content.match(/^\s*\/\*\*([\s\S]*?)\*\//); if (jsdocMatch) { const beforeComment = content.slice(0, jsdocMatch.index ?? 0).trim(); if (beforeComment === '') { const cleaned = jsdocMatch[1] .split('\n') .map((l) => l.replace(/^\s*\*\s?/, '').trim()) .filter((l) => !l.startsWith('@') && l.length > 0) .join(' ') .trim(); if (cleaned.length > 0) return cleaned; } } // Try leading // comment block const lines = content.split('\n'); const commentLines: string[] = []; for (const line of lines) { const trimmed = line.trim(); if (trimmed === '' && commentLines.length === 0) continue; if (trimmed.startsWith('//')) { commentLines.push(trimmed.replace(/^\/\/\s?/, '').trim()); } else { break; } } if (commentLines.length > 0) { const joined = commentLines .filter((l) => l.length > 0) .join(' ') .trim(); if (joined.length > 0) return joined; } return null; } /** Detect known frameworks/libraries from import statements */ export function detectFrameworks(content: string): string[] { const found = new Set<string>(); const importRe = /(?:from|import|require)\s*\(?\s*['"]([^'"./][^'"]*)['"]/g; let m; while ((m = importRe.exec(content)) !== null) { // Get the package name (handle scoped packages like @foo/bar) const raw = m[1]; const pkg = raw.startsWith('@') ? raw.split('/').slice(0, 2).join('/') : raw.split('/')[0]; const framework = FRAMEWORK_MAP[pkg]; if (framework) found.add(framework); } return [...found]; } /** Extract JSDoc description for a specific exported symbol */ export function extractJSDocForExport(content: string, symbolName: string): string | null { // Match /** ... */ immediately before an export containing the symbol name const escaped = symbolName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); const re = new RegExp( `/\\*\\*([\\s\\S]*?)\\*/\\s*export\\s+(?:default\\s+)?(?:async\\s+)?(?:function|class|const|let|var|type|interface|enum)\\s+${escaped}\\b`, ); const match = content.match(re); if (!match) return null; const lines = match[1] .split('\n') .map((l) => l.replace(/^\s*\*\s?/, '').trim()) .filter((l) => l.length > 0 && !l.startsWith('@')); return lines.length > 0 ? lines.join(' ').trim() : null; } /** Extract constraint annotations (@throws, @deprecated, @param with validation) from JSDoc [E] `mpga-plugin/cli/src/generators/scope-md.ts`
-- **getScopeName** (function) — Module-level comments extracted from entry point files */ moduleSummaries: Array<{ filepath: string; summary: string }>; /** Frameworks/libraries detected from imports */ detectedFrameworks: string[]; /** Exported functions with their JSDoc descriptions */ exportDescriptions: Array<{ symbol: string; filepath: string; kind: string; description: string; }>; /** JSDoc annotations: @throws, @deprecated, etc. */ rulesAndConstraints: Array<{ filepath: string; symbol: string; annotation: string }>; } interface ExportedSymbol { symbol: string; filepath: string; kind: string; } // Extract exported symbols with their kind function extractExports(filepath: string, content: string): ExportedSymbol[] { const exports: ExportedSymbol[] = []; const seen = new Set<string>(); // TypeScript/JS exports const tsRe = /export\s+(?:default\s+)?(?:async\s+)?(function|class|const|let|var|type|interface|enum)\s+(\w+)/g; let m; while ((m = tsRe.exec(content)) !== null) { const kind = m[1] === 'let' || m[1] === 'var' ? 'variable' : m[1]; if (!seen.has(m[2])) { seen.add(m[2]); exports.push({ symbol: m[2], filepath, kind }); } } // Python def/class at module level const pyRe = /^(def|class)\s+(\w+)/gm; while ((m = pyRe.exec(content)) !== null) { if (!seen.has(m[2])) { seen.add(m[2]); exports.push({ symbol: m[2], filepath, kind: m[1] }); } } // Go func const goRe = /^func\s+(\w+)/gm; while ((m = goRe.exec(content)) !== null) { if (!seen.has(m[1])) { seen.add(m[1]); exports.push({ symbol: m[1], filepath, kind: 'function' }); } } return exports; } // Known frameworks/libraries to detect from imports const FRAMEWORK_MAP: Record<string, string> = { express: 'Express', fastify: 'Fastify', hono: 'Hono', koa: 'Koa', react: 'React', 'react-dom': 'React', vue: 'Vue', svelte: 'Svelte', next: 'Next.js', nuxt: 'Nuxt', angular: 'Angular', commander: 'Commander', yargs: 'Yargs', inquirer: 'Inquirer', zod: 'Zod', joi: 'Joi', ajv: 'Ajv', prisma: 'Prisma', drizzle: 'Drizzle', typeorm: 'TypeORM', sequelize: 'Sequelize', vitest: 'Vitest', jest: 'Jest', mocha: 'Mocha', tailwindcss: 'Tailwind CSS', 'styled-components': 'styled-components', graphql: 'GraphQL', trpc: 'tRPC', axios: 'Axios', mongoose: 'Mongoose', knex: 'Knex', flask: 'Flask', django: 'Django', fastapi: 'FastAPI', }; /** Extract the leading module-level comment (JSDoc or // block) from file content */ export function extractModuleSummary(content: string): string | null { // Try JSDoc block comment at the top (before any import/code) const jsdocMatch = content.match(/^\s*\/\*\*([\s\S]*?)\*\//); if (jsdocMatch) { const beforeComment = content.slice(0, jsdocMatch.index ?? 0).trim(); if (beforeComment === '') { const cleaned = jsdocMatch[1] .split('\n') .map((l) => l.replace(/^\s*\*\s?/, '').trim()) .filter((l) => !l.startsWith('@') && l.length > 0) .join(' ') .trim(); if (cleaned.length > 0) return cleaned; } } // Try leading // comment block const lines = content.split('\n'); const commentLines: string[] = []; for (const line of lines) { const trimmed = line.trim(); if (trimmed === '' && commentLines.length === 0) continue; if (trimmed.startsWith('//')) { commentLines.push(trimmed.replace(/^\/\/\s?/, '').trim()); } else { break; } } if (commentLines.length > 0) { const joined = commentLines .filter((l) => l.length > 0) .join(' ') .trim(); if (joined.length > 0) return joined; } return null; } /** Detect known frameworks/libraries from import statements */ export function detectFrameworks(content: string): string[] { const found = new Set<string>(); const importRe = /(?:from|import|require)\s*\(?\s*['"]([^'"./][^'"]*)['"]/g; let m; while ((m = importRe.exec(content)) !== null) { // Get the package name (handle scoped packages like @foo/bar) const raw = m[1]; const pkg = raw.startsWith('@') ? raw.split('/').slice(0, 2).join('/') : raw.split('/')[0]; const framework = FRAMEWORK_MAP[pkg]; if (framework) found.add(framework); } return [...found]; } /** Extract JSDoc description for a specific exported symbol */ export function extractJSDocForExport(content: string, symbolName: string): string | null { // Match /** ... */ immediately before an export containing the symbol name const escaped = symbolName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); const re = new RegExp( `/\\*\\*([\\s\\S]*?)\\*/\\s*export\\s+(?:default\\s+)?(?:async\\s+)?(?:function|class|const|let|var|type|interface|enum)\\s+${escaped}\\b`, ); const match = content.match(re); if (!match) return null; const lines = match[1] .split('\n') .map((l) => l.replace(/^\s*\*\s?/, '').trim()) .filter((l) => l.length > 0 && !l.startsWith('@')); return lines.length > 0 ? lines.join(' ').trim() : null; } /** Extract constraint annotations (@throws, @deprecated, @param with validation) from JSDoc */ export function extractAnnotations(content: string, symbolName: string): string[] { const escaped = symbolName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); const re = new RegExp( `/\\*\\*([\\s\\S]*?)\\*/\\s*export\\s+(?:default\\s+)?(?:async\\s+)?(?:function|class|const|let|var|type|interface|enum)\\s+${escaped}\\b`, ); const match = content.match(re); if (!match) return []; const annotations: string[] = []; const lines = match[1].split('\n').map((l) => l.replace(/^\s*\*\s?/, '').trim()); for (const line of lines) { if (line.startsWith('@throws') || line.startsWith('@deprecated')) { annotations.push(line); } } return annotations; } // Detect entry-point files within a scope function detectEntryPoints(files: FileInfo[]): string[] { const entryPatterns = [ /(?:^|\/)index\.\w+$/, /(?:^|\/)main\.\w+$/, /(?:^|\/)app\.\w+$/, /(?:^|\/)server\.\w+$/, /(?:^|\/)cli\.\w+$/, /(?:^|\/)mod\.\w+$/, /(?:^|\/)lib\.\w+$/, /(?:^|\/)__init__\.py$/, ]; const entries: string[] = []; for (const file of files) { if (entryPatterns.some((p) => p.test(file.filepath))) { entries.push(file.filepath); } } // If no conventional entry points, pick the largest files (likely the main ones) if (entries.length === 0 && files.length > 0) { const sorted = [...files].sort((a, b) => b.lines - a.lines); entries.push(sorted[0].filepath); } return entries; } /** Determine the scope name for a file based on its path. With scopeDepth='auto', finds the deepest "source-like" directory (src/, lib/, core/, commands/, etc.) and uses its subdirectories as scopes. With a numeric depth, uses that many path segments. [E] `mpga-plugin/cli/src/generators/scope-md.ts`
+- **`extractModuleSummary`** (function) — Extracts the leading JSDoc block or `//` comment block at the top of a file. Returns `null` if no such comment exists or if the JSDoc appears after any code. [E] `mpga-plugin/cli/src/generators/scope-md.ts:112-150`
+- **`detectFrameworks`** (function) — Scans import/require statements against a 30-entry `FRAMEWORK_MAP` and returns the display names (e.g. `'Express'`). Deduplicates via `Set`. [E] `mpga-plugin/cli/src/generators/scope-md.ts:152-165`
+- **`extractJSDocForExport`** (function) — Finds the `/** ... */` block immediately before a named export declaration and returns the description lines (stripping `@`-tagged lines). [E] `mpga-plugin/cli/src/generators/scope-md.ts:167-183`
+- **`extractAnnotations`** (function) — Like `extractJSDocForExport` but returns only `@throws` and `@deprecated` annotation strings for a named export. [E] `mpga-plugin/cli/src/generators/scope-md.ts:185-202`
+- **`getScopeName`** (function) — Maps a file path to a scope name. In `auto` mode: finds the deepest `src`/`lib`/`app`/`pkg`/`internal`/`cmd` directory and uses its immediate child directory as the scope name. In numeric mode: joins that many path segments. [E] `mpga-plugin/cli/src/generators/scope-md.ts:230-261`
+- **`groupIntoScopes`** (function) — Groups all scanned files into `ScopeInfo[]`. Reads each file from disk, runs all extractors, computes inter-scope deps from relative imports, and builds a reverse-dep map from the `GraphData`. [E] `mpga-plugin/cli/src/generators/scope-md.ts:264-383`
+- **`renderScopeMd`** (function) — Converts a `ScopeInfo` into a complete scope markdown document string. All sections — Summary, What happens, Rules, Evidence index, Files, etc. — fall back to `<!-- TODO -->` comments when data is absent. [E] `mpga-plugin/cli/src/generators/scope-md.ts:390-599`
+- **`buildGraph`** (function) — Reads all files, extracts relative imports via regex, maps to module names via `getModuleName`, detects circular pairs and orphan modules, returns `GraphData`. [E] `mpga-plugin/cli/src/generators/graph-md.ts:71-135`
+- **`renderGraphMd`** (function) — Converts `GraphData` to a markdown string with module dependency list, circular warnings, orphan list, and a Mermaid `graph TD` block. [E] `mpga-plugin/cli/src/generators/graph-md.ts:137-183`
+- **`renderIndexMd`** (function) — Assembles `INDEX.md` from `ScanResult`, `MpgaConfig`, `ScopeInfo[]`, active milestone string, and evidence coverage ratio. Outputs identity, key files, conventions, agent trigger table, and scope registry. [E] `mpga-plugin/cli/src/generators/index-md.ts:10-90`
 
 ## Rules and edge cases
 
-<!-- TODO: The guardrails. Validation, permissions, error handling — everything that keeps this code GREAT. -->
+- **Missing files are silently skipped.** `groupIntoScopes` checks `fs.existsSync` before reading each file; read failures are caught and the file is skipped. [E] `mpga-plugin/cli/src/generators/scope-md.ts:310-316`
+- **No-entry-point fallback.** If no file in a scope matches the conventional entry-point patterns (`index.*`, `main.*`, `app.*`, etc.), `detectEntryPoints` picks the largest file by line count. [E] `mpga-plugin/cli/src/generators/scope-md.ts:222-227`
+- **Scope name collision guard.** `getScopeName` with `scopeDepth='auto'` maps every file under a `src/`-like dir to the *immediate* sub-directory name. Files outside those dirs collapse to the top-level directory, preventing deep path bleed-through. [E] `mpga-plugin/cli/src/generators/scope-md.ts:240-261`
+- **`extractModuleSummary` only uses the file-top comment.** A JSDoc block that appears after any code or import is rejected (`beforeComment === ''` check). [E] `mpga-plugin/cli/src/generators/scope-md.ts:115-127`
+- **`detectFrameworks` deduplicates within a single call** using an internal `Set`, but cross-file deduplication in `groupIntoScopes` is done with a second `new Set(allFrameworks)` when building `ScopeInfo`. [E] `mpga-plugin/cli/src/generators/scope-md.ts:153-165`, `mpga-plugin/cli/src/generators/scope-md.ts:376`
+- **Evidence index is capped at 40 entries; file list at 30.** Constants `MAX_EVIDENCE_INDEX_ENTRIES` and `MAX_FILE_LIST_ENTRIES` prevent scope docs from becoming unreadable for large scopes. [E] `mpga-plugin/cli/src/generators/scope-md.ts:386-388`
+- **Mermaid output is capped at 30 dependencies** in `renderGraphMd` via `MAX_MERMAID_DEPENDENCIES`. [E] `mpga-plugin/cli/src/generators/graph-md.ts:9`, `mpga-plugin/cli/src/generators/graph-md.ts:170`
+- **Orphan detection is at module level, not file level.** A module is an orphan if it has no incoming *and* no outgoing edges. Individual files within an orphan module are reported (up to `MAX_ORPHAN_FILES = 10`). [E] `mpga-plugin/cli/src/generators/graph-md.ts:7`, `mpga-plugin/cli/src/generators/graph-md.ts:124-132`
+- **Circular detection is a simple direct-edge check**, not a full DFS. Only pairs where A→B and B→A both exist as direct edges are flagged; longer cycles are not detected. [E] `mpga-plugin/cli/src/generators/graph-md.ts:112-122`
+- **`extractAnnotations` only captures `@throws` and `@deprecated`**; other JSDoc tags (`@param`, `@returns`, etc.) are ignored. [E] `mpga-plugin/cli/src/generators/scope-md.ts:196-200`
+- **`renderIndexMd` falls back to `(describe role)` and placeholder conventions** when `config.knowledgeLayer` is absent or empty. [E] `mpga-plugin/cli/src/generators/index-md.ts:43-60`
 
 ## Concrete examples
 
-<!-- TODO: REAL examples. "When X happens, Y happens." Simple. Powerful. Like a deal. -->
+**`mpga sync` full pipeline:**
+1. `scan()` returns a `ScanResult` (files + metadata). [E] `mpga-plugin/cli/src/commands/sync.ts:32`
+2. `buildGraph(scanResult, config)` reads each file, extracts relative imports via regex, maps files to scope names, and returns `{ dependencies, circular, orphans, modules }`. [E] `mpga-plugin/cli/src/generators/graph-md.ts:71-135`
+3. `renderGraphMd(graph)` converts that data into a markdown string with a module list, circular warning section, and a Mermaid `graph TD` block. [E] `mpga-plugin/cli/src/generators/graph-md.ts:137-183`
+4. `groupIntoScopes(scanResult, graph, config)` groups files by `getScopeName`, reads each file for exports/JSDoc/frameworks, builds reverse-dep map from graph, and returns `ScopeInfo[]`. [E] `mpga-plugin/cli/src/generators/scope-md.ts:264-383`
+5. For each `ScopeInfo`, `renderScopeMd(scope, projectRoot)` produces a full scope markdown document — Summary, Where to start, What happens, Rules, Evidence index, Files, etc. [E] `mpga-plugin/cli/src/generators/scope-md.ts:390-599`
+6. `renderIndexMd(scanResult, config, scopes, activeMilestone, evidenceCoverage)` assembles `INDEX.md` with identity, key files table, conventions, agent trigger table, and scope registry. [E] `mpga-plugin/cli/src/generators/index-md.ts:10-90`
+
+**Framework detection example:** a file containing `import express from 'express'` causes `detectFrameworks` to match `express` against `FRAMEWORK_MAP` and return `['Express']`. [E] `mpga-plugin/cli/src/generators/scope-md.ts:153-165`, `mpga-plugin/cli/src/generators/scope-md.test.ts:47-51`
+
+**JSDoc extraction example:** `extractJSDocForExport(content, 'loadBoard')` finds the `/** ... */` block immediately preceding `export function loadBoard` and returns the description with `@param`/`@returns` tags stripped. [E] `mpga-plugin/cli/src/generators/scope-md.ts:167-183`, `mpga-plugin/cli/src/generators/scope-md.test.ts:82-84`
+
+**Evidence coverage in INDEX:** the ratio `driftReport.validLinks / driftReport.totalLinks` is passed as `evidenceCoverage` to `renderIndexMd`, which rounds it to a percentage. [E] `mpga-plugin/cli/src/commands/sync.ts:74-76`, `mpga-plugin/cli/src/generators/index-md.ts:35`
 
 ## UI
 
-<!-- TODO: Screens, flows, the beautiful UI. No UI? Cut this section. We don't keep dead weight. -->
+No UI. This scope is pure data transformation — strings in, markdown strings out.
 
 ## Navigation
 
 **Sibling scopes:**
 
 - [mpga-plugin](./mpga-plugin.md)
-- [board](./board.md)
 - [commands](./commands.md)
+- [board](./board.md)
 - [core](./core.md)
 - [evidence](./evidence.md)
 
@@ -63,36 +93,49 @@ These are your MAIN entry points — the best, the most important. Open them FIR
 **Depends on:**
 
 - → [core](./core.md)
-- → [mpga-plugin](./mpga-plugin.md)
 
 **Depended on by:**
 
 - ← [commands](./commands.md)
 
-<!-- TODO: What deals does this scope make with other scopes? Document them. -->
+**Contract with `core`:** generators import `ScanResult` and `FileInfo` from `scanner.ts`, and `MpgaConfig` from `config.ts`. They only *read* from these types — they do not mutate scan results. [E] `mpga-plugin/cli/src/generators/scope-md.ts:3-5`, `mpga-plugin/cli/src/generators/graph-md.ts:3-4`
+
+**Contract with `commands`:** generators expose pure functions (`buildGraph`, `renderGraphMd`, `groupIntoScopes`, `renderScopeMd`, `renderIndexMd`). The `sync` command owns all filesystem writes; generators never write to disk themselves. [E] `mpga-plugin/cli/src/commands/sync.ts:39-86`
+
+Note: the `postbuild` npm script in `package.json` invokes `dist/index.js export --claude` after each build, but this is a build-system hook — not a source-level import. Generators have no code-level dependency on `mpga-plugin`. [E] `mpga-plugin/cli/package.json:38`
 
 ## Diagram
 
 ```mermaid
 graph LR
     generators --> core
-    generators --> mpga_plugin
     commands --> generators
 ```
 
 ## Traces
 
-<!-- TODO: Step-by-step traces. Follow the code like a WINNER follows a deal. Use this table:
+**Trace: `mpga sync` — full knowledge layer rebuild**
 
 | Step | Layer | What happens | Evidence |
 |------|-------|-------------|----------|
-| 1 | (layer) | (description) | [E] file:line |
--->
+| 1 | commands | `registerSync` action fires; `scan()` called with project root and ignore list | [E] `mpga-plugin/cli/src/commands/sync.ts:32` |
+| 2 | generators | `buildGraph(scanResult, config)` iterates all files, extracts relative imports via regex, maps each to a module name via `getModuleName` | [E] `mpga-plugin/cli/src/generators/graph-md.ts:71-99` |
+| 3 | generators | Direct circular pairs detected; orphan modules identified (no in or out edges) | [E] `mpga-plugin/cli/src/generators/graph-md.ts:111-132` |
+| 4 | generators | `renderGraphMd(graph)` serialises graph to markdown + Mermaid block; `sync` writes to `MPGA/GRAPH.md` | [E] `mpga-plugin/cli/src/generators/graph-md.ts:137-183`, `mpga-plugin/cli/src/commands/sync.ts:40-41` |
+| 5 | generators | `groupIntoScopes(scanResult, graph, config)` groups files by `getScopeName`, reads each file, extracts exports/JSDoc/frameworks/deps | [E] `mpga-plugin/cli/src/generators/scope-md.ts:264-383` |
+| 6 | generators | For each scope, `renderScopeMd(scope, root)` builds the full scope markdown string | [E] `mpga-plugin/cli/src/generators/scope-md.ts:390-599` |
+| 7 | commands | `sync` writes each scope doc to `MPGA/scopes/<name>.md` (skipped in `--incremental` if file exists) | [E] `mpga-plugin/cli/src/commands/sync.ts:52-58` |
+| 8 | evidence | `runDriftCheck` returns `validLinks/totalLinks` for evidence coverage ratio | [E] `mpga-plugin/cli/src/commands/sync.ts:74-76` |
+| 9 | generators | `renderIndexMd(scanResult, config, scopes, activeMilestone, evidenceCoverage)` assembles `INDEX.md` string | [E] `mpga-plugin/cli/src/generators/index-md.ts:10-90` |
+| 10 | commands | `sync` writes `MPGA/INDEX.md` to disk | [E] `mpga-plugin/cli/src/commands/sync.ts:85` |
 
 ## Evidence index
 
 | Claim | Evidence |
 |-------|----------|
+| `x` (const) | [E] mpga-plugin/cli/src/generators/graph-md.test.ts :: x |
+| `help` (function) | [E] mpga-plugin/cli/src/generators/graph-md.test.ts :: help |
+| `solo` (const) | [E] mpga-plugin/cli/src/generators/graph-md.test.ts :: solo |
 | `Dependency` (interface) | [E] mpga-plugin/cli/src/generators/graph-md.ts :: Dependency |
 | `GraphData` (interface) | [E] mpga-plugin/cli/src/generators/graph-md.ts :: GraphData |
 | `buildGraph` (function) | [E] mpga-plugin/cli/src/generators/graph-md.ts :: buildGraph |
@@ -118,23 +161,25 @@ graph LR
 
 ## Files
 
-- `mpga-plugin/cli/src/generators/graph-md.ts` (183 lines, typescript)
-- `mpga-plugin/cli/src/generators/index-md.test.ts` (71 lines, typescript)
-- `mpga-plugin/cli/src/generators/index-md.ts` (86 lines, typescript)
-- `mpga-plugin/cli/src/generators/scope-md.test.ts` (243 lines, typescript)
-- `mpga-plugin/cli/src/generators/scope-md.ts` (594 lines, typescript)
+- `mpga-plugin/cli/src/generators/graph-md.test.ts` (82 lines, typescript)
+- `mpga-plugin/cli/src/generators/graph-md.ts` (184 lines, typescript)
+- `mpga-plugin/cli/src/generators/index-md.test.ts` (76 lines, typescript)
+- `mpga-plugin/cli/src/generators/index-md.ts` (91 lines, typescript)
+- `mpga-plugin/cli/src/generators/scope-md.test.ts` (248 lines, typescript)
+- `mpga-plugin/cli/src/generators/scope-md.ts` (600 lines, typescript)
 
 ## Deeper splits
 
-<!-- TODO: Too big? Split it. Make each piece LEAN and GREAT. -->
+`scope-md.ts` at 600 lines could be split: the extraction helpers (`extractModuleSummary`, `detectFrameworks`, `extractJSDocForExport`, `extractAnnotations`, `extractExports`) are stateless utilities that could live in a dedicated `scope-extract.ts`. `groupIntoScopes` and `renderScopeMd` would remain in `scope-md.ts`. No split is required yet — the file is well-organised — but watch for growth beyond ~800 lines. [E] `mpga-plugin/cli/src/generators/scope-md.ts:113-202`
 
 ## Confidence and notes
 
-- **Confidence:** LOW (for now) — auto-generated, not yet verified. But it's going to be PERFECT.
-- **Evidence coverage:** 0/22 verified
+- **Confidence:** HIGH — all 6 files read directly; evidence links verified against source line numbers by SCOUT.
+- **Evidence coverage:** 25/25 verified
 - **Last verified:** 2026-03-24
-- **Drift risk:** unknown
-- <!-- TODO: Note anything unknown or ambiguous. We don't hide problems — we FIX them. -->
+- **Drift risk:** low — generators are pure functions; changes are visible in tests.
+- The circular dependency detector only finds *direct* A↔B pairs. Multi-hop cycles (A→B→C→A) are not detected. [Unknown] whether this is intentional or a known gap.
+- `getScopeName` with a numeric `scopeDepth` joins path segments with `/` — the resulting scope name may contain slashes, which could cause issues if used as a filename without sanitisation. [E] `mpga-plugin/cli/src/generators/scope-md.ts:259-261`
 
 ## Change history
 

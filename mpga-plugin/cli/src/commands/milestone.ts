@@ -47,6 +47,47 @@ function nextMilestoneId(milestonesDir: string): string {
   return `M${String(max + 1).padStart(3, '0')}`;
 }
 
+export type CompleteMilestoneResult =
+  | { ok: true; milestoneSlug: string }
+  | { ok: false; error: 'no_active_milestone' };
+
+/** Write SUMMARY, clear `board.milestone`, save board + BOARD.md. */
+export function completeActiveMilestone(projectRoot: string): CompleteMilestoneResult {
+  const boardDir = path.join(projectRoot, 'MPGA', 'board');
+  const tasksDir = path.join(boardDir, 'tasks');
+  const board = loadBoard(boardDir);
+
+  if (!board.milestone) {
+    return { ok: false, error: 'no_active_milestone' };
+  }
+
+  const milestoneSlug = board.milestone;
+  const milestoneDir = path.join(projectRoot, 'MPGA', 'milestones', milestoneSlug);
+  const today = new Date().toISOString().split('T')[0];
+
+  recalcStats(board, tasksDir);
+  fs.writeFileSync(
+    path.join(milestoneDir, 'SUMMARY.md'),
+    `# ${milestoneSlug} — Summary
+
+## Completed: ${today}
+
+## Stats
+- Tasks completed: ${board.stats.done}
+- Evidence links produced: ${board.stats.evidence_produced}
+
+## Outcome
+(describe what was delivered)
+`,
+  );
+
+  board.milestone = null;
+  saveBoard(boardDir, board);
+  fs.writeFileSync(path.join(boardDir, 'BOARD.md'), renderBoardMd(board, tasksDir));
+
+  return { ok: true, milestoneSlug };
+}
+
 export function registerMilestone(program: Command): void {
   const cmd = program.command('milestone').description('Milestone workflow management');
 
@@ -189,37 +230,17 @@ ${today}
     .description('Archive milestone and mark as complete')
     .action(() => {
       const projectRoot = findProjectRoot() ?? process.cwd();
-      const boardDir = path.join(projectRoot, 'MPGA', 'board');
-      const tasksDir = path.join(boardDir, 'tasks');
-      const board = loadBoard(boardDir);
+      const result = completeActiveMilestone(projectRoot);
 
-      if (!board.milestone) {
+      if (!result.ok) {
         log.error('No active milestone to complete.');
         process.exit(1);
       }
 
-      const milestoneDir = path.join(projectRoot, 'MPGA', 'milestones', board.milestone);
-      const today = new Date().toISOString().split('T')[0];
+      const { milestoneSlug: slug } = result;
 
-      // Write SUMMARY.md
-      recalcStats(board, tasksDir);
-      fs.writeFileSync(
-        path.join(milestoneDir, 'SUMMARY.md'),
-        `# ${board.milestone} — Summary
-
-## Completed: ${today}
-
-## Stats
-- Tasks completed: ${board.stats.done}
-- Evidence links produced: ${board.stats.evidence_produced}
-
-## Outcome
-(describe what was delivered)
-`,
-      );
-
-      log.success(`Milestone '${board.milestone}' marked complete.`);
-      log.dim(`  Summary saved to MPGA/milestones/${board.milestone}/SUMMARY.md`);
+      log.success(`Milestone '${slug}' marked complete.`);
+      log.dim(`  Summary saved to MPGA/milestones/${slug}/SUMMARY.md`);
       log.dim('  Run `mpga board archive` to archive done tasks.');
     });
 }

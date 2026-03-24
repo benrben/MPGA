@@ -67,4 +67,9 @@ describe('renderIndexMd', () => {
     expect(md).toContain('(Add your project conventions here)');
     expect(md).toContain('| src/heavy.ts | (describe role) |');
   });
+
+  it('shows evidence coverage percentage from sync/drift ratio', () => {
+    const md = renderIndexMd(scanTwoFiles, DEFAULT_CONFIG, [minimalScope], null, 0.73);
+    expect(md).toContain('- **Evidence coverage:** 73%');
+  });
 });

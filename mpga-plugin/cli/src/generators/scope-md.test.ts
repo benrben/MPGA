@@ -150,6 +150,11 @@ describe('renderScopeMd', () => {
     rulesAndConstraints: [],
   };
 
+  it('emits Health line for scope list parsing', () => {
+    const md = renderScopeMd(baseScope, '/proj');
+    expect(md).toMatch(/\*\*Health:\*\* ✓ fresh/);
+  });
+
   it('shows TODO when no module summary is available', () => {
     const md = renderScopeMd(baseScope, '/proj');
     expect(md).toContain('<!-- TODO: Tell the people what this GREAT module does');

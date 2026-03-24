@@ -3,29 +3,63 @@ import path from 'path';
 import { EvidenceLink, parseEvidenceLinks } from './parser.js';
 import { verifyAllLinks } from './resolver.js';
 
+/**
+ * Drift report for a single scope file, summarizing evidence link health
+ * and listing any stale or healed items found during verification.
+ */
 export interface ScopeDriftReport {
+  /** Name of the scope (derived from the filename without extension) */
   scope: string;
+  /** Absolute path to the scope markdown file */
   scopePath: string;
+  /** Total number of evidence links checked in this scope */
   totalLinks: number;
+  /** Number of links whose targets were found exactly as specified */
   validLinks: number;
+  /** Number of links that were stale but could be auto-healed via AST lookup */
   healedLinks: number;
+  /** Number of links whose targets could not be resolved */
   staleLinks: number;
+  /** Health percentage: (valid + healed) / total * 100 */
   healthPct: number;
+  /** Links that could not be resolved, with the reason for failure */
   staleItems: Array<{ link: EvidenceLink; reason: string }>;
+  /** Links that were healed, with updated line ranges */
   healedItems: Array<{ link: EvidenceLink; newStart: number; newEnd: number }>;
 }
 
+/**
+ * Aggregate drift report across all scopes in a project, including
+ * overall health metrics and CI pass/fail status.
+ */
 export interface DriftReport {
+  /** ISO timestamp of when the drift check was performed */
   timestamp: string;
+  /** Absolute path to the project root directory */
   projectRoot: string;
+  /** Per-scope drift reports */
   scopes: ScopeDriftReport[];
+  /** Overall health percentage across all scopes */
   overallHealthPct: number;
+  /** Total number of evidence links across all scopes */
   totalLinks: number;
+  /** Total number of valid (including healed) links across all scopes */
   validLinks: number;
+  /** Whether the overall health meets or exceeds the CI threshold */
   ciPass: boolean;
+  /** The minimum health percentage required for CI to pass */
   ciThreshold: number;
 }
 
+/**
+ * Runs a drift check across all scope files in the project, verifying that
+ * evidence links still point to valid code locations.
+ *
+ * @param projectRoot - Absolute path to the project root directory
+ * @param ciThreshold - Minimum health percentage (0-100) required for CI to pass
+ * @param scopeFilter - Optional scope name to limit the check to a single scope file
+ * @returns A DriftReport containing per-scope results and aggregate health metrics
+ */
 export async function runDriftCheck(
   projectRoot: string,
   ciThreshold: number,
@@ -121,7 +155,13 @@ export async function runDriftCheck(
   };
 }
 
-// Heal stale links by updating line ranges based on AST resolution
+/**
+ * Heals stale evidence links in a scope file by replacing their line ranges
+ * with updated values determined by AST resolution.
+ *
+ * @param report - The ScopeDriftReport containing healed items with updated line ranges
+ * @returns An object with `healed` (number of links successfully updated) and `content` (the updated file content)
+ */
 export function healScopeFile(report: ScopeDriftReport): { healed: number; content: string } {
   const content = fs.readFileSync(report.scopePath, 'utf-8');
   let updated = content;

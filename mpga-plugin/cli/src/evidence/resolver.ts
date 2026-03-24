@@ -3,6 +3,17 @@ import path from 'path';
 import { EvidenceLink } from './parser.js';
 import { findSymbol, verifyRange } from './ast.js';
 
+/** Confidence when only the file exists (no symbol or line range). */
+const CONFIDENCE_FILE_ONLY = 0.8;
+/** Confidence when the exact line range is verified. */
+const CONFIDENCE_EXACT_RANGE = 1.0;
+/** Confidence when the symbol is found via AST lookup. */
+const CONFIDENCE_AST_ANCHOR = 0.9;
+/** Confidence when the symbol is found via fuzzy text search. */
+const CONFIDENCE_FUZZY_MATCH = 0.6;
+/** Number of lines to include after a fuzzy match for the end-line estimate. */
+const FUZZY_MATCH_LINE_LOOKAHEAD = 20;
+
 export type ResolutionStatus = 'valid' | 'healed' | 'stale';
 
 export interface ResolvedEvidence {
@@ -25,7 +36,7 @@ export function resolveEvidence(link: EvidenceLink, projectRoot: string): Resolv
 
   // Step 0: File-only link (no symbol, no line range) — file exists is enough
   if (!link.symbol && !link.startLine && !link.endLine) {
-    return { status: 'valid', confidence: 0.8 };
+    return { status: 'valid', confidence: CONFIDENCE_FILE_ONLY };
   }
 
   // Step 1: Try exact line range
@@ -38,7 +49,12 @@ export function resolveEvidence(link: EvidenceLink, projectRoot: string): Resolv
       projectRoot,
     );
     if (rangeValid) {
-      return { status: 'valid', confidence: 1.0, startLine: link.startLine, endLine: link.endLine };
+      return {
+        status: 'valid',
+        confidence: CONFIDENCE_EXACT_RANGE,
+        startLine: link.startLine,
+        endLine: link.endLine,
+      };
     }
   }
 
@@ -49,7 +65,7 @@ export function resolveEvidence(link: EvidenceLink, projectRoot: string): Resolv
       const healed = link.startLine !== location.startLine || link.endLine !== location.endLine;
       return {
         status: healed ? 'healed' : 'valid',
-        confidence: 0.9,
+        confidence: CONFIDENCE_AST_ANCHOR,
         startLine: location.startLine,
         endLine: location.endLine,
         healedFrom: healed
@@ -68,9 +84,9 @@ export function resolveEvidence(link: EvidenceLink, projectRoot: string): Resolv
         if (lines[i].includes(link.symbol)) {
           return {
             status: 'healed',
-            confidence: 0.6,
+            confidence: CONFIDENCE_FUZZY_MATCH,
             startLine: i + 1,
-            endLine: Math.min(i + 20, lines.length),
+            endLine: Math.min(i + FUZZY_MATCH_LINE_LOOKAHEAD, lines.length),
             healedFrom: `fuzzy match at line ${i + 1} (was ${link.startLine}-${link.endLine})`,
           };
         }

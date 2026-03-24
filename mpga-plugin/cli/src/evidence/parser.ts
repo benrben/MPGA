@@ -1,16 +1,38 @@
+/**
+ * Discriminated type representing the verification status of an evidence link.
+ * - `'valid'` — link target exists and matches
+ * - `'unknown'` — unverified placeholder with a description
+ * - `'stale'` — link target could not be found, tagged with a date
+ * - `'deprecated'` — link target is explicitly marked as deprecated
+ */
 export type EvidenceLinkType = 'valid' | 'unknown' | 'stale' | 'deprecated';
 
+/**
+ * Parsed representation of an evidence link extracted from markdown content.
+ * Evidence links tie prose claims to specific code locations.
+ */
 export interface EvidenceLink {
+  /** The original raw text of the evidence link as it appeared in the source */
   raw: string;
+  /** The verification status of this link */
   type: EvidenceLinkType;
+  /** Relative file path the link points to */
   filepath?: string;
+  /** Start line number of the referenced code range */
   startLine?: number;
+  /** End line number of the referenced code range */
   endLine?: number;
+  /** Symbol name (function, class, etc.) referenced by this link */
   symbol?: string;
+  /** The kind of symbol referenced */
   symbolType?: 'function' | 'class' | 'method' | 'variable' | 'type';
+  /** Human-readable description (used for 'unknown' type links) */
   description?: string;
+  /** ISO date string indicating when the link was marked stale */
   staleDate?: string;
+  /** ISO date string of the last successful verification */
   lastVerified?: string;
+  /** Confidence score from 0 to 1 indicating trust in this link's accuracy */
   confidence: number;
 }
 
@@ -34,6 +56,13 @@ function cleanParsed(s: string): string {
     .trim();
 }
 
+/**
+ * Parses a single line of text to extract an evidence link, if present.
+ * Supports [E], [Unknown], [Stale:DATE], and [Deprecated] link formats.
+ *
+ * @param line - A single line of text that may contain an evidence link
+ * @returns The parsed EvidenceLink, or null if the line does not contain a recognized evidence link
+ */
 export function parseEvidenceLink(line: string): EvidenceLink | null {
   line = line.trim();
 
@@ -85,6 +114,13 @@ export function parseEvidenceLink(line: string): EvidenceLink | null {
   return null;
 }
 
+/**
+ * Parses all evidence links from a block of markdown content by splitting
+ * it into lines and extracting any recognized evidence link from each line.
+ *
+ * @param content - Multi-line markdown content to parse
+ * @returns An array of all parsed EvidenceLink objects found in the content
+ */
 export function parseEvidenceLinks(content: string): EvidenceLink[] {
   return content
     .split('\n')
@@ -92,6 +128,13 @@ export function parseEvidenceLinks(content: string): EvidenceLink[] {
     .filter((l): l is EvidenceLink => l !== null);
 }
 
+/**
+ * Formats an EvidenceLink back into its canonical string representation,
+ * suitable for writing into markdown scope files.
+ *
+ * @param link - The EvidenceLink to format
+ * @returns The formatted evidence link string (e.g., `[E] src/foo.ts:10-20 :: bar()`)
+ */
 export function formatEvidenceLink(link: EvidenceLink): string {
   if (link.type === 'unknown') return `[Unknown] ${link.description ?? ''}`;
   if (link.type === 'stale') {
@@ -113,6 +156,13 @@ export function formatEvidenceLink(link: EvidenceLink): string {
   return s;
 }
 
+/**
+ * Computes aggregate statistics for a collection of evidence links,
+ * counting links by type and calculating the overall health percentage.
+ *
+ * @param links - Array of EvidenceLink objects to compute statistics for
+ * @returns An object with counts by type (`total`, `valid`, `stale`, `unknown`, `deprecated`) and `healthPct` (0-100)
+ */
 export function evidenceStats(links: EvidenceLink[]): {
   total: number;
   valid: number;

@@ -1,0 +1,1 @@
+cd mpga-plugin/cli && npx lint-staged

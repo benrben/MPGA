@@ -30,6 +30,11 @@ jobs:
         run: npm ci
         working-directory: mpga-plugin/cli
 
+      - name: Security audit
+        run: npm audit --audit-level=high
+        working-directory: mpga-plugin/cli
+        continue-on-error: true
+
       - name: Type check
         run: npm run typecheck
         working-directory: mpga-plugin/cli

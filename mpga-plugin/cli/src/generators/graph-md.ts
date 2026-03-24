@@ -3,6 +3,11 @@ import path from 'path';
 import { ScanResult } from '../core/scanner.js';
 import { MpgaConfig } from '../core/config.js';
 
+/** Maximum number of orphan files to include in the graph output. */
+const MAX_ORPHAN_FILES = 10;
+/** Maximum number of dependencies to render in the Mermaid diagram. */
+const MAX_MERMAID_DEPENDENCIES = 30;
+
 export interface Dependency {
   from: string;
   to: string;
@@ -116,18 +121,14 @@ export async function buildGraph(scanResult: ScanResult, config?: MpgaConfig): P
     }
   }
 
-  // Find orphans (files with no imports and no importers)
+  // Orphan modules: no outgoing or incoming edges in the module graph
   const hasImporters = new Set(dependencies.map((d) => d.to));
   const hasImports = new Set(dependencies.map((d) => d.from));
+  const orphanedModules = [...modules].filter((m) => !hasImporters.has(m) && !hasImports.has(m));
+  const orphaned = new Set(orphanedModules);
   const orphans = files
-    .filter((f) => {
-      const mod = f.filepath; // use exact filepath for orphan detection
-      return (
-        !hasImporters.has(path.basename(mod, path.extname(mod))) &&
-        !hasImports.has(path.basename(mod, path.extname(mod)))
-      );
-    })
-    .slice(0, 10) // cap to avoid huge lists
+    .filter((f) => orphaned.has(getModuleName(f.filepath, scopeDepth)))
+    .slice(0, MAX_ORPHAN_FILES)
     .map((f) => f.filepath);
 
   return { dependencies, circular, orphans, modules: [...modules] };
@@ -166,7 +167,7 @@ export function renderGraphMd(graph: GraphData): string {
     lines.push('    (no dependencies)');
   } else {
     const seen = new Set<string>();
-    for (const { from, to } of graph.dependencies.slice(0, 30)) {
+    for (const { from, to } of graph.dependencies.slice(0, MAX_MERMAID_DEPENDENCIES)) {
       const key = `${from}-->${to}`;
       if (!seen.has(key)) {
         seen.add(key);

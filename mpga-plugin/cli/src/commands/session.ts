@@ -6,6 +6,17 @@ import { findProjectRoot } from '../core/config.js';
 import { loadBoard, recalcStats } from '../board/board.js';
 import { loadAllTasks } from '../board/task.js';
 
+/** Approximate number of tokens per line of markdown/code. */
+const TOKENS_PER_LINE = 4;
+/** Default context window size in tokens (e.g. Claude 200K). */
+const CONTEXT_WINDOW_TOKENS = 200_000;
+/** Column width for budget display name padding. */
+const BUDGET_NAME_PAD_WIDTH = 30;
+/** Context budget percentage below which scope usage is healthy. */
+const BUDGET_HEALTHY_PCT = 10;
+/** Context budget percentage above which scope usage is getting full. */
+const BUDGET_FULL_PCT = 30;
+
 function getSessionsDir(projectRoot: string): string {
   return path.join(projectRoot, 'MPGA', 'sessions');
 }
@@ -179,17 +190,22 @@ ${
       log.header('Context Budget');
       let total = 0;
       for (const e of estimates) {
-        console.log(`  ${e.name.padEnd(30)} ${String(e.lines).padStart(5)} lines  [${e.tier}]`);
+        console.log(
+          `  ${e.name.padEnd(BUDGET_NAME_PAD_WIDTH)} ${String(e.lines).padStart(5)} lines  [${e.tier}]`,
+        );
         total += e.lines;
       }
       console.log('');
-      console.log(`  Total MPGA context:  ${total} lines (~${Math.round(total * 4)} tokens)`);
-      const pct = Math.round(((total * 4) / 200000) * 100);
-      console.log(`  % of 200K window:    ~${pct}%`);
+      console.log(
+        `  Total MPGA context:  ${total} lines (~${Math.round(total * TOKENS_PER_LINE)} tokens)`,
+      );
+      const pct = Math.round(((total * TOKENS_PER_LINE) / CONTEXT_WINDOW_TOKENS) * 100);
+      console.log(`  % of ${CONTEXT_WINDOW_TOKENS / 1000}K window:    ~${pct}%`);
       console.log('');
 
-      if (pct < 10) log.success(`Healthy — room for more scope docs`);
-      else if (pct < 30) log.info(`Getting full — consider using fewer scope docs per session`);
+      if (pct < BUDGET_HEALTHY_PCT) log.success(`Healthy — room for more scope docs`);
+      else if (pct < BUDGET_FULL_PCT)
+        log.info(`Getting full — consider using fewer scope docs per session`);
       else log.warn(`Context heavy — consider running /mpga:handoff and starting fresh`);
     });
 }

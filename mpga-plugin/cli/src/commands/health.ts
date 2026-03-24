@@ -7,6 +7,13 @@ import { findProjectRoot, loadConfig } from '../core/config.js';
 import { runDriftCheck } from '../evidence/drift.js';
 import { BoardState, loadBoard, recalcStats } from '../board/board.js';
 
+/** Evidence health percentage at or above which status is considered good. */
+const EVIDENCE_HEALTH_GOOD_PCT = 80;
+/** Health percentage at or above which the project earns an A grade. */
+const GRADE_A_THRESHOLD = 95;
+/** Multiplier applied to CI threshold to determine the C grade cutoff. */
+const GRADE_C_MULTIPLIER = 0.7;
+
 export function registerHealth(program: Command): void {
   program
     .command('health')
@@ -67,7 +74,7 @@ export function registerHealth(program: Command): void {
 
       // ── Evidence ──
       console.log(
-        `  ${statusBadge(driftReport.overallHealthPct >= 80, 'Evidence health')}   ${driftReport.overallHealthPct}%  ${chalk.dim(`(CI threshold: ${config.drift.ciThreshold}%)`)}`,
+        `  ${statusBadge(driftReport.overallHealthPct >= EVIDENCE_HEALTH_GOOD_PCT, 'Evidence health')}   ${driftReport.overallHealthPct}%  ${chalk.dim(`(CI threshold: ${config.drift.ciThreshold}%)`)}`,
       );
       console.log(
         `    ${progressBar(driftReport.validLinks, driftReport.totalLinks)}  ${chalk.dim(`${driftReport.validLinks}/${driftReport.totalLinks} links`)}`,
@@ -76,7 +83,8 @@ export function registerHealth(program: Command): void {
       if (opts.verbose && driftReport.scopes.length > 0) {
         log.blank();
         for (const scope of driftReport.scopes) {
-          const icon = scope.healthPct >= 80 ? chalk.green('✓') : chalk.yellow('⚠');
+          const icon =
+            scope.healthPct >= EVIDENCE_HEALTH_GOOD_PCT ? chalk.green('✓') : chalk.yellow('⚠');
           console.log(
             `    ${icon} ${chalk.white(scope.scope.padEnd(20))} ${scope.healthPct}% ${chalk.dim(`(${scope.validLinks}/${scope.totalLinks})`)}`,
           );
@@ -122,9 +130,9 @@ export function registerHealth(program: Command): void {
 }
 
 function computeGrade(healthPct: number, threshold: number): string {
-  if (healthPct >= 95) return 'A';
+  if (healthPct >= GRADE_A_THRESHOLD) return 'A';
   if (healthPct >= threshold) return 'B';
-  if (healthPct >= threshold * 0.7) return 'C';
+  if (healthPct >= threshold * GRADE_C_MULTIPLIER) return 'C';
   return 'D';
 }
 

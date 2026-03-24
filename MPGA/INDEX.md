@@ -2,24 +2,24 @@
 
 ## Identity
 - **Type:** TypeScript
-- **Size:** ~6,540 lines across 41 files
-- **Languages:** typescript (99%), shell (1%), javascript (0%)
-- **Last sync:** 2026-03-24T00:21:46.892Z
-- **Evidence coverage:** 0% (target: 80%)
+- **Size:** ~11,017 lines across 61 files
+- **Languages:** typescript (96%), javascript (3%), shell (1%)
+- **Last sync:** 2026-03-24T12:59:43.941Z
+- **Evidence coverage:** 100% (target: 80%)
 
 ## Key files
 | File | Role | Evidence |
 |------|------|----------|
-| mpga-plugin/cli/src/commands/export.ts | Multi-target export (Claude, Cursor, Codex, Gemini, Antigravity): agents, skills, rules, AGENTS.md. | [E] mpga-plugin/cli/src/commands/export.ts:1-50 |
+| mpga-plugin/cli/src/commands/init.test.ts | Tests init, config, status, and health CLI commands. | [E] mpga-plugin/cli/src/commands/init.test.ts:1-50 |
+| mpga-plugin/cli/src/commands/board-evidence-drift.test.ts | Tests board CRUD, evidence verify/add, and drift detection commands. | [E] mpga-plugin/cli/src/commands/board-evidence-drift.test.ts:1-50 |
 | mpga-plugin/cli/src/generators/scope-md.ts | Builds per-scope markdown from scan + graph (symbols, files, evidence table). | [E] mpga-plugin/cli/src/generators/scope-md.ts:1-50 |
+| mpga-plugin/cli/src/evidence/ast.test.ts | Tests language detection, symbol extraction, lookup, and range verification. | [E] mpga-plugin/cli/src/evidence/ast.test.ts:1-50 |
+| mpga-plugin/cli/src/evidence/drift.test.ts | Tests drift checking and scope file healing against stale evidence links. | [E] mpga-plugin/cli/src/evidence/drift.test.ts:1-50 |
+| mpga-plugin/cli/src/commands/session-export.test.ts | Tests session handoff/log/resume/budget and export --claude commands. | [E] mpga-plugin/cli/src/commands/session-export.test.ts:1-50 |
 | mpga-plugin/cli/src/commands/board.ts | Board CLI: columns, tasks, `board show`, moves, Markdown board view. | [E] mpga-plugin/cli/src/commands/board.ts:1-50 |
-| mpga-plugin/cli/src/generators/scope-md.test.ts | (describe role) | [E] mpga-plugin/cli/src/generators/scope-md.test.ts:1-50 |
-| mpga-plugin/cli/src/commands/milestone.ts | Milestone lifecycle under `MPGA/milestones` and board linkage. | [E] mpga-plugin/cli/src/commands/milestone.ts:1-50 |
-| mpga-plugin/cli/src/commands/scope.ts | Scope subcommands: list, show, split suggestions, evidence stats. | [E] mpga-plugin/cli/src/commands/scope.ts:1-50 |
-| mpga-plugin/cli/src/commands/session.ts | Session handoff and context export under `MPGA/sessions`. | [E] mpga-plugin/cli/src/commands/session.ts:1-50 |
-| mpga-plugin/cli/src/core/config.ts | Loads `mpga.config.json`, defaults, deep merge, project root discovery. | [E] mpga-plugin/cli/src/core/config.ts:1-50 |
-| mpga-plugin/cli/src/board/board.ts | Board JSON state: load/save, columns, stats, task IDs. | [E] mpga-plugin/cli/src/board/board.ts:1-50 |
-| mpga-plugin/cli/src/commands/init.ts | Bootstraps `MPGA/` tree, templates for INDEX and GRAPH. | [E] mpga-plugin/cli/src/commands/init.ts:1-50 |
+| mpga-plugin/cli/src/core/scanner.test.ts | Tests language detection, line counting, scan, and project type detection. | [E] mpga-plugin/cli/src/core/scanner.test.ts:1-50 |
+| mpga-plugin/cli/src/commands/scan-sync-graph-scope.test.ts | Tests scan, sync, graph show, and scope add/remove/list commands. | [E] mpga-plugin/cli/src/commands/scan-sync-graph-scope.test.ts:1-50 |
+| mpga-plugin/cli/src/commands/export/antigravity.ts | Exports MPGA context to Gemini/Antigravity rules, skills, and GEMINI.md. | [E] mpga-plugin/cli/src/commands/export/antigravity.ts:1-50 |
 
 ## Conventions
 - Read `MPGA/INDEX.md` before substantive work; cite `[E] path:lines` when stating how code behaves.
@@ -41,11 +41,11 @@
 | Scope | Status | Evidence links | Last verified |
 |-------|--------|---------------|---------------|
 | mpga-plugin | ✓ fresh | 0/1 | 2026-03-24 |
+| commands | ✓ fresh | 0/31 | 2026-03-24 |
 | board | ✓ fresh | 0/20 | 2026-03-24 |
-| commands | ✓ fresh | 0/15 | 2026-03-24 |
-| core | ✓ fresh | 0/22 | 2026-03-24 |
-| evidence | ✓ fresh | 0/20 | 2026-03-24 |
-| generators | ✓ fresh | 0/22 | 2026-03-24 |
+| core | ✓ fresh | 0/24 | 2026-03-24 |
+| evidence | ✓ fresh | 0/49 | 2026-03-24 |
+| generators | ✓ fresh | 0/25 | 2026-03-24 |
 
 ## Active milestone
 - (none)

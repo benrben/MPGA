@@ -1,3 +1,8 @@
+/** Number of top files (by line count) to list in the Key Files table. */
+const TOP_FILES_COUNT = 10;
+/** Maximum lines to reference in an evidence link for a key file. */
+const KEY_FILE_EVIDENCE_MAX_LINES = 50;
+
 import { ScanResult, detectProjectType } from '../core/scanner.js';
 import { MpgaConfig } from '../core/config.js';
 import { ScopeInfo } from './scope-md.js';
@@ -36,10 +41,14 @@ export function renderIndexMd(
   lines.push('| File | Role | Evidence |');
   lines.push('|------|------|----------|');
   const roleMap = config.knowledgeLayer?.keyFileRoles ?? {};
-  const topFiles = [...scanResult.files].sort((a, b) => b.lines - a.lines).slice(0, 10);
+  const topFiles = [...scanResult.files]
+    .sort((a, b) => b.lines - a.lines)
+    .slice(0, TOP_FILES_COUNT);
   for (const f of topFiles) {
     const role = roleMap[f.filepath] ?? '(describe role)';
-    lines.push(`| ${f.filepath} | ${role} | [E] ${f.filepath}:1-${Math.min(50, f.lines)} |`);
+    lines.push(
+      `| ${f.filepath} | ${role} | [E] ${f.filepath}:1-${Math.min(KEY_FILE_EVIDENCE_MAX_LINES, f.lines)} |`,
+    );
   }
   lines.push('');
 

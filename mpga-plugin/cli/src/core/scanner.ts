@@ -45,6 +45,9 @@ const LANGUAGE_MAP: Record<string, string> = {
   toml: 'toml',
 };
 
+/** Maximum directory depth for shallow scans (deep scans use Infinity). */
+const SHALLOW_SCAN_MAX_DEPTH = 12;
+
 const ENTRY_PATTERNS = [
   'src/index.*',
   'src/main.*',
@@ -76,15 +79,15 @@ export async function scan(
 ): Promise<ScanResult> {
   const ignorePatterns = ignore.map((p) => `**/${p}/**`).concat(ignore);
 
-  const globs = deep
-    ? ['**/*.{ts,tsx,js,jsx,mjs,cjs,py,go,rs,java,cs,rb,php,swift,kt,sh,sql}']
-    : ['**/*.{ts,tsx,js,jsx,mjs,cjs,py,go,rs,java,cs,rb,php,swift,kt,sh,sql}'];
+  const globs = ['**/*.{ts,tsx,js,jsx,mjs,cjs,py,go,rs,java,cs,rb,php,swift,kt,sh,sql}'];
 
   const rawFiles = await fg(globs, {
     cwd: projectRoot,
     ignore: ignorePatterns,
     onlyFiles: true,
     absolute: false,
+    /** Shallow scan: cap directory depth; deep scan walks the full tree. */
+    deep: deep ? Infinity : SHALLOW_SCAN_MAX_DEPTH,
   });
 
   const files: FileInfo[] = rawFiles.map((rel) => {
@@ -147,17 +150,4 @@ export function detectProjectType(scanResult: ScanResult): string {
   if (languages.rust) return 'Rust';
   if (languages.java) return 'Java';
   return 'Unknown';
-}
-
-export function getTopLanguage(scanResult: ScanResult): string {
-  const { languages } = scanResult;
-  let topLang = 'unknown';
-  let topLines = 0;
-  for (const [lang, stats] of Object.entries(languages)) {
-    if (stats.lines > topLines) {
-      topLines = stats.lines;
-      topLang = lang;
-    }
-  }
-  return topLang;
 }

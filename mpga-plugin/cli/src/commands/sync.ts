@@ -7,6 +7,7 @@ import { scan } from '../core/scanner.js';
 import { buildGraph, renderGraphMd } from '../generators/graph-md.js';
 import { groupIntoScopes, renderScopeMd } from '../generators/scope-md.js';
 import { renderIndexMd } from '../generators/index-md.js';
+import { runDriftCheck } from '../evidence/drift.js';
 
 export function registerSync(program: Command): void {
   program
@@ -70,7 +71,11 @@ export function registerSync(program: Command): void {
         if (mDirs.length > 0) activeMilestone = mDirs[mDirs.length - 1];
       }
 
-      const indexMd = renderIndexMd(scanResult, config, scopes, activeMilestone, 0);
+      const driftReport = await runDriftCheck(projectRoot, config.drift.ciThreshold);
+      const evidenceCoverage =
+        driftReport.totalLinks === 0 ? 0 : driftReport.validLinks / driftReport.totalLinks;
+
+      const indexMd = renderIndexMd(scanResult, config, scopes, activeMilestone, evidenceCoverage);
       fs.writeFileSync(path.join(mpgaDir, 'INDEX.md'), indexMd);
       log.success('INDEX.md generated');
 
