@@ -5,12 +5,12 @@
 mpga-plugin → core
 mpga-plugin → commands
 board → core
-generators → core
-generators → mpga-plugin
 commands → core
 commands → board
 commands → evidence
 commands → generators
+generators → core
+generators → mpga-plugin
 
 ## Circular dependencies
 (none detected)
@@ -33,10 +33,10 @@ graph TD
     mpga_plugin --> core
     mpga_plugin --> commands
     board --> core
-    generators --> core
-    generators --> mpga_plugin
     commands --> core
     commands --> board
     commands --> evidence
     commands --> generators
+    generators --> core
+    generators --> mpga_plugin
 ```

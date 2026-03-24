@@ -23,4 +23,4 @@ Read MPGA/INDEX.md for the full scope registry and agent trigger table.
 ## Active milestone
 - (none)
 
-Generated: 2026-03-23T17:50:49.813Z
+Generated: 2026-03-24T00:22:09.852Z

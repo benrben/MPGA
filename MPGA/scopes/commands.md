@@ -2,45 +2,45 @@
 
 ## Summary
 
-The **commands** module contains 14 files (3,262 lines).
+The **commands** module — TREMENDOUS — 14 files, 3,281 lines of the finest code you've ever seen. Believe me.
 
-<!-- TODO: Describe what this area does and what is intentionally out of scope -->
+<!-- TODO: Tell the people what this GREAT module does. What's in, what's out. Keep it simple. MPGA! -->
 
 ## Where to start in code
 
-Main entry points — open these first to understand this behavior:
+These are your MAIN entry points — the best, the most important. Open them FIRST:
 
 - [E] `mpga-plugin/cli/src/commands/export.ts`
 
 ## Context / stack / skills
 
 - **Languages:** typescript
-- **Symbol types:** function
+- **Symbol types:** function, const
 - **Frameworks:** Commander
 
 ## Who and what triggers it
 
-<!-- TODO: Users, systems, schedules, or APIs that kick off this behavior -->
+<!-- TODO: Who triggers this? A lot of very important callers, believe me. Find them. -->
 
-**Called by scopes:**
+**Called by these GREAT scopes (they need us, tremendously):**
 
 - ← mpga-plugin
 
 ## What happens
 
-<!-- TODO: Describe the flow in plain language: inputs, main steps, outputs or side effects -->
+<!-- TODO: What happens here? Inputs, steps, outputs. Keep it simple. Even Sleepy Copilot could understand. -->
 
 ## Rules and edge cases
 
-<!-- TODO: Constraints, validation, permissions, failures, retries, empty states -->
+<!-- TODO: The guardrails. Validation, permissions, error handling — everything that keeps this code GREAT. -->
 
 ## Concrete examples
 
-<!-- TODO: A few real scenarios ("when X happens, Y results") -->
+<!-- TODO: REAL examples. "When X happens, Y happens." Simple. Powerful. Like a deal. -->
 
 ## UI
 
-<!-- TODO: Screens or flows if relevant — intent, layout, interactions, data shown/submitted. Remove this section if not applicable. -->
+<!-- TODO: Screens, flows, the beautiful UI. No UI? Cut this section. We don't keep dead weight. -->
 
 ## Navigation
 
@@ -48,9 +48,9 @@ Main entry points — open these first to understand this behavior:
 
 - [mpga-plugin](./mpga-plugin.md)
 - [board](./board.md)
+- [core](./core.md)
 - [evidence](./evidence.md)
 - [generators](./generators.md)
-- [core](./core.md)
 
 **Parent:** [INDEX.md](../INDEX.md)
 
@@ -67,7 +67,7 @@ Main entry points — open these first to understand this behavior:
 
 - ← [mpga-plugin](./mpga-plugin.md)
 
-<!-- TODO: Shared concepts or data with other scopes -->
+<!-- TODO: What deals does this scope make with other scopes? Document them. -->
 
 ## Diagram
 
@@ -82,7 +82,7 @@ graph LR
 
 ## Traces
 
-<!-- TODO: Step-by-step paths through the system. Use the table format below:
+<!-- TODO: Step-by-step traces. Follow the code like a WINNER follows a deal. Use this table:
 
 | Step | Layer | What happens | Evidence |
 |------|-------|-------------|----------|
@@ -98,6 +98,7 @@ graph LR
 | `registerDrift` (function) | [E] mpga-plugin/cli/src/commands/drift.ts :: registerDrift |
 | `registerEvidence` (function) | [E] mpga-plugin/cli/src/commands/evidence.ts :: registerEvidence |
 | `registerExport` (function) | [E] mpga-plugin/cli/src/commands/export.ts :: registerExport |
+| `merged` (const) | [E] mpga-plugin/cli/src/commands/export.ts :: merged |
 | `registerGraph` (function) | [E] mpga-plugin/cli/src/commands/graph.ts :: registerGraph |
 | `registerHealth` (function) | [E] mpga-plugin/cli/src/commands/health.ts :: registerHealth |
 | `registerInit` (function) | [E] mpga-plugin/cli/src/commands/init.ts :: registerInit |
@@ -114,7 +115,7 @@ graph LR
 - `mpga-plugin/cli/src/commands/config.ts` (78 lines, typescript)
 - `mpga-plugin/cli/src/commands/drift.ts` (107 lines, typescript)
 - `mpga-plugin/cli/src/commands/evidence.ts` (167 lines, typescript)
-- `mpga-plugin/cli/src/commands/export.ts` (1169 lines, typescript)
+- `mpga-plugin/cli/src/commands/export.ts` (1188 lines, typescript)
 - `mpga-plugin/cli/src/commands/graph.ts` (67 lines, typescript)
 - `mpga-plugin/cli/src/commands/health.ts` (139 lines, typescript)
 - `mpga-plugin/cli/src/commands/init.ts` (195 lines, typescript)
@@ -127,16 +128,16 @@ graph LR
 
 ## Deeper splits
 
-<!-- TODO: Pointers to smaller sub-topic scopes if this capability is large enough to split -->
+<!-- TODO: Too big? Split it. Make each piece LEAN and GREAT. -->
 
 ## Confidence and notes
 
-- **Confidence:** low — auto-generated, not yet verified
-- **Evidence coverage:** 0/14 verified
-- **Last verified:** 2026-03-23
+- **Confidence:** LOW (for now) — auto-generated, not yet verified. But it's going to be PERFECT.
+- **Evidence coverage:** 0/15 verified
+- **Last verified:** 2026-03-24
 - **Drift risk:** unknown
-- <!-- TODO: Note anything unknown, ambiguous, or still to verify -->
+- <!-- TODO: Note anything unknown or ambiguous. We don't hide problems — we FIX them. -->
 
 ## Change history
 
-- 2026-03-23: Initial scope generation via `mpga sync`
+- 2026-03-24: Initial scope generation via `mpga sync` — Making this scope GREAT!

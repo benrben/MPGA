@@ -390,7 +390,7 @@ export function renderScopeMd(scope: ScopeInfo, _projectRoot: string): string {
   lines.push(`# Scope: ${scope.name}`, '');
   lines.push('## Summary', '');
   lines.push(
-    `The **${scope.name}** module contains ${scope.files.length} files (${scope.files.reduce((s, f) => s + f.lines, 0).toLocaleString()} lines).`,
+    `The **${scope.name}** module — TREMENDOUS — ${scope.files.length} files, ${scope.files.reduce((s, f) => s + f.lines, 0).toLocaleString()} lines of the finest code you've ever seen. Believe me.`,
   );
   lines.push('');
   if (scope.moduleSummaries.length > 0) {
@@ -400,7 +400,7 @@ export function renderScopeMd(scope: ScopeInfo, _projectRoot: string): string {
     lines.push('');
   } else {
     lines.push(
-      '<!-- TODO: Describe what this area does and what is intentionally out of scope -->',
+      '<!-- TODO: Tell the people what this GREAT module does. What\'s in, what\'s out. Keep it simple. MPGA! -->',
     );
     lines.push('');
   }
@@ -408,12 +408,12 @@ export function renderScopeMd(scope: ScopeInfo, _projectRoot: string): string {
   // ── Where to start in code ──
   lines.push('## Where to start in code', '');
   if (scope.entryPoints.length > 0) {
-    lines.push('Main entry points — open these first to understand this behavior:', '');
+    lines.push('These are your MAIN entry points — the best, the most important. Open them FIRST:', '');
     for (const ep of scope.entryPoints) {
       lines.push(`- [E] \`${ep}\``);
     }
   } else {
-    lines.push('- <!-- TODO: Identify the main entry points for this scope -->');
+    lines.push('- <!-- TODO: Find the main entry points. The best ones. The ones everybody should be reading. -->');
   }
   lines.push('');
 
@@ -431,15 +431,15 @@ export function renderScopeMd(scope: ScopeInfo, _projectRoot: string): string {
   if (scope.detectedFrameworks.length > 0) {
     lines.push(`- **Frameworks:** ${scope.detectedFrameworks.join(', ')}`);
   } else {
-    lines.push('- <!-- TODO: Add relevant frameworks, integrations, and expertise areas -->');
+    lines.push('- <!-- TODO: List the frameworks. We use only the BEST. -->');
   }
   lines.push('');
 
   // ── Who and what triggers it ──
   lines.push('## Who and what triggers it', '');
-  lines.push('<!-- TODO: Users, systems, schedules, or APIs that kick off this behavior -->', '');
+  lines.push('<!-- TODO: Who triggers this? A lot of very important callers, believe me. Find them. -->', '');
   if (scope.reverseDeps.length > 0) {
-    lines.push('**Called by scopes:**', '');
+    lines.push('**Called by these GREAT scopes (they need us, tremendously):**', '');
     for (const rd of scope.reverseDeps) {
       lines.push(`- ← ${rd}`);
     }
@@ -455,7 +455,7 @@ export function renderScopeMd(scope: ScopeInfo, _projectRoot: string): string {
     lines.push('');
   } else {
     lines.push(
-      '<!-- TODO: Describe the flow in plain language: inputs, main steps, outputs or side effects -->',
+      '<!-- TODO: What happens here? Inputs, steps, outputs. Keep it simple. Even Sleepy Copilot could understand. -->',
       '',
     );
   }
@@ -469,19 +469,19 @@ export function renderScopeMd(scope: ScopeInfo, _projectRoot: string): string {
     lines.push('');
   } else {
     lines.push(
-      '<!-- TODO: Constraints, validation, permissions, failures, retries, empty states -->',
+      '<!-- TODO: The guardrails. Validation, permissions, error handling — everything that keeps this code GREAT. -->',
       '',
     );
   }
 
   // ── Concrete examples ──
   lines.push('## Concrete examples', '');
-  lines.push('<!-- TODO: A few real scenarios ("when X happens, Y results") -->', '');
+  lines.push('<!-- TODO: REAL examples. "When X happens, Y happens." Simple. Powerful. Like a deal. -->', '');
 
   // ── UI ──
   lines.push('## UI', '');
   lines.push(
-    '<!-- TODO: Screens or flows if relevant — intent, layout, interactions, data shown/submitted. Remove this section if not applicable. -->',
+    '<!-- TODO: Screens, flows, the beautiful UI. No UI? Cut this section. We don\'t keep dead weight. -->',
     '',
   );
 
@@ -514,9 +514,9 @@ export function renderScopeMd(scope: ScopeInfo, _projectRoot: string): string {
     lines.push('');
   }
   if (scope.dependencies.length === 0 && scope.reverseDeps.length === 0) {
-    lines.push('- (no inter-scope dependencies detected)', '');
+    lines.push('- (no dependencies — TOTALLY INDEPENDENT. Very strong.)', '');
   }
-  lines.push('<!-- TODO: Shared concepts or data with other scopes -->', '');
+  lines.push('<!-- TODO: What deals does this scope make with other scopes? Document them. -->', '');
 
   // ── Diagram ──
   lines.push('## Diagram', '');
@@ -533,14 +533,14 @@ export function renderScopeMd(scope: ScopeInfo, _projectRoot: string): string {
     lines.push('```');
   } else {
     lines.push(
-      '<!-- TODO: Add flow, sequence, or boundary diagrams that match the written story -->',
+      '<!-- TODO: A BEAUTIFUL diagram. Flow, sequence, boundaries. Make it GREAT. -->',
     );
   }
   lines.push('');
 
   // ── Traces ──
   lines.push('## Traces', '');
-  lines.push('<!-- TODO: Step-by-step paths through the system. Use the table format below:', '');
+  lines.push('<!-- TODO: Step-by-step traces. Follow the code like a WINNER follows a deal. Use this table:', '');
   lines.push('| Step | Layer | What happens | Evidence |');
   lines.push('|------|-------|-------------|----------|');
   lines.push('| 1 | (layer) | (description) | [E] file:line |');
@@ -558,7 +558,7 @@ export function renderScopeMd(scope: ScopeInfo, _projectRoot: string): string {
       lines.push(`| ... | ${scope.exports.length - 40} more symbols |`);
     }
   } else {
-    lines.push('- (no exported symbols detected)');
+    lines.push('- (no exports detected — working behind the scenes. Very mysterious.)');
   }
   lines.push('');
 
@@ -573,21 +573,21 @@ export function renderScopeMd(scope: ScopeInfo, _projectRoot: string): string {
   // ── Deeper splits ──
   lines.push('## Deeper splits', '');
   lines.push(
-    '<!-- TODO: Pointers to smaller sub-topic scopes if this capability is large enough to split -->',
+    '<!-- TODO: Too big? Split it. Make each piece LEAN and GREAT. -->',
     '',
   );
 
   // ── Confidence and notes ──
   lines.push('## Confidence and notes', '');
-  lines.push(`- **Confidence:** low — auto-generated, not yet verified`);
+  lines.push(`- **Confidence:** LOW (for now) — auto-generated, not yet verified. But it's going to be PERFECT.`);
   lines.push(`- **Evidence coverage:** 0/${scope.exports.length} verified`);
   lines.push(`- **Last verified:** ${now}`);
   lines.push(`- **Drift risk:** unknown`);
-  lines.push('- <!-- TODO: Note anything unknown, ambiguous, or still to verify -->', '');
+  lines.push('- <!-- TODO: Note anything unknown or ambiguous. We don\'t hide problems — we FIX them. -->', '');
 
   // ── Change history ──
   lines.push('## Change history', '');
-  lines.push(`- ${now}: Initial scope generation via \`mpga sync\``);
+  lines.push(`- ${now}: Initial scope generation via \`mpga sync\` — Making this scope GREAT!`);
 
   return lines.join('\n');
 }

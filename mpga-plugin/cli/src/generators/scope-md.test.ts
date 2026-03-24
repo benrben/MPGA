@@ -152,7 +152,7 @@ describe('renderScopeMd', () => {
 
   it('shows TODO when no module summary is available', () => {
     const md = renderScopeMd(baseScope, '/proj');
-    expect(md).toContain('<!-- TODO: Describe what this area does');
+    expect(md).toContain('<!-- TODO: Tell the people what this GREAT module does');
   });
 
   it('shows module summary when available', () => {
@@ -164,24 +164,24 @@ describe('renderScopeMd', () => {
     };
     const md = renderScopeMd(scope, '/proj');
     expect(md).toContain('Authentication and session management.');
-    expect(md).not.toContain('<!-- TODO: Describe what this area does');
+    expect(md).not.toContain('<!-- TODO: Tell the people what this GREAT module does');
   });
 
   it('shows TODO when no frameworks detected', () => {
     const md = renderScopeMd(baseScope, '/proj');
-    expect(md).toContain('<!-- TODO: Add relevant frameworks');
+    expect(md).toContain('<!-- TODO: List the frameworks. We use only the BEST.');
   });
 
   it('shows detected frameworks', () => {
     const scope = { ...baseScope, detectedFrameworks: ['Express', 'Zod'] };
     const md = renderScopeMd(scope, '/proj');
     expect(md).toContain('**Frameworks:** Express, Zod');
-    expect(md).not.toContain('<!-- TODO: Add relevant frameworks');
+    expect(md).not.toContain('<!-- TODO: List the frameworks. We use only the BEST.');
   });
 
   it('shows TODO when no export descriptions', () => {
     const md = renderScopeMd(baseScope, '/proj');
-    expect(md).toContain('<!-- TODO: Describe the flow in plain language');
+    expect(md).toContain('<!-- TODO: What happens here? Inputs, steps, outputs.');
   });
 
   it('shows export descriptions in What happens section', () => {
@@ -198,12 +198,12 @@ describe('renderScopeMd', () => {
     };
     const md = renderScopeMd(scope, '/proj');
     expect(md).toContain('**login** (function) — Authenticate a user with credentials.');
-    expect(md).not.toContain('<!-- TODO: Describe the flow in plain language');
+    expect(md).not.toContain('<!-- TODO: What happens here? Inputs, steps, outputs.');
   });
 
   it('shows TODO when no rules/constraints', () => {
     const md = renderScopeMd(baseScope, '/proj');
-    expect(md).toContain('<!-- TODO: Constraints, validation');
+    expect(md).toContain('<!-- TODO: The guardrails. Validation, permissions, error handling');
   });
 
   it('shows rules and constraints when available', () => {
@@ -219,6 +219,24 @@ describe('renderScopeMd', () => {
     };
     const md = renderScopeMd(scope, '/proj');
     expect(md).toContain('`login`: @throws Error if credentials are invalid');
-    expect(md).not.toContain('<!-- TODO: Constraints, validation');
+    expect(md).not.toContain('<!-- TODO: The guardrails. Validation, permissions, error handling');
+  });
+
+  it('includes Trump-style flavor in summary', () => {
+    const md = renderScopeMd(baseScope, '/proj');
+    expect(md).toContain('TREMENDOUS');
+    expect(md).toContain('Believe me');
+  });
+
+  it('includes Trump-style flavor in confidence section', () => {
+    const md = renderScopeMd(baseScope, '/proj');
+    expect(md).toContain('PERFECT');
+    expect(md).toContain('LOW (for now)');
+  });
+
+  it('preserves evidence format [E] in output', () => {
+    const md = renderScopeMd(baseScope, '/proj');
+    expect(md).toContain('[E]');
+    expect(md).toContain('`src/auth/index.ts`');
   });
 });
