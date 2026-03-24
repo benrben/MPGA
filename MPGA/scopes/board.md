@@ -167,26 +167,26 @@ graph LR
 
 | Claim | Evidence |
 |-------|----------|
-| `renderBoardMd` (function) | [E] mpga-plugin/cli/src/board/board-md.ts :: renderBoardMd |
-| `BoardState` (interface) | [E] mpga-plugin/cli/src/board/board.ts :: BoardState |
-| `loadBoard` (function) | [E] mpga-plugin/cli/src/board/board.ts :: loadBoard |
-| `saveBoard` (function) | [E] mpga-plugin/cli/src/board/board.ts :: saveBoard |
-| `createEmptyBoard` (function) | [E] mpga-plugin/cli/src/board/board.ts :: createEmptyBoard |
-| `recalcStats` (function) | [E] mpga-plugin/cli/src/board/board.ts :: recalcStats |
-| `checkWipLimit` (function) | [E] mpga-plugin/cli/src/board/board.ts :: checkWipLimit |
-| `nextTaskId` (function) | [E] mpga-plugin/cli/src/board/board.ts :: nextTaskId |
-| `addTask` (function) | [E] mpga-plugin/cli/src/board/board.ts :: addTask |
-| `moveTask` (function) | [E] mpga-plugin/cli/src/board/board.ts :: moveTask |
-| `findTaskFile` (function) | [E] mpga-plugin/cli/src/board/board.ts :: findTaskFile |
-| `Column` (type) | [E] mpga-plugin/cli/src/board/task.ts :: Column |
-| `Priority` (type) | [E] mpga-plugin/cli/src/board/task.ts :: Priority |
-| `TddStage` (type) | [E] mpga-plugin/cli/src/board/task.ts :: TddStage |
-| `TaskStatus` (type) | [E] mpga-plugin/cli/src/board/task.ts :: TaskStatus |
+| `renderBoardMd` (function) | [E] mpga-plugin/cli/src/board/board-md.ts:29-153 :: renderBoardMd()|
+| `BoardState` (interface) | [E] mpga-plugin/cli/src/board/board.ts:5-21 :: BoardState()|
+| `loadBoard` (function) | [E] mpga-plugin/cli/src/board/board.ts:24-29 :: loadBoard()|
+| `saveBoard` (function) | [E] mpga-plugin/cli/src/board/board.ts:32-35 :: saveBoard()|
+| `createEmptyBoard` (function) | [E] mpga-plugin/cli/src/board/board.ts:38-55 :: createEmptyBoard()|
+| `recalcStats` (function) | [E] mpga-plugin/cli/src/board/board.ts:58-93 :: recalcStats()|
+| `checkWipLimit` (function) | [E] mpga-plugin/cli/src/board/board.ts:96-99 :: checkWipLimit()|
+| `nextTaskId` (function) | [E] mpga-plugin/cli/src/board/board.ts:102-105 :: nextTaskId()|
+| `addTask` (function) | [E] mpga-plugin/cli/src/board/board.ts:108-119 :: addTask()|
+| `moveTask` (function) | [E] mpga-plugin/cli/src/board/board.ts:152-157 :: moveTask()|
+| `findTaskFile` (function) | [E] mpga-plugin/cli/src/board/board.ts:188-193 :: findTaskFile()|
+| `Column` (type) | [E] mpga-plugin/cli/src/board/task.ts:5-6 :: Column()|
+| `Priority` (type) | [E] mpga-plugin/cli/src/board/task.ts:6-7 :: Priority()|
+| `TddStage` (type) | [E] mpga-plugin/cli/src/board/task.ts:7-9 :: TddStage()|
+| `TaskStatus` (type) | [E] mpga-plugin/cli/src/board/task.ts:10-29 :: Task()Status()|
 | `Task` (interface) | [E] mpga-plugin/cli/src/board/task.ts :: Task |
-| `taskFilename` (function) | [E] mpga-plugin/cli/src/board/task.ts :: taskFilename |
-| `renderTaskFile` (function) | [E] mpga-plugin/cli/src/board/task.ts :: renderTaskFile |
-| `parseTaskFile` (function) | [E] mpga-plugin/cli/src/board/task.ts :: parseTaskFile |
-| `loadAllTasks` (function) | [E] mpga-plugin/cli/src/board/task.ts :: loadAllTasks |
+| `taskFilename` (function) | [E] mpga-plugin/cli/src/board/task.ts:32-38 :: taskFilename()|
+| `renderTaskFile` (function) | [E] mpga-plugin/cli/src/board/task.ts:41-66 :: renderTaskFile()|
+| `parseTaskFile` (function) | [E] mpga-plugin/cli/src/board/task.ts:101-129 :: parseTaskFile()|
+| `loadAllTasks` (function) | [E] mpga-plugin/cli/src/board/task.ts:132-138 :: loadAllTasks()|
 
 ## Files
 

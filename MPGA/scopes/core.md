@@ -191,29 +191,29 @@ graph LR
 
 | Claim | Evidence |
 |-------|----------|
-| `KnowledgeLayerConfig` (interface) | [E] mpga-plugin/cli/src/core/config.ts :: KnowledgeLayerConfig |
-| `MpgaConfig` (interface) | [E] mpga-plugin/cli/src/core/config.ts :: MpgaConfig |
-| `DEFAULT_CONFIG` (const) | [E] mpga-plugin/cli/src/core/config.ts :: DEFAULT_CONFIG |
-| `findProjectRoot` (function) | [E] mpga-plugin/cli/src/core/config.ts :: findProjectRoot |
-| `loadConfig` (function) | [E] mpga-plugin/cli/src/core/config.ts :: loadConfig |
-| `saveConfig` (function) | [E] mpga-plugin/cli/src/core/config.ts :: saveConfig |
-| `getConfigValue` (function) | [E] mpga-plugin/cli/src/core/config.ts :: getConfigValue |
-| `setConfigValue` (function) | [E] mpga-plugin/cli/src/core/config.ts :: setConfigValue |
-| `VERSION` (const) | [E] mpga-plugin/cli/src/core/logger.ts :: VERSION |
-| `banner` (function) | [E] mpga-plugin/cli/src/core/logger.ts :: banner |
-| `miniBanner` (function) | [E] mpga-plugin/cli/src/core/logger.ts :: miniBanner |
-| `log` (const) | [E] mpga-plugin/cli/src/core/logger.ts :: log |
-| `progressBar` (function) | [E] mpga-plugin/cli/src/core/logger.ts :: progressBar |
-| `gradeColor` (function) | [E] mpga-plugin/cli/src/core/logger.ts :: gradeColor |
-| `statusBadge` (function) | [E] mpga-plugin/cli/src/core/logger.ts :: statusBadge |
-| `foo` (function) | [E] mpga-plugin/cli/src/core/scanner.test.ts :: foo |
-| `bar` (function) | [E] mpga-plugin/cli/src/core/scanner.test.ts :: bar |
-| `FileInfo` (interface) | [E] mpga-plugin/cli/src/core/scanner.ts :: FileInfo |
-| `ScanResult` (interface) | [E] mpga-plugin/cli/src/core/scanner.ts :: ScanResult |
-| `detectLanguage` (function) | [E] mpga-plugin/cli/src/core/scanner.ts :: detectLanguage |
-| `countLines` (function) | [E] mpga-plugin/cli/src/core/scanner.ts :: countLines |
-| `scan` (function) | [E] mpga-plugin/cli/src/core/scanner.ts :: scan |
-| `detectProjectType` (function) | [E] mpga-plugin/cli/src/core/scanner.ts :: detectProjectType |
+| `KnowledgeLayerConfig` (interface) | [E] mpga-plugin/cli/src/core/config.ts:5-9 :: KnowledgeLayerConfig()|
+| `MpgaConfig` (interface) | [E] mpga-plugin/cli/src/core/config.ts:12-70 :: MpgaConfig()|
+| `DEFAULT_CONFIG` (const) | [E] mpga-plugin/cli/src/core/config.ts:73-124 :: DEFAULT_CONFIG()|
+| `findProjectRoot` (function) | [E] mpga-plugin/cli/src/core/config.ts:127-136 :: findProjectRoot()|
+| `loadConfig` (function) | [E] mpga-plugin/cli/src/core/config.ts:139-150 :: loadConfig()|
+| `saveConfig` (function) | [E] mpga-plugin/cli/src/core/config.ts:153-155 :: saveConfig()|
+| `getConfigValue` (function) | [E] mpga-plugin/cli/src/core/config.ts:158-165 :: getConfigValue()|
+| `setConfigValue` (function) | [E] mpga-plugin/cli/src/core/config.ts:168-179 :: setConfigValue()|
+| `VERSION` (const) | [E] mpga-plugin/cli/src/core/logger.ts:44-45 :: VERSION()|
+| `banner` (function) | [E] mpga-plugin/cli/src/core/logger.ts:46-47 :: banner()|
+| `miniBanner` (function) | [E] mpga-plugin/cli/src/core/logger.ts:50-53 :: miniBanner()|
+| `log` (const) | [E] mpga-plugin/cli/src/core/logger.ts:56-84 :: log()|
+| `progressBar` (function) | [E] mpga-plugin/cli/src/core/logger.ts:87-90 :: progressBar()|
+| `gradeColor` (function) | [E] mpga-plugin/cli/src/core/logger.ts:98-108 :: gradeColor()|
+| `statusBadge` (function) | [E] mpga-plugin/cli/src/core/logger.ts:111-112 :: statusBadge()|
+| `foo` (function) | [E] mpga-plugin/cli/src/core/scanner.test.ts:203-222 :: foo()|
+| `bar` (function) | [E] mpga-plugin/cli/src/core/scanner.test.ts:203-222 :: bar()|
+| `FileInfo` (interface) | [E] mpga-plugin/cli/src/core/scanner.ts:5-9 :: FileInfo()|
+| `ScanResult` (interface) | [E] mpga-plugin/cli/src/core/scanner.ts:12-19 :: ScanResult()|
+| `detectLanguage` (function) | [E] mpga-plugin/cli/src/core/scanner.ts:61-63 :: detectLanguage()|
+| `countLines` (function) | [E] mpga-plugin/cli/src/core/scanner.ts:66-72 :: countLines()|
+| `scan` (function) | [E] mpga-plugin/cli/src/core/scanner.ts:75-78 :: scan()|
+| `detectProjectType` (function) | [E] mpga-plugin/cli/src/core/scanner.ts:136-152 :: detectProjectType()|
 | `getTopLanguage` (function) | [E] mpga-plugin/cli/src/core/scanner.ts :: getTopLanguage |
 
 ## Files

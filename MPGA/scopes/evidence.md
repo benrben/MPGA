@@ -173,46 +173,46 @@ graph LR
 
 | Claim | Evidence |
 |-------|----------|
-| `greet` (function) | [E] mpga-plugin/cli/src/evidence/ast.test.ts :: greet |
-| `fetchData` (function) | [E] mpga-plugin/cli/src/evidence/ast.test.ts :: fetchData |
-| `UserService` (class) | [E] mpga-plugin/cli/src/evidence/ast.test.ts :: UserService |
-| `UserId` (type) | [E] mpga-plugin/cli/src/evidence/ast.test.ts :: UserId |
-| `Config` (interface) | [E] mpga-plugin/cli/src/evidence/ast.test.ts :: Config |
-| `add` (const) | [E] mpga-plugin/cli/src/evidence/ast.test.ts :: add |
-| `handler` (const) | [E] mpga-plugin/cli/src/evidence/ast.test.ts :: handler |
-| `MAX_RETRIES` (const) | [E] mpga-plugin/cli/src/evidence/ast.test.ts :: MAX_RETRIES |
-| `alpha` (function) | [E] mpga-plugin/cli/src/evidence/ast.test.ts :: alpha |
-| `beta` (function) | [E] mpga-plugin/cli/src/evidence/ast.test.ts :: beta |
-| `targetSymbol` (function) | [E] mpga-plugin/cli/src/evidence/ast.test.ts :: targetSymbol |
-| `SymbolLocation` (interface) | [E] mpga-plugin/cli/src/evidence/ast.ts :: SymbolLocation |
-| `detectLanguage` (function) | [E] mpga-plugin/cli/src/evidence/ast.ts :: detectLanguage |
-| `extractSymbols` (function) | [E] mpga-plugin/cli/src/evidence/ast.ts :: extractSymbols |
-| `findSymbol` (function) | [E] mpga-plugin/cli/src/evidence/ast.ts :: findSymbol |
-| `verifyRange` (function) | [E] mpga-plugin/cli/src/evidence/ast.ts :: verifyRange |
-| `myFunction` (function) | [E] mpga-plugin/cli/src/evidence/drift.test.ts :: myFunction |
-| `x` (const) | [E] mpga-plugin/cli/src/evidence/drift.test.ts :: x |
-| `unrelated` (const) | [E] mpga-plugin/cli/src/evidence/drift.test.ts :: unrelated |
-| `movedFunc` (function) | [E] mpga-plugin/cli/src/evidence/drift.test.ts :: movedFunc |
-| `funcA` (function) | [E] mpga-plugin/cli/src/evidence/drift.test.ts :: funcA |
-| `funcB` (function) | [E] mpga-plugin/cli/src/evidence/drift.test.ts :: funcB |
-| `okFunc` (function) | [E] mpga-plugin/cli/src/evidence/drift.test.ts :: okFunc |
-| `goodFunc` (function) | [E] mpga-plugin/cli/src/evidence/drift.test.ts :: goodFunc |
-| `v` (const) | [E] mpga-plugin/cli/src/evidence/drift.test.ts :: v |
-| `ScopeDriftReport` (interface) | [E] mpga-plugin/cli/src/evidence/drift.ts :: ScopeDriftReport |
-| `DriftReport` (interface) | [E] mpga-plugin/cli/src/evidence/drift.ts :: DriftReport |
-| `runDriftCheck` (function) | [E] mpga-plugin/cli/src/evidence/drift.ts :: runDriftCheck |
-| `healScopeFile` (function) | [E] mpga-plugin/cli/src/evidence/drift.ts :: healScopeFile |
-| `EvidenceLinkType` (type) | [E] mpga-plugin/cli/src/evidence/parser.ts :: EvidenceLinkType |
+| `greet` (function) | [E] mpga-plugin/cli/src/evidence/ast.test.ts:85-104 :: greet()|
+| `fetchData` (function) | [E] mpga-plugin/cli/src/evidence/ast.test.ts:106-125 :: fetchData()|
+| `UserService` (class) | [E] mpga-plugin/cli/src/evidence/ast.test.ts:119-138 :: UserService()|
+| `UserId` (type) | [E] mpga-plugin/cli/src/evidence/ast.test.ts:143-162 :: UserId()|
+| `Config` (interface) | [E] mpga-plugin/cli/src/evidence/ast.test.ts:145-164 :: Config()|
+| `add` (const) | [E] mpga-plugin/cli/src/evidence/ast.test.ts:168-187 :: add()|
+| `handler` (const) | [E] mpga-plugin/cli/src/evidence/ast.test.ts:187-206 :: handler()|
+| `MAX_RETRIES` (const) | [E] mpga-plugin/cli/src/evidence/ast.test.ts:199-218 :: MAX_RETRIES()|
+| `alpha` (function) | [E] mpga-plugin/cli/src/evidence/ast.test.ts:398-417 :: alpha()|
+| `beta` (function) | [E] mpga-plugin/cli/src/evidence/ast.test.ts:402-421 :: beta()|
+| `targetSymbol` (function) | [E] mpga-plugin/cli/src/evidence/ast.test.ts:483-492 :: targetSymbol()|
+| `SymbolLocation` (interface) | [E] mpga-plugin/cli/src/evidence/ast.ts:4-8 :: SymbolLocation()|
+| `detectLanguage` (function) | [E] mpga-plugin/cli/src/evidence/ast.ts:15-31 :: detectLanguage()|
+| `extractSymbols` (function) | [E] mpga-plugin/cli/src/evidence/ast.ts:132-144 :: extractSymbols()|
+| `findSymbol` (function) | [E] mpga-plugin/cli/src/evidence/ast.ts:147-150 :: findSymbol()|
+| `verifyRange` (function) | [E] mpga-plugin/cli/src/evidence/ast.ts:157-162 :: verifyRange()|
+| `myFunction` (function) | [E] mpga-plugin/cli/src/evidence/drift.test.ts:58-77 :: myFunction()|
+| `x` (const) | [E] mpga-plugin/cli/src/evidence/drift.test.ts:1-20 :: x()|
+| `unrelated` (const) | [E] mpga-plugin/cli/src/evidence/drift.test.ts:112-131 :: unrelated()|
+| `movedFunc` (function) | [E] mpga-plugin/cli/src/evidence/drift.test.ts:126-145 :: movedFunc()|
+| `funcA` (function) | [E] mpga-plugin/cli/src/evidence/drift.test.ts:142-161 :: funcA()|
+| `funcB` (function) | [E] mpga-plugin/cli/src/evidence/drift.test.ts:143-162 :: funcB()|
+| `okFunc` (function) | [E] mpga-plugin/cli/src/evidence/drift.test.ts:162-181 :: okFunc()|
+| `goodFunc` (function) | [E] mpga-plugin/cli/src/evidence/drift.test.ts:179-198 :: goodFunc()|
+| `v` (const) | [E] mpga-plugin/cli/src/evidence/drift.test.ts:1-20 :: v()|
+| `ScopeDriftReport` (interface) | [E] mpga-plugin/cli/src/evidence/drift.ts:10-28 :: ScopeDriftReport()|
+| `DriftReport` (interface) | [E] mpga-plugin/cli/src/evidence/drift.ts:35-51 :: DriftReport()|
+| `runDriftCheck` (function) | [E] mpga-plugin/cli/src/evidence/drift.ts:63-66 :: runDriftCheck()|
+| `healScopeFile` (function) | [E] mpga-plugin/cli/src/evidence/drift.ts:165-193 :: healScopeFile()|
+| `EvidenceLinkType` (type) | [E] mpga-plugin/cli/src/evidence/parser.ts:14-36 :: EvidenceLink()Type()|
 | `EvidenceLink` (interface) | [E] mpga-plugin/cli/src/evidence/parser.ts :: EvidenceLink |
-| `parseEvidenceLink` (function) | [E] mpga-plugin/cli/src/evidence/parser.ts :: parseEvidenceLink |
-| `parseEvidenceLinks` (function) | [E] mpga-plugin/cli/src/evidence/parser.ts :: parseEvidenceLinks |
-| `formatEvidenceLink` (function) | [E] mpga-plugin/cli/src/evidence/parser.ts :: formatEvidenceLink |
-| `evidenceStats` (function) | [E] mpga-plugin/cli/src/evidence/parser.ts :: evidenceStats |
-| `x` (const) | [E] mpga-plugin/cli/src/evidence/resolver.test.ts :: x |
-| `greet` (function) | [E] mpga-plugin/cli/src/evidence/resolver.test.ts :: greet |
-| `unrelatedFunction` (function) | [E] mpga-plugin/cli/src/evidence/resolver.test.ts :: unrelatedFunction |
-| `doWork` (function) | [E] mpga-plugin/cli/src/evidence/resolver.test.ts :: doWork |
-| `compute` (function) | [E] mpga-plugin/cli/src/evidence/resolver.test.ts :: compute |
+| `parseEvidenceLink` (function) | [E] mpga-plugin/cli/src/evidence/parser.ts:66-114 :: parseEvidenceLink()|
+| `parseEvidenceLinks` (function) | [E] mpga-plugin/cli/src/evidence/parser.ts:124-128 :: parseEvidenceLinks()|
+| `formatEvidenceLink` (function) | [E] mpga-plugin/cli/src/evidence/parser.ts:138-156 :: formatEvidenceLink()|
+| `evidenceStats` (function) | [E] mpga-plugin/cli/src/evidence/parser.ts:166-172 :: evidenceStats()|
+| `x` (const) | [E] mpga-plugin/cli/src/evidence/resolver.test.ts:1-20 :: x()|
+| `greet` (function) | [E] mpga-plugin/cli/src/evidence/resolver.test.ts:59-78 :: greet()|
+| `unrelatedFunction` (function) | [E] mpga-plugin/cli/src/evidence/resolver.test.ts:135-154 :: unrelatedFunction()|
+| `doWork` (function) | [E] mpga-plugin/cli/src/evidence/resolver.test.ts:165-184 :: doWork()|
+| `compute` (function) | [E] mpga-plugin/cli/src/evidence/resolver.test.ts:183-202 :: compute()|
 | ... | 9 more symbols |
 
 ## Files

@@ -160,37 +160,37 @@ graph LR
 
 | Claim | Evidence |
 |-------|----------|
-| `add` (function) | [E] mpga-plugin/cli/src/commands/board-evidence-drift.test.ts :: add |
-| `subtract` (function) | [E] mpga-plugin/cli/src/commands/board-evidence-drift.test.ts :: subtract |
-| `registerBoard` (function) | [E] mpga-plugin/cli/src/commands/board.ts :: registerBoard |
-| `registerConfig` (function) | [E] mpga-plugin/cli/src/commands/config.ts :: registerConfig |
-| `registerDrift` (function) | [E] mpga-plugin/cli/src/commands/drift.ts :: registerDrift |
-| `registerEvidence` (function) | [E] mpga-plugin/cli/src/commands/evidence.ts :: registerEvidence |
-| `registerExport` (function) | [E] mpga-plugin/cli/src/commands/export.ts :: registerExport |
-| `registerGraph` (function) | [E] mpga-plugin/cli/src/commands/graph.ts :: registerGraph |
-| `registerHealth` (function) | [E] mpga-plugin/cli/src/commands/health.ts :: registerHealth |
-| `registerInit` (function) | [E] mpga-plugin/cli/src/commands/init.ts :: registerInit |
-| `CompleteMilestoneResult` (type) | [E] mpga-plugin/cli/src/commands/milestone.ts :: CompleteMilestoneResult |
-| `completeActiveMilestone` (function) | [E] mpga-plugin/cli/src/commands/milestone.ts :: completeActiveMilestone |
-| `registerMilestone` (function) | [E] mpga-plugin/cli/src/commands/milestone.ts :: registerMilestone |
-| `main` (function) | [E] mpga-plugin/cli/src/commands/scan-sync-graph-scope.test.ts :: main |
-| `add` (function) | [E] mpga-plugin/cli/src/commands/scan-sync-graph-scope.test.ts :: add |
-| `registerScan` (function) | [E] mpga-plugin/cli/src/commands/scan.ts :: registerScan |
-| `registerScope` (function) | [E] mpga-plugin/cli/src/commands/scope.ts :: registerScope |
-| `registerSession` (function) | [E] mpga-plugin/cli/src/commands/session.ts :: registerSession |
-| `registerStatus` (function) | [E] mpga-plugin/cli/src/commands/status.ts :: registerStatus |
-| `registerSync` (function) | [E] mpga-plugin/cli/src/commands/sync.ts :: registerSync |
-| `AgentMeta` (interface) | [E] mpga-plugin/cli/src/commands/export/agents.ts :: AgentMeta |
-| `AGENTS` (const) | [E] mpga-plugin/cli/src/commands/export/agents.ts :: AGENTS |
-| `SKILL_NAMES` (const) | [E] mpga-plugin/cli/src/commands/export/agents.ts :: SKILL_NAMES |
-| `findPluginRoot` (function) | [E] mpga-plugin/cli/src/commands/export/agents.ts :: findPluginRoot |
-| `copySkillsTo` (function) | [E] mpga-plugin/cli/src/commands/export/agents.ts :: copySkillsTo |
-| `readAgentInstructions` (function) | [E] mpga-plugin/cli/src/commands/export/agents.ts :: readAgentInstructions |
-| `exportAntigravity` (function) | [E] mpga-plugin/cli/src/commands/export/antigravity.ts :: exportAntigravity |
-| `exportClaude` (function) | [E] mpga-plugin/cli/src/commands/export/claude.ts :: exportClaude |
-| `merged` (const) | [E] mpga-plugin/cli/src/commands/export/claude.ts :: merged |
-| `exportCodex` (function) | [E] mpga-plugin/cli/src/commands/export/codex.ts :: exportCodex |
-| `exportCursor` (function) | [E] mpga-plugin/cli/src/commands/export/cursor.ts :: exportCursor |
+| `add` (function) | [E] mpga-plugin/cli/src/commands/board-evidence-drift.test.ts:121-140 :: add()|
+| `subtract` (function) | [E] mpga-plugin/cli/src/commands/board-evidence-drift.test.ts:125-144 :: subtract()|
+| `registerBoard` (function) | [E] mpga-plugin/cli/src/commands/board.ts:19-79 :: registerBoard()|
+| `registerConfig` (function) | [E] mpga-plugin/cli/src/commands/config.ts:13-62 :: registerConfig()|
+| `registerDrift` (function) | [E] mpga-plugin/cli/src/commands/drift.ts:8-105 :: registerDrift()|
+| `registerEvidence` (function) | [E] mpga-plugin/cli/src/commands/evidence.ts:145-175 :: registerEvidence()|
+| `registerExport` (function) | [E] mpga-plugin/cli/src/commands/export.ts:14-102 :: registerExport()|
+| `registerGraph` (function) | [E] mpga-plugin/cli/src/commands/graph.ts:9-65 :: registerGraph()|
+| `registerHealth` (function) | [E] mpga-plugin/cli/src/commands/health.ts:17-129 :: registerHealth()|
+| `registerInit` (function) | [E] mpga-plugin/cli/src/commands/init.ts:67-193 :: registerInit()|
+| `CompleteMilestoneResult` (type) | [E] mpga-plugin/cli/src/commands/milestone.ts:50-53 :: CompleteMilestoneResult()|
+| `completeActiveMilestone` (function) | [E] mpga-plugin/cli/src/commands/milestone.ts:55-72 :: completeActiveMilestone()|
+| `registerMilestone` (function) | [E] mpga-plugin/cli/src/commands/milestone.ts:91-120 :: registerMilestone()|
+| `main` (function) | [E] mpga-plugin/cli/src/commands/scan-sync-graph-scope.test.ts:46-65 :: main()|
+| `add` (function) | [E] mpga-plugin/cli/src/commands/scan-sync-graph-scope.test.ts:50-69 :: add()|
+| `registerScan` (function) | [E] mpga-plugin/cli/src/commands/scan.ts:6-74 :: registerScan()|
+| `registerScope` (function) | [E] mpga-plugin/cli/src/commands/scope.ts:208-230 :: registerScope()|
+| `registerSession` (function) | [E] mpga-plugin/cli/src/commands/session.ts:24-54 :: registerSession()|
+| `registerStatus` (function) | [E] mpga-plugin/cli/src/commands/status.ts:128-133 :: registerStatus()|
+| `registerSync` (function) | [E] mpga-plugin/cli/src/commands/sync.ts:12-89 :: registerSync()|
+| `AgentMeta` (interface) | [E] mpga-plugin/cli/src/commands/export/agents.ts:8-15 :: AgentMeta()|
+| `AGENTS` (const) | [E] mpga-plugin/cli/src/commands/export/agents.ts:18-108 :: AGENTS()|
+| `SKILL_NAMES` (const) | [E] mpga-plugin/cli/src/commands/export/agents.ts:111-121 :: SKILL_NAMES()|
+| `findPluginRoot` (function) | [E] mpga-plugin/cli/src/commands/export/agents.ts:126-141 :: findPluginRoot()|
+| `copySkillsTo` (function) | [E] mpga-plugin/cli/src/commands/export/agents.ts:150-154 :: copySkillsTo()|
+| `readAgentInstructions` (function) | [E] mpga-plugin/cli/src/commands/export/agents.ts:226-237 :: readAgentInstructions()|
+| `exportAntigravity` (function) | [E] mpga-plugin/cli/src/commands/export/antigravity.ts:8-15 :: exportAntigravity()|
+| `exportClaude` (function) | [E] mpga-plugin/cli/src/commands/export/claude.ts:8-13 :: exportClaude()|
+| `merged` (const) | [E] mpga-plugin/cli/src/commands/export/claude.ts:38-57 :: merged()|
+| `exportCodex` (function) | [E] mpga-plugin/cli/src/commands/export/codex.ts:9-15 :: exportCodex()|
+| `exportCursor` (function) | [E] mpga-plugin/cli/src/commands/export/cursor.ts:9-15 :: exportCursor()|
 
 ## Files
 

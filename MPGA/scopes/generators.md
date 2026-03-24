@@ -133,31 +133,31 @@ graph LR
 
 | Claim | Evidence |
 |-------|----------|
-| `x` (const) | [E] mpga-plugin/cli/src/generators/graph-md.test.ts :: x |
-| `help` (function) | [E] mpga-plugin/cli/src/generators/graph-md.test.ts :: help |
-| `solo` (const) | [E] mpga-plugin/cli/src/generators/graph-md.test.ts :: solo |
-| `Dependency` (interface) | [E] mpga-plugin/cli/src/generators/graph-md.ts :: Dependency |
-| `GraphData` (interface) | [E] mpga-plugin/cli/src/generators/graph-md.ts :: GraphData |
-| `buildGraph` (function) | [E] mpga-plugin/cli/src/generators/graph-md.ts :: buildGraph |
-| `renderGraphMd` (function) | [E] mpga-plugin/cli/src/generators/graph-md.ts :: renderGraphMd |
-| `renderIndexMd` (function) | [E] mpga-plugin/cli/src/generators/index-md.ts :: renderIndexMd |
-| `foo` (function) | [E] mpga-plugin/cli/src/generators/scope-md.test.ts :: foo |
-| `loadBoard` (function) | [E] mpga-plugin/cli/src/generators/scope-md.test.ts :: loadBoard |
-| `saveBoard` (function) | [E] mpga-plugin/cli/src/generators/scope-md.test.ts :: saveBoard |
-| `noDoc` (function) | [E] mpga-plugin/cli/src/generators/scope-md.test.ts :: noDoc |
-| `exists` (function) | [E] mpga-plugin/cli/src/generators/scope-md.test.ts :: exists |
-| `scan` (function) | [E] mpga-plugin/cli/src/generators/scope-md.test.ts :: scan |
-| `doThing` (function) | [E] mpga-plugin/cli/src/generators/scope-md.test.ts :: doThing |
-| `oldFunc` (function) | [E] mpga-plugin/cli/src/generators/scope-md.test.ts :: oldFunc |
-| `simple` (function) | [E] mpga-plugin/cli/src/generators/scope-md.test.ts :: simple |
-| `ScopeInfo` (interface) | [E] mpga-plugin/cli/src/generators/scope-md.ts :: ScopeInfo |
-| `extractModuleSummary` (function) | [E] mpga-plugin/cli/src/generators/scope-md.ts :: extractModuleSummary |
-| `detectFrameworks` (function) | [E] mpga-plugin/cli/src/generators/scope-md.ts :: detectFrameworks |
-| `extractJSDocForExport` (function) | [E] mpga-plugin/cli/src/generators/scope-md.ts :: extractJSDocForExport |
-| `extractAnnotations` (function) | [E] mpga-plugin/cli/src/generators/scope-md.ts :: extractAnnotations |
-| `getScopeName` (function) | [E] mpga-plugin/cli/src/generators/scope-md.ts :: getScopeName |
-| `groupIntoScopes` (function) | [E] mpga-plugin/cli/src/generators/scope-md.ts :: groupIntoScopes |
-| `renderScopeMd` (function) | [E] mpga-plugin/cli/src/generators/scope-md.ts :: renderScopeMd |
+| `x` (const) | [E] mpga-plugin/cli/src/generators/graph-md.test.ts:1-20 :: x()|
+| `help` (function) | [E] mpga-plugin/cli/src/generators/graph-md.test.ts:44-63 :: help()|
+| `solo` (const) | [E] mpga-plugin/cli/src/generators/graph-md.test.ts:66-82 :: solo()|
+| `Dependency` (interface) | [E] mpga-plugin/cli/src/generators/graph-md.ts:11-13 :: Dependency()|
+| `GraphData` (interface) | [E] mpga-plugin/cli/src/generators/graph-md.ts:16-20 :: GraphData()|
+| `buildGraph` (function) | [E] mpga-plugin/cli/src/generators/graph-md.ts:71-134 :: buildGraph()|
+| `renderGraphMd` (function) | [E] mpga-plugin/cli/src/generators/graph-md.ts:137-182 :: renderGraphMd()|
+| `renderIndexMd` (function) | [E] mpga-plugin/cli/src/generators/index-md.ts:10-15 :: renderIndexMd()|
+| `foo` (function) | [E] mpga-plugin/cli/src/generators/scope-md.test.ts:39-58 :: foo()|
+| `loadBoard` (function) | [E] mpga-plugin/cli/src/generators/scope-md.test.ts:83-102 :: loadBoard()|
+| `saveBoard` (function) | [E] mpga-plugin/cli/src/generators/scope-md.test.ts:88-107 :: saveBoard()|
+| `noDoc` (function) | [E] mpga-plugin/cli/src/generators/scope-md.test.ts:95-114 :: noDoc()|
+| `exists` (function) | [E] mpga-plugin/cli/src/generators/scope-md.test.ts:33-52 :: exists()|
+| `scan` (function) | [E] mpga-plugin/cli/src/generators/scope-md.test.ts:105-124 :: scan()|
+| `doThing` (function) | [E] mpga-plugin/cli/src/generators/scope-md.test.ts:114-133 :: doThing()|
+| `oldFunc` (function) | [E] mpga-plugin/cli/src/generators/scope-md.test.ts:120-139 :: oldFunc()|
+| `simple` (function) | [E] mpga-plugin/cli/src/generators/scope-md.test.ts:126-145 :: simple()|
+| `ScopeInfo` (interface) | [E] mpga-plugin/cli/src/generators/scope-md.ts:11-38 :: ScopeInfo()|
+| `extractModuleSummary` (function) | [E] mpga-plugin/cli/src/generators/scope-md.ts:130-166 :: extractModuleSummary()|
+| `detectFrameworks` (function) | [E] mpga-plugin/cli/src/generators/scope-md.ts:170-181 :: detectFrameworks()|
+| `extractJSDocForExport` (function) | [E] mpga-plugin/cli/src/generators/scope-md.ts:185-199 :: extractJSDocForExport()|
+| `extractAnnotations` (function) | [E] mpga-plugin/cli/src/generators/scope-md.ts:203-218 :: extractAnnotations()|
+| `getScopeName` (function) | [E] mpga-plugin/cli/src/generators/scope-md.ts:257-281 :: getScopeName()|
+| `groupIntoScopes` (function) | [E] mpga-plugin/cli/src/generators/scope-md.ts:294-297 :: groupIntoScopes()|
+| `renderScopeMd` (function) | [E] mpga-plugin/cli/src/generators/scope-md.ts:428-627 :: renderScopeMd()|
 
 ## Files
 
