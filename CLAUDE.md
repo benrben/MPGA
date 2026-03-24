@@ -9,6 +9,8 @@ Run `mpga sync && mpga export --claude` to update.
 - ALWAYS cite evidence links [E] when making claims about code
 - NEVER write implementation before tests (TDD enforced)
 - Mark anything unverified as [Unknown]
+- Allow parallel READS, not parallel WRITES: one writer per scope, scouts/auditors in background
+- Prefer scope-local work queues so independent scopes can move in parallel
 
 ## Available MPGA commands
 - /mpga:status — project health dashboard
@@ -23,4 +25,4 @@ Read MPGA/INDEX.md for the full scope registry and agent trigger table.
 ## Active milestone
 - (none)
 
-Generated: 2026-03-24T13:51:10.776Z
+Generated: 2026-03-24T20:41:47.777Z

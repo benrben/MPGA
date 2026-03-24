@@ -18,7 +18,7 @@ Auto-detect the next logical action based on current project state.
 → Continue: `/mpga:execute <task-id>`
 
 ### If todo tasks ready
-→ Pick up next: `/mpga:execute`
+→ Pick up the next task whose scope is not already locked by another in-progress write lane: `/mpga:execute`
 
 ### If all tasks done
 → Run `/mpga:verify`, then suggest `/mpga:ship`

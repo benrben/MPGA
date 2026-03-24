@@ -1,4 +1,5 @@
 ---
+name: mpga-onboard
 description: Guided codebase tour from INDEX.md outward — WELCOME to the greatest codebase you've ever seen
 ---
 
@@ -28,4 +29,4 @@ description: Guided codebase tour from INDEX.md outward — WELCOME to the great
 - Do NOT overwhelm with all information at once — present in sections, like a GREAT presentation
 - Ask which area the user wants to dig into after the overview — let THEM choose
 - Cite evidence links for all claims about the codebase — EVIDENCE OVER CLAIMS
-- If scope docs are stale → mention it and suggest `/Users/benreich/MPGA/mpga-plugin/bin/mpga.sh sync` — we keep things FRESH
+- If scope docs are stale → mention it and suggest `node ./.mpga-runtime/cli/dist/index.js sync` — we keep things FRESH

@@ -5,10 +5,10 @@ Rebuild the MPGA knowledge layer from the current codebase state.
 ## Steps
 
 1. Check if MPGA is initialized, init if needed
-2. Run full sync: `mpga-plugin/bin/mpga.sh sync --full`
-3. Verify evidence health: `mpga-plugin/bin/mpga.sh evidence verify`
-4. Run drift check: `mpga-plugin/bin/mpga.sh drift --report`
-5. Show health report: `mpga-plugin/bin/mpga.sh health`
+2. Run full sync: `node ./.mpga-runtime/cli/dist/index.js sync --full`
+3. Verify evidence health: `node ./.mpga-runtime/cli/dist/index.js evidence verify`
+4. Run drift check: `node ./.mpga-runtime/cli/dist/index.js drift --report`
+5. Show health report: `node ./.mpga-runtime/cli/dist/index.js health`
 
 ## Usage
 ```

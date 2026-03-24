@@ -4,11 +4,11 @@ Initialize MPGA in the current project and build the knowledge layer.
 
 ## Steps
 
-1. Check if MPGA is initialized: `mpga-plugin/bin/mpga.sh status 2>/dev/null`
-2. If not initialized: run `mpga-plugin/bin/mpga.sh init --from-existing`
-3. Run `mpga-plugin/bin/mpga.sh sync` to generate the knowledge layer
+1. Check if MPGA is initialized: `node ./.mpga-runtime/cli/dist/index.js status 2>/dev/null`
+2. If not initialized: run `node ./.mpga-runtime/cli/dist/index.js init --from-existing`
+3. Run `node ./.mpga-runtime/cli/dist/index.js sync` to generate the knowledge layer
 4. Spawn the `map-codebase` skill to explore parallel with scout agents
-5. Show final status: `mpga-plugin/bin/mpga.sh health`
+5. Show final status: `node ./.mpga-runtime/cli/dist/index.js health`
 
 ## After initialization
 

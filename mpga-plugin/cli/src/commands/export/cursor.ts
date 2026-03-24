@@ -3,6 +3,11 @@ import path from 'path';
 import { log } from '../../core/logger.js';
 import { AGENTS, SKILL_NAMES, copySkillsTo, readAgentInstructions } from './agents.js';
 import type { AgentMeta } from './agents.js';
+import {
+  copyVendoredRuntime,
+  globalVendoredCliCommand,
+  projectVendoredCliCommand,
+} from './runtime.js';
 
 // ─── Cursor export ───────────────────────────────────────────────────────────
 
@@ -15,10 +20,13 @@ export function exportCursor(
   isGlobal: boolean,
 ): void {
   if (isGlobal) {
+    const cursorRoot = path.join(process.env.HOME ?? '~', '.cursor');
+    const cliCommand = pluginRoot ? globalVendoredCliCommand(cursorRoot) : 'npx mpga';
+    copyVendoredRuntime(cursorRoot, pluginRoot);
     log.info('Add the following to Cursor Settings > General > Rules for AI:');
-    log.info('\n' + generateCursorGlobal());
+    log.info('\n' + generateCursorGlobal(cliCommand));
     const globalSkillsDir = path.join(process.env.HOME ?? '~', '.cursor', 'skills');
-    copySkillsTo(globalSkillsDir, pluginRoot, 'cursor');
+    copySkillsTo(globalSkillsDir, pluginRoot, 'cursor', cliCommand);
     log.success(`Generated ~/.cursor/skills/ (${SKILL_NAMES.length} skills)`);
     // Global agents
     const globalAgentsDir = path.join(process.env.HOME ?? '~', '.cursor', 'agents');
@@ -26,25 +34,30 @@ export function exportCursor(
     for (const agent of AGENTS) {
       fs.writeFileSync(
         path.join(globalAgentsDir, `${agent.name}.md`),
-        generateCursorAgentMd(agent, pluginRoot),
+        generateCursorAgentMd(agent, pluginRoot, cliCommand),
       );
     }
     log.success(`Generated ~/.cursor/agents/ (${AGENTS.length} agents)`);
   } else {
+    const cliCommand = pluginRoot ? projectVendoredCliCommand() : 'npx mpga';
+    copyVendoredRuntime(projectRoot, pluginRoot);
     // Rules
     const rulesDir = path.join(projectRoot, '.cursor', 'rules');
     fs.mkdirSync(rulesDir, { recursive: true });
     fs.writeFileSync(
       path.join(rulesDir, 'mpga-project.mdc'),
-      generateCursorProjectMdc(indexContent, projectName),
+      generateCursorProjectMdc(indexContent, projectName, cliCommand),
     );
-    fs.writeFileSync(path.join(rulesDir, 'mpga-evidence.mdc'), generateCursorEvidenceMdc());
+    fs.writeFileSync(
+      path.join(rulesDir, 'mpga-evidence.mdc'),
+      generateCursorEvidenceMdc(cliCommand),
+    );
     fs.writeFileSync(path.join(rulesDir, 'mpga-tdd.mdc'), generateCursorTddMdc());
     fs.writeFileSync(path.join(rulesDir, 'mpga-scopes.mdc'), generateCursorScopesMdc(mpgaDir));
     log.success('Generated .cursor/rules/ (4 MDC files)');
     // Skills
     const cursorSkillsDir = path.join(projectRoot, '.cursor', 'skills');
-    copySkillsTo(cursorSkillsDir, pluginRoot, 'cursor');
+    copySkillsTo(cursorSkillsDir, pluginRoot, 'cursor', cliCommand);
     log.success(`.cursor/skills/ (${SKILL_NAMES.length} skills)`);
     // Agents
     const cursorAgentsDir = path.join(projectRoot, '.cursor', 'agents');
@@ -52,7 +65,7 @@ export function exportCursor(
     for (const agent of AGENTS) {
       fs.writeFileSync(
         path.join(cursorAgentsDir, `${agent.name}.md`),
-        generateCursorAgentMd(agent, pluginRoot),
+        generateCursorAgentMd(agent, pluginRoot, cliCommand),
       );
     }
     log.success(`.cursor/agents/ (${AGENTS.length} agents)`);
@@ -62,10 +75,12 @@ export function exportCursor(
 // ─── Cursor generators ────────────────────────────────────────────────────────
 
 /** Generate Cursor-format agent markdown (.cursor/agents/mpga-<slug>.md) */
-function generateCursorAgentMd(agent: AgentMeta, pluginRoot: string | null): string {
-  const instructions = readAgentInstructions(pluginRoot, agent.slug)
-    // Rewrite plugin-root-relative CLI calls to npx mpga
-    .replace(/\$\{CLAUDE_PLUGIN_ROOT\}\/bin\/mpga\.sh/g, 'npx mpga');
+function generateCursorAgentMd(
+  agent: AgentMeta,
+  pluginRoot: string | null,
+  cliCommand: string,
+): string {
+  const instructions = readAgentInstructions(pluginRoot, agent.slug, cliCommand);
 
   return `---
 name: ${agent.name}
@@ -78,7 +93,11 @@ is_background: ${agent.isBackground}
 ${instructions}`;
 }
 
-function generateCursorProjectMdc(indexContent: string, _projectName: string): string {
+function generateCursorProjectMdc(
+  indexContent: string,
+  _projectName: string,
+  cliCommand: string,
+): string {
   const milestonesMatch = indexContent.match(/## Active milestone\n([\s\S]*?)(?=\n##|$)/);
   const milestone = milestonesMatch ? milestonesMatch[1].trim() : '(none)';
 
@@ -113,7 +132,7 @@ Generated: ${new Date().toISOString()}
 `;
 }
 
-function generateCursorEvidenceMdc(): string {
+function generateCursorEvidenceMdc(cliCommand: string): string {
   return `---
 description: "MPGA evidence link conventions — format and verification rules"
 globs:
@@ -137,9 +156,9 @@ alwaysApply: true
 
 ## Verification
 \`\`\`bash
-npx mpga evidence verify       # check all links
-npx mpga drift --quick         # fast staleness check
-npx mpga evidence heal --auto  # auto-fix broken links via AST
+${cliCommand} evidence verify       # check all links
+${cliCommand} drift --quick         # fast staleness check
+${cliCommand} evidence heal --auto  # auto-fix broken links via AST
 \`\`\`
 `;
 }
@@ -158,6 +177,7 @@ alwaysApply: true
 3. Write MINIMAL implementation to pass (green)
 4. Refactor without changing behavior (blue)
 5. Update evidence links in the relevant MPGA/scopes/*.md file
+6. Keep one writer per scope; parallelize read-only scouts and auditors instead
 
 If you find yourself writing implementation code without a test:
 STOP. Delete it. Write the test first.
@@ -200,7 +220,7 @@ Always check the scope BEFORE making changes.
 `;
 }
 
-function generateCursorGlobal(): string {
+function generateCursorGlobal(cliCommand: string): string {
   return `When you see an MPGA/ directory in any project:
 - Read MPGA/INDEX.md before starting any task
 - Use evidence links [E] format: [E] file:line :: symbol()

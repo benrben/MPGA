@@ -1,7 +1,12 @@
 import fs from 'fs';
 import path from 'path';
 import { log } from '../../core/logger.js';
-import { SKILL_NAMES, copySkillsTo } from './agents.js';
+import { SKILL_NAMES, copySkillsTo, rewriteCliReferences } from './agents.js';
+import {
+  copyVendoredRuntime,
+  globalVendoredCliCommand,
+  projectVendoredCliCommand,
+} from './runtime.js';
 
 // ─── Claude Code export ───────────────────────────────────────────────────────
 
@@ -15,6 +20,7 @@ export function exportClaude(
   if (isGlobal) {
     log.info('Append the following to ~/.claude/CLAUDE.md:');
     log.info('\n' + generateClaudeGlobal());
+    copyVendoredRuntime(path.join(process.env.HOME ?? '~', '.claude'), pluginRoot);
     deployClaudePlugin(
       path.join(process.env.HOME ?? '~', '.claude'),
       pluginRoot,
@@ -22,6 +28,7 @@ export function exportClaude(
       true,
     );
   } else {
+    copyVendoredRuntime(projectRoot, pluginRoot);
     fs.writeFileSync(
       path.join(projectRoot, 'CLAUDE.md'),
       generateClaudeMd(indexContent, projectName),
@@ -32,9 +39,9 @@ export function exportClaude(
 }
 
 // Deploy the full MPGA plugin into a .claude/ directory:
-//   skills/mpga-<name>/SKILL.md  (10 skills)
-//   agents/<slug>.md             (9 agents)
-//   commands/<cmd>.md            (12 /mpga:* commands)
+//   skills/mpga-<name>/SKILL.md  (11 skills)
+//   agents/<slug>.md             (10 agents)
+//   commands/<cmd>.md            (21 /mpga:* commands)
 //   settings.json                (hooks merged with existing)
 function deployClaudePlugin(
   claudeDir: string,
@@ -44,20 +51,11 @@ function deployClaudePlugin(
 ): void {
   fs.mkdirSync(claudeDir, { recursive: true });
 
-  // Compute a portable CLI path relative to the project root.
-  // For project-scoped exports this yields e.g. "mpga-plugin/bin/mpga.sh".
-  // For global exports we must use the absolute path as a fallback.
-  let cliPath: string | undefined;
-  if (pluginRoot) {
-    const relPlugin = path.relative(projectRoot, pluginRoot);
-    if (!relPlugin.startsWith('..') && !path.isAbsolute(relPlugin)) {
-      // Plugin lives inside the project tree — use relative path
-      cliPath = path.posix.join(...relPlugin.split(path.sep), 'bin', 'mpga.sh');
-    } else {
-      // Plugin is outside the project (global install, etc.) — absolute path
-      cliPath = path.join(pluginRoot, 'bin', 'mpga.sh').replace(/\\/g, '/');
-    }
-  }
+  const cliPath = pluginRoot
+    ? isGlobal
+      ? globalVendoredCliCommand(claudeDir)
+      : projectVendoredCliCommand()
+    : undefined;
 
   // Skills
   copySkillsTo(path.join(claudeDir, 'skills'), pluginRoot, 'claude', cliPath);
@@ -76,7 +74,11 @@ function deployClaudePlugin(
   if (fs.existsSync(agentsSrc)) {
     fs.mkdirSync(agentsDest, { recursive: true });
     for (const f of fs.readdirSync(agentsSrc).filter((n) => n.endsWith('.md'))) {
-      fs.copyFileSync(path.join(agentsSrc, f), path.join(agentsDest, f));
+      const content = rewriteCliReferences(
+        fs.readFileSync(path.join(agentsSrc, f), 'utf-8'),
+        cliPath,
+      );
+      fs.writeFileSync(path.join(agentsDest, f), content);
     }
     log.success(
       `.claude/agents/ (${fs.readdirSync(agentsSrc).filter((n) => n.endsWith('.md')).length} agents)`,
@@ -93,7 +95,7 @@ function deployClaudePlugin(
         // Resolve ${CLAUDE_PLUGIN_ROOT} in command files too
         let content = fs.readFileSync(path.join(commandsSrc, f), 'utf-8');
         if (cliPath) {
-          content = content.replace(/\$\{CLAUDE_PLUGIN_ROOT\}\/bin\/mpga\.sh/g, cliPath);
+          content = rewriteCliReferences(content, cliPath);
         }
         fs.writeFileSync(path.join(commandsDest, f), content);
       }
@@ -109,11 +111,8 @@ function deployClaudePlugin(
     const settingsPath = path.join(claudeDir, 'settings.json');
     const hooks = JSON.parse(fs.readFileSync(hooksSrc, 'utf-8'));
 
-    // Replace ${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh with the portable CLI path
-    const hooksStr = JSON.stringify(hooks).replace(
-      /\$\{CLAUDE_PLUGIN_ROOT\}\/bin\/mpga\.sh/g,
-      cliPath ?? pluginRoot.replace(/\\/g, '/') + '/bin/mpga.sh',
-    );
+    // Rewrite local/plugin CLI references to the portable vendored command.
+    const hooksStr = rewriteCliReferences(JSON.stringify(hooks), cliPath, pluginRoot);
     const resolvedHooks = JSON.parse(hooksStr);
 
     let settings: Record<string, unknown> = {};
@@ -147,6 +146,8 @@ Run \`mpga sync && mpga export --claude\` to update.
 - ALWAYS cite evidence links [E] when making claims about code
 - NEVER write implementation before tests (TDD enforced)
 - Mark anything unverified as [Unknown]
+- Allow parallel READS, not parallel WRITES: one writer per scope, scouts/auditors in background
+- Prefer scope-local work queues so independent scopes can move in parallel
 
 ## Available MPGA commands
 - /mpga:status — project health dashboard
@@ -176,5 +177,6 @@ When you detect an MPGA/ directory in any project:
 5. Check MPGA/board/BOARD.md for current task state
 6. Run \`mpga drift --quick\` after modifying files
 7. Update scope docs when code changes affect evidence links
+8. Use one writer per scope; scouts and auditors may run in parallel as read-only helpers
 `;
 }

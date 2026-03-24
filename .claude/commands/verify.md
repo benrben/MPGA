@@ -9,10 +9,14 @@ Run full verification pass on completed work.
    - Run full test suite
    - Check for stubs/incomplete implementations
    - Verify evidence links are updated
-   - Run `mpga-plugin/bin/mpga.sh drift --quick`
+   - Run `node ./.mpga-runtime/cli/dist/index.js drift --quick`
    - Confirm milestone progress
 3. Display verification report
 4. If passed: suggest `/mpga:ship`
+
+## Fast path
+- For small, isolated tasks, rely on `reviewer` + quick drift during execution
+- Use full `verifier` runs for milestone boundaries, risky work, or explicit verification
 
 ## Usage
 ```

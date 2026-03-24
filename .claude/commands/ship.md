@@ -5,11 +5,11 @@ Verify, commit, and update documentation after completing work.
 ## Steps
 
 1. Run full test suite — must pass
-2. Run `mpga-plugin/bin/mpga.sh evidence verify` — flag any new stale links
+2. Run `node ./.mpga-runtime/cli/dist/index.js evidence verify` — flag any new stale links
 3. Update scope documents with new evidence links produced this session
 4. Create atomic commit(s) with conventional commit messages
-5. Update milestone status: `mpga-plugin/bin/mpga.sh milestone status`
-6. Archive done tasks: `mpga-plugin/bin/mpga.sh board archive`
+5. Update milestone status: `node ./.mpga-runtime/cli/dist/index.js milestone status`
+6. Archive done tasks: `node ./.mpga-runtime/cli/dist/index.js board archive`
 7. Offer options: merge / create PR / keep branch
 
 ## Usage

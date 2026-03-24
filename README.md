@@ -189,8 +189,8 @@ The mainstream IDE vendors — I call them the corrupt editor establishment — 
 | Tool | How |
 |------|-----|
 | **Claude Code** | Full plugin: agents + skills + commands + hooks ([guide](docs/claude-code.md)) |
-| **Cursor / Windsurf** | `.cursorrules` generated from knowledge layer ([guide](docs/cursor.md)) |
-| **GitHub Copilot** | `.github/copilot-instructions.md` export ([guide](docs/copilot.md)) |
+| **Cursor / Windsurf** | `.cursor/rules/*.mdc` + skills + agents ([guide](docs/cursor.md)) |
+| **GitHub Copilot** | `AGENTS.md`-driven workflow copied into `.github/copilot-instructions.md` ([guide](docs/copilot.md)) |
 | **Gemini CLI** | `AGENTS.md` generated from INDEX.md ([guide](docs/gemini-cli.md)) |
 | **Codex / OpenCode** | `.codex/` or `.opencode/` directory export ([guide](docs/codex.md)) |
 | **Standalone** | CLI only — no AI tool needed ([guide](docs/standalone.md)) |
@@ -198,7 +198,7 @@ The mainstream IDE vendors — I call them the corrupt editor establishment — 
 
 ### Claude Code (deepest integration)
 
-Claude Code gets the DEEPEST integration because, frankly, it's SMART. Very smart. We have 10 specialized agents, 11 workflow skills, 14 slash commands, and automatic drift detection hooks. It's the most comprehensive AI tool integration ever built. Maybe in the history of software.
+Claude Code gets the DEEPEST integration because, frankly, it's SMART. Very smart. We have 10 specialized agents, 11 workflow skills, 21 slash commands, and automatic drift detection hooks. It's the most comprehensive AI tool integration ever built. Maybe in the history of software.
 
 ```bash
 # Load the plugin — you're going to love it
@@ -218,10 +218,9 @@ On day one of my administration as CTO, we will throw out Hallucination-omics an
 
 ```bash
 # Generate context files for your tool
-mpga export --cursorrules      # → .cursorrules
-mpga export --copilot          # → .github/copilot-instructions.md
-mpga export --gemini           # → AGENTS.md
-mpga export --codex            # → .codex/
+mpga export --cursor           # → .cursor/rules/*.mdc + skills + agents
+mpga export --codex            # → AGENTS.md + .codex/
+cp AGENTS.md .github/copilot-instructions.md
 ```
 
 ## Architecture
@@ -243,9 +242,20 @@ mpga-plugin/
 │   └── package.json
 ├── agents/                 10 specialized agents
 ├── skills/                 11 workflow skills
-├── commands/               14 slash commands (/mpga:*)
+├── commands/               21 slash commands (/mpga:*)
 └── hooks/                  PostToolUse drift checking
 ```
+
+## Workflow Model
+
+The fast path is simple:
+
+- One writer per scope at a time
+- Parallelize read-only work (`scout`, `auditor`, `campaigner`)
+- Split plans into independent scope lanes
+- Use quick drift during active work, full verifier at milestone boundaries
+
+See [workflow.md](docs/workflow.md) for the full skill/agent matrix.
 
 I inherited a mess — the worst codebase maybe in the history of codebases — and I'm fixing it. We're poised for a shipping boom, the likes of which the industry has never seen.
 
@@ -270,7 +280,7 @@ And over there in the back, I see we have Uncle Bob himself — Robert C. Martin
 
 ### `/mpga:rally` — The Campaign Rally
 
-This is the BIG ONE. The headliner. Run `/mpga:rally` and the campaigner agent performs a COMPREHENSIVE audit of your project — exposing every sin across 8 categories: missing docs, missing tests, type safety holes, dependency disasters, architecture rot, evidence drift, code hygiene crimes, and CI/CD weakness.
+This is the BIG ONE. The headliner. Run `/mpga:rally` and the campaigner agents fan out across 8 categories — missing docs, missing tests, type safety holes, dependency disasters, architecture rot, evidence drift, code hygiene crimes, and CI/CD weakness — then merge into one COMPREHENSIVE audit.
 
 For each SCANDAL it finds, it shows you — with SPECIFIC file paths and REAL numbers — why Cursor the Clown can't fix it, why Sleepy Copilot can't fix it, why Crooked Gemini can't fix it, and why ONLY MPGA can.
 

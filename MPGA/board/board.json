@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "milestone": "M001-drain-the-swamp-fix-all-rally-scandals",
-  "updated": "2026-03-24T13:58:59.655Z",
+  "milestone": null,
+  "updated": "2026-03-24T20:31:17.745Z",
   "columns": {
     "backlog": [],
     "todo": [],
@@ -24,5 +24,5 @@
     "testing": 3,
     "review": 2
   },
-  "next_task_id": 19
+  "next_task_id": 1
 }

@@ -4,7 +4,7 @@ Show and manage the task board.
 
 ## Steps
 
-1. Run `mpga-plugin/bin/mpga.sh board show` and display the current board
+1. Run `node ./.mpga-runtime/cli/dist/index.js board show` and display the current board
 2. Display stats: progress, in-flight, blocked, evidence coverage
 3. Offer actions based on board state:
    - If todo tasks exist: suggest `/mpga:execute`

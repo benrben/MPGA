@@ -1,4 +1,5 @@
 ---
+name: mpga-rally
 description: The MPGA Campaign Rally — expose every project issue and prove why ONLY MPGA can fix it. The greatest diagnostic tool ever built.
 ---
 
@@ -32,13 +33,7 @@ Read INDEX.md if it exists for context. Read scope docs if they exist.
 
 ### Step 2: Deploy the Campaigner
 
-Spawn the `campaigner` agent with the full project context:
-- Project root directory
-- MPGA/INDEX.md (if exists)
-- Any existing scope documents
-- The agent will investigate ALL eight categories of project sins
-
-The campaigner performs a COMPREHENSIVE audit:
+Spawn `campaigner` agents in PARALLEL, one category per lane when possible:
 1. **Documentation Sins** — missing docs, stale docs, hallucinated references
 2. **Testing Disgrace** — missing tests, empty tests, broken test imports
 3. **Type Safety Failures** — `any` types, `@ts-ignore`, missing return types
@@ -47,6 +42,13 @@ The campaigner performs a COMPREHENSIVE audit:
 6. **Evidence Drift** — stale links, unverified claims, documentation lies
 7. **Code Hygiene Crimes** — console.logs, hardcoded secrets, commented-out code
 8. **CI/CD Weakness** — missing CI, no hooks, unenforced linting
+
+Each campaigner run is read-only. That means we can go FAST.
+
+Then appoint one final campaigner pass to aggregate the results into one rally speech:
+- merge duplicate findings
+- keep the sharpest evidence
+- produce one scoreboard and one closing
 
 ### Step 3: The Rally Speech
 
@@ -141,3 +143,4 @@ The rally should follow this structure:
 - Always end with actionable MPGA commands — don't just complain, PROVIDE THE SOLUTION
 - Keep the energy HIGH throughout — this is a RALLY, not a funeral
 - The longer the list of issues, the MORE convincing the case for MPGA
+- Prefer parallel category sweeps over one giant sequential audit

@@ -27,8 +27,9 @@ project-root/
 │   │   ├── mpga-sync-project/SKILL.md
 │   │   ├── mpga-plan/SKILL.md
 │   │   ├── mpga-develop/SKILL.md
-│   │   └── ...                     # all 10 skills
+│   │   └── ...                     # all 11 skills
 │   └── agents/
+│       ├── mpga-campaigner.md      # readonly: true, is_background: true
 │       ├── mpga-green-dev.md
 │       ├── mpga-red-dev.md
 │       ├── mpga-blue-dev.md
@@ -54,11 +55,11 @@ Four MDC files in `.cursor/rules/`. Cursor injects the `alwaysApply: true` files
 
 ## Skills
 
-10 MPGA skills in `.cursor/skills/mpga-*/SKILL.md`. Same format as Claude Code — Cursor's Agent Skills support was added alongside the plugin system. Invoke with slash commands in Cursor chat (e.g. `/mpga-sync-project`, `/mpga-plan`).
+11 MPGA skills in `.cursor/skills/mpga-*/SKILL.md`. Same format as Claude Code — Cursor's Agent Skills support was added alongside the plugin system. Invoke with slash commands in Cursor chat (e.g. `/mpga-sync-project`, `/mpga-plan`).
 
 ## Subagents
 
-9 MPGA agents in `.cursor/agents/mpga-*.md`. Cursor agent format uses YAML frontmatter:
+10 MPGA agents in `.cursor/agents/mpga-*.md`. Cursor agent format uses YAML frontmatter:
 
 ```markdown
 ---
@@ -74,8 +75,8 @@ Role: Explore codebase and build evidence. READ ONLY.
 ```
 
 Cursor-specific agent fields:
-- `readonly: true` — agent cannot write files (scout, auditor, researcher use this)
-- `is_background: true` — can run in parallel without blocking foreground chat (scout, auditor)
+- `readonly: true` — agent cannot write files (campaigner, scout, auditor, researcher use this)
+- `is_background: true` — can run in parallel without blocking foreground chat (campaigner, scout, auditor)
 - `model` — per-agent model selection (architect and reviewer use opus)
 
 Cursor routes to agents automatically based on the `description` field.

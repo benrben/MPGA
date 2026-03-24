@@ -1,31 +1,16 @@
 # Dependency graph
 
 ## Module dependencies
-
-mpga-plugin → core
-mpga-plugin → commands
-commands → core
-commands → board
-commands → evidence
-commands → generators
-board → core
-generators → core
+(run `mpga sync` to generate dependency graph)
 
 ## Circular dependencies
-(none detected)
+(none detected yet)
 
 ## Orphan modules
-(none detected)
+(none detected yet)
 
 ## Mermaid export
 ```mermaid
 graph TD
-    mpga_plugin --> core
-    mpga_plugin --> commands
-    commands --> core
-    commands --> board
-    commands --> evidence
-    commands --> generators
-    board --> core
-    generators --> core
+    (sync to populate)
 ```

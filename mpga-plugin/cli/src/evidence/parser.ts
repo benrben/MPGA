@@ -36,7 +36,7 @@ export interface EvidenceLink {
   confidence: number;
 }
 
-// Patterns:
+// Patterns (legacy range-based):
 // [E] src/foo.ts:10-20 :: symbolName()
 // [E] src/foo.ts:10-20
 // [E] src/foo.ts :: symbolName
@@ -47,6 +47,17 @@ const EVIDENCE_RE = /\[E\]\s+(\S+?)(?::(\d+)-(\d+))?\s*(?:::\s*(.+))?$/;
 const UNKNOWN_RE = /\[Unknown\]\s+(.+)$/;
 const STALE_RE = /\[Stale:(\d{4}-\d{2}-\d{2})\]\s+(\S+?)(?::(\d+)-(\d+))?\s*(?:::\s*(.+))?$/;
 const DEPRECATED_RE = /\[Deprecated\]\s+(\S+?)(?::(\d+)-(\d+))?\s*(?:::\s*(.+))?$/;
+
+// Patterns (symbol-based):
+// [E] src/foo.ts#symbolName:170 — description
+// [E] src/foo.ts#symbolName:170
+// [E] src/foo.ts#symbolName — description
+// [E] src/foo.ts#symbolName
+// [Stale:2026-03-20] src/foo.ts#symbolName:170
+// [Deprecated] src/foo.ts#symbolName:170
+const EVIDENCE_SYMBOL_RE = /\[E\]\s+(\S+?)#(\w+)(?::(\d+))?\s*(?:—\s*(.+))?$/;
+const STALE_SYMBOL_RE = /\[Stale:(\d{4}-\d{2}-\d{2})\]\s+(\S+?)#(\w+)(?::(\d+))?\s*(?:—\s*(.+))?$/;
+const DEPRECATED_SYMBOL_RE = /\[Deprecated\]\s+(\S+?)#(\w+)(?::(\d+))?\s*(?:—\s*(.+))?$/;
 
 // Strip markdown artifacts (backticks, trailing table pipes) from parsed values
 function cleanParsed(s: string): string {
@@ -64,12 +75,56 @@ function cleanParsed(s: string): string {
  * @returns The parsed EvidenceLink, or null if the line does not contain a recognized evidence link
  */
 export function parseEvidenceLink(line: string): EvidenceLink | null {
-  line = line.trim();
+  const raw = line.trim();
+  // Strip backticks (markdown artifacts) before regex matching
+  line = raw.replace(/`/g, '');
 
-  let m = EVIDENCE_RE.exec(line);
+  // Try symbol-based patterns first (they contain '#' which is more specific)
+  let m = EVIDENCE_SYMBOL_RE.exec(line);
   if (m) {
     return {
-      raw: line,
+      raw,
+      type: 'valid',
+      filepath: cleanParsed(m[1]),
+      symbol: cleanParsed(m[2]),
+      startLine: m[3] ? parseInt(m[3]) : undefined,
+      description: m[4] ? m[4].trim() : undefined,
+      confidence: 1.0,
+    };
+  }
+
+  m = STALE_SYMBOL_RE.exec(line);
+  if (m) {
+    return {
+      raw,
+      type: 'stale',
+      staleDate: m[1],
+      filepath: cleanParsed(m[2]),
+      symbol: cleanParsed(m[3]),
+      startLine: m[4] ? parseInt(m[4]) : undefined,
+      description: m[5] ? m[5].trim() : undefined,
+      confidence: 0,
+    };
+  }
+
+  m = DEPRECATED_SYMBOL_RE.exec(line);
+  if (m) {
+    return {
+      raw,
+      type: 'deprecated',
+      filepath: cleanParsed(m[1]),
+      symbol: cleanParsed(m[2]),
+      startLine: m[3] ? parseInt(m[3]) : undefined,
+      description: m[4] ? m[4].trim() : undefined,
+      confidence: 0.5,
+    };
+  }
+
+  // Legacy range-based patterns
+  m = EVIDENCE_RE.exec(line);
+  if (m) {
+    return {
+      raw,
       type: 'valid',
       filepath: cleanParsed(m[1]),
       startLine: m[2] ? parseInt(m[2]) : undefined,
@@ -81,13 +136,13 @@ export function parseEvidenceLink(line: string): EvidenceLink | null {
 
   m = UNKNOWN_RE.exec(line);
   if (m) {
-    return { raw: line, type: 'unknown', description: m[1], confidence: 0 };
+    return { raw, type: 'unknown', description: m[1], confidence: 0 };
   }
 
   m = STALE_RE.exec(line);
   if (m) {
     return {
-      raw: line,
+      raw,
       type: 'stale',
       staleDate: m[1],
       filepath: cleanParsed(m[2]),
@@ -101,7 +156,7 @@ export function parseEvidenceLink(line: string): EvidenceLink | null {
   m = DEPRECATED_RE.exec(line);
   if (m) {
     return {
-      raw: line,
+      raw,
       type: 'deprecated',
       filepath: cleanParsed(m[1]),
       startLine: m[2] ? parseInt(m[2]) : undefined,
@@ -129,31 +184,54 @@ export function parseEvidenceLinks(content: string): EvidenceLink[] {
 }
 
 /**
- * Formats an EvidenceLink back into its canonical string representation,
- * suitable for writing into markdown scope files.
- *
- * @param link - The EvidenceLink to format
- * @returns The formatted evidence link string (e.g., `[E] src/foo.ts:10-20 :: bar()`)
+ * Determines whether a link should use the symbol-based format.
+ * Symbol-based format is used when a symbol is present and there is no endLine
+ * (i.e., it has a line hint, not a line range).
  */
-export function formatEvidenceLink(link: EvidenceLink): string {
-  if (link.type === 'unknown') return `[Unknown] ${link.description ?? ''}`;
-  if (link.type === 'stale') {
-    let s = `[Stale:${link.staleDate}] ${link.filepath}`;
-    if (link.startLine && link.endLine) s += `:${link.startLine}-${link.endLine}`;
-    if (link.symbol) s += ` :: ${link.symbol}()`;
-    return s;
-  }
-  if (link.type === 'deprecated') {
-    let s = `[Deprecated] ${link.filepath}`;
-    if (link.startLine && link.endLine) s += `:${link.startLine}-${link.endLine}`;
-    if (link.symbol) s += ` :: ${link.symbol}()`;
-    return s;
-  }
-  // valid
-  let s = `[E] ${link.filepath}`;
+function isSymbolBased(link: EvidenceLink): boolean {
+  return !!link.symbol && !link.endLine;
+}
+
+/**
+ * Formats the symbol-based portion of an evidence link: `file#symbol:lineHint — description`.
+ */
+function formatSymbolRef(link: EvidenceLink): string {
+  let s = `${link.filepath}#${link.symbol}`;
+  if (link.startLine) s += `:${link.startLine}`;
+  if (link.description) s += ` — ${link.description}`;
+  return s;
+}
+
+/**
+ * Formats the legacy range-based portion of an evidence link: `file:start-end :: symbol()`.
+ */
+function formatRangeRef(link: EvidenceLink): string {
+  let s = `${link.filepath}`;
   if (link.startLine && link.endLine) s += `:${link.startLine}-${link.endLine}`;
   if (link.symbol) s += ` :: ${link.symbol}()`;
   return s;
+}
+
+/**
+ * Formats an EvidenceLink back into its canonical string representation,
+ * suitable for writing into markdown scope files.
+ *
+ * Uses symbol-based format (`file#symbol:lineHint`) when a symbol is present
+ * without an endLine. Falls back to legacy range format (`file:start-end :: symbol()`)
+ * for links with both startLine and endLine.
+ *
+ * @param link - The EvidenceLink to format
+ * @returns The formatted evidence link string
+ */
+export function formatEvidenceLink(link: EvidenceLink): string {
+  if (link.type === 'unknown') return `[Unknown] ${link.description ?? ''}`;
+
+  const useSymbol = isSymbolBased(link);
+  const ref = useSymbol ? formatSymbolRef(link) : formatRangeRef(link);
+
+  if (link.type === 'stale') return `[Stale:${link.staleDate}] ${ref}`;
+  if (link.type === 'deprecated') return `[Deprecated] ${ref}`;
+  return `[E] ${ref}`;
 }
 
 /**

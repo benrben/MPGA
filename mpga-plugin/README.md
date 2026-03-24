@@ -20,9 +20,9 @@ mpga-plugin/
 │   ├── setup.sh            # Builds the CLI (npm install + tsc)
 │   ├── check-cli.sh        # Ensures CLI is built before hooks run
 │   └── format-evidence.sh  # Evidence link formatter
-├── agents/                 # 9 agent definitions
-├── commands/               # 13 slash commands (/mpga:*)
-├── skills/                 # 10 skill definitions
+├── agents/                 # 10 agent definitions
+├── commands/               # 21 slash commands (/mpga:*)
+├── skills/                 # 11 skill definitions
 └── hooks/
     └── hooks.json          # PostToolUse drift check
 ```
@@ -58,7 +58,7 @@ This runs `mpga init --from-existing`, scans the codebase, and generates the ful
 | `/mpga:scope <name>` | View scope document |
 | `/mpga:drift` | Check evidence drift |
 | `/mpga:plan` | Generate evidence-based task plan |
-| `/mpga:execute` | Run TDD cycle (green → red → blue → review) |
+| `/mpga:execute` | Run TDD cycle (red → green → blue → review) |
 | `/mpga:verify` | Full verification pass |
 | `/mpga:ship` | Commit + update evidence + archive tasks |
 | `/mpga:quick "<task>"` | Ad-hoc fix without full milestone |
@@ -85,3 +85,11 @@ The bundled CLI is always invoked via `${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh`. When 
 3. Proceeds to run the CLI
 
 The hook in `hooks/hooks.json` calls `bin/mpga.sh drift --quick` after every Write/Edit — drift checking is always available with no user setup.
+
+## Workflow model
+
+- One writer per scope at a time
+- Read-only helpers (`scout`, `auditor`, `campaigner`) can fan out in parallel
+- Plans should isolate independent scopes into separate task lanes
+
+See [workflow.md](../docs/workflow.md) for the detailed matrix.

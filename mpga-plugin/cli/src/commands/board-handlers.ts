@@ -2,9 +2,19 @@ import fs from 'fs';
 import path from 'path';
 import { log } from '../core/logger.js';
 import { findProjectRoot } from '../core/config.js';
-import { loadBoard, recalcStats, addTask, moveTask, findTaskFile } from '../board/board.js';
+import {
+  loadBoard,
+  recalcStats,
+  addTask,
+  moveTask,
+  findTaskFile,
+  checkWipLimit,
+} from '../board/board.js';
 import { parseTaskFile, renderTaskFile, loadAllTasks, Column, Priority } from '../board/task.js';
 import { renderBoardMd } from '../board/board-md.js';
+import { writeBoardLiveSnapshot } from '../board/live.js';
+import { writeBoardLiveHtml } from '../board/live-html.js';
+import { createBoardLiveServer, openBoardLiveUrl } from './board-live-server.js';
 import { persistBoard } from './board.js';
 
 export function getBoardDir(projectRoot: string): string {
@@ -31,6 +41,33 @@ export function handleBoardShow(opts: { json?: boolean; milestone?: string }): v
 
   const mdContent = renderBoardMd(board, tasksDir);
   console.log(mdContent);
+}
+
+export function handleBoardLive(
+  opts: { serve?: boolean; open?: boolean; port?: number } = {},
+): void {
+  const projectRoot = findProjectRoot() ?? process.cwd();
+  const boardDir = getBoardDir(projectRoot);
+  const tasksDir = getTasksDir(projectRoot);
+
+  const board = loadBoard(boardDir);
+  persistBoard(board, boardDir, tasksDir);
+  writeBoardLiveSnapshot(board, tasksDir, boardDir);
+  writeBoardLiveHtml(boardDir);
+
+  const liveDir = path.join(boardDir, 'live');
+  log.success(`Generated live board artifacts in ${path.join('MPGA', 'board', 'live')}`);
+
+  const shouldServe = opts.serve || opts.open;
+  if (!shouldServe) return;
+
+  const port = opts.port && opts.port > 0 ? opts.port : 4173;
+  const server = createBoardLiveServer(liveDir);
+  server.listen(port, '127.0.0.1', () => {
+    const url = `http://127.0.0.1:${port}`;
+    log.success(`Serving live board at ${url}`);
+    if (opts.open) openBoardLiveUrl(url);
+  });
 }
 
 export function handleBoardAdd(
@@ -84,12 +121,20 @@ export function handleBoardMove(taskId: string, column: string, opts: { force?: 
   log.success(`Moved ${taskId} → ${column}`);
 }
 
-export function handleBoardClaim(taskId: string, opts: { agent?: string }): void {
+export function handleBoardClaim(taskId: string, opts: { agent?: string; force?: boolean }): void {
   const projectRoot = findProjectRoot() ?? process.cwd();
   const boardDir = getBoardDir(projectRoot);
   const tasksDir = getTasksDir(projectRoot);
 
   const board = loadBoard(boardDir);
+
+  // Check WIP limit before claiming
+  if (!opts.force && !checkWipLimit(board, 'in-progress')) {
+    log.error(
+      `WIP limit reached for 'in-progress' (${board.columns['in-progress'].length}/${board.wip_limits['in-progress']}). Use --force to override.`,
+    );
+    process.exit(1);
+  }
 
   // Find and update the task file
   const taskFile = findTaskFile(tasksDir, taskId);

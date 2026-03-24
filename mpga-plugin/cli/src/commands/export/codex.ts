@@ -3,6 +3,11 @@ import path from 'path';
 import { log } from '../../core/logger.js';
 import { AGENTS, SKILL_NAMES, copySkillsTo, readAgentInstructions } from './agents.js';
 import type { AgentMeta } from './agents.js';
+import {
+  copyVendoredRuntime,
+  globalVendoredCliCommand,
+  projectVendoredCliCommand,
+} from './runtime.js';
 
 // ─── Codex / Gemini CLI export ───────────────────────────────────────────────
 
@@ -16,26 +21,33 @@ export function exportCodex(
 ): void {
   if (isGlobal) {
     const codexGlobalDir = path.join(process.env.HOME ?? '~', '.codex');
+    const cliCommand = pluginRoot ? globalVendoredCliCommand(codexGlobalDir) : 'npx mpga';
+    copyVendoredRuntime(codexGlobalDir, pluginRoot);
     fs.mkdirSync(codexGlobalDir, { recursive: true });
-    fs.writeFileSync(path.join(codexGlobalDir, 'AGENTS.md'), generateCodexGlobalAgentsMd());
+    fs.writeFileSync(
+      path.join(codexGlobalDir, 'AGENTS.md'),
+      generateCodexGlobalAgentsMd(cliCommand),
+    );
     log.success('Generated ~/.codex/AGENTS.md');
     const globalSkillsDir = path.join(codexGlobalDir, 'skills');
-    copySkillsTo(globalSkillsDir, pluginRoot, 'codex');
+    copySkillsTo(globalSkillsDir, pluginRoot, 'codex', cliCommand);
     log.success(`Generated ~/.codex/skills/ (${SKILL_NAMES.length} skills)`);
     const globalAgentsDir = path.join(codexGlobalDir, 'agents');
     fs.mkdirSync(globalAgentsDir, { recursive: true });
     for (const agent of AGENTS) {
       fs.writeFileSync(
         path.join(globalAgentsDir, `${agent.name}.toml`),
-        generateCodexAgentToml(agent, pluginRoot),
+        generateCodexAgentToml(agent, pluginRoot, cliCommand),
       );
     }
     log.success(`Generated ~/.codex/agents/ (${AGENTS.length} TOML agents)`);
   } else {
+    const cliCommand = pluginRoot ? projectVendoredCliCommand() : 'npx mpga';
+    copyVendoredRuntime(projectRoot, pluginRoot);
     // Root AGENTS.md
     fs.writeFileSync(
       path.join(projectRoot, 'AGENTS.md'),
-      generateAgentsMd(indexContent, projectName),
+      generateAgentsMd(indexContent, projectName, cliCommand),
     );
     // MPGA layer nav guide
     fs.writeFileSync(path.join(mpgaDir, 'AGENTS.md'), generateMpgaLayerAgentsMd());
@@ -45,7 +57,7 @@ export function exportCodex(
     log.success('Generated AGENTS.md (root + MPGA/ + scope subdirs)');
     // Skills
     const codexSkillsDir = path.join(projectRoot, '.codex', 'skills');
-    copySkillsTo(codexSkillsDir, pluginRoot, 'codex');
+    copySkillsTo(codexSkillsDir, pluginRoot, 'codex', cliCommand);
     log.success(`.codex/skills/ (${SKILL_NAMES.length} skills)`);
     // TOML agents
     const codexAgentsDir = path.join(projectRoot, '.codex', 'agents');
@@ -53,7 +65,7 @@ export function exportCodex(
     for (const agent of AGENTS) {
       fs.writeFileSync(
         path.join(codexAgentsDir, `${agent.name}.toml`),
-        generateCodexAgentToml(agent, pluginRoot),
+        generateCodexAgentToml(agent, pluginRoot, cliCommand),
       );
     }
     log.success(`.codex/agents/ (${AGENTS.length} TOML agents)`);
@@ -63,9 +75,12 @@ export function exportCodex(
 // ─── Codex generators ────────────────────────────────────────────────────────
 
 /** Generate Codex-format TOML agent (.codex/agents/mpga-<slug>.toml) */
-function generateCodexAgentToml(agent: AgentMeta, pluginRoot: string | null): string {
-  const instructions = readAgentInstructions(pluginRoot, agent.slug)
-    .replace(/\$\{CLAUDE_PLUGIN_ROOT\}\/bin\/mpga\.sh/g, 'npx mpga')
+function generateCodexAgentToml(
+  agent: AgentMeta,
+  pluginRoot: string | null,
+  cliCommand: string,
+): string {
+  const instructions = readAgentInstructions(pluginRoot, agent.slug, cliCommand)
     // Escape double-quotes and backslashes for TOML triple-quoted strings
     .replace(/\\/g, '\\\\')
     .replace(/"""/g, '\\"\\"\\"');
@@ -81,7 +96,7 @@ ${instructions}
 `;
 }
 
-function generateAgentsMd(indexContent: string, _projectName: string): string {
+function generateAgentsMd(indexContent: string, _projectName: string, cliCommand: string): string {
   return `# MPGA — Evidence-Backed Context Engineering
 
 This project uses MPGA to maintain a verified knowledge layer.
@@ -104,15 +119,20 @@ The AI's "map" of this codebase lives in the MPGA/ directory.
 3. Refactor without changing behavior
 4. Update MPGA scope docs with new evidence links
 
+## Parallel execution protocol
+- One writer per scope at a time
+- Read-only helpers like scouts and auditors may run in parallel
+- Break plans into independent scope lanes when possible
+
 ## Task board
 Current tasks tracked in MPGA/board/BOARD.md
 Task cards in MPGA/board/tasks/T*.md
 
 ## Verification commands
 - Run tests: npm test
-- Check evidence: npx mpga evidence verify
-- Check drift: npx mpga drift --quick
-- Board status: npx mpga board show
+- Check evidence: ${cliCommand} evidence verify
+- Check drift: ${cliCommand} drift --quick
+- Board status: ${cliCommand} board show
 
 ## Project structure
 See MPGA/INDEX.md for complete file registry with evidence links.
@@ -193,7 +213,7 @@ See MPGA/scopes/${scopeName}.md for full dependency graph.
   }
 }
 
-function generateCodexGlobalAgentsMd(): string {
+function generateCodexGlobalAgentsMd(cliCommand: string): string {
   return `# MPGA Methodology (Global)
 
 When working in ANY project that contains an MPGA/ directory:
@@ -203,13 +223,14 @@ When working in ANY project that contains an MPGA/ directory:
 - Unknown is honest: mark gaps as [Unknown], never guess
 - TDD is mandatory: test → implement → refactor → update evidence
 - Tiered reading: INDEX.md first, scope docs second, deep docs only if needed
+- Parallelize reads, not writes: one writer per scope
 
 ## Workflow
 1. Read MPGA/INDEX.md for project map
 2. Check MPGA/board/BOARD.md for current tasks
 3. Load relevant MPGA/scopes/*.md before touching code
 4. After changes: update evidence links in scope docs
-5. Run \`npx mpga drift --quick\` to verify nothing broke
+5. Run \`${cliCommand} drift --quick\` to verify nothing broke
 
 ## Evidence link format
 [E] filepath:startLine-endLine :: symbolName()

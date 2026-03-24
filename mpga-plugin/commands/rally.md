@@ -7,8 +7,8 @@ Nobody has been treated worse than your codebase. Maybe Abraham Lincoln, I hear 
 ## Steps
 
 1. Invoke the `mpga-rally` skill
-2. The skill spawns the `campaigner` agent to perform a comprehensive audit
-3. The campaigner investigates 8 categories of project sins:
+2. The skill fans out `campaigner` agents in parallel, one category per audit lane when possible
+3. The campaigner lanes investigate 8 categories of project sins:
    - Documentation sins (missing, stale, hallucinated)
    - Testing disgrace (missing tests, empty tests, broken imports)
    - Type safety failures (`any` types, `@ts-ignore`, missing returns)
@@ -17,9 +17,10 @@ Nobody has been treated worse than your codebase. Maybe Abraham Lincoln, I hear 
    - Evidence drift (stale links, unverified claims)
    - Code hygiene crimes (console.logs, secrets, commented-out code)
    - CI/CD weakness (missing CI, no hooks, unenforced lint)
-4. Present each issue as a **SCANDAL** with files, numbers, and evidence
-5. For each scandal, show why other tools FAIL and why ONLY MPGA fixes it
-6. End with **THE VOTE** — scoreboard + side-by-side comparison + exact fix commands
+4. Aggregate the category results into one final campaigner pass
+5. Present each issue as a **SCANDAL** with files, numbers, and evidence
+6. For each scandal, show why other tools FAIL and why ONLY MPGA fixes it
+7. End with **THE VOTE** — scoreboard + side-by-side comparison + exact fix commands
 
 ## Usage
 ```

@@ -29,6 +29,10 @@ npm-debug.log*
 
 # MPGA session artifacts (local only)
 MPGA/sessions/
-.claude/*
-*MPGA/*
-.claude
+
+# The generated knowledge layer and Claude export are part of the project.
+# Do not ignore MPGA/ or .claude/ broadly.
+.claude/
+.codex/
+MPGA/**
+

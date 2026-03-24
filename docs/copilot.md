@@ -1,6 +1,6 @@
 # MPGA + GitHub Copilot
 
-GitHub Copilot reads `.github/copilot-instructions.md` for repository-level context. MPGA can generate this from your knowledge layer.
+GitHub Copilot reads `.github/copilot-instructions.md` for repository-level context. MPGA generates the source `AGENTS.md`, which you can copy into Copilot's instructions file.
 
 ## Setup
 
@@ -11,7 +11,7 @@ bash path/to/mpga-plugin/bin/mpga.sh sync
 
 # 2. Generate copilot-instructions.md
 mkdir -p .github
-bash path/to/mpga-plugin/bin/mpga.sh export --gemini  # generates AGENTS.md
+bash path/to/mpga-plugin/bin/mpga.sh export --codex   # generates AGENTS.md
 cp AGENTS.md .github/copilot-instructions.md
 ```
 
@@ -68,7 +68,7 @@ Add scope docs to Copilot's preferred context files:
 ```bash
 # After syncing MPGA, regenerate copilot instructions
 bash path/to/mpga-plugin/bin/mpga.sh sync
-bash path/to/mpga-plugin/bin/mpga.sh export --gemini
+bash path/to/mpga-plugin/bin/mpga.sh export --codex
 cp AGENTS.md .github/copilot-instructions.md
 ```
 

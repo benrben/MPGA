@@ -23,7 +23,7 @@ project-root/
 │       ├── mpga-sync-project/SKILL.md
 │       ├── mpga-plan/SKILL.md
 │       ├── mpga-develop/SKILL.md
-│       └── ...                        # all 10 skills
+│       └── ...                        # all 11 skills
 ├── .agents/
 │   └── workflows/
 │       ├── mpga-plan.md               # Step-by-step planning workflow
@@ -49,7 +49,7 @@ bash path/to/mpga-plugin/bin/mpga.sh export --antigravity  # → GEMINI.md + .ag
 
 ## Skills (`.agent/skills/`)
 
-10 MPGA skills, same SKILL.md format as Claude Code and Cursor. Antigravity loads skills on demand based on relevance to the current task. Invoke with slash commands (e.g. `/mpga-sync-project`, `/mpga-develop`).
+11 MPGA skills, same SKILL.md format as Claude Code and Cursor. Antigravity loads skills on demand based on relevance to the current task. Invoke with slash commands (e.g. `/mpga-sync-project`, `/mpga-develop`).
 
 ## Workflows (`.agents/workflows/`)
 
@@ -63,9 +63,10 @@ Antigravity's native step-by-step workflow format — its closest analog to Clau
 
 ## Subagents
 
-Antigravity doesn't use the same named-agent model as Claude Code, Cursor, or Codex. Instead:
-- MPGA's 9 agents are implemented as **skills with agent-like instructions** (e.g., `mpga-green-dev` skill contains the full green-dev protocol)
-- Multi-step orchestration happens via **workflows** (`.agents/workflows/mpga-develop.md` runs the full green → red → blue → review cycle)
+Antigravity doesn't use the same named-agent file model as Claude Code, Cursor, or Codex. Instead:
+- MPGA exports the 11 workflow skills directly
+- Multi-step orchestration happens via **workflows** (`.agents/workflows/mpga-develop.md` runs the full red → green → blue → review cycle)
+- The agent responsibilities still exist conceptually, but they are encoded through the exported skills/workflows rather than separate agent files
 
 ## Knowledge Items
 
@@ -84,7 +85,7 @@ bash path/to/mpga-plugin/bin/mpga.sh export --antigravity --global
 ```
 
 Writes:
-- `~/.gemini/antigravity/skills/mpga-*/` — 10 skills (global)
+- `~/.gemini/antigravity/skills/mpga-*/` — 11 skills (global)
 - `~/.antigravity/rules/mpga-global.md` — MPGA methodology for all projects
 
 ## Keep it updated

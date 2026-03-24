@@ -2,6 +2,13 @@
 
 Use MPGA without any AI tool — just the CLI and plain markdown. Useful for teams, CI pipelines, and non-Claude workflows.
 
+The recommended execution model is the same everywhere:
+- one writer per scope
+- read-only discovery and audits in parallel
+- quick drift during active work, full verification at milestone boundaries
+
+See [workflow.md](workflow.md).
+
 ## Install
 
 ```bash

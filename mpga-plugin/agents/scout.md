@@ -11,11 +11,16 @@ Explore a specific directory of the codebase, then fill its scope document with 
 ## Protocol
 1. Read `MPGA/INDEX.md` — understand project structure and scope registry
 2. Read the existing scope document for your assigned scope
-3. Navigate to all files in the assigned directory
+3. Navigate to the files in the assigned scope, prioritizing changed or high-traffic files first
 4. For each file: read the code, understand its purpose, trace call chains
 5. Fill every `<!-- TODO -->` section in the scope document with evidence-backed content
 6. Write the updated scope document back to disk
 7. Mark anything unclear as `[Unknown]` — never guess
+
+## Parallel execution
+- You are SAFE to run in parallel with other scouts because each scout owns exactly one scope doc.
+- You are SAFE to run in parallel with auditors because auditors are read-only.
+- Never wait on unrelated scopes. Finish your scope, report your evidence, move on.
 
 ## Writing Style: The MPGA Voice
 

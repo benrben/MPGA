@@ -5,8 +5,8 @@ Auto-detect the next logical action based on current project state.
 ## Decision tree
 
 1. Read `MPGA/INDEX.md` for active milestone
-2. Read board state: `mpga-plugin/bin/mpga.sh board show --json`
-3. Check context budget: `mpga-plugin/bin/mpga.sh session budget`
+2. Read board state: `node ./.mpga-runtime/cli/dist/index.js board show --json`
+3. Check context budget: `node ./.mpga-runtime/cli/dist/index.js session budget`
 
 ### If context budget is critical (>80% used)
 → Run `/mpga:handoff` — create handoff and clear context
@@ -18,7 +18,7 @@ Auto-detect the next logical action based on current project state.
 → Continue: `/mpga:execute <task-id>`
 
 ### If todo tasks ready
-→ Pick up next: `/mpga:execute`
+→ Pick up the next task whose scope is not already locked by another in-progress write lane: `/mpga:execute`
 
 ### If all tasks done
 → Run `/mpga:verify`, then suggest `/mpga:ship`
@@ -27,7 +27,7 @@ Auto-detect the next logical action based on current project state.
 → Suggest `/mpga:plan` to generate tasks
 
 ### If no milestone
-→ Suggest `mpga-plugin/bin/mpga.sh milestone new "<name>"`
+→ Suggest `node ./.mpga-runtime/cli/dist/index.js milestone new "<name>"`
 
 ### If MPGA not initialized
 → Run `/mpga:init`

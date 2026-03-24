@@ -179,7 +179,7 @@ describe('resolveEvidence', () => {
     expect(result.confidence).toBe(1.0);
   });
 
-  it('handles file with only a symbol and no line range (AST lookup path)', () => {
+  it('handles file with only a symbol and no line range (symbol-based lookup path)', () => {
     const source = ['export function compute(x: number) {', '  return x * x;', '}'].join('\n');
     writeFile('src/compute.ts', source);
 
@@ -188,11 +188,9 @@ describe('resolveEvidence', () => {
       symbol: 'compute',
     });
     const result = resolveEvidence(link, tmpDir);
-    // No startLine/endLine on the link, so it won't attempt verifyRange.
-    // It will go to AST lookup since symbol is set.
-    // AST will find it; since link has no startLine/endLine, healed check
-    // compares undefined !== location.startLine → healed
-    expect(result.status).toBe('healed');
+    // No startLine/endLine on the link — treated as symbol-based.
+    // AST finds the symbol; since no hint was provided, it's valid (not healed).
+    expect(result.status).toBe('valid');
     expect(result.confidence).toBe(0.9);
     expect(result.startLine).toBe(1);
   });
@@ -297,5 +295,105 @@ describe('verifyAllLinks', () => {
 
     expect(results[0].link).toBe(link); // same reference
     expect(results[0].link.raw).toBe('[E] src/x.ts');
+  });
+});
+
+describe('resolveEvidence — symbol-based format', () => {
+  it('resolves symbol-based link when symbol is at the hinted line', () => {
+    const source = [
+      'const a = 1;',
+      'export function greet(name: string) {',
+      '  return `Hello, ${name}`;',
+      '}',
+    ].join('\n');
+    writeFile('src/greet.ts', source);
+
+    // Symbol-based link: symbol=greet, startLine=2 (hint), no endLine
+    const link = makeLink({
+      filepath: 'src/greet.ts',
+      symbol: 'greet',
+      startLine: 2,
+      // no endLine — this distinguishes symbol-based from old range-based
+    });
+    const result = resolveEvidence(link, tmpDir);
+    expect(result.status).toBe('valid');
+    expect(result.confidence).toBeGreaterThanOrEqual(0.9);
+    expect(result.startLine).toBe(2);
+  });
+
+  it('resolves symbol-based link when line hint has drifted', () => {
+    // Symbol is actually at line 5 now, but hint says line 2
+    const source = [
+      '// comment 1',
+      '// comment 2',
+      '// comment 3',
+      '',
+      'export function greet(name: string) {',
+      '  return `Hello, ${name}`;',
+      '}',
+    ].join('\n');
+    writeFile('src/greet.ts', source);
+
+    const link = makeLink({
+      filepath: 'src/greet.ts',
+      symbol: 'greet',
+      startLine: 2, // drifted hint — actual is line 5
+    });
+    const result = resolveEvidence(link, tmpDir);
+    // Symbol found via AST — healed because hint was wrong
+    expect(result.status).toBe('healed');
+    expect(result.confidence).toBeGreaterThanOrEqual(0.6);
+    expect(result.startLine).toBe(5);
+    expect(result.healedFrom).toBeDefined();
+  });
+
+  it('resolves symbol-based link with no line hint at all', () => {
+    const source = ['export function compute(x: number) {', '  return x * x;', '}'].join('\n');
+    writeFile('src/compute.ts', source);
+
+    const link = makeLink({
+      filepath: 'src/compute.ts',
+      symbol: 'compute',
+      // no startLine, no endLine
+    });
+    const result = resolveEvidence(link, tmpDir);
+    // AST finds it; since no startLine on the link, it will be healed
+    expect(result.confidence).toBeGreaterThanOrEqual(0.6);
+    expect(result.startLine).toBe(1);
+  });
+
+  it('falls back to fuzzy match when symbol not found via AST', () => {
+    const source = [
+      '// logic module',
+      'const handlers = {',
+      '  specialHandler: (x: number) => x * 2,',
+      '};',
+      'export default handlers;',
+    ].join('\n');
+    writeFile('src/handler.ts', source);
+
+    const link = makeLink({
+      filepath: 'src/handler.ts',
+      symbol: 'specialHandler',
+      startLine: 10, // drifted hint
+    });
+    const result = resolveEvidence(link, tmpDir);
+    expect(result.status).toBe('healed');
+    expect(result.confidence).toBe(0.6);
+    expect(result.startLine).toBe(3);
+  });
+
+  it('returns stale when symbol is gone and line hint is useless', () => {
+    const source = ['export function unrelated() {', '  return 1;', '}'].join('\n');
+    writeFile('src/gone.ts', source);
+
+    const link = makeLink({
+      filepath: 'src/gone.ts',
+      symbol: 'vanishedSymbol',
+      startLine: 5,
+    });
+    const result = resolveEvidence(link, tmpDir);
+    expect(result.status).toBe('stale');
+    expect(result.confidence).toBe(0);
   });
 });

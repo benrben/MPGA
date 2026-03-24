@@ -4,15 +4,15 @@ Export current session state for a fresh context window.
 
 ## Steps
 
-1. Check context budget: `mpga-plugin/bin/mpga.sh session budget`
+1. Check context budget: `node ./.mpga-runtime/cli/dist/index.js session budget`
 2. Summarize current session state:
    - What was accomplished this session
    - Current milestone/phase/task
    - Key decisions made (with rationale)
    - Open questions and blockers
    - Files modified this session
-3. Save handoff document: `mpga-plugin/bin/mpga.sh session handoff --accomplished "<summary>"`
-4. Log the session: `mpga-plugin/bin/mpga.sh session log "<brief description of work done>"`
+3. Save handoff document: `node ./.mpga-runtime/cli/dist/index.js session handoff --accomplished "<summary>"`
+4. Log the session: `node ./.mpga-runtime/cli/dist/index.js session log "<brief description of work done>"`
 5. Tell the user the handoff file location and how to resume
 
 ## Usage

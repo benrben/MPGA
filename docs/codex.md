@@ -28,8 +28,9 @@ project-root/
 │   │   ├── mpga-sync-project/SKILL.md
 │   │   ├── mpga-plan/SKILL.md
 │   │   ├── mpga-develop/SKILL.md
-│   │   └── ...                       # all 10 skills
+│   │   └── ...                       # all 11 skills
 │   └── agents/
+│       ├── mpga-campaigner.toml
 │       ├── mpga-green-dev.toml
 │       ├── mpga-red-dev.toml
 │       ├── mpga-blue-dev.toml
@@ -84,7 +85,7 @@ Strict rules:
 
 ## Skills
 
-10 MPGA skills in `.codex/skills/mpga-*/SKILL.md`. Codex loads skills on demand when the conversation matches the skill's trigger description.
+11 MPGA skills in `.codex/skills/mpga-*/SKILL.md`. Codex loads skills on demand when the conversation matches the skill's trigger description.
 
 ## Global config (user-level)
 
@@ -94,8 +95,8 @@ bash path/to/mpga-plugin/bin/mpga.sh export --codex --global
 
 Writes:
 - `~/.codex/AGENTS.md` — global MPGA methodology
-- `~/.codex/skills/mpga-*/` — 10 skills
-- `~/.codex/agents/mpga-*.toml` — 9 agents
+- `~/.codex/skills/mpga-*/` — 11 skills
+- `~/.codex/agents/mpga-*.toml` — 10 agents
 
 ## Gemini CLI
 

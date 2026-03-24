@@ -27,8 +27,8 @@ vi.mock('./agents.js', () => ({
   ],
   SKILL_NAMES: ['sync-project', 'plan'],
   copySkillsTo: vi.fn(),
-  readAgentInstructions: vi.fn((_pluginRoot: string | null, slug: string) => {
-    return `Instructions for ${slug}\nUse \${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh sync`;
+  readAgentInstructions: vi.fn((_pluginRoot: string | null, slug: string, cliPath?: string) => {
+    return `Instructions for ${slug}\nUse ${cliPath ?? 'node ${CLAUDE_PLUGIN_ROOT}/cli/dist/index.js'} sync`;
   }),
 }));
 
@@ -153,7 +153,12 @@ describe('exportCodex', () => {
       exportCodex(projectRoot, mpgaDir, '', 'my-project', '/some/plugin', false);
 
       const expectedSkillsDir = path.join(projectRoot, '.codex', 'skills');
-      expect(mockedCopySkillsTo).toHaveBeenCalledWith(expectedSkillsDir, '/some/plugin', 'codex');
+      expect(mockedCopySkillsTo).toHaveBeenCalledWith(
+        expectedSkillsDir,
+        '/some/plugin',
+        'codex',
+        'node ./.mpga-runtime/cli/dist/index.js',
+      );
     });
 
     it('creates .codex/agents/ with TOML files for each agent', () => {
@@ -174,14 +179,14 @@ describe('exportCodex', () => {
       }
     });
 
-    it('TOML agent files replace ${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh with npx mpga', () => {
+    it('TOML agent files replace local CLI references with vendored runtime path', () => {
       exportCodex(projectRoot, mpgaDir, '', 'my-project', '/some/plugin', false);
 
       const tomlPath = path.join(projectRoot, '.codex', 'agents', 'mpga-test-agent.toml');
       const content = fs.readFileSync(tomlPath, 'utf-8');
 
-      expect(content).toContain('npx mpga');
-      expect(content).not.toContain('${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh');
+      expect(content).toContain('node ./.mpga-runtime/cli/dist/index.js');
+      expect(content).not.toContain('${CLAUDE_PLUGIN_ROOT}/cli/dist/index.js');
     });
 
     it('TOML agent files escape double quotes in description', () => {
@@ -229,7 +234,12 @@ describe('exportCodex', () => {
       exportCodex('/unused', '/unused/MPGA', '', 'proj', '/plugin', true);
 
       const expectedSkillsDir = path.join(tmpDir, '.codex', 'skills');
-      expect(mockedCopySkillsTo).toHaveBeenCalledWith(expectedSkillsDir, '/plugin', 'codex');
+      expect(mockedCopySkillsTo).toHaveBeenCalledWith(
+        expectedSkillsDir,
+        '/plugin',
+        'codex',
+        `${path.join(tmpDir, '.codex', '.mpga-runtime', 'cli', 'dist', 'index.js').replace(/\\/g, '/')}`,
+      );
     });
 
     it('creates ~/.codex/agents/ with TOML files for each agent', () => {
@@ -271,7 +281,7 @@ describe('exportCodex', () => {
       const mpgaDir = path.join(projectRoot, 'MPGA');
       fs.mkdirSync(mpgaDir, { recursive: true });
 
-      exportCodex(projectRoot, mpgaDir, '', 'proj', null, false);
+      exportCodex(projectRoot, mpgaDir, '', 'proj', '/plugin', false);
 
       const tomlPath = path.join(projectRoot, '.codex', 'agents', 'mpga-test-agent.toml');
       const content = fs.readFileSync(tomlPath, 'utf-8');
@@ -288,7 +298,7 @@ describe('exportCodex', () => {
       const mpgaDir = path.join(projectRoot, 'MPGA');
       fs.mkdirSync(mpgaDir, { recursive: true });
 
-      exportCodex(projectRoot, mpgaDir, '', 'proj', null, false);
+      exportCodex(projectRoot, mpgaDir, '', 'proj', '/plugin', false);
 
       const tomlPath = path.join(projectRoot, '.codex', 'agents', 'mpga-test-agent.toml');
       const content = fs.readFileSync(tomlPath, 'utf-8');
@@ -305,8 +315,16 @@ describe('exportCodex', () => {
 
       exportCodex(projectRoot, mpgaDir, '', 'proj', '/my/plugin', false);
 
-      expect(mockedReadAgentInstructions).toHaveBeenCalledWith('/my/plugin', 'test-agent');
-      expect(mockedReadAgentInstructions).toHaveBeenCalledWith('/my/plugin', 'readonly-agent');
+      expect(mockedReadAgentInstructions).toHaveBeenCalledWith(
+        '/my/plugin',
+        'test-agent',
+        'node ./.mpga-runtime/cli/dist/index.js',
+      );
+      expect(mockedReadAgentInstructions).toHaveBeenCalledWith(
+        '/my/plugin',
+        'readonly-agent',
+        'node ./.mpga-runtime/cli/dist/index.js',
+      );
     });
   });
 
@@ -318,12 +336,12 @@ describe('exportCodex', () => {
       const mpgaDir = path.join(projectRoot, 'MPGA');
       fs.mkdirSync(mpgaDir, { recursive: true });
 
-      exportCodex(projectRoot, mpgaDir, '', 'proj', null, false);
+      exportCodex(projectRoot, mpgaDir, '', 'proj', '/plugin', false);
 
       const content = fs.readFileSync(path.join(projectRoot, 'AGENTS.md'), 'utf-8');
       expect(content).toContain('npm test');
-      expect(content).toContain('npx mpga evidence verify');
-      expect(content).toContain('npx mpga board show');
+      expect(content).toContain('node ./.mpga-runtime/cli/dist/index.js evidence verify');
+      expect(content).toContain('node ./.mpga-runtime/cli/dist/index.js board show');
     });
 
     it('root AGENTS.md contains timestamp', () => {
@@ -351,11 +369,13 @@ describe('exportCodex', () => {
     });
 
     it('global AGENTS.md contains workflow steps', () => {
-      exportCodex('/unused', '/unused/MPGA', '', 'proj', null, true);
+      exportCodex('/unused', '/unused/MPGA', '', 'proj', '/plugin', true);
 
       const content = fs.readFileSync(path.join(tmpDir, '.codex', 'AGENTS.md'), 'utf-8');
       expect(content).toContain('Read MPGA/INDEX.md');
-      expect(content).toContain('npx mpga drift --quick');
+      expect(content).toContain(
+        path.join(tmpDir, '.codex', '.mpga-runtime', 'cli', 'dist', 'index.js'),
+      );
     });
 
     it('subdirectory AGENTS.md limits evidence links to 5', () => {

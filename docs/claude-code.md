@@ -41,10 +41,10 @@ The plugin provides agents, commands, and hooks:
 
 ```
 mpga-plugin/
-├── agents/           # 9 agents: red-dev, green-dev, blue-dev, scout, ...
-├── commands/         # 12 /mpga:* commands
+├── agents/           # 10 agents: campaigner, red-dev, green-dev, blue-dev, scout, ...
+├── commands/         # 21 /mpga:* commands
 ├── hooks/            # PostToolUse drift check (triggers mpga drift --quick)
-└── skills/           # 10 skill definitions (source of truth)
+└── skills/           # 11 skill definitions (source of truth)
 ```
 
 ### Per-project export
@@ -59,17 +59,21 @@ This generates:
 project-root/
 ├── CLAUDE.md                 # Project context (generated from MPGA/INDEX.md)
 └── .claude/
-    └── skills/
-        ├── mpga-sync-project/SKILL.md
-        ├── mpga-brainstorm/SKILL.md
-        ├── mpga-plan/SKILL.md
-        ├── mpga-develop/SKILL.md
-        ├── mpga-drift-check/SKILL.md
-        ├── mpga-ask/SKILL.md
-        ├── mpga-onboard/SKILL.md
-        ├── mpga-ship/SKILL.md
-        ├── mpga-handoff/SKILL.md
-        └── mpga-map-codebase/SKILL.md
+    ├── skills/
+    │   ├── mpga-sync-project/SKILL.md
+    │   ├── mpga-brainstorm/SKILL.md
+    │   ├── mpga-plan/SKILL.md
+    │   ├── mpga-develop/SKILL.md
+    │   ├── mpga-drift-check/SKILL.md
+    │   ├── mpga-ask/SKILL.md
+    │   ├── mpga-onboard/SKILL.md
+    │   ├── mpga-rally/SKILL.md
+    │   ├── mpga-ship/SKILL.md
+    │   ├── mpga-handoff/SKILL.md
+    │   └── mpga-map-codebase/SKILL.md
+    ├── agents/               # 10 exported agent specs
+    ├── commands/             # 21 exported /mpga:* command specs
+    └── settings.json         # drift hook configuration
 ```
 
 ### Global export (user-level)
@@ -78,7 +82,7 @@ project-root/
 mpga export --claude --global
 ```
 
-- Copies all 10 skills to `~/.claude/skills/mpga-*/`
+- Copies all 11 skills to `~/.claude/skills/mpga-*/`
 - Prints the MPGA global rules section to append to `~/.claude/CLAUDE.md`
 
 ## Daily workflow
@@ -103,6 +107,15 @@ mpga export --claude --global
 /mpga:ship            ← verify + commit + update evidence + archive tasks
 ```
 
+### Parallel workflow
+MPGA's fast path is:
+- one writer per scope
+- read-only `scout` / `auditor` in background
+- independent scopes planned as separate lanes
+- `verifier` reserved for milestone boundaries or risky work
+
+See [workflow.md](workflow.md).
+
 ### Ad-hoc fixes
 ```
 /mpga:quick "Fix the login redirect on mobile Safari"
@@ -117,8 +130,9 @@ mpga export --claude --global
 
 | Agent | Role | Readonly |
 |-------|------|---------|
-| `green-dev` | Writes failing tests first; never writes implementation | No |
-| `red-dev` | Writes minimal implementation to pass the tests | No |
+| `campaigner` | Read-only rally diagnostician for full project audits | Yes |
+| `red-dev` | Writes failing tests first; never writes implementation | No |
+| `green-dev` | Writes minimal implementation to pass the tests | No |
 | `blue-dev` | Refactors without changing behavior; updates evidence links | No |
 | `scout` | Read-only codebase explorer; produces evidence links | Yes |
 | `architect` | Generates/updates scope docs and GRAPH.md | No |
@@ -143,8 +157,10 @@ If stale evidence links are detected, you'll see a warning. Run `mpga evidence h
 |---------|-------------|
 | `/mpga:init` | Bootstrap knowledge layer |
 | `/mpga:status` | Health dashboard |
+| `/mpga:rally` | Full diagnostic rally audit |
 | `/mpga:scope <name>` | Load a scope document |
 | `/mpga:drift` | Full drift report |
+| `/mpga:map` | Parallel scope mapping |
 | `/mpga:plan` | Generate task plan from milestone |
 | `/mpga:execute [task-id]` | Run TDD cycle |
 | `/mpga:verify` | Full verification pass |

@@ -39,8 +39,8 @@ vi.mock('./agents.js', () => ({
   SKILL_NAMES: ['sync-project', 'plan'],
   copySkillsTo: vi.fn(),
   readAgentInstructions: vi.fn(
-    (_pluginRoot: string | null, slug: string) =>
-      `Instructions for ${slug}\n\n${String.raw`${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh`} sync`,
+    (_pluginRoot: string | null, slug: string, cliPath?: string) =>
+      `Instructions for ${slug}\n\n${cliPath ?? String.raw`node ${CLAUDE_PLUGIN_ROOT}/cli/dist/index.js`} sync`,
   ),
 }));
 
@@ -83,8 +83,8 @@ describe('exportCursor', () => {
     mockedCopySkillsTo.mockClear();
     mockedReadAgentInstructions.mockClear();
     mockedReadAgentInstructions.mockImplementation(
-      (_pluginRoot: string | null, slug: string) =>
-        `Instructions for ${slug}\n\n\${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh sync`,
+      (_pluginRoot: string | null, slug: string, cliPath?: string) =>
+        `Instructions for ${slug}\n\n${cliPath ?? 'node ${CLAUDE_PLUGIN_ROOT}/cli/dist/index.js'} sync`,
     );
     vi.mocked(mockedLog.info).mockClear();
     vi.mocked(mockedLog.success).mockClear();
@@ -133,7 +133,7 @@ describe('exportCursor', () => {
       expect(content).toContain('[E]');
       expect(content).toContain('[Unknown]');
       expect(content).toContain('[Stale:');
-      expect(content).toContain('npx mpga evidence verify');
+      expect(content).toContain('node ./.mpga-runtime/cli/dist/index.js evidence verify');
     });
 
     it('generates mpga-tdd.mdc with TDD enforcement', () => {
@@ -181,6 +181,7 @@ describe('exportCursor', () => {
         path.join(projectRoot, '.cursor', 'skills'),
         pluginRoot,
         'cursor',
+        'node ./.mpga-runtime/cli/dist/index.js',
       );
     });
 
@@ -201,12 +202,12 @@ describe('exportCursor', () => {
       }
     });
 
-    it('rewrites CLAUDE_PLUGIN_ROOT to npx mpga in agent instructions', () => {
+    it('rewrites CLAUDE_PLUGIN_ROOT to the vendored runtime path in agent instructions', () => {
       exportCursor(projectRoot, mpgaDir, indexContent, projectName, pluginRoot, false);
 
       const content = writtenContent('mpga-test-agent.md');
-      expect(content).toContain('npx mpga');
-      expect(content).not.toContain('${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh');
+      expect(content).toContain('node ./.mpga-runtime/cli/dist/index.js');
+      expect(content).not.toContain('${CLAUDE_PLUGIN_ROOT}/cli/dist/index.js');
     });
 
     it('logs success messages for rules, skills, and agents', () => {
@@ -253,6 +254,7 @@ describe('exportCursor', () => {
         path.join('/fake/home', '.cursor', 'skills'),
         pluginRoot,
         'cursor',
+        '/fake/home/.cursor/.mpga-runtime/cli/dist/index.js',
       );
     });
 
@@ -294,6 +296,7 @@ describe('exportCursor', () => {
         path.join('~', '.cursor', 'skills'),
         pluginRoot,
         'cursor',
+        '~/.cursor/.mpga-runtime/cli/dist/index.js',
       );
 
       const agentsDir = path.join('~', '.cursor', 'agents');
@@ -316,10 +319,19 @@ describe('exportCursor', () => {
     it('handles null pluginRoot', () => {
       exportCursor(projectRoot, mpgaDir, indexContent, projectName, null, false);
 
-      expect(mockedCopySkillsTo).toHaveBeenCalledWith(expect.any(String), null, 'cursor');
+      expect(mockedCopySkillsTo).toHaveBeenCalledWith(
+        expect.any(String),
+        null,
+        'cursor',
+        'npx mpga',
+      );
 
       // Agent instructions should still be read (will return fallback text)
-      expect(mockedReadAgentInstructions).toHaveBeenCalledWith(null, expect.any(String));
+      expect(mockedReadAgentInstructions).toHaveBeenCalledWith(
+        null,
+        expect.any(String),
+        'npx mpga',
+      );
     });
 
     it('scopes mdc shows fallback when scopesDir exists but is empty', () => {

@@ -10,7 +10,7 @@ bash path/to/mpga-plugin/bin/mpga.sh init --from-existing
 bash path/to/mpga-plugin/bin/mpga.sh sync
 
 # 2. Export AGENTS.md
-bash path/to/mpga-plugin/bin/mpga.sh export --gemini
+bash path/to/mpga-plugin/bin/mpga.sh export --codex
 ```
 
 This creates `AGENTS.md` in your project root.
@@ -53,7 +53,7 @@ This project uses MPGA for evidence-backed context engineering.
 
 ```bash
 bash path/to/mpga-plugin/bin/mpga.sh sync && \
-bash path/to/mpga-plugin/bin/mpga.sh export --gemini
+bash path/to/mpga-plugin/bin/mpga.sh export --codex
 ```
 
 ## Usage in Gemini CLI
@@ -77,6 +77,6 @@ ln -s AGENTS.md GEMINI.md
 Or export directly:
 
 ```bash
-bash path/to/mpga-plugin/bin/mpga.sh export --gemini
+bash path/to/mpga-plugin/bin/mpga.sh export --codex
 cp AGENTS.md GEMINI.md
 ```

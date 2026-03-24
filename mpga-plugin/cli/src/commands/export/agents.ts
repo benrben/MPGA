@@ -17,6 +17,16 @@ export interface AgentMeta {
 
 export const AGENTS: AgentMeta[] = [
   {
+    slug: 'campaigner',
+    name: 'mpga-campaigner',
+    description:
+      'Read-only rally diagnostician. Runs a category-by-category audit and aggregates the sharpest evidence-backed case for fixing the project.',
+    model: 'claude-opus-4-6',
+    readonly: true,
+    isBackground: true,
+    sandboxMode: 'none',
+  },
+  {
     slug: 'red-dev',
     name: 'mpga-red-dev',
     description:
@@ -106,6 +116,46 @@ export const AGENTS: AgentMeta[] = [
     isBackground: false,
     sandboxMode: 'workspace',
   },
+  {
+    slug: 'bug-hunter',
+    name: 'mpga-bug-hunter',
+    description:
+      'Specification-based bug detection. Compares implementation against acceptance criteria, finds edge cases and specification gaps.',
+    model: 'claude-opus-4-6',
+    readonly: true,
+    isBackground: true,
+    sandboxMode: 'none',
+  },
+  {
+    slug: 'optimizer',
+    name: 'mpga-optimizer',
+    description:
+      'Code quality analyzer. Detects spaghetti, duplication, and elegance issues using Kent Beck and Sandi Metz rules.',
+    model: 'claude-sonnet-4-6',
+    readonly: true,
+    isBackground: true,
+    sandboxMode: 'none',
+  },
+  {
+    slug: 'security-auditor',
+    name: 'mpga-security-auditor',
+    description:
+      'Security-focused code review. Checks OWASP Top 10, scans for hardcoded secrets, runs npm audit, flags missing input validation.',
+    model: 'claude-sonnet-4-6',
+    readonly: true,
+    isBackground: true,
+    sandboxMode: 'none',
+  },
+  {
+    slug: 'orchestrator',
+    name: 'mpga-orchestrator',
+    description:
+      'Dynamic lane management and deadlock detection. Monitors parallel task execution, resolves conflicts, balances load across lanes.',
+    model: 'claude-opus-4-6',
+    readonly: true,
+    isBackground: true,
+    sandboxMode: 'none',
+  },
 ];
 
 export const SKILL_NAMES = [
@@ -116,10 +166,43 @@ export const SKILL_NAMES = [
   'drift-check',
   'ask',
   'onboard',
+  'rally',
   'ship',
   'handoff',
   'map-codebase',
+  'diagnose',
+  'secure',
+  'simplify',
+  'review-pr',
 ];
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+export function rewriteCliReferences(
+  content: string,
+  cliPath?: string,
+  pluginRoot?: string | null,
+): string {
+  const replacement = cliPath ?? 'npx mpga';
+  let next = content
+    .replace(/node\s+\$\{CLAUDE_PLUGIN_ROOT\}\/cli\/dist\/index\.js/g, replacement)
+    .replace(/\$\{CLAUDE_PLUGIN_ROOT\}\/cli\/dist\/index\.js/g, replacement)
+    .replace(/\$\{CLAUDE_PLUGIN_ROOT\}\/bin\/mpga\.sh/g, replacement)
+    .replace(/\bnpx mpga\b/g, replacement);
+
+  if (pluginRoot) {
+    const normalizedRoot = pluginRoot.replace(/\\/g, '/');
+    const escapedRoot = escapeRegExp(normalizedRoot);
+    next = next
+      .replace(new RegExp(`node\\s+${escapedRoot}/cli/dist/index\\.js`, 'g'), replacement)
+      .replace(new RegExp(`${escapedRoot}/cli/dist/index\\.js`, 'g'), replacement)
+      .replace(new RegExp(`${escapedRoot}/bin/mpga\\.sh`, 'g'), replacement);
+  }
+
+  return next;
+}
 
 // ─── Plugin root finder ───────────────────────────────────────────────────────
 
@@ -162,7 +245,7 @@ export function copySkillsTo(
     if (pluginRoot) {
       const srcDir = path.join(pluginRoot, 'skills', skillName);
       if (fs.existsSync(srcDir)) {
-        copyDir(srcDir, destDir, toolName, cliPath);
+        copyDir(srcDir, destDir, toolName, cliPath, pluginRoot);
         continue;
       }
     }
@@ -174,21 +257,26 @@ export function copySkillsTo(
   }
 }
 
-function copyDir(src: string, dest: string, toolName: string, cliPath?: string): void {
+function copyDir(
+  src: string,
+  dest: string,
+  toolName: string,
+  cliPath?: string,
+  pluginRoot?: string | null,
+): void {
   for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
     const srcPath = path.join(src, entry.name);
     const destPath = path.join(dest, entry.name);
     if (entry.isDirectory()) {
       fs.mkdirSync(destPath, { recursive: true });
-      copyDir(srcPath, destPath, toolName, cliPath);
+      copyDir(srcPath, destPath, toolName, cliPath, pluginRoot);
     } else {
       let content = fs.readFileSync(srcPath, 'utf-8');
-      if (toolName === 'claude' && cliPath) {
-        // Resolve to portable relative path from project root
-        content = content.replace(/\$\{CLAUDE_PLUGIN_ROOT\}\/bin\/mpga\.sh/g, cliPath);
+      if (cliPath) {
+        content = rewriteCliReferences(content, cliPath, pluginRoot);
       } else if (toolName !== 'claude') {
         // Rewrite CLAUDE_PLUGIN_ROOT references to use npx mpga for non-Claude tools
-        content = content.replace(/\$\{CLAUDE_PLUGIN_ROOT\}\/bin\/mpga\.sh/g, 'npx mpga');
+        content = rewriteCliReferences(content, undefined, pluginRoot);
       }
       fs.writeFileSync(destPath, content);
     }
@@ -204,12 +292,18 @@ function generateFallbackSkillMd(skillName: string): string {
     'drift-check': 'Validate evidence links and detect stale scope docs',
     ask: 'Answer questions about the codebase using MPGA scope docs as citations',
     onboard: 'Guided tour of the codebase using the MPGA knowledge layer',
+    rally: 'Run the MPGA campaign rally diagnostic and aggregate project issues',
     ship: 'Verify, commit, update evidence, and advance milestone',
     handoff: 'Export session state for cross-context continuity',
     'map-codebase': 'Parallel scout agents analyze the full codebase and generate scopes',
+    diagnose: 'Find bugs and quality issues using bug-hunter + optimizer agents',
+    secure: 'Run a comprehensive security audit with OWASP and secrets scanning',
+    simplify: 'Improve code elegance using Kent Beck and Sandi Metz rules',
+    'review-pr': 'Comprehensive PR review with reviewer + bug-hunter + security-auditor',
   };
 
   return `---
+name: mpga-${skillName}
 description: ${descriptions[skillName] ?? skillName}
 ---
 
@@ -223,15 +317,23 @@ Run \`npx mpga ${skillName.replace('-', ' ')}\` for CLI equivalent.
 
 // ─── Agent file generators ────────────────────────────────────────────────────
 
-export function readAgentInstructions(pluginRoot: string | null, slug: string): string {
+export function readAgentInstructions(
+  pluginRoot: string | null,
+  slug: string,
+  cliPath?: string,
+): string {
   if (pluginRoot) {
     const agentPath = path.join(pluginRoot, 'agents', `${slug}.md`);
     if (fs.existsSync(agentPath)) {
       // Strip the H1 title line — it becomes redundant with the YAML frontmatter
-      return fs
-        .readFileSync(agentPath, 'utf-8')
-        .replace(/^# Agent:.*\n/, '')
-        .trimStart();
+      return rewriteCliReferences(
+        fs
+          .readFileSync(agentPath, 'utf-8')
+          .replace(/^# Agent:.*\n/, '')
+          .trimStart(),
+        cliPath,
+        pluginRoot,
+      );
     }
   }
   return `See MPGA documentation for full ${slug} agent protocol.`;

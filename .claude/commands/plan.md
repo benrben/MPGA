@@ -4,20 +4,23 @@ Generate an evidence-based implementation plan for the active milestone.
 
 ## Steps
 
-1. Read `MPGA/INDEX.md` for active milestone
-2. Read the milestone's PLAN.md: `cat MPGA/milestones/<id>/PLAN.md`
-3. Read relevant scope documents based on milestone objective
-4. Spawn `researcher` agent if `config.agents.researchBeforePlan` is true
-5. Break work into bite-sized tasks (2-10 min each):
+1. Start the live board in the browser through Node: `node ./.mpga-runtime/cli/dist/index.js board live --serve --open`
+2. Read `MPGA/INDEX.md` for active milestone
+3. Read the milestone's PLAN.md: `cat MPGA/milestones/<id>/PLAN.md`
+4. Read relevant scope documents based on milestone objective
+5. Spawn `researcher` plus any needed read-only `scout` agents in parallel if `config.agents.researchBeforePlan` is true
+6. Break work into bite-sized tasks (2-10 min each):
    - Each task MUST cite exact files to modify (with evidence links)
    - Each task MUST cite expected test file locations
    - Each task MUST have mechanically verifiable acceptance criteria
-6. Create task cards on the board:
+   - Each task should declare its scope so independent scopes can run in parallel
+   - One write lane per scope
+7. Create task cards on the board:
    ```
-   mpga-plugin/bin/mpga.sh board add "<title>" --priority <p> --scope <scope> --column todo
+   node ./.mpga-runtime/cli/dist/index.js board add "<title>" --priority <p> --scope <scope> --column todo
    ```
-7. Write the plan to `MPGA/milestones/<id>/PLAN.md`
-8. Show board: `mpga-plugin/bin/mpga.sh board show`
+8. Write the plan to `MPGA/milestones/<id>/PLAN.md`
+9. Show board: `node ./.mpga-runtime/cli/dist/index.js board show`
 
 ## Usage
 ```
@@ -31,3 +34,4 @@ Generate an evidence-based implementation plan for the active milestone.
 - [ ] No task is more than 10 minutes of work
 - [ ] Dependencies between tasks are explicit
 - [ ] Evidence links expected for each task are listed
+- [ ] Parallel-safe tasks are separated from same-scope write conflicts

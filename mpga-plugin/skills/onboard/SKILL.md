@@ -1,4 +1,5 @@
 ---
+name: mpga-onboard
 description: Guided codebase tour from INDEX.md outward — WELCOME to the greatest codebase you've ever seen
 ---
 

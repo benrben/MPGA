@@ -14,6 +14,10 @@ Run full verification pass on completed work.
 3. Display verification report
 4. If passed: suggest `/mpga:ship`
 
+## Fast path
+- For small, isolated tasks, rely on `reviewer` + quick drift during execution
+- Use full `verifier` runs for milestone boundaries, risky work, or explicit verification
+
 ## Usage
 ```
 /mpga:verify

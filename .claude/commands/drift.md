@@ -4,9 +4,9 @@ Check and report evidence drift across all scope documents.
 
 ## Steps
 
-1. Run `mpga-plugin/bin/mpga.sh drift --report`
+1. Run `node ./.mpga-runtime/cli/dist/index.js drift --report`
 2. Display drift report
-3. If stale links found: offer to run `mpga-plugin/bin/mpga.sh evidence heal`
+3. If stale links found: offer to run `node ./.mpga-runtime/cli/dist/index.js evidence heal`
 4. Show CI pass/fail status
 
 ## Usage

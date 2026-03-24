@@ -4,7 +4,7 @@ Show comprehensive project health report.
 
 ## Steps
 
-1. Run `mpga-plugin/bin/mpga.sh health --verbose`
+1. Run `node ./.mpga-runtime/cli/dist/index.js health --verbose`
 2. Show evidence health per scope
 3. Show board stats
 4. Show drift status
