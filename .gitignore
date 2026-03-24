@@ -29,3 +29,6 @@ npm-debug.log*
 
 # MPGA session artifacts (local only)
 MPGA/sessions/
+.claude/*
+*MPGA/*
+.claude

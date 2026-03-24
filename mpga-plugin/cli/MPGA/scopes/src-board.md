@@ -56,7 +56,9 @@ And a status overlay: `blocked | stale | rework | paused | null`
 
 **Parent:** [src](./src.md)
 
-**Used by:** [src-commands](./src-commands.md) (board, milestone, session commands)
+**Depends on:** [src-core](./src-core.md) — imports `progressBar` from `core/logger.js` for board-md rendering [E] src/board/board-md.ts:3
+
+**Used by:** [src-commands](./src-commands.md) (board, milestone, session, health, status commands)
 
 ## Evidence index
 
@@ -67,11 +69,11 @@ And a status overlay: `blocked | stale | rework | paused | null`
 | `saveBoard` (function) | [E] src/board/board.ts:32-35 :: saveBoard()|
 | `createEmptyBoard` (function) | [E] src/board/board.ts:38-50 :: createEmptyBoard()|
 | `recalcStats` (function) | [E] src/board/board.ts:53-81 :: recalcStats()|
-| `checkWipLimit` (function) | [E] src/board/board.ts:84-87 :: checkWipLimit()|
-| `nextTaskId` (function) | [E] src/board/board.ts:90-93 :: nextTaskId()|
-| `addTask` (function) | [E] src/board/board.ts:96-107 :: addTask()|
-| `moveTask` (function) | [E] src/board/board.ts:140-145 :: moveTask()|
-| `findTaskFile` (function) | [E] src/board/board.ts:176-179 :: findTaskFile()|
+| `checkWipLimit` (function) | [E] src/board/board.ts:96-99 :: checkWipLimit()|
+| `nextTaskId` (function) | [E] src/board/board.ts:102-105 :: nextTaskId()|
+| `addTask` (function) | [E] src/board/board.ts:108-119 :: addTask()|
+| `moveTask` (function) | [E] src/board/board.ts:152-157 :: moveTask()|
+| `findTaskFile` (function) | [E] src/board/board.ts:188-193 :: findTaskFile()|
 | `Column` (type) | [E] src/board/task.ts:5-6 :: Column()|
 | `Priority` (type) | [E] src/board/task.ts:6-7 :: Priority()|
 | `TddStage` (type) | [E] src/board/task.ts:7-9 :: TddStage()|
@@ -80,7 +82,7 @@ And a status overlay: `blocked | stale | rework | paused | null`
 | `taskFilename` (function) | [E] src/board/task.ts:32-34 :: taskFilename()|
 | `renderTaskFile` (function) | [E] src/board/task.ts:37-60 :: renderTaskFile()|
 | `parseTaskFile` (function) | [E] src/board/task.ts:95-123 :: parseTaskFile()|
-| `loadAllTasks` (function) | [E] src/board/task.ts:126-131 :: loadAllTasks()|
+| `loadAllTasks` (function) | [E] src/board/task.ts:132-138 :: loadAllTasks()|
 | `renderBoardMd` (function) | [E] src/board/board-md.ts:19-123 :: renderBoardMd()|
 
 ## Files

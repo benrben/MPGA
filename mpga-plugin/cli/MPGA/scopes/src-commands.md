@@ -78,19 +78,19 @@ Users run `mpga <command>` from terminal. Each command is registered in `cli.ts`
 
 | Claim | Evidence |
 |-------|----------|
-| `registerBoard` (function) | [E] src/commands/board.ts:20-218 :: registerBoard()|
+| `registerBoard` (function) | [E] src/commands/board.ts:15-53 :: registerBoard()|
 | `registerConfig` (function) | [E] src/commands/config.ts:7-58 :: registerConfig()|
-| `registerDrift` (function) | [E] src/commands/drift.ts:9-97 :: registerDrift()|
+| `registerDrift` (function) | [E] src/commands/drift.ts:8-105 :: registerDrift()|
 | `registerEvidence` (function) | [E] src/commands/evidence.ts:11-149 :: registerEvidence()|
-| `registerExport` (function) | [E] src/commands/export.ts:253-452 :: registerExport()|
+| `registerExport` (function) | [E] src/commands/export.ts:14-94 :: registerExport()|
 | `registerGraph` (function) | [E] src/commands/graph.ts:9-65 :: registerGraph()|
 | `registerHealth` (function) | [E] src/commands/health.ts:10-111 :: registerHealth()|
 | `registerInit` (function) | [E] src/commands/init.ts:67-183 :: registerInit()|
-| `registerMilestone` (function) | [E] src/commands/milestone.ts:49-75 :: registerMilestone()|
-| `registerScan` (function) | [E] src/commands/scan.ts:7-75 :: registerScan()|
-| `registerScope` (function) | [E] src/commands/scope.ts:12-95 :: registerScope()|
+| `registerMilestone` (function) | [E] src/commands/milestone.ts:91-120 :: registerMilestone()|
+| `registerScan` (function) | [E] src/commands/scan.ts:6-74 :: registerScan()|
+| `registerScope` (function) | [E] src/commands/scope.ts:208-233 :: registerScope()|
 | `registerSession` (function) | [E] src/commands/session.ts:13-45 :: registerSession()|
-| `registerStatus` (function) | [E] src/commands/status.ts:8-113 :: registerStatus()|
+| `registerStatus` (function) | [E] src/commands/status.ts:128-133 :: registerStatus()|
 | `registerSync` (function) | [E] src/commands/sync.ts:11-80 :: registerSync()|
 
 ## Files

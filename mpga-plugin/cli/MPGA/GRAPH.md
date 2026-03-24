@@ -2,6 +2,8 @@
 
 ## Module dependencies
 
+bin → src (runtime: requires compiled dist/index.js)
+src → core
 src → commands
 board → core
 commands → core
@@ -9,25 +11,19 @@ commands → board
 commands → evidence
 commands → generators
 generators → core
+evidence (no intra-project imports — standalone module)
 
 ## Circular dependencies
 (none detected)
 
 ## Orphan modules
-- bin/mpga.js
-- src/cli.ts
-- src/index.ts
-- src/core/config.ts
-- src/core/logger.ts
-- src/core/scanner.ts
-- src/board/board-md.ts
-- src/board/task.ts
-- src/commands/config.ts
-- src/commands/drift.ts
+- vitest.config.ts (standalone config — consumed by Vitest at runtime)
 
 ## Mermaid export
 ```mermaid
 graph TD
+    bin --> src
+    src --> core
     src --> commands
     board --> core
     commands --> core
