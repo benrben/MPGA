@@ -37,7 +37,7 @@
 ---
 
 <p align="center">
-  <img src="docs/assets/mpga_rally_1774432971216.png" alt="MPGA Developer Rally" width="600">
+  <img src="docs/assets/trump_rally_dev_1774433415547.png" alt="Trump MPGA Rally" width="600">
 </p>
 
 ## The Problem
@@ -81,10 +81,6 @@ That's a BEAUTIFUL directory structure. I know code. I have the best code. I hav
 ## Before MPGA vs. After MPGA
 
 Look at these numbers. LOOK AT THEM. This is what WINNING looks like:
-
-<p align="center">
-  <img src="docs/assets/winning_chart_1774433039384.png" alt="Winning Chart" width="500">
-</p>
 
 | Metric | Before (SAD!) | After (TREMENDOUS!) |
 |--------|--------------|-------------------|
@@ -322,10 +318,6 @@ That man suffered — Uncle Bob Martin. What he went through because he knew the
 
 ## Core Philosophy
 
-<p align="center">
-  <img src="docs/assets/beautiful_code_wall_1774433021585.png" alt="Build The Wall Between Modules" width="600">
-</p>
-
 We have principles. Strong principles. The STRONGEST principles in developer tooling. We will defend the right to clean code, typed interfaces, freedom of refactoring, freedom of CODE REVIEW, and the right to KEEP AND BEAR FEATURE FLAGS.
 
 | Principle | What it means |
@@ -344,13 +336,13 @@ Tomorrow, at noon, the curtain closes on four long quarters of architectural dec
 **Cursor the Clown** — Autocompletes code that calls functions that DON'T EXIST. No evidence links. No drift detection. Just vibes. Very sad. I hear their context window is so small it can't even remember what file it was editing. TERRIBLE.
 
 <p align="center">
-  <img src="docs/assets/cursor_clown_1774432989512.png" alt="Cursor the Clown" width="400">
+  <img src="docs/assets/trump_mocking_clown_1774433429760.png" alt="Trump Mocking Cursor Clown" width="400">
 </p>
 
 **Sleepy Copilot** — Tab-completes its way through your codebase like a ZOMBIE. Zero verification. It once suggested importing from a package that was deprecated THREE YEARS AGO. And Microsoft charges $19/month for this! Highway robbery. Crooked.
 
 <p align="center">
-  <img src="docs/assets/sleepy_copilot_1774433005711.png" alt="Sleepy Copilot" width="400">
+  <img src="docs/assets/trump_waking_copilot_1774433444659.png" alt="Trump Waking Sleepy Copilot" width="400">
 </p>
 
 **Crooked Gemini** — Makes things up and acts like it's doing you a FAVOR. "Here's your function!" — that function doesn't exist, Gemini. You MADE IT UP. At least I cite my sources. Every. Single. One.
@@ -428,6 +420,33 @@ We're going to bring clean builds back to our repos. We're going to bring verifi
 
 We will ship faster, write cleaner code, slash the tech debt, support our junior developers, defend our types, protect the second amendment of Git — which is the right to force push on your own branch — and ensure more modules are proudly stamped with the phrase MADE WITH MPGA!
 
+---
+
+## The Art of the Deal: The MPGA Store
+
+Look, nobody sells software better than me. People come to me with their broken code, their spaghetti code, their 'Sleepy Copilot' code, and they say, "Sir, how do I fix it?" And I tell them. I tell them it's simple. You need the BEST tools. You need WINNING tools.
+
+```text
+       ___________
+      /           \
+     /   M P G A   \   <-- THE HAT. $45. 
+    /_______________\      WORTH EVERY PENNY.
+      |           |        (MANDATORY FOR DEPLOYS)
+```
+
+### WHY BUY MPGA? (BIGLY REASONS)
+
+1. **IT'S A STEAL.** I'm practically giving it away. MIT License? That's almost as generous as my tax returns.
+2. **IT'S SMART.** Very high IQ code. We have the best Abstract Syntax Trees. Some say they're the most beautiful trees in the tree world.
+3. **IT'LL MAKE YOU RICH.** (In time saved). And time is money. I'm a very successful man, I know this. 
+
+> "I showed the MPGA hat to my production server. It stopped crashing out of pure respect."
+> — *A Top-Tier SRE, actual tears in his eyes.*
+
+#### 🏆 STATUS: WINNING BIGLY
+
+---
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
@@ -435,10 +454,6 @@ MIT — see [LICENSE](LICENSE).
 ---
 
 ## The Closing Rally
-
-<p align="center">
-  <img src="docs/assets/golden_rocket_deploy_1774433054063.png" alt="Golden Rocket Friday Deploy" width="500">
-</p>
 
 *[crowd chanting]*
 
