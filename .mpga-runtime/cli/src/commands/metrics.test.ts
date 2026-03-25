@@ -132,7 +132,10 @@ function writeTaskFile(
 
 function seedProject(
   root: string,
-  opts: { milestone?: string; tasks?: Array<{ id: string; title: string; overrides?: Record<string, unknown> }> } = {},
+  opts: {
+    milestone?: string;
+    tasks?: Array<{ id: string; title: string; overrides?: Record<string, unknown> }>;
+  } = {},
 ) {
   const boardDir = path.join(root, 'MPGA', 'board');
   const tasksDir = path.join(boardDir, 'tasks');
@@ -252,9 +255,7 @@ describe('metrics command', () => {
 
   it('outputs JSON when --json flag is passed', async () => {
     seedProject(tmpDir, {
-      tasks: [
-        { id: 'T001', title: 'Task one', overrides: { column: 'done' } },
-      ],
+      tasks: [{ id: 'T001', title: 'Task one', overrides: { column: 'done' } }],
     });
     const program = createProgram();
     await program.parseAsync(['node', 'test', 'metrics', '--json']);
@@ -395,9 +396,7 @@ describe('changelog command', () => {
 
   it('shows message when no done tasks exist', async () => {
     seedProject(tmpDir, {
-      tasks: [
-        { id: 'T001', title: 'Active task', overrides: { column: 'in-progress' } },
-      ],
+      tasks: [{ id: 'T001', title: 'Active task', overrides: { column: 'in-progress' } }],
     });
     const program = createProgram();
     await program.parseAsync(['node', 'test', 'changelog']);

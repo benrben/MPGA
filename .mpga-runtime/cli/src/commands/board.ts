@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { Command, Option } from 'commander';
 import { loadBoard, recalcStats, saveBoard } from '../board/board.js';
+import { loadAllTasks } from '../board/task.js';
 import { renderBoardMd } from '../board/board-md.js';
 import { writeBoardLiveSnapshot } from '../board/live.js';
 import { writeBoardLiveHtml } from '../board/live-html.js';
@@ -14,10 +15,11 @@ export function persistBoard(
   boardDir: string,
   tasksDir: string,
 ): void {
-  recalcStats(board, tasksDir);
+  const tasks = loadAllTasks(tasksDir);
+  recalcStats(board, tasksDir, tasks);
   saveBoard(boardDir, board);
-  fs.writeFileSync(path.join(boardDir, 'BOARD.md'), renderBoardMd(board, tasksDir));
-  writeBoardLiveSnapshot(board, tasksDir, boardDir);
+  fs.writeFileSync(path.join(boardDir, 'BOARD.md'), renderBoardMd(board, tasksDir, tasks));
+  writeBoardLiveSnapshot(board, tasksDir, boardDir, tasks);
   writeBoardLiveHtml(boardDir);
 }
 
@@ -40,11 +42,19 @@ export function registerBoard(program: Command): void {
   cmd
     .command('add <title>')
     .description('Create a new task')
-    .addOption(new Option('--priority <level>', 'Task priority').choices(['critical', 'high', 'medium', 'low']).default('medium'))
+    .addOption(
+      new Option('--priority <level>', 'Task priority')
+        .choices(['critical', 'high', 'medium', 'low'])
+        .default('medium'),
+    )
     .option('--scope <name>', 'Link to scope document')
     .option('--depends <task-id>', 'Add dependency (comma-separated)')
     .option('--tags <tags>', 'Comma-separated tags')
-    .addOption(new Option('--column <col>', 'Initial column').choices(['backlog', 'todo', 'in-progress', 'testing', 'review', 'done']).default('backlog'))
+    .addOption(
+      new Option('--column <col>', 'Initial column')
+        .choices(['backlog', 'todo', 'in-progress', 'testing', 'review', 'done'])
+        .default('backlog'),
+    )
     .option('--milestone <id>', 'Link to milestone')
     .action((title: string, opts) => h.handleBoardAdd(title, opts));
   cmd
@@ -65,10 +75,32 @@ export function registerBoard(program: Command): void {
   cmd
     .command('update <task-id>')
     .description('Update task fields')
-    .addOption(new Option('--status <status>', 'Task status').choices(['blocked', 'stale', 'rework', 'paused']))
-    .addOption(new Option('--priority <level>', 'Task priority').choices(['critical', 'high', 'medium', 'low']))
+    .addOption(
+      new Option('--status <status>', 'Task status').choices([
+        'blocked',
+        'stale',
+        'rework',
+        'paused',
+      ]),
+    )
+    .addOption(
+      new Option('--priority <level>', 'Task priority').choices([
+        'critical',
+        'high',
+        'medium',
+        'low',
+      ]),
+    )
     .option('--evidence-add <link>', 'Record produced evidence link')
-    .addOption(new Option('--tdd-stage <stage>', 'TDD stage').choices(['green', 'red', 'blue', 'review', 'done']))
+    .addOption(
+      new Option('--tdd-stage <stage>', 'TDD stage').choices([
+        'green',
+        'red',
+        'blue',
+        'review',
+        'done',
+      ]),
+    )
     .action((taskId: string, opts) => h.handleBoardUpdate(taskId, opts));
   cmd
     .command('block <task-id> <reason>')
@@ -93,8 +125,24 @@ export function registerBoard(program: Command): void {
   cmd
     .command('search [query]')
     .description('Search and filter tasks')
-    .addOption(new Option('--priority <level>', 'Filter by priority').choices(['critical', 'high', 'medium', 'low']))
-    .addOption(new Option('--column <col>', 'Filter by column').choices(['backlog', 'todo', 'in-progress', 'testing', 'review', 'done']))
+    .addOption(
+      new Option('--priority <level>', 'Filter by priority').choices([
+        'critical',
+        'high',
+        'medium',
+        'low',
+      ]),
+    )
+    .addOption(
+      new Option('--column <col>', 'Filter by column').choices([
+        'backlog',
+        'todo',
+        'in-progress',
+        'testing',
+        'review',
+        'done',
+      ]),
+    )
     .option('--scope <name>', 'Filter by scope')
     .option('--agent <name>', 'Filter by assigned agent')
     .option('--tags <tags>', 'Filter by tags (comma-separated)')

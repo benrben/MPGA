@@ -25,15 +25,14 @@ function handlePr(): void {
   let changedFiles: string;
 
   try {
-    branch = execSync('git rev-parse --abbrev-ref HEAD', { cwd: projectRoot })
+    branch = execSync('git rev-parse --abbrev-ref HEAD', { cwd: projectRoot }).toString().trim();
+    const base = execSync(
+      'git merge-base HEAD main 2>/dev/null || git merge-base HEAD master 2>/dev/null || echo HEAD~10',
+      { cwd: projectRoot },
+    )
       .toString()
       .trim();
-    const base = execSync('git merge-base HEAD main 2>/dev/null || git merge-base HEAD master 2>/dev/null || echo HEAD~10', { cwd: projectRoot })
-      .toString()
-      .trim();
-    commits = execSync(`git log --oneline ${base}..HEAD`, { cwd: projectRoot })
-      .toString()
-      .trim();
+    commits = execSync(`git log --oneline ${base}..HEAD`, { cwd: projectRoot }).toString().trim();
     changedFiles = execSync(`git diff --name-only ${base}..HEAD`, { cwd: projectRoot })
       .toString()
       .trim();
@@ -48,13 +47,21 @@ function handlePr(): void {
   const doneTasks = tasks.filter((t) => t.column === 'done');
   const evidenceLinks = doneTasks.flatMap((t) => t.evidence_produced);
 
-  // Detect affected scopes
+  // Detect affected scopes by cross-referencing with changed files
   const scopesDir = path.join(mpgaDir, 'scopes');
   const scopes: string[] = [];
+  const changedFileList = changedFiles ? changedFiles.split('\n').filter((f) => f.trim()) : [];
   if (fs.existsSync(scopesDir)) {
     const scopeFiles = fs.readdirSync(scopesDir).filter((f) => f.endsWith('.md'));
     for (const sf of scopeFiles) {
-      scopes.push(sf.replace('.md', ''));
+      const scopeName = sf.replace('.md', '');
+      const scopeContent = fs.readFileSync(path.join(scopesDir, sf), 'utf-8');
+      const scopePathSegments = scopeName.replace(/^src-/, 'src/').split('-');
+      const isAffected = changedFileList.some(
+        (file) =>
+          scopePathSegments.some((seg) => file.includes(seg)) || scopeContent.includes(file),
+      );
+      if (isAffected) scopes.push(scopeName);
     }
   }
 

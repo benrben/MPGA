@@ -67,7 +67,7 @@ export function registerHealth(program: Command): void {
       }
 
       miniBanner();
-      log.header('Health Report');
+      log.header("Health Report — We're CRUSHING IT");
 
       // ── Grade ──
       console.log(`\n  ${chalk.dim('Grade')}  ${gradeColor(health.overallGrade)}\n`);
@@ -115,15 +115,15 @@ export function registerHealth(program: Command): void {
       log.blank();
       log.divider();
       if (driftReport.overallHealthPct < config.drift.ciThreshold) {
-        log.warn(`Evidence below CI threshold — run \`mpga evidence heal\` or \`mpga sync\``);
+        log.warn(`Evidence below CI threshold — SAD! Run \`mpga evidence heal\` or \`mpga sync\``);
       }
       if (scopeCount === 0) {
-        log.warn('No scope documents — run `mpga sync` to generate them');
+        log.warn('No scope documents — SAD! Run `mpga sync` to generate them');
       }
       if (!driftReport.ciPass) {
-        log.error(`CI would FAIL at ${config.drift.ciThreshold}% threshold`);
+        log.error(`CI would FAIL at ${config.drift.ciThreshold}% threshold — TOTAL DISASTER!`);
       } else {
-        log.success('All health checks pass');
+        log.success('All health checks PASS — TREMENDOUS!');
       }
       log.blank();
     });

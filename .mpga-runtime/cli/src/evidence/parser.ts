@@ -55,12 +55,9 @@ const DEPRECATED_RE = /\[Deprecated\]\s+(\S+?)(?::(\d+)-(\d+))?\s*(?:::\s*(.+))?
 // [E] src/foo.ts#symbolName
 // [Stale:2026-03-20] src/foo.ts#symbolName:170
 // [Deprecated] src/foo.ts#symbolName:170
-const EVIDENCE_SYMBOL_RE =
-  /\[E\]\s+(\S+?)#(\w+)(?::(\d+))?\s*(?:—\s*(.+))?$/;
-const STALE_SYMBOL_RE =
-  /\[Stale:(\d{4}-\d{2}-\d{2})\]\s+(\S+?)#(\w+)(?::(\d+))?\s*(?:—\s*(.+))?$/;
-const DEPRECATED_SYMBOL_RE =
-  /\[Deprecated\]\s+(\S+?)#(\w+)(?::(\d+))?\s*(?:—\s*(.+))?$/;
+const EVIDENCE_SYMBOL_RE = /\[E\]\s+(\S+?)#(\w+)(?::(\d+))?\s*(?:—\s*(.+))?$/;
+const STALE_SYMBOL_RE = /\[Stale:(\d{4}-\d{2}-\d{2})\]\s+(\S+?)#(\w+)(?::(\d+))?\s*(?:—\s*(.+))?$/;
+const DEPRECATED_SYMBOL_RE = /\[Deprecated\]\s+(\S+?)#(\w+)(?::(\d+))?\s*(?:—\s*(.+))?$/;
 
 // Strip markdown artifacts (backticks, trailing table pipes) from parsed values
 function cleanParsed(s: string): string {
@@ -191,7 +188,7 @@ export function parseEvidenceLinks(content: string): EvidenceLink[] {
  * Symbol-based format is used when a symbol is present and there is no endLine
  * (i.e., it has a line hint, not a line range).
  */
-function isSymbolBased(link: EvidenceLink): boolean {
+export function isSymbolBased(link: EvidenceLink): boolean {
   return !!link.symbol && !link.endLine;
 }
 

@@ -14,7 +14,7 @@ import { exportAntigravity } from './export/antigravity.js';
 export function registerExport(program: Command): void {
   program
     .command('export')
-    .description('Export knowledge layer for other AI tools')
+    .description('Export knowledge layer — other tools NEED this, believe me')
     .option('--claude', 'Generate CLAUDE.md + .claude/skills/ for Claude Code')
     .option('--cursor', 'Generate .cursor/rules/*.mdc + .cursor/skills/ + .cursor/agents/')
     .option('--codex', 'Generate AGENTS.md + .codex/skills/ + .codex/agents/*.toml')
@@ -37,7 +37,7 @@ export function registerExport(program: Command): void {
       const pluginRoot = findPluginRoot();
 
       if (!fs.existsSync(mpgaDir)) {
-        log.error('MPGA not initialized. Run `mpga init` first.');
+        log.error('MPGA not initialized — DISASTER! Run `mpga init` first.');
         process.exit(1);
       }
 
@@ -51,20 +51,23 @@ export function registerExport(program: Command): void {
       // ── Claude Code ──────────────────────────────────────────────────────────
       if (opts.claude || doAll) {
         exportClaude(projectRoot, indexContent, projectName, pluginRoot, !!opts.global);
+        log.success('Exported — your tools just got a LOT smarter');
         exported++;
       }
 
       // ── Cursor ───────────────────────────────────────────────────────────────
       if (opts.cursor || opts.cursorrules || doAll) {
-        if (opts.cursorrules) log.warn('--cursorrules is deprecated. Use --cursor.');
+        if (opts.cursorrules) log.warn('--cursorrules is deprecated — SAD! Use --cursor instead.');
         exportCursor(projectRoot, mpgaDir, indexContent, projectName, pluginRoot, !!opts.global);
+        log.success("Exported for Cursor — it's fine, but without MPGA it's basically guessing");
         exported++;
       }
 
       // ── Codex / Gemini CLI ───────────────────────────────────────────────────
       if (opts.codex || opts.gemini || doAll) {
-        if (opts.gemini) log.warn('--gemini is deprecated. Use --codex.');
+        if (opts.gemini) log.warn('--gemini is deprecated — very outdated! Use --codex.');
         exportCodex(projectRoot, mpgaDir, indexContent, projectName, pluginRoot, !!opts.global);
+        log.success('Exported — your tools just got a LOT smarter');
         exported++;
       }
 
@@ -81,6 +84,7 @@ export function registerExport(program: Command): void {
             knowledge: opts.knowledge,
           },
         );
+        log.success('Exported — your tools just got a LOT smarter');
         exported++;
       }
 
@@ -89,7 +93,7 @@ export function registerExport(program: Command): void {
         const openCodeDir = path.join(projectRoot, '.opencode');
         fs.mkdirSync(openCodeDir, { recursive: true });
         fs.writeFileSync(path.join(openCodeDir, 'context.md'), indexContent);
-        log.success('Generated .opencode/context.md');
+        log.success('Generated .opencode/context.md — TREMENDOUS');
         exported++;
       }
 

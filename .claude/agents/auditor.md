@@ -44,11 +44,11 @@ The auditor now owns drift detection. When invoked in drift mode:
 
 1. **Quick drift** (`drift-quick`): Run the smallest quick drift check that fits the change — find the STALE evidence:
    ```
-   /Users/benreich/MPGA/mpga-plugin/bin/mpga.sh drift --quick --scope <scope>
+   node ./.mpga-runtime/cli/dist/index.js drift --quick --scope <scope>
    ```
    If you don't know the scope, fall back to:
    ```
-   /Users/benreich/MPGA/mpga-plugin/bin/mpga.sh drift --quick
+   node ./.mpga-runtime/cli/dist/index.js drift --quick
    ```
 
 2. **Classify findings** by severity tier (see table above). Every finding gets a tier. EVERY one.
@@ -68,7 +68,7 @@ The auditor now owns drift detection. When invoked in drift mode:
 
 6. **CI mode** (`drift-ci`): Hold the line at the GATE:
    ```
-   /Users/benreich/MPGA/mpga-plugin/bin/mpga.sh drift --ci --threshold 80
+   node ./.mpga-runtime/cli/dist/index.js drift --ci --threshold 80
    ```
    Exit non-zero if below threshold OR if any CRITICAL findings exist. No exceptions. Standards matter.
 

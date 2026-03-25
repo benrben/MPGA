@@ -311,22 +311,26 @@ description: ${descriptions[skillName] ?? skillName}
 
 See MPGA documentation for full protocol.
 
-Run \`npx mpga ${skillName.replace('-', ' ')}\` for CLI equivalent.
+Run \`npx mpga ${skillName.replace(/-/g, ' ')}\` for CLI equivalent.
 `;
 }
 
 // ─── Agent file generators ────────────────────────────────────────────────────
 
-export function readAgentInstructions(pluginRoot: string | null, slug: string, cliPath?: string): string {
+export function readAgentInstructions(
+  pluginRoot: string | null,
+  slug: string,
+  cliPath?: string,
+): string {
   if (pluginRoot) {
     const agentPath = path.join(pluginRoot, 'agents', `${slug}.md`);
     if (fs.existsSync(agentPath)) {
       // Strip the H1 title line — it becomes redundant with the YAML frontmatter
       return rewriteCliReferences(
         fs
-        .readFileSync(agentPath, 'utf-8')
-        .replace(/^# Agent:.*\n/, '')
-        .trimStart(),
+          .readFileSync(agentPath, 'utf-8')
+          .replace(/^# Agent:.*\n/, '')
+          .trimStart(),
         cliPath,
         pluginRoot,
       );

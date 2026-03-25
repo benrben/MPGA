@@ -138,7 +138,10 @@ function writeTaskFile(
 
 function seedProject(
   root: string,
-  opts: { milestone?: string; tasks?: Array<{ id: string; title: string; overrides?: Record<string, unknown> }> } = {},
+  opts: {
+    milestone?: string;
+    tasks?: Array<{ id: string; title: string; overrides?: Record<string, unknown> }>;
+  } = {},
 ) {
   const boardDir = path.join(root, 'MPGA', 'board');
   const tasksDir = path.join(boardDir, 'tasks');
@@ -198,8 +201,10 @@ describe('pr command', () => {
     mockExecSync.mockImplementation((cmd: string) => {
       if (cmd.includes('rev-parse --abbrev-ref HEAD')) return Buffer.from('feat/add-auth\n');
       if (cmd.includes('merge-base')) return Buffer.from('abc123\n');
-      if (cmd.includes('git log')) return Buffer.from('abc456 Add authentication module\ndef789 Add login tests\n');
-      if (cmd.includes('git diff --name-only')) return Buffer.from('src/auth.ts\nsrc/auth.test.ts\n');
+      if (cmd.includes('git log'))
+        return Buffer.from('abc456 Add authentication module\ndef789 Add login tests\n');
+      if (cmd.includes('git diff --name-only'))
+        return Buffer.from('src/auth.ts\nsrc/auth.test.ts\n');
       return Buffer.from('');
     });
 

@@ -19,12 +19,12 @@ function createProgram(): Command {
   return program;
 }
 
-describe('develop command', () => {
+describe('develop command — WINNING development, believe me', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('registers the develop run command and forwards scheduler options', async () => {
+  it('registers the WINNING develop command and forwards scheduler options', async () => {
     const program = createProgram();
     registerDevelop(program);
 
@@ -43,7 +43,7 @@ describe('develop command', () => {
   });
 });
 
-describe('develop status/abort/resume', () => {
+describe('develop status/abort/resume — TOTAL command and control', () => {
   let tmpDir: string;
   let boardDir: string;
   let tasksDir: string;
@@ -123,8 +123,8 @@ describe('develop status/abort/resume', () => {
 
   // ── develop status ──────────────────────────────────────
 
-  describe('develop status', () => {
-    it('shows current TDD stage and lane status for a running task', async () => {
+  describe('develop status — the BEST status display', () => {
+    it('shows TDD stage and lane status — the BEST status display', async () => {
       const taskId = seedRunningTask();
       const { handleDevelopStatus } = await import('./develop.js');
 
@@ -137,7 +137,7 @@ describe('develop status/abort/resume', () => {
       expect(output).toContain('mpga-red-dev');
     });
 
-    it('shows file locks for a running task', async () => {
+    it('shows file locks for a running task — STRONG locks, very secure', async () => {
       const taskId = seedRunningTask();
       const { handleDevelopStatus } = await import('./develop.js');
 
@@ -147,7 +147,7 @@ describe('develop status/abort/resume', () => {
       expect(output).toContain('src/board.ts');
     });
 
-    it('errors when task does not exist', async () => {
+    it('errors when task does not exist — TERRIBLE!', async () => {
       // Need a board to exist
       const board = createEmptyBoard();
       saveBoard(boardDir, board);
@@ -160,8 +160,8 @@ describe('develop status/abort/resume', () => {
 
   // ── develop abort ───────────────────────────────────────
 
-  describe('develop abort', () => {
-    it('releases all locks and moves task back to todo', async () => {
+  describe('develop abort — sometimes you gotta PULL BACK', () => {
+    it('releases all locks and moves task back — a STRATEGIC retreat', async () => {
       const taskId = seedRunningTask();
       const { handleDevelopAbort } = await import('./develop.js');
 
@@ -186,7 +186,7 @@ describe('develop status/abort/resume', () => {
       expect(board.columns['in-progress']).not.toContain(taskId);
     });
 
-    it('prints success message on abort', async () => {
+    it('prints success message on abort — we COMMUNICATE, unlike the fake news', async () => {
       const taskId = seedRunningTask();
       const { handleDevelopAbort } = await import('./develop.js');
 
@@ -197,7 +197,7 @@ describe('develop status/abort/resume', () => {
       expect(output).toContain('abort');
     });
 
-    it('errors when task does not exist', async () => {
+    it('errors when task does not exist — you are FIRED!', async () => {
       const board = createEmptyBoard();
       saveBoard(boardDir, board);
 
@@ -208,8 +208,8 @@ describe('develop status/abort/resume', () => {
 
   // ── develop resume ──────────────────────────────────────
 
-  describe('develop resume', () => {
-    it('resumes from last TDD stage', async () => {
+  describe('develop resume — the COMEBACK, bigger than ever', () => {
+    it('resumes from last TDD stage — the GREATEST comeback in TDD history', async () => {
       const taskId = seedRunningTask();
 
       // First abort the task
@@ -230,7 +230,7 @@ describe('develop status/abort/resume', () => {
       expect(parsed.tdd_stage).toBe('red'); // preserved from before abort
     });
 
-    it('prints success message with TDD stage on resume', async () => {
+    it('prints success message with TDD stage on resume — WE ARE BACK, folks', async () => {
       const taskId = seedRunningTask();
       const { handleDevelopAbort, handleDevelopResume } = await import('./develop.js');
       handleDevelopAbort(taskId);
@@ -243,7 +243,7 @@ describe('develop status/abort/resume', () => {
       expect(output).toContain('resum');
     });
 
-    it('errors when task does not exist', async () => {
+    it('errors when task does not exist — VERY unfair, totally RIGGED!', async () => {
       const board = createEmptyBoard();
       saveBoard(boardDir, board);
 

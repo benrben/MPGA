@@ -33,7 +33,10 @@ export function exportAntigravity(
     log.success(`Generated ~/.gemini/antigravity/skills/ (${SKILL_NAMES.length} skills)`);
     const agGlobalRulesDir = path.join(process.env.HOME ?? '~', '.antigravity', 'rules');
     fs.mkdirSync(agGlobalRulesDir, { recursive: true });
-    fs.writeFileSync(path.join(agGlobalRulesDir, 'mpga-global.md'), generateAntigravityGlobal(cliCommand));
+    fs.writeFileSync(
+      path.join(agGlobalRulesDir, 'mpga-global.md'),
+      generateAntigravityGlobal(cliCommand),
+    );
     log.success('Generated ~/.antigravity/rules/mpga-global.md');
   } else {
     const cliCommand = pluginRoot ? projectVendoredCliCommand() : 'npx mpga';
@@ -55,13 +58,19 @@ export function exportAntigravity(
       path.join(rulesDir, 'mpga-context.md'),
       generateAntigravityContextMd(indexContent, projectName, cliCommand),
     );
-    fs.writeFileSync(path.join(rulesDir, 'mpga-evidence.md'), generateAntigravityEvidenceMd(cliCommand));
+    fs.writeFileSync(
+      path.join(rulesDir, 'mpga-evidence.md'),
+      generateAntigravityEvidenceMd(cliCommand),
+    );
     fs.writeFileSync(path.join(rulesDir, 'mpga-tdd.md'), generateAntigravityTddMd(cliCommand));
     log.success('Generated .antigravity/rules/ (3 files)');
     // Workflows in .agents/workflows/ — always generated for antigravity
     const workflowsDir = path.join(projectRoot, '.agents', 'workflows');
     fs.mkdirSync(workflowsDir, { recursive: true });
-    fs.writeFileSync(path.join(workflowsDir, 'mpga-plan.md'), generateAntigravityPlanWorkflow(cliCommand));
+    fs.writeFileSync(
+      path.join(workflowsDir, 'mpga-plan.md'),
+      generateAntigravityPlanWorkflow(cliCommand),
+    );
     fs.writeFileSync(
       path.join(workflowsDir, 'mpga-develop.md'),
       generateAntigravityDevelopWorkflow(cliCommand),

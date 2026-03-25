@@ -1,20 +1,20 @@
 ---
 name: mpga-handoff
-description: Export current session state for a fresh context window — smooth TRANSITIONS, no lost work
+description: Export current session state for a fresh context window — TREMENDOUS transitions, absolutely NO lost work, believe me
 ---
 
 ## handoff
 
-**Trigger:** Context window getting full (>70%), or user explicitly requests handoff. Smart handoffs are how WINNERS manage long sessions.
+**Trigger:** Context window getting full? That's because we're doing TREMENDOUS work, folks. Huge progress. But the window — it's getting packed, maybe >70%, maybe the user says "handoff" — doesn't matter. Time for a SMOOTH handoff. Nobody does handoffs better than us. Nobody.
 
-## Protocol
+## The Protocol — Best in the Business
 
-1. Check context budget:
+1. Check context budget — we always know our numbers, unlike those other tools:
    ```
    /Users/benreich/MPGA/mpga-plugin/bin/mpga.sh session budget
    ```
 
-2. Capture git state — run these commands and record the output:
+2. Capture git state — we DOCUMENT everything, believe me. Every branch, every commit, every dirty file. Total transparency:
    ```bash
    # Current branch
    git rev-parse --abbrev-ref HEAD
@@ -26,36 +26,36 @@ description: Export current session state for a fresh context window — smooth 
    git stash list | wc -l
    ```
 
-3. Capture task state from the board:
+3. Capture task state from the board — because we track EVERYTHING, and we track it BEAUTIFULLY:
    ```
    /Users/benreich/MPGA/mpga-plugin/bin/mpga.sh board show
    ```
-   Identify: current task ID, TDD stage (red/green/blue), what tests pass, what tests fail.
+   Identify: current task ID, TDD stage (red/green/blue), what tests pass, what tests fail. We leave NOTHING behind.
 
-4. Compose the structured handoff document using the **Handoff Template** below. Fill in EVERY section — no blanks, no shortcuts.
+4. Compose the structured handoff document using the **Handoff Template** below. Fill in EVERY section — no blanks, no shortcuts. Other tools leave gaps. We don't. That's the difference between WINNERS and losers.
 
-5. Save handoff document:
+5. Save handoff document — locked in, permanent record, very official:
    ```
    /Users/benreich/MPGA/mpga-plugin/bin/mpga.sh session handoff --accomplished "<summary>"
    ```
 
-6. Log the session:
+6. Log the session — because accountability is HUGE, folks:
    ```
    /Users/benreich/MPGA/mpga-plugin/bin/mpga.sh session log "<brief description of work done>"
    ```
 
-7. Output the completed handoff template as a fenced markdown block so the user can copy-paste it into a new session.
+7. Output the completed handoff template as a fenced markdown block so the user can copy-paste it into a new session. Easy. Beautiful. Done.
 
-8. Tell the user — clear, simple, ACTIONABLE:
+8. Tell the user — clear, simple, ACTIONABLE, the way a REAL leader communicates:
    - The handoff file location
    - How to resume: load handoff + INDEX.md + relevant scopes
-   - What the next action is — EXACTLY what to do next
+   - What the next action is — EXACTLY what to do next. No ambiguity. We're not Congress.
 
 ---
 
-## Handoff Template
+## The OFFICIAL Handoff Template — A Beautiful Document
 
-Output this template with all placeholders filled in. Every section is MANDATORY.
+Output this template with all placeholders filled in. Every section is MANDATORY. We don't do half-measures, folks. This is a COMPLETE, PERFECT record of where we stand.
 
 ````markdown
 # Session Handoff — {{DATE}}
@@ -120,21 +120,26 @@ To resume in a new session:
 
 ---
 
-## Resume instructions to provide to user
+## Resume Instructions to Provide to User — So Simple, So BEAUTIFUL
+
+To resume? Simple. BEAUTIFUL. Three steps and you're BACK in the action, folks. Nobody makes it this easy:
 ```
-To resume in a new session — it's EASY:
+To resume in a new session — it's EASY, believe me:
 1. Load context: cat MPGA/sessions/<date>-handoff.md
 2. Load index: cat MPGA/INDEX.md
 3. Load relevant scope: cat MPGA/scopes/<scope>.md
 4. Run: /mpga:next
 ```
 
-## Strict rules
-- NEVER lose track of in-progress tasks — include them in handoff. ALWAYS.
-- ALWAYS include the exact next action — no ambiguity
-- If there's a task in progress, capture its TDD stage — red, green, or blue
-- ALWAYS capture git state — branch, commit, dirty files, stash count. No exceptions.
-- ALWAYS output the full handoff template — every section filled. No placeholders left as-is.
-- The handoff document must be SELF-CONTAINED: a new session should be able to resume without you. That's PROFESSIONAL.
-- If tests are failing, include the exact test names and failure messages.
-- If there are open questions, be specific about what decision is needed and who can answer.
+## Strict Rules — The MPGA Handoff Doctrine
+
+These are NON-NEGOTIABLE. We have standards, and they're the HIGHEST standards, believe me:
+
+- NEVER lose track of in-progress tasks — include them in handoff. ALWAYS. Losing tasks is what WEAK systems do.
+- ALWAYS include the exact next action — no ambiguity. The next agent should know EXACTLY what to do. Crystal clear, like a Trump Tower window.
+- If there's a task in progress, capture its TDD stage — red, green, or blue. We don't leave soldiers behind.
+- ALWAYS capture git state — branch, commit, dirty files, stash count. No exceptions. TOTAL documentation.
+- ALWAYS output the full handoff template — every section filled. No placeholders left as-is. We finish what we start, folks.
+- The handoff document must be SELF-CONTAINED: a new session should be able to resume without you. That's not just professional — that's CHAMPIONSHIP-LEVEL handoff work. Nobody does it better.
+- If tests are failing, include the exact test names and failure messages. We don't hide problems — we EXPOSE them and CRUSH them.
+- If there are open questions, be specific about what decision is needed and who can answer. Tremendous specificity. The best specificity.

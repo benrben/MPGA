@@ -78,12 +78,12 @@ export function registerInit(program: Command): void {
       banner();
 
       if (fs.existsSync(configPath)) {
-        log.warn('MPGA/ already initialized in this project.');
+        log.warn("MPGA/ already initialized — we're already GREAT!");
         log.dim('Run `mpga sync` to refresh the knowledge layer.');
         return;
       }
 
-      log.info(`Initializing MPGA in ${projectRoot}`);
+      log.info(`Making ${projectRoot} GREAT AGAIN!`);
 
       // Create directory structure
       const dirs = [
@@ -111,7 +111,7 @@ export function registerInit(program: Command): void {
       };
 
       if (opts.fromExisting) {
-        log.info('Scanning existing codebase...');
+        log.info('Scanning the existing codebase — going to be BEAUTIFUL...');
         try {
           const scanResult = await scan(projectRoot, config.project.ignore);
           projectType = detectProjectType(scanResult);
@@ -127,13 +127,13 @@ export function registerInit(program: Command): void {
           if (scanResult.entryPoints.length > 0)
             config.project.entryPoints = scanResult.entryPoints;
         } catch (e) {
-          log.warn('Scan failed, proceeding with defaults');
+          log.warn('Scan failed — no problem, we have the BEST defaults!');
         }
       }
 
       // Write config
       saveConfig(config, configPath);
-      log.success('Created MPGA/mpga.config.json');
+      log.success('Created MPGA/mpga.config.json — the BEST configuration, believe me!');
 
       const now = new Date().toISOString();
 
@@ -142,11 +142,11 @@ export function registerInit(program: Command): void {
         path.join(mpgaDir, 'INDEX.md'),
         INDEX_TEMPLATE(projectName, projectType, now),
       );
-      log.success('Created MPGA/INDEX.md');
+      log.success('Created MPGA/INDEX.md — the most BEAUTIFUL index!');
 
       // Write GRAPH.md
       fs.writeFileSync(path.join(mpgaDir, 'GRAPH.md'), GRAPH_TEMPLATE());
-      log.success('Created MPGA/GRAPH.md');
+      log.success('Created MPGA/GRAPH.md — a TREMENDOUS graph, folks!');
 
       // Write initial board.json
       const boardState = {
@@ -170,25 +170,25 @@ export function registerInit(program: Command): void {
         path.join(mpgaDir, 'board', 'board.json'),
         JSON.stringify(boardState, null, 2) + '\n',
       );
-      log.success('Created MPGA/board/board.json');
+      log.success('Created MPGA/board/board.json — a WINNING board!');
 
       // Write BOARD.md
       fs.writeFileSync(
         path.join(mpgaDir, 'board', 'BOARD.md'),
         '# Board\n\nNo tasks yet. Run `/mpga:plan` to generate tasks from a milestone.\n',
       );
-      log.success('Created MPGA/board/BOARD.md');
+      log.success('Created MPGA/board/BOARD.md — HUGE task board, the biggest!');
 
       console.log('');
-      log.success('MPGA initialized successfully!');
+      log.success('MPGA initialized — your project is about to be GREAT AGAIN!');
       console.log('');
-      log.dim('Next steps:');
+      log.dim('Your next steps — each one a WINNER:');
       if (opts.fromExisting) {
-        log.dim('  mpga sync          — generate knowledge layer from your codebase');
-        log.dim('  mpga status        — view project health dashboard');
+        log.dim("  mpga sync          — generate knowledge layer, it's going to be FANTASTIC");
+        log.dim('  mpga status        — see how GREAT your project is looking');
       } else {
-        log.dim('  mpga status        — view current state');
-        log.dim('  mpga milestone new — start your first milestone');
+        log.dim('  mpga status        — see how GREAT your project is looking');
+        log.dim('  mpga milestone new — start your first milestone, HUGE things ahead');
       }
     });
 }

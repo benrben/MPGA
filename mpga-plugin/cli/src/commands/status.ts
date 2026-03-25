@@ -63,7 +63,7 @@ function handleStatus(opts: { json?: boolean }): void {
   miniBanner();
 
   // ── Knowledge Layer ──
-  log.header(`Status — ${config.project.name}`);
+  log.header(`Status — ${config.project.name} (Looking TREMENDOUS)`);
 
   log.section('  📚 Knowledge Layer');
   log.kv('Last sync', lastSync, 4);

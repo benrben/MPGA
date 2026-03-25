@@ -43,6 +43,8 @@ describe('runtime export helper', () => {
 
   it('computes project and global vendored cli commands', () => {
     expect(projectVendoredCliCommand()).toBe('node ./.mpga-runtime/cli/dist/index.js');
-    expect(globalVendoredCliCommand('/tmp/tool-root')).toBe('/tmp/tool-root/.mpga-runtime/cli/dist/index.js');
+    expect(globalVendoredCliCommand('/tmp/tool-root')).toBe(
+      'node /tmp/tool-root/.mpga-runtime/cli/dist/index.js',
+    );
   });
 });

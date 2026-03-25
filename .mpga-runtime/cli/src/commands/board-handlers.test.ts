@@ -90,12 +90,24 @@ function makeBoard(inProgressCount: number) {
       review: [],
       done: [],
     },
-    stats: { total: 0, done: 0, in_flight: 0, blocked: 0, progress_pct: 0, evidence_produced: 0, evidence_expected: 0 },
+    stats: {
+      total: 0,
+      done: 0,
+      in_flight: 0,
+      blocked: 0,
+      progress_pct: 0,
+      evidence_produced: 0,
+      evidence_expected: 0,
+    },
     wip_limits: { 'in-progress': 3, testing: 3, review: 2 },
     next_task_id: 10,
     lanes: {},
     active_runs: {},
-    scheduler: { lock_mode: 'file' as const, max_parallel_lanes: 3, split_strategy: 'file-groups' as const },
+    scheduler: {
+      lock_mode: 'file' as const,
+      max_parallel_lanes: 3,
+      split_strategy: 'file-groups' as const,
+    },
     ui: { refresh_interval_ms: 2500, theme: 'mpga-signal' },
   };
 }

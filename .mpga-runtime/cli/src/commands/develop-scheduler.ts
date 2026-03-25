@@ -2,8 +2,16 @@ import fs from 'fs';
 import path from 'path';
 import { findProjectRoot } from '../core/config.js';
 import { loadBoard, saveBoard, type BoardLane } from '../board/board.js';
-import { parseTaskFile, renderTaskFile, loadAllTasks, type RunStatus, type FileLock, type TddStage } from '../board/task.js';
+import {
+  parseTaskFile,
+  renderTaskFile,
+  loadAllTasks,
+  type RunStatus,
+  type FileLock,
+  type TddStage,
+} from '../board/task.js';
 import { findTaskFile, recalcStats } from '../board/board.js';
+import { withBoardLock } from '../board/board-lock.js';
 import { writeBoardLiveSnapshot } from '../board/live.js';
 import { writeBoardLiveHtml } from '../board/live-html.js';
 
@@ -66,7 +74,11 @@ function parseCheckpointSection(body: string): TddCheckpoint | null {
   return checkpoint;
 }
 
-export function saveTddCheckpoint(tasksDir: string, taskId: string, checkpoint: TddCheckpoint): void {
+export function saveTddCheckpoint(
+  tasksDir: string,
+  taskId: string,
+  checkpoint: TddCheckpoint,
+): void {
   const taskFile = findTaskFile(tasksDir, taskId);
   if (!taskFile) throw new Error(`Task '${taskId}' not found`);
 
@@ -81,7 +93,11 @@ export function saveTddCheckpoint(tasksDir: string, taskId: string, checkpoint: 
     const afterHeader = task.body.slice(sectionStart);
     const nextSection = afterHeader.indexOf('\n## ', 1);
     const sectionEnd = nextSection === -1 ? task.body.length : sectionStart + nextSection;
-    task.body = task.body.slice(0, sectionStart).trimEnd() + '\n\n' + checkpointText + task.body.slice(sectionEnd);
+    task.body =
+      task.body.slice(0, sectionStart).trimEnd() +
+      '\n\n' +
+      checkpointText +
+      task.body.slice(sectionEnd);
   } else {
     // Append the checkpoint section at the end
     task.body = task.body.trimEnd() + '\n\n' + checkpointText + '\n';
@@ -124,7 +140,11 @@ function mergeFileGroups(groups: string[][]): string[][] {
   return merged.sort((a, b) => a[0]!.localeCompare(b[0]!));
 }
 
-export function splitIntoFileGroups(taskId: string, groups: string[][], scope?: string): BoardLane[] {
+export function splitIntoFileGroups(
+  taskId: string,
+  groups: string[][],
+  scope?: string,
+): BoardLane[] {
   const merged = mergeFileGroups(groups);
   const normalized = merged.length > 0 ? merged : [[]];
 
@@ -139,7 +159,10 @@ export function splitIntoFileGroups(taskId: string, groups: string[][], scope?: 
   }));
 }
 
-export function canAcquireFileLocks(files: string[], tasksDir: string): { ok: boolean; conflicts: string[] } {
+export function canAcquireFileLocks(
+  files: string[],
+  tasksDir: string,
+): { ok: boolean; conflicts: string[] } {
   const tasks = loadAllTasks(tasksDir);
   const activeLocks = new Set(
     tasks
@@ -155,76 +178,81 @@ export function persistLaneTransition(
   tasksDir: string,
   opts: PersistLaneTransitionOptions,
 ): void {
-  const board = loadBoard(boardDir);
-  const taskFile = findTaskFile(tasksDir, opts.taskId);
-  if (!taskFile) throw new Error(`Task '${opts.taskId}' not found`);
+  withBoardLock(boardDir, () => {
+    const board = loadBoard(boardDir);
+    const taskFile = findTaskFile(tasksDir, opts.taskId);
+    if (!taskFile) throw new Error(`Task '${opts.taskId}' not found`);
 
-  const task = parseTaskFile(taskFile);
-  if (!task) throw new Error(`Could not parse task '${opts.taskId}'`);
+    const task = parseTaskFile(taskFile);
+    if (!task) throw new Error(`Could not parse task '${opts.taskId}'`);
 
-  const now = new Date().toISOString();
-  const files = opts.files ?? [];
-  const fileLocks: FileLock[] =
-    opts.status === 'done' || opts.status === 'failed'
-      ? []
-      : files.map((file) => ({
-          path: file,
-          lane_id: opts.laneId,
-          agent: opts.agent ?? 'mpga-red-dev',
-          acquired_at: task.started_at ?? now,
-          heartbeat_at: now,
-        }));
-
-  task.lane_id = opts.laneId;
-  task.run_status = opts.status;
-  task.current_agent = opts.agent ?? null;
-  task.file_locks = fileLocks;
-  task.scope_locks =
-    opts.scope && opts.status !== 'done' && opts.status !== 'failed'
-      ? [
-          {
-            scope: opts.scope,
+    const now = new Date().toISOString();
+    const files = opts.files ?? [];
+    const fileLocks: FileLock[] =
+      opts.status === 'done' || opts.status === 'failed'
+        ? []
+        : files.map((file) => ({
+            path: file,
             lane_id: opts.laneId,
             agent: opts.agent ?? 'mpga-red-dev',
             acquired_at: task.started_at ?? now,
             heartbeat_at: now,
-          },
-        ]
-      : [];
-  task.started_at = task.started_at ?? now;
-  task.finished_at = opts.status === 'done' || opts.status === 'failed' ? now : null;
-  task.heartbeat_at = opts.status === 'done' || opts.status === 'failed' ? null : now;
-  task.updated = now;
+          }));
 
-  board.lanes[opts.laneId] = {
-    id: opts.laneId,
-    task_ids: [opts.taskId],
-    status:
-      opts.status === 'handoff'
-        ? 'running'
-        : opts.status === 'queued' || opts.status === 'running' || opts.status === 'done' || opts.status === 'failed'
-          ? opts.status
-          : 'running',
-    scope: opts.scope,
-    files,
-    current_agent: opts.agent ?? null,
-    updated_at: now,
-  };
-  board.active_runs[`${opts.laneId}:${opts.taskId}`] = {
-    id: `${opts.laneId}:${opts.taskId}`,
-    lane_id: opts.laneId,
-    task_id: opts.taskId,
-    status: opts.status,
-    agent: opts.agent ?? null,
-    started_at: task.started_at ?? now,
-    finished_at: task.finished_at,
-  };
+    task.lane_id = opts.laneId;
+    task.run_status = opts.status;
+    task.current_agent = opts.agent ?? null;
+    task.file_locks = fileLocks;
+    task.scope_locks =
+      opts.scope && opts.status !== 'done' && opts.status !== 'failed'
+        ? [
+            {
+              scope: opts.scope,
+              lane_id: opts.laneId,
+              agent: opts.agent ?? 'mpga-red-dev',
+              acquired_at: task.started_at ?? now,
+              heartbeat_at: now,
+            },
+          ]
+        : [];
+    task.started_at = task.started_at ?? now;
+    task.finished_at = opts.status === 'done' || opts.status === 'failed' ? now : null;
+    task.heartbeat_at = opts.status === 'done' || opts.status === 'failed' ? null : now;
+    task.updated = now;
 
-  fs.writeFileSync(taskFile, renderTaskFile(task));
-  recalcStats(board, tasksDir);
-  saveBoard(boardDir, board);
-  writeBoardLiveSnapshot(board, tasksDir, boardDir);
-  writeBoardLiveHtml(boardDir);
+    board.lanes[opts.laneId] = {
+      id: opts.laneId,
+      task_ids: [opts.taskId],
+      status:
+        opts.status === 'handoff'
+          ? 'running'
+          : opts.status === 'queued' ||
+              opts.status === 'running' ||
+              opts.status === 'done' ||
+              opts.status === 'failed'
+            ? opts.status
+            : 'running',
+      scope: opts.scope,
+      files,
+      current_agent: opts.agent ?? null,
+      updated_at: now,
+    };
+    board.active_runs[`${opts.laneId}:${opts.taskId}`] = {
+      id: `${opts.laneId}:${opts.taskId}`,
+      lane_id: opts.laneId,
+      task_id: opts.taskId,
+      status: opts.status,
+      agent: opts.agent ?? null,
+      started_at: task.started_at ?? now,
+      finished_at: task.finished_at,
+    };
+
+    fs.writeFileSync(taskFile, renderTaskFile(task));
+    recalcStats(board, tasksDir);
+    saveBoard(boardDir, board);
+    writeBoardLiveSnapshot(board, tasksDir, boardDir);
+    writeBoardLiveHtml(boardDir);
+  });
 }
 
 export function runDevelopTask(
@@ -248,7 +276,9 @@ export function runDevelopTask(
     blue: 'mpga-blue-dev',
     review: 'mpga-reviewer',
   };
-  const resumeAgent = checkpoint ? (agentForStage[checkpoint.stage] ?? 'mpga-red-dev') : 'mpga-red-dev';
+  const resumeAgent = checkpoint
+    ? (agentForStage[checkpoint.stage] ?? 'mpga-red-dev')
+    : 'mpga-red-dev';
   if (checkpoint) {
     task.tdd_stage = checkpoint.stage as TddStage;
     fs.writeFileSync(taskFile, renderTaskFile(task));

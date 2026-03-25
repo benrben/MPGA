@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { EvidenceLink } from './parser.js';
+import { EvidenceLink, isSymbolBased } from './parser.js';
 import { findSymbol, verifyRange } from './ast.js';
 
 /** Confidence when only the file exists (no symbol or line range). */
@@ -22,15 +22,6 @@ export interface ResolvedEvidence {
   startLine?: number;
   endLine?: number;
   healedFrom?: string; // description of what changed
-}
-
-/**
- * Determines whether a link uses symbol-based format.
- * Symbol-based links have a symbol as the stable anchor and an optional
- * line-number hint (startLine only, no endLine).
- */
-function isSymbolBasedLink(link: EvidenceLink): boolean {
-  return !!link.symbol && !link.endLine;
 }
 
 export function resolveEvidence(link: EvidenceLink, projectRoot: string): ResolvedEvidence {
@@ -71,7 +62,7 @@ export function resolveEvidence(link: EvidenceLink, projectRoot: string): Resolv
   if (link.symbol) {
     const location = findSymbol(link.filepath, link.symbol, projectRoot);
     if (location) {
-      if (isSymbolBasedLink(link)) {
+      if (isSymbolBased(link)) {
         // Symbol-based link: the symbol is the stable anchor.
         // The line hint is advisory — if the symbol is found, it's valid.
         // Only mark as healed if the hint has drifted so the caller can update it.
@@ -108,7 +99,7 @@ export function resolveEvidence(link: EvidenceLink, projectRoot: string): Resolv
       const lines = content.split('\n');
       for (let i = 0; i < lines.length; i++) {
         if (lines[i].includes(link.symbol)) {
-          const fromDesc = isSymbolBasedLink(link)
+          const fromDesc = isSymbolBased(link)
             ? `fuzzy match at line ${i + 1} (hint was ${link.startLine ?? 'none'})`
             : `fuzzy match at line ${i + 1} (was ${link.startLine}-${link.endLine})`;
           return {

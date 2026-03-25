@@ -238,7 +238,7 @@ describe('exportCodex', () => {
         expectedSkillsDir,
         '/plugin',
         'codex',
-        `${path.join(tmpDir, '.codex', '.mpga-runtime', 'cli', 'dist', 'index.js').replace(/\\/g, '/')}`,
+        `node ${path.join(tmpDir, '.codex', '.mpga-runtime', 'cli', 'dist', 'index.js').replace(/\\/g, '/')}`,
       );
     });
 
@@ -373,7 +373,9 @@ describe('exportCodex', () => {
 
       const content = fs.readFileSync(path.join(tmpDir, '.codex', 'AGENTS.md'), 'utf-8');
       expect(content).toContain('Read MPGA/INDEX.md');
-      expect(content).toContain(path.join(tmpDir, '.codex', '.mpga-runtime', 'cli', 'dist', 'index.js'));
+      expect(content).toContain(
+        path.join(tmpDir, '.codex', '.mpga-runtime', 'cli', 'dist', 'index.js'),
+      );
     });
 
     it('subdirectory AGENTS.md limits evidence links to 5', () => {

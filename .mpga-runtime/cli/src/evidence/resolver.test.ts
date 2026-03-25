@@ -348,11 +348,7 @@ describe('resolveEvidence — symbol-based format', () => {
   });
 
   it('resolves symbol-based link with no line hint at all', () => {
-    const source = [
-      'export function compute(x: number) {',
-      '  return x * x;',
-      '}',
-    ].join('\n');
+    const source = ['export function compute(x: number) {', '  return x * x;', '}'].join('\n');
     writeFile('src/compute.ts', source);
 
     const link = makeLink({

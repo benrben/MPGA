@@ -412,7 +412,10 @@ describe('exportAntigravity (global)', () => {
       path.join(tmpDir, '.gemini', 'antigravity', 'skills'),
       '/fake/plugin',
       'antigravity',
-      path.join(tmpDir, '.gemini', '.mpga-runtime', 'cli', 'dist', 'index.js').replace(/\\/g, '/'),
+      'node ' +
+        path
+          .join(tmpDir, '.gemini', '.mpga-runtime', 'cli', 'dist', 'index.js')
+          .replace(/\\/g, '/'),
     );
   });
 

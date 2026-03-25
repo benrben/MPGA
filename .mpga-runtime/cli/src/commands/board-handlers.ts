@@ -2,7 +2,14 @@ import fs from 'fs';
 import path from 'path';
 import { log } from '../core/logger.js';
 import { findProjectRoot } from '../core/config.js';
-import { loadBoard, recalcStats, addTask, moveTask, findTaskFile, checkWipLimit } from '../board/board.js';
+import {
+  loadBoard,
+  recalcStats,
+  addTask,
+  moveTask,
+  findTaskFile,
+  checkWipLimit,
+} from '../board/board.js';
 import { parseTaskFile, renderTaskFile, loadAllTasks, Column, Priority } from '../board/task.js';
 import { renderBoardMd } from '../board/board-md.js';
 import { writeBoardLiveSnapshot } from '../board/live.js';
@@ -24,7 +31,7 @@ export function handleBoardShow(opts: { json?: boolean; milestone?: string }): v
   const tasksDir = getTasksDir(projectRoot);
 
   const board = loadBoard(boardDir);
-  recalcStats(board, tasksDir);
+  persistBoard(board, boardDir, tasksDir);
 
   if (opts.json) {
     const tasks = loadAllTasks(tasksDir);
@@ -36,7 +43,9 @@ export function handleBoardShow(opts: { json?: boolean; milestone?: string }): v
   console.log(mdContent);
 }
 
-export function handleBoardLive(opts: { serve?: boolean; open?: boolean; port?: number } = {}): void {
+export function handleBoardLive(
+  opts: { serve?: boolean; open?: boolean; port?: number } = {},
+): void {
   const projectRoot = findProjectRoot() ?? process.cwd();
   const boardDir = getBoardDir(projectRoot);
   const tasksDir = getTasksDir(projectRoot);
@@ -278,15 +287,23 @@ export function handleBoardDeps(taskId: string): void {
   const tasks = loadAllTasks(tasksDir);
   const taskMap = new Map(tasks.map((t) => [t.id, t]));
 
+  const visited = new Set<string>();
   function printDeps(id: string, indent = 0): void {
+    if (visited.has(id)) {
+      console.log(`${'  '.repeat(indent)}${id} (circular)`);
+      return;
+    }
+    visited.add(id);
     const task = taskMap.get(id);
     const prefix = '  '.repeat(indent);
     if (!task) {
       console.log(`${prefix}${id} (not found)`);
+      visited.delete(id);
       return;
     }
     console.log(`${prefix}${task.id}: ${task.title} [${task.column}]`);
     for (const dep of task.depends_on) printDeps(dep, indent + 1);
+    visited.delete(id);
   }
 
   log.header(`Dependencies for ${taskId}`);

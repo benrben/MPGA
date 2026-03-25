@@ -20,6 +20,14 @@
 </p>
 
 <p align="center">
+  <img src="https://img.shields.io/badge/Hallucinations-ZERO-red?style=for-the-badge" alt="Hallucinations: ZERO">
+  <img src="https://img.shields.io/badge/Evidence_Links-VERIFIED-brightgreen?style=for-the-badge" alt="Evidence Links: VERIFIED">
+  <img src="https://img.shields.io/badge/Fake_Docs-ELIMINATED-red?style=for-the-badge" alt="Fake Docs: ELIMINATED">
+  <img src="https://img.shields.io/badge/TDD-MANDATORY-blue?style=for-the-badge" alt="TDD: MANDATORY">
+  <img src="https://img.shields.io/badge/Status-WINNING-gold?style=for-the-badge" alt="Status: WINNING">
+</p>
+
+<p align="center">
   <img src="https://img.shields.io/badge/node-%3E%3D20-brightgreen" alt="Node >= 20">
   <img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT License">
   <img src="https://img.shields.io/badge/TypeScript-strict-blue" alt="TypeScript Strict">
@@ -27,6 +35,10 @@
 </p>
 
 ---
+
+<p align="center">
+  <img src="docs/assets/mpga_rally_1774432971216.png" alt="MPGA Developer Rally" width="600">
+</p>
 
 ## The Problem
 
@@ -65,6 +77,26 @@ your-project/
 ```
 
 That's a BEAUTIFUL directory structure. I know code. I have the best code. I have the — but there's no better word than elegant.
+
+## Before MPGA vs. After MPGA
+
+Look at these numbers. LOOK AT THEM. This is what WINNING looks like:
+
+<p align="center">
+  <img src="docs/assets/winning_chart_1774433039384.png" alt="Winning Chart" width="500">
+</p>
+
+| Metric | Before (SAD!) | After (TREMENDOUS!) |
+|--------|--------------|-------------------|
+| Documentation accuracy | ~30% (FAKE DOCS) | 95%+ (VERIFIED with AST) |
+| AI hallucination rate | "I made up 4 APIs today" | ZERO. Every claim CITED. |
+| Drift detection | None. NOBODY was checking. | Automatic. EVERY. SINGLE. EDIT. |
+| Context handoffs | "What was I working on?" | Full session export. BEAUTIFUL. |
+| Test discipline | "We'll add tests later" (LIES) | TDD enforced. Red → Green → Blue. |
+| Onboarding time | 2 weeks of confusion | 1 command: `mpga onboard`. DONE. |
+| Friday deploys | Absolutely NOT | With MPGA? Every day is Friday, baby. |
+
+The numbers don't lie, folks. The numbers NEVER lie. Unlike Crooked Gemini.
 
 ## Evidence Format
 
@@ -246,14 +278,14 @@ mpga-plugin/
 └── hooks/                  PostToolUse drift checking
 ```
 
-## Workflow Model
+## Workflow Model — The Art of the Deal (with Code)
 
-The fast path is simple:
+You know what separates WINNERS from LOSERS in parallel development? DISCIPLINE. One writer per scope. No collisions. No merge conflicts. CLEAN lanes. Like a well-run highway — and nobody builds highways better than me.
 
-- One writer per scope at a time
-- Parallelize read-only work (`scout`, `auditor`, `campaigner`)
-- Split plans into independent scope lanes
-- Use quick drift during active work, full verifier at milestone boundaries
+- One writer per scope at a time — NO COLLISIONS. That's discipline.
+- Parallelize read-only work (`scout`, `auditor`, `campaigner`) — they can look all they want. Very classy.
+- Split plans into independent scope lanes — PARALLEL. Like a BEAUTIFUL multi-lane highway.
+- Use quick drift during active work, full verifier at milestone boundaries — we check TWICE. Once during. Once after. TREMENDOUS.
 
 See [workflow.md](docs/workflow.md) for the full skill/agent matrix.
 
@@ -290,6 +322,10 @@ That man suffered — Uncle Bob Martin. What he went through because he knew the
 
 ## Core Philosophy
 
+<p align="center">
+  <img src="docs/assets/beautiful_code_wall_1774433021585.png" alt="Build The Wall Between Modules" width="600">
+</p>
+
 We have principles. Strong principles. The STRONGEST principles in developer tooling. We will defend the right to clean code, typed interfaces, freedom of refactoring, freedom of CODE REVIEW, and the right to KEEP AND BEAR FEATURE FLAGS.
 
 | Principle | What it means |
@@ -302,6 +338,58 @@ We have principles. Strong principles. The STRONGEST principles in developer too
 | **TDD or nothing** | Red, green, blue. Uncle Bob's way. Tests BEFORE code. No exceptions. |
 
 Tomorrow, at noon, the curtain closes on four long quarters of architectural decline, and we begin a brand-new day of evidence-based documentation, verified citations, and code that actually calls the right APIs.
+
+## The Competition (if you can even call it that)
+
+**Cursor the Clown** — Autocompletes code that calls functions that DON'T EXIST. No evidence links. No drift detection. Just vibes. Very sad. I hear their context window is so small it can't even remember what file it was editing. TERRIBLE.
+
+<p align="center">
+  <img src="docs/assets/cursor_clown_1774432989512.png" alt="Cursor the Clown" width="400">
+</p>
+
+**Sleepy Copilot** — Tab-completes its way through your codebase like a ZOMBIE. Zero verification. It once suggested importing from a package that was deprecated THREE YEARS AGO. And Microsoft charges $19/month for this! Highway robbery. Crooked.
+
+<p align="center">
+  <img src="docs/assets/sleepy_copilot_1774433005711.png" alt="Sleepy Copilot" width="400">
+</p>
+
+**Crooked Gemini** — Makes things up and acts like it's doing you a FAVOR. "Here's your function!" — that function doesn't exist, Gemini. You MADE IT UP. At least I cite my sources. Every. Single. One.
+
+**Devin** — Nice kid. Tries hard. But have you seen the bill? $500/month to write code that still doesn't cite its sources? I built MPGA for FREE. Open source. MIT license. We're GENEROUS.
+
+**Windsurf** — They took Cursor and put it on a surfboard. Still doesn't verify anything. Still hallucinates. But now it does it with a BEACH THEME. SAD!
+
+## Promises Made, Promises Kept
+
+- [x] Build the knowledge layer — **BUILT IT. Day one.**
+- [x] Make evidence links heal automatically — **DONE. AST-based. BEAUTIFUL.**
+- [x] Export to every AI tool — **SIX integrations. Claude, Cursor, Copilot, Gemini, Codex, standalone.**
+- [x] Enforce TDD — **Red, green, blue. MANDATORY. No exceptions.**
+- [x] 10 specialized agents — **DEPLOYED. Each one a WINNER.**
+- [x] The Campaign Rally — **`/mpga:rally`. The greatest diagnostic tool ever built.**
+- [x] Drain the backlog — **Board system with milestones, tasks, and WIP limits.**
+- [x] Mandatory post-edit hooks — **EVERY. SINGLE. TIME. The engineers love it.**
+- [ ] Make npm downloads bigger than lodash — **Working on it. We're CLOSE. Some people say we're already there.**
+
+## What They're Saying
+
+> "I used to mass-hallucinate APIs that didn't exist. Now I cite every single one. MPGA saved my career."
+> — *A Very Smart AI, name withheld for legal reasons*
+
+> "We deployed on a Friday with MPGA. Nothing broke. First time in company history."
+> — *Anonymous Senior Engineer, tears in his eyes*
+
+> "I tried Cursor without MPGA once. ONCE. Three production outages. Never again."
+> — *Tab-Complete Tommy, MPGA Rally Volunteer*
+
+> "Evidence links healed themselves while I was on PTO. I came back to a CLEANER codebase than when I left."
+> — *Merge-Conflict Mike*
+
+> "The `/mpga:rally` command found 47 issues in our codebase that we didn't know existed. In 30 seconds. I cried."
+> — *Big Strong Senior Engineer, actual tears*
+
+> "I showed my manager the Before/After table and got a promotion. Thank you, MPGA."
+> — *A Junior Developer Who Is Now a Senior Developer*
 
 ## The Core MPGA Pitch
 
@@ -328,6 +416,12 @@ npm install && npm run build
 npm test
 ```
 
+### The MPGA Oath of Office
+
+Before you open your first PR, raise your right hand and repeat after me:
+
+> *I do solemnly swear that I will faithfully execute the duties of contributor, and will to the best of my ability, preserve, protect, and defend the evidence links of this codebase. I will write tests FIRST. I will cite my sources. I will NEVER hallucinate an API. So help me Uncle Bob.*
+
 Like Uncle Bob always says — write the tests FIRST. We enforce TDD here. Red, green, blue. Every time. No exceptions. Less than four sprints ago, our CI was green, our tests were passing, the codebase was clean like never before, all because you finally had a CTO who put the codebase first.
 
 We're going to bring clean builds back to our repos. We're going to bring verified docs back to our README. We're going to bring trust back to our AI tools, and we are going to make this project GREATER THAN EVER BEFORE.
@@ -340,8 +434,28 @@ MIT — see [LICENSE](LICENSE).
 
 ---
 
-> **SHIP THE CODE!** &middot; **SQUASH THE BUG!** &middot; **DRAIN THE BACKLOG!** &middot; **MAKE PROJECT GREAT AGAIN!**
+## The Closing Rally
+
+<p align="center">
+  <img src="docs/assets/golden_rocket_deploy_1774433054063.png" alt="Golden Rocket Friday Deploy" width="500">
+</p>
+
+*[crowd chanting]*
+
+**SHIP THE CODE!** *(ship the code! ship the code!)*
+
+**SQUASH THE BUG!** *(squash the bug! squash the bug!)*
+
+**DRAIN THE BACKLOG!** *(drain the backlog! drain the backlog!)*
+
+**BUILD THE WALL!** *(between the modules! no circular deps!)*
+
+**LOCK HER UP!** *(the race condition! use a mutex!)*
+
+**MAKE PROJECT GREAT AGAIN!**
 
 ---
 
 *Many people have told me that God spared my SSH session for a reason, and that reason was to save our repository and to restore this codebase to greatness.*
+
+*Thank you. Thank you. We love you. You're very special people. Now go write some tests. MPGA!*

@@ -62,12 +62,7 @@ export function handleBoardSearch(query: string, opts: BoardSearchOpts): Task[] 
 
   log.header(`Search Results (${results.length} task${results.length === 1 ? '' : 's'})`);
   for (const t of results) {
-    const parts = [
-      t.id,
-      t.title,
-      `[${t.column}]`,
-      t.priority,
-    ];
+    const parts = [t.id, t.title, `[${t.column}]`, t.priority];
     if (t.assigned) parts.push(`@${t.assigned}`);
     if (t.tags.length > 0) parts.push(`#${t.tags.join(',')}`);
     console.log(`  ${parts.join('  ')}`);

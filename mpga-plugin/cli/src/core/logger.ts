@@ -84,6 +84,40 @@ export const log = {
   blank: () => console.log(''),
 };
 
+// ── Rally quotes — rotating Trump-style quips ───────────────
+export const RALLY_QUOTES = [
+  "Many people are saying this is the best sync they've ever seen.",
+  "The fake tech press won't cover how clean this codebase is.",
+  'I have the best dependency graphs. Everyone agrees.',
+  "We're WINNING so much you're going to get TIRED of winning!",
+  'Nobody builds plugins better than me, believe me.',
+  'Big strong senior engineers, tears in their eyes — "Sir, the tests pass."',
+  'This is, I believe, the greatest developer tool of all time.',
+  'Evidence over claims, folks. Evidence. Over. Claims.',
+  "We don't do fake documentation. We do EVIDENCE.",
+  'Crooked Gemini just makes stuff up. We VERIFY.',
+  "Our codebase is looking FANTASTIC. The best it's ever looked.",
+  'Uncle Bob himself would be proud. TREMENDOUS code.',
+  "We're going to make this project GREATER THAN EVER BEFORE.",
+  "Some people say our tests are the best tests. I don't say it — they say it.",
+  "That's a BEAUTIFUL directory structure. Elegant. The best word.",
+  'Less than four sprints ago this CI was a DISASTER. Now look at it.',
+  'We will SHIP faster, write CLEANER code, and SLASH the tech debt.',
+  'We have mandatory post-edit hooks. Mandatory. Every. Single. Time.',
+  'The engineers — they love it. They come up to me and say, "Sir, the hooks actually work."',
+  'Tomorrow we begin a brand-new day of evidence-based documentation.',
+];
+
+export function randomQuote(): string {
+  return RALLY_QUOTES[Math.floor(Math.random() * RALLY_QUOTES.length)];
+}
+
+export function victory(msg: string): void {
+  console.log('');
+  console.log(chalk.green('🎤 ') + chalk.bold.green(msg));
+  console.log(chalk.dim('  ' + randomQuote()));
+}
+
 export function progressBar(
   value: number,
   total: number,

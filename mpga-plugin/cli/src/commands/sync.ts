@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { Command } from 'commander';
-import { log } from '../core/logger.js';
+import { log, victory } from '../core/logger.js';
 import { loadConfig, findProjectRoot } from '../core/config.js';
 import { scan } from '../core/scanner.js';
 import { buildGraph, renderGraphMd } from '../generators/graph-md.js';
@@ -20,22 +20,22 @@ export function registerSync(program: Command): void {
       const mpgaDir = path.join(projectRoot, 'MPGA');
 
       if (!fs.existsSync(mpgaDir)) {
-        log.error('MPGA not initialized. Run `mpga init` first.');
+        log.error('MPGA not initialized — SAD! Run `mpga init` to Make This Project Great Again.');
         process.exit(1);
       }
 
       const config = loadConfig(projectRoot);
-      log.header('MPGA Sync');
+      log.header('MPGA Sync — Going to be TREMENDOUS');
 
       // Step 1: Scan
-      log.info('Scanning codebase...');
+      log.info('Scanning the GREATEST codebase...');
       const scanResult = await scan(projectRoot, config.project.ignore, true);
       log.success(
         `Scanned ${scanResult.totalFiles} files (${scanResult.totalLines.toLocaleString()} lines)`,
       );
 
       // Step 2: Build dependency graph
-      log.info('Building dependency graph...');
+      log.info('Building a TREMENDOUS dependency graph...');
       const graph = await buildGraph(scanResult, config);
       const graphMd = renderGraphMd(graph);
       fs.writeFileSync(path.join(mpgaDir, 'GRAPH.md'), graphMd);
@@ -44,7 +44,7 @@ export function registerSync(program: Command): void {
       );
 
       // Step 3: Generate scope docs
-      log.info('Generating scope documents...');
+      log.info('Generating scope documents — the BEST docs...');
       const scopesDir = path.join(mpgaDir, 'scopes');
       fs.mkdirSync(scopesDir, { recursive: true });
       const scopes = groupIntoScopes(scanResult, graph, config);
@@ -59,7 +59,7 @@ export function registerSync(program: Command): void {
       log.success(`Generated ${scopes.length} scope documents`);
 
       // Step 4: Generate INDEX.md
-      log.info('Generating INDEX.md...');
+      log.info('Generating INDEX.md — the most BEAUTIFUL index...');
 
       // Read active milestone
       let activeMilestone: string | null = null;
@@ -80,11 +80,10 @@ export function registerSync(program: Command): void {
       log.success('INDEX.md generated');
 
       // Summary
+      victory('Sync COMPLETE! Your project is looking FANTASTIC!');
       console.log('');
-      log.success('Sync complete!');
-      console.log('');
-      log.dim(`  ${scopes.length} scopes in MPGA/scopes/`);
-      log.dim('  Run `mpga evidence verify` to check evidence health');
-      log.dim('  Run `mpga status` to view dashboard');
+      log.dim(`  ${scopes.length} scopes in MPGA/scopes/ — WINNING!`);
+      log.dim('  Run `mpga evidence verify` to check evidence health — believe me, you want to');
+      log.dim('  Run `mpga status` to view your INCREDIBLE dashboard');
     });
 }

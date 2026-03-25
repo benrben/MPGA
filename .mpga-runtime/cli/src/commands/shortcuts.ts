@@ -11,7 +11,9 @@ export function registerShortcuts(program: Command): void {
         console.log(`  Target files: ${files.join(', ')}`);
       }
       console.log('  Use /mpga:diagnose to run bug-hunter + optimizer in your AI coding agent.');
-      log.dim('  This skill analyzes code for bugs, performance issues, and optimization opportunities.');
+      log.dim(
+        '  This skill analyzes code for bugs, performance issues, and optimization opportunities.',
+      );
     });
 
   program

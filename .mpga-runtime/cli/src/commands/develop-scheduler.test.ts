@@ -4,7 +4,15 @@ import path from 'path';
 import os from 'os';
 import { addTask, createEmptyBoard, loadBoard, saveBoard } from '../board/board.js';
 import { parseTaskFile, renderTaskFile } from '../board/task.js';
-import { canAcquireFileLocks, persistLaneTransition, splitIntoFileGroups, runDevelopTask, saveTddCheckpoint, loadTddCheckpoint, type TddCheckpoint } from './develop-scheduler.js';
+import {
+  canAcquireFileLocks,
+  persistLaneTransition,
+  splitIntoFileGroups,
+  runDevelopTask,
+  saveTddCheckpoint,
+  loadTddCheckpoint,
+  type TddCheckpoint,
+} from './develop-scheduler.js';
 
 describe('develop scheduler', () => {
   let tmpDir: string;
@@ -23,7 +31,11 @@ describe('develop scheduler', () => {
   });
 
   it('splits disjoint file groups into separate lanes', () => {
-    const lanes = splitIntoFileGroups('T001', [['src/a.ts'], ['src/b.ts', 'src/c.ts']], 'src-board');
+    const lanes = splitIntoFileGroups(
+      'T001',
+      [['src/a.ts'], ['src/b.ts', 'src/c.ts']],
+      'src-board',
+    );
     expect(lanes).toHaveLength(2);
     expect(lanes[0]?.files).toEqual(['src/a.ts']);
     expect(lanes[1]?.files).toEqual(['src/b.ts', 'src/c.ts']);
@@ -32,7 +44,10 @@ describe('develop scheduler', () => {
   it('merges overlapping file groups into one lane', () => {
     const lanes = splitIntoFileGroups(
       'T001',
-      [['src/a.ts', 'src/b.ts'], ['src/b.ts', 'src/c.ts']],
+      [
+        ['src/a.ts', 'src/b.ts'],
+        ['src/b.ts', 'src/c.ts'],
+      ],
       'src-board',
     );
     expect(lanes).toHaveLength(1);
@@ -74,14 +89,36 @@ describe('develop scheduler', () => {
     const board = createEmptyBoard();
     saveBoard(boardDir, board);
 
-    const task = addTask(board, tasksDir, { title: 'Multi-file task', column: 'in-progress', scopes: ['src-board'] });
+    const task = addTask(board, tasksDir, {
+      title: 'Multi-file task',
+      column: 'in-progress',
+      scopes: ['src-board'],
+    });
     saveBoard(boardDir, board);
-    const taskPath = path.join(tasksDir, fs.readdirSync(tasksDir).find((f) => f.startsWith(task.id))!);
+    const taskPath = path.join(
+      tasksDir,
+      fs.readdirSync(tasksDir).find((f) => f.startsWith(task.id))!,
+    );
     const parsed = parseTaskFile(taskPath)!;
     parsed.file_locks = [
-      { path: 'src/a.ts', lane_id: 'l1', agent: 'red-dev', acquired_at: '2026-03-24T12:00:00.000Z' },
-      { path: 'src/b.ts', lane_id: 'l2', agent: 'red-dev', acquired_at: '2026-03-24T12:00:00.000Z' },
-      { path: 'src/c.ts', lane_id: 'l3', agent: 'red-dev', acquired_at: '2026-03-24T12:00:00.000Z' },
+      {
+        path: 'src/a.ts',
+        lane_id: 'l1',
+        agent: 'red-dev',
+        acquired_at: '2026-03-24T12:00:00.000Z',
+      },
+      {
+        path: 'src/b.ts',
+        lane_id: 'l2',
+        agent: 'red-dev',
+        acquired_at: '2026-03-24T12:00:00.000Z',
+      },
+      {
+        path: 'src/c.ts',
+        lane_id: 'l3',
+        agent: 'red-dev',
+        acquired_at: '2026-03-24T12:00:00.000Z',
+      },
     ];
     fs.writeFileSync(taskPath, renderTaskFile(parsed));
 
@@ -102,13 +139,30 @@ describe('develop scheduler', () => {
     const board = createEmptyBoard();
     saveBoard(boardDir, board);
 
-    const task = addTask(board, tasksDir, { title: 'Multi-file task', column: 'in-progress', scopes: ['src-board'] });
+    const task = addTask(board, tasksDir, {
+      title: 'Multi-file task',
+      column: 'in-progress',
+      scopes: ['src-board'],
+    });
     saveBoard(boardDir, board);
-    const taskPath = path.join(tasksDir, fs.readdirSync(tasksDir).find((f) => f.startsWith(task.id))!);
+    const taskPath = path.join(
+      tasksDir,
+      fs.readdirSync(tasksDir).find((f) => f.startsWith(task.id))!,
+    );
     const parsed = parseTaskFile(taskPath)!;
     parsed.file_locks = [
-      { path: 'src/a.ts', lane_id: 'l1', agent: 'red-dev', acquired_at: '2026-03-24T12:00:00.000Z' },
-      { path: 'src/b.ts', lane_id: 'l2', agent: 'red-dev', acquired_at: '2026-03-24T12:00:00.000Z' },
+      {
+        path: 'src/a.ts',
+        lane_id: 'l1',
+        agent: 'red-dev',
+        acquired_at: '2026-03-24T12:00:00.000Z',
+      },
+      {
+        path: 'src/b.ts',
+        lane_id: 'l2',
+        agent: 'red-dev',
+        acquired_at: '2026-03-24T12:00:00.000Z',
+      },
     ];
     fs.writeFileSync(taskPath, renderTaskFile(parsed));
 
@@ -128,22 +182,42 @@ describe('develop scheduler', () => {
     // Create a running task that holds a file lock on src/shared.ts
     const holder = addTask(board, tasksDir, { title: 'Lock holder', column: 'in-progress' });
     saveBoard(boardDir, board);
-    const holderPath = path.join(tasksDir, fs.readdirSync(tasksDir).find((f) => f.startsWith(holder.id))!);
+    const holderPath = path.join(
+      tasksDir,
+      fs.readdirSync(tasksDir).find((f) => f.startsWith(holder.id))!,
+    );
     const holderTask = parseTaskFile(holderPath)!;
     holderTask.run_status = 'running';
     holderTask.lane_id = 'holder-lane';
     holderTask.file_locks = [
-      { path: 'src/shared.ts', lane_id: 'holder-lane', agent: 'mpga-green-dev', acquired_at: '2026-03-24T12:00:00.000Z' },
+      {
+        path: 'src/shared.ts',
+        lane_id: 'holder-lane',
+        agent: 'mpga-green-dev',
+        acquired_at: '2026-03-24T12:00:00.000Z',
+      },
     ];
     fs.writeFileSync(holderPath, renderTaskFile(holderTask));
 
     // Create a second task whose file_locks overlap with the holder
-    const contender = addTask(board, tasksDir, { title: 'Contender', column: 'in-progress', scopes: ['src-board'] });
+    const contender = addTask(board, tasksDir, {
+      title: 'Contender',
+      column: 'in-progress',
+      scopes: ['src-board'],
+    });
     saveBoard(boardDir, board);
-    const contenderPath = path.join(tasksDir, fs.readdirSync(tasksDir).find((f) => f.startsWith(contender.id))!);
+    const contenderPath = path.join(
+      tasksDir,
+      fs.readdirSync(tasksDir).find((f) => f.startsWith(contender.id))!,
+    );
     const contenderTask = parseTaskFile(contenderPath)!;
     contenderTask.file_locks = [
-      { path: 'src/shared.ts', lane_id: 'c-lane', agent: 'mpga-red-dev', acquired_at: '2026-03-24T12:00:00.000Z' },
+      {
+        path: 'src/shared.ts',
+        lane_id: 'c-lane',
+        agent: 'mpga-red-dev',
+        acquired_at: '2026-03-24T12:00:00.000Z',
+      },
     ];
     fs.writeFileSync(contenderPath, renderTaskFile(contenderTask));
 
@@ -184,7 +258,10 @@ describe('develop scheduler', () => {
       };
       saveTddCheckpoint(tasksDir, task.id, checkpoint);
 
-      const taskPath = path.join(tasksDir, fs.readdirSync(tasksDir).find((f) => f.startsWith(task.id))!);
+      const taskPath = path.join(
+        tasksDir,
+        fs.readdirSync(tasksDir).find((f) => f.startsWith(task.id))!,
+      );
       const raw = fs.readFileSync(taskPath, 'utf-8');
       expect(raw).toContain('## TDD Checkpoint');
       expect(raw).toContain('stage: red');
@@ -252,7 +329,10 @@ describe('develop scheduler', () => {
       expect(loaded!.lastImplFile).toBe('src/new.ts');
 
       // Ensure old checkpoint content is gone
-      const taskPath = path.join(tasksDir, fs.readdirSync(tasksDir).find((f) => f.startsWith(task.id))!);
+      const taskPath = path.join(
+        tasksDir,
+        fs.readdirSync(tasksDir).find((f) => f.startsWith(task.id))!,
+      );
       const raw = fs.readFileSync(taskPath, 'utf-8');
       const checkpointCount = (raw.match(/## TDD Checkpoint/g) || []).length;
       expect(checkpointCount).toBe(1);
@@ -285,7 +365,11 @@ describe('develop scheduler', () => {
     it('runDevelopTask resumes from checkpoint when one exists', async () => {
       const board = createEmptyBoard();
       saveBoard(boardDir, board);
-      const task = addTask(board, tasksDir, { title: 'Resume task', column: 'in-progress', scopes: ['src-board'] });
+      const task = addTask(board, tasksDir, {
+        title: 'Resume task',
+        column: 'in-progress',
+        scopes: ['src-board'],
+      });
       saveBoard(boardDir, board);
 
       // Save a checkpoint so runDevelopTask can detect it
@@ -304,7 +388,10 @@ describe('develop scheduler', () => {
       expect(laneIds.length).toBeGreaterThanOrEqual(1);
 
       // After scheduling, verify the task's tdd_stage is set to the checkpoint stage
-      const taskPath = path.join(tasksDir, fs.readdirSync(tasksDir).find((f) => f.startsWith(task.id))!);
+      const taskPath = path.join(
+        tasksDir,
+        fs.readdirSync(tasksDir).find((f) => f.startsWith(task.id))!,
+      );
       const parsed = parseTaskFile(taskPath)!;
       expect(parsed.tdd_stage).toBe('green');
 

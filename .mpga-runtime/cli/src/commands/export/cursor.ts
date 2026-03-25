@@ -48,7 +48,10 @@ export function exportCursor(
       path.join(rulesDir, 'mpga-project.mdc'),
       generateCursorProjectMdc(indexContent, projectName, cliCommand),
     );
-    fs.writeFileSync(path.join(rulesDir, 'mpga-evidence.mdc'), generateCursorEvidenceMdc(cliCommand));
+    fs.writeFileSync(
+      path.join(rulesDir, 'mpga-evidence.mdc'),
+      generateCursorEvidenceMdc(cliCommand),
+    );
     fs.writeFileSync(path.join(rulesDir, 'mpga-tdd.mdc'), generateCursorTddMdc());
     fs.writeFileSync(path.join(rulesDir, 'mpga-scopes.mdc'), generateCursorScopesMdc(mpgaDir));
     log.success('Generated .cursor/rules/ (4 MDC files)');

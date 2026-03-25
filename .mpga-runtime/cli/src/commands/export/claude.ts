@@ -72,14 +72,15 @@ function deployClaudePlugin(
   const agentsSrc = path.join(pluginRoot, 'agents');
   const agentsDest = path.join(claudeDir, 'agents');
   if (fs.existsSync(agentsSrc)) {
-      fs.mkdirSync(agentsDest, { recursive: true });
-      for (const f of fs.readdirSync(agentsSrc).filter((n) => n.endsWith('.md'))) {
-        const content = rewriteCliReferences(
-          fs.readFileSync(path.join(agentsSrc, f), 'utf-8'),
-          cliPath,
-        );
-        fs.writeFileSync(path.join(agentsDest, f), content);
-      }
+    fs.mkdirSync(agentsDest, { recursive: true });
+    for (const f of fs.readdirSync(agentsSrc).filter((n) => n.endsWith('.md'))) {
+      const content = rewriteCliReferences(
+        fs.readFileSync(path.join(agentsSrc, f), 'utf-8'),
+        cliPath,
+        pluginRoot,
+      );
+      fs.writeFileSync(path.join(agentsDest, f), content);
+    }
     log.success(
       `.claude/agents/ (${fs.readdirSync(agentsSrc).filter((n) => n.endsWith('.md')).length} agents)`,
     );

@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "milestone": "M001-fix-diagnosis-findings",
-  "updated": "2026-03-24T20:54:38.607Z",
+  "milestone": null,
+  "updated": "2026-03-22T14:12:47.173Z",
   "columns": {
     "backlog": [],
     "todo": [],
@@ -24,16 +24,5 @@
     "testing": 3,
     "review": 2
   },
-  "next_task_id": 1,
-  "lanes": {},
-  "active_runs": {},
-  "scheduler": {
-    "lock_mode": "file",
-    "max_parallel_lanes": 3,
-    "split_strategy": "file-groups"
-  },
-  "ui": {
-    "refresh_interval_ms": 2500,
-    "theme": "mpga-signal"
-  }
+  "next_task_id": 1
 }

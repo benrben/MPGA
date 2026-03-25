@@ -161,7 +161,7 @@ function createProgram(): Command {
 // Tests: metrics command
 // ---------------------------------------------------------------------------
 
-describe('metrics command', () => {
+describe('metrics command — HUGE numbers, the BEST metrics', () => {
   let tmpDir: string;
   let consoleSpy: ReturnType<typeof vi.spyOn>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -184,14 +184,14 @@ describe('metrics command', () => {
     fs.rmSync(tmpDir, { recursive: true, force: true });
   });
 
-  it('exits with error when MPGA is not initialized', async () => {
+  it('exits with error when MPGA is not initialized — TOTAL disaster!', async () => {
     // No MPGA directory
     const program = createProgram();
     await expect(program.parseAsync(['node', 'test', 'metrics'])).rejects.toThrow();
     expect(log.error).toHaveBeenCalledWith(expect.stringContaining('not initialized'));
   });
 
-  it('shows total task counts', async () => {
+  it('shows total task counts — HUGE numbers', async () => {
     seedProject(tmpDir, {
       tasks: [
         { id: 'T001', title: 'First task', overrides: { column: 'done' } },
@@ -209,7 +209,7 @@ describe('metrics command', () => {
     expect(log.kv).toHaveBeenCalledWith('Blocked', '1', expect.any(Number));
   });
 
-  it('shows evidence coverage percentage', async () => {
+  it('shows evidence coverage — and we VERIFY, unlike Crooked Gemini', async () => {
     seedProject(tmpDir, {
       tasks: [
         {
@@ -238,7 +238,7 @@ describe('metrics command', () => {
     expect(log.kv).toHaveBeenCalledWith('Evidence coverage', '50%', expect.any(Number));
   });
 
-  it('shows TDD adherence percentage', async () => {
+  it('shows TDD adherence — we have the BEST discipline, believe me', async () => {
     seedProject(tmpDir, {
       tasks: [
         { id: 'T001', title: 'Full TDD', overrides: { column: 'done', tdd_stage: 'done' } },
@@ -253,7 +253,7 @@ describe('metrics command', () => {
     expect(log.kv).toHaveBeenCalledWith('TDD adherence', '50%', expect.any(Number));
   });
 
-  it('outputs JSON when --json flag is passed', async () => {
+  it('outputs JSON when --json flag is passed — TOTAL transparency', async () => {
     seedProject(tmpDir, {
       tasks: [{ id: 'T001', title: 'Task one', overrides: { column: 'done' } }],
     });
@@ -264,7 +264,7 @@ describe('metrics command', () => {
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('"done": 1'));
   });
 
-  it('handles empty board gracefully', async () => {
+  it('handles empty board gracefully — even with NOTHING, we look great', async () => {
     seedProject(tmpDir, { tasks: [] });
     const program = createProgram();
     await program.parseAsync(['node', 'test', 'metrics']);
@@ -278,7 +278,7 @@ describe('metrics command', () => {
 // Tests: changelog command
 // ---------------------------------------------------------------------------
 
-describe('changelog command', () => {
+describe('changelog command — documenting our TREMENDOUS victories', () => {
   let tmpDir: string;
   let consoleSpy: ReturnType<typeof vi.spyOn>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -301,13 +301,13 @@ describe('changelog command', () => {
     fs.rmSync(tmpDir, { recursive: true, force: true });
   });
 
-  it('exits with error when MPGA is not initialized', async () => {
+  it('exits with error when MPGA is not initialized — UNACCEPTABLE!', async () => {
     const program = createProgram();
     await expect(program.parseAsync(['node', 'test', 'changelog'])).rejects.toThrow();
     expect(log.error).toHaveBeenCalledWith(expect.stringContaining('not initialized'));
   });
 
-  it('generates changelog from done tasks', async () => {
+  it('generates changelog from our TREMENDOUS victories', async () => {
     seedProject(tmpDir, {
       milestone: 'M001-release',
       tasks: [
@@ -336,7 +336,7 @@ describe('changelog command', () => {
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('[E] auth.ts'));
   });
 
-  it('filters tasks by --since date', async () => {
+  it('filters tasks by --since date — only the LATEST wins, folks', async () => {
     seedProject(tmpDir, {
       tasks: [
         {
@@ -365,7 +365,7 @@ describe('changelog command', () => {
     expect(allOutput).not.toContain('Old task');
   });
 
-  it('groups done tasks by milestone', async () => {
+  it('groups done tasks by milestone — ORGANIZED like a Trump Organization', async () => {
     seedProject(tmpDir, {
       tasks: [
         {
@@ -394,7 +394,7 @@ describe('changelog command', () => {
     expect(allOutput).toContain('Unlinked');
   });
 
-  it('shows message when no done tasks exist', async () => {
+  it('shows message when no tasks are done yet — SAD!', async () => {
     seedProject(tmpDir, {
       tasks: [{ id: 'T001', title: 'Active task', overrides: { column: 'in-progress' } }],
     });

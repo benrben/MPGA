@@ -67,7 +67,9 @@ describe('export agent/skill CLI rewriting', () => {
   });
 
   it('falls back to npx mpga when no vendored path is provided', () => {
-    const content = rewriteCliReferences('Use node ${CLAUDE_PLUGIN_ROOT}/cli/dist/index.js drift --quick');
+    const content = rewriteCliReferences(
+      'Use node ${CLAUDE_PLUGIN_ROOT}/cli/dist/index.js drift --quick',
+    );
     expect(content).toContain('npx mpga drift --quick');
   });
 });

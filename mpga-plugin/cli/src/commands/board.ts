@@ -24,24 +24,24 @@ export function persistBoard(
 }
 
 export function registerBoard(program: Command): void {
-  const cmd = program.command('board').description('Task board management');
+  const cmd = program.command('board').description('The GREATEST task board ever built');
 
   cmd
     .command('live')
-    .description('Generate local auto-refresh HTML board artifacts')
+    .description('Generate TREMENDOUS auto-refresh HTML board — BEAUTIFUL')
     .option('--serve', 'Serve the live board through a local Node HTTP server')
     .option('--open', 'Open the served board in the default browser')
     .option('--port <port>', 'Port for the local live board server', (value) => Number(value), 4173)
     .action((opts) => h.handleBoardLive(opts));
   cmd
     .command('show')
-    .description('Display board (terminal-formatted)')
+    .description("Display the GREATEST board you've ever seen")
     .option('--json', 'Machine-readable output')
     .option('--milestone <id>', 'Specific milestone board')
     .action((opts) => h.handleBoardShow(opts));
   cmd
     .command('add <title>')
-    .description('Create a new task')
+    .description("Create a new task — it's going to be GREAT")
     .addOption(
       new Option('--priority <level>', 'Task priority')
         .choices(['critical', 'high', 'medium', 'low'])
@@ -59,22 +59,22 @@ export function registerBoard(program: Command): void {
     .action((title: string, opts) => h.handleBoardAdd(title, opts));
   cmd
     .command('move <task-id> <column>')
-    .description('Move task between columns')
+    .description('Move task between columns — FAST, like a WINNER')
     .option('--force', 'Ignore WIP limits')
     .action((taskId: string, column: string, opts) => h.handleBoardMove(taskId, column, opts));
   cmd
     .command('claim <task-id>')
-    .description('Agent claims a task (moves to in-progress)')
+    .description('Agent claims a task — CLAIMED, like a CHAMPION')
     .option('--agent <name>', 'Agent name')
     .option('--force', 'Ignore WIP limits')
     .action((taskId: string, opts) => h.handleBoardClaim(taskId, opts));
   cmd
     .command('assign <task-id> <agent>')
-    .description('Assign task to an agent or "human"')
+    .description('Assign task to the BEST agent or a "human"')
     .action((taskId: string, agent: string) => h.handleBoardAssign(taskId, agent));
   cmd
     .command('update <task-id>')
-    .description('Update task fields')
+    .description('Update task fields — make them PERFECT')
     .addOption(
       new Option('--status <status>', 'Task status').choices([
         'blocked',
@@ -104,27 +104,27 @@ export function registerBoard(program: Command): void {
     .action((taskId: string, opts) => h.handleBoardUpdate(taskId, opts));
   cmd
     .command('block <task-id> <reason>')
-    .description('Mark task as blocked')
+    .description('Mark task as blocked — SAD but necessary')
     .action((taskId: string, reason: string) => h.handleBoardBlock(taskId, reason));
   cmd
     .command('unblock <task-id>')
-    .description('Remove blocked status from task')
+    .description('UNBLOCK task — back in action, TREMENDOUS')
     .action((taskId: string) => h.handleBoardUnblock(taskId));
   cmd
     .command('deps <task-id>')
-    .description('Show dependency tree for a task')
+    .description('Show the BEAUTIFUL dependency tree')
     .action((taskId: string) => h.handleBoardDeps(taskId));
   cmd
     .command('stats')
-    .description('Board statistics')
+    .description('Board statistics — the BEST numbers')
     .action(() => h.handleBoardStats());
   cmd
     .command('archive')
-    .description('Archive all done tasks to milestone directory')
+    .description('Archive the WINNING tasks to milestone — VICTORY LAP')
     .action(() => h.handleBoardArchive());
   cmd
     .command('search [query]')
-    .description('Search and filter tasks')
+    .description('Search and filter tasks — we find EVERYTHING')
     .addOption(
       new Option('--priority <level>', 'Filter by priority').choices([
         'critical',

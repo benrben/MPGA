@@ -28,9 +28,12 @@ describe('develop command', () => {
     const program = createProgram();
     registerDevelop(program);
 
-    await program.parseAsync(['develop', 'T001', '--parallel', 'auto', '--lanes', '2', '--dashboard'], {
-      from: 'user',
-    });
+    await program.parseAsync(
+      ['develop', 'T001', '--parallel', 'auto', '--lanes', '2', '--dashboard'],
+      {
+        from: 'user',
+      },
+    );
 
     expect(runDevelopTask).toHaveBeenCalledWith('T001', {
       parallel: 'auto',
@@ -87,17 +90,30 @@ describe('develop status/abort/resume', () => {
     saveBoard(boardDir, board);
 
     // Simulate a running develop state
-    const taskPath = path.join(tasksDir, fs.readdirSync(tasksDir).find((f) => f.startsWith(task.id))!);
+    const taskPath = path.join(
+      tasksDir,
+      fs.readdirSync(tasksDir).find((f) => f.startsWith(task.id))!,
+    );
     const parsed = parseTaskFile(taskPath)!;
     parsed.lane_id = 'T001-lane-1';
     parsed.run_status = 'running';
     parsed.current_agent = 'mpga-red-dev';
     parsed.tdd_stage = 'red';
     parsed.file_locks = [
-      { path: 'src/board.ts', lane_id: 'T001-lane-1', agent: 'mpga-red-dev', acquired_at: '2026-03-24T12:00:00.000Z' },
+      {
+        path: 'src/board.ts',
+        lane_id: 'T001-lane-1',
+        agent: 'mpga-red-dev',
+        acquired_at: '2026-03-24T12:00:00.000Z',
+      },
     ];
     parsed.scope_locks = [
-      { scope: 'core', lane_id: 'T001-lane-1', agent: 'mpga-red-dev', acquired_at: '2026-03-24T12:00:00.000Z' },
+      {
+        scope: 'core',
+        lane_id: 'T001-lane-1',
+        agent: 'mpga-red-dev',
+        acquired_at: '2026-03-24T12:00:00.000Z',
+      },
     ];
     parsed.started_at = '2026-03-24T12:00:00.000Z';
     fs.writeFileSync(taskPath, renderTaskFile(parsed));
@@ -152,7 +168,10 @@ describe('develop status/abort/resume', () => {
       handleDevelopAbort(taskId);
 
       // Verify the task was updated
-      const taskPath = path.join(tasksDir, fs.readdirSync(tasksDir).find((f) => f.startsWith(taskId))!);
+      const taskPath = path.join(
+        tasksDir,
+        fs.readdirSync(tasksDir).find((f) => f.startsWith(taskId))!,
+      );
       const parsed = parseTaskFile(taskPath)!;
       expect(parsed.column).toBe('todo');
       expect(parsed.run_status).toBe('queued');
@@ -201,7 +220,10 @@ describe('develop status/abort/resume', () => {
       handleDevelopResume(taskId);
 
       // Verify the task was moved back to in-progress and re-activated
-      const taskPath = path.join(tasksDir, fs.readdirSync(tasksDir).find((f) => f.startsWith(taskId))!);
+      const taskPath = path.join(
+        tasksDir,
+        fs.readdirSync(tasksDir).find((f) => f.startsWith(taskId))!,
+      );
       const parsed = parseTaskFile(taskPath)!;
       expect(parsed.column).toBe('in-progress');
       expect(parsed.run_status).toBe('running');

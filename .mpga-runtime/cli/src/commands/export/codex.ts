@@ -24,7 +24,10 @@ export function exportCodex(
     const cliCommand = pluginRoot ? globalVendoredCliCommand(codexGlobalDir) : 'npx mpga';
     copyVendoredRuntime(codexGlobalDir, pluginRoot);
     fs.mkdirSync(codexGlobalDir, { recursive: true });
-    fs.writeFileSync(path.join(codexGlobalDir, 'AGENTS.md'), generateCodexGlobalAgentsMd(cliCommand));
+    fs.writeFileSync(
+      path.join(codexGlobalDir, 'AGENTS.md'),
+      generateCodexGlobalAgentsMd(cliCommand),
+    );
     log.success('Generated ~/.codex/AGENTS.md');
     const globalSkillsDir = path.join(codexGlobalDir, 'skills');
     copySkillsTo(globalSkillsDir, pluginRoot, 'codex', cliCommand);

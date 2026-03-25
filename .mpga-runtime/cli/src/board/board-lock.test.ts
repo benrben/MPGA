@@ -50,10 +50,7 @@ describe('board-lock', () => {
     // Simulate a lock held by a different PID
     const lockPath = path.join(boardDir, '.board.lock');
     const fakePid = process.pid + 99999; // Very unlikely to be a real PID
-    fs.writeFileSync(
-      lockPath,
-      JSON.stringify({ pid: fakePid, timestamp: Date.now() }),
-    );
+    fs.writeFileSync(lockPath, JSON.stringify({ pid: fakePid, timestamp: Date.now() }));
 
     const acquired = acquireBoardLock(boardDir);
     expect(acquired).toBe(false);
@@ -72,10 +69,7 @@ describe('board-lock', () => {
     const lockPath = path.join(boardDir, '.board.lock');
     const fakePid = process.pid + 99999;
     const staleTimestamp = Date.now() - 60_000; // 60 seconds ago (well past 30s default)
-    fs.writeFileSync(
-      lockPath,
-      JSON.stringify({ pid: fakePid, timestamp: staleTimestamp }),
-    );
+    fs.writeFileSync(lockPath, JSON.stringify({ pid: fakePid, timestamp: staleTimestamp }));
 
     const acquired = acquireBoardLock(boardDir);
     expect(acquired).toBe(true);
@@ -90,10 +84,7 @@ describe('board-lock', () => {
     const fakePid = process.pid + 99999;
     // 10 seconds ago — stale with 5s timeout, not stale with 30s default
     const timestamp = Date.now() - 10_000;
-    fs.writeFileSync(
-      lockPath,
-      JSON.stringify({ pid: fakePid, timestamp }),
-    );
+    fs.writeFileSync(lockPath, JSON.stringify({ pid: fakePid, timestamp }));
 
     // With 30s default timeout, should NOT be stale
     expect(acquireBoardLock(boardDir, 30_000)).toBe(false);
@@ -131,14 +122,11 @@ describe('board-lock', () => {
     // Simulate a held lock by another process
     const lockPath = path.join(boardDir, '.board.lock');
     const fakePid = process.pid + 99999;
-    fs.writeFileSync(
-      lockPath,
-      JSON.stringify({ pid: fakePid, timestamp: Date.now() }),
-    );
+    fs.writeFileSync(lockPath, JSON.stringify({ pid: fakePid, timestamp: Date.now() }));
 
-    expect(() =>
-      withBoardLock(boardDir, () => 'should not run'),
-    ).toThrow(/Could not acquire board lock/);
+    expect(() => withBoardLock(boardDir, () => 'should not run')).toThrow(
+      /Could not acquire board lock/,
+    );
   });
 
   it('acquireBoardLock creates boardDir if it does not exist', () => {

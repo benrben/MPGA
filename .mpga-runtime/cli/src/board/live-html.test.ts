@@ -61,7 +61,9 @@ describe('renderBoardLiveHtml', () => {
     });
 
     expect(html).not.toContain('</script><script>alert(1)</script>');
-    expect(html).toContain('\\u003c/script\\u003e\\u003cscript\\u003ealert(1)\\u003c/script\\u003e');
+    expect(html).toContain(
+      '\\u003c/script\\u003e\\u003cscript\\u003ealert(1)\\u003c/script\\u003e',
+    );
     expect(html).toContain('textContent = value');
   });
 });

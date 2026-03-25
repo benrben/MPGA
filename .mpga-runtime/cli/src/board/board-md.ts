@@ -26,8 +26,12 @@ const STATUS_ICONS: Record<string, string> = {
 
 const WIP_LIMITS_DEFAULT: Record<string, number> = { 'in-progress': 3, testing: 3, review: 2 };
 
-export function renderBoardMd(board: BoardState, tasksDir: string): string {
-  const tasks = loadAllTasks(tasksDir);
+export function renderBoardMd(
+  board: BoardState,
+  tasksDir: string,
+  preloadedTasks?: Task[],
+): string {
+  const tasks = preloadedTasks ?? loadAllTasks(tasksDir);
   const byColumn: Record<Column, Task[]> = {
     backlog: [],
     todo: [],
