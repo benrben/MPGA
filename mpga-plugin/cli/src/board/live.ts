@@ -82,8 +82,9 @@ export function buildBoardLiveSnapshot(
   board: BoardState,
   tasksDir: string,
   boardDir: string,
+  preloadedTasks?: Task[],
 ): BoardLiveSnapshot {
-  const tasks = loadAllTasks(tasksDir);
+  const tasks = preloadedTasks ?? loadAllTasks(tasksDir);
   const columns: BoardLiveSnapshot['columns'] = {
     backlog: [],
     todo: [],
@@ -114,11 +115,12 @@ export function writeBoardLiveSnapshot(
   board: BoardState,
   tasksDir: string,
   boardDir: string,
+  preloadedTasks?: Task[],
 ): string {
   const liveDir = getBoardLiveDir(boardDir);
   fs.mkdirSync(liveDir, { recursive: true });
   const snapshotPath = path.join(liveDir, 'snapshot.json');
-  const snapshot = buildBoardLiveSnapshot(board, tasksDir, boardDir);
+  const snapshot = buildBoardLiveSnapshot(board, tasksDir, boardDir, preloadedTasks);
   fs.writeFileSync(snapshotPath, JSON.stringify(snapshot, null, 2) + '\n');
   return snapshotPath;
 }

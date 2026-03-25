@@ -129,8 +129,12 @@ function normalizeBoardState(board: Partial<BoardState>): BoardState {
   };
 }
 
-export function recalcStats(board: BoardState, tasksDir: string): BoardState {
-  const tasks = loadAllTasks(tasksDir);
+export function recalcStats(
+  board: BoardState,
+  tasksDir: string,
+  preloadedTasks?: Task[],
+): BoardState {
+  const tasks = preloadedTasks ?? loadAllTasks(tasksDir);
   const total = tasks.length;
   const done = tasks.filter((t) => t.column === 'done').length;
   const inFlight = tasks.filter((t) =>

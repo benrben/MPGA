@@ -24,7 +24,9 @@ export function projectVendoredCliCommand(): string {
 }
 
 export function globalVendoredCliCommand(baseDir: string): string {
-  return path.join(baseDir, '.mpga-runtime', 'cli', 'dist', 'index.js').replace(/\\/g, '/');
+  return (
+    'node ' + path.join(baseDir, '.mpga-runtime', 'cli', 'dist', 'index.js').replace(/\\/g, '/')
+  );
 }
 
 export function copyVendoredRuntime(targetRoot: string, pluginRoot: string | null): string | null {

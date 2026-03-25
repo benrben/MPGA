@@ -39,7 +39,14 @@ export function createBoardLiveServer(liveDir: string): Server {
       'Content-Type': CONTENT_TYPES[path.extname(filePath)] ?? 'application/octet-stream',
       'Cache-Control': 'no-store',
     });
-    res.end(fs.readFileSync(filePath));
+    fs.readFile(filePath, (err, data) => {
+      if (err) {
+        res.writeHead(500);
+        res.end('Internal Server Error');
+        return;
+      }
+      res.end(data);
+    });
   });
 }
 

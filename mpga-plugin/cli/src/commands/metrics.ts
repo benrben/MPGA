@@ -4,7 +4,6 @@ import { Command } from 'commander';
 import { log, miniBanner } from '../core/logger.js';
 import { findProjectRoot } from '../core/config.js';
 import { loadAllTasks, Task } from '../board/task.js';
-import { loadBoard } from '../board/board.js';
 
 // ---------------------------------------------------------------------------
 // metrics command

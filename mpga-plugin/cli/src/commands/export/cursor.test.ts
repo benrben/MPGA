@@ -254,7 +254,7 @@ describe('exportCursor', () => {
         path.join('/fake/home', '.cursor', 'skills'),
         pluginRoot,
         'cursor',
-        '/fake/home/.cursor/.mpga-runtime/cli/dist/index.js',
+        'node /fake/home/.cursor/.mpga-runtime/cli/dist/index.js',
       );
     });
 
@@ -296,7 +296,7 @@ describe('exportCursor', () => {
         path.join('~', '.cursor', 'skills'),
         pluginRoot,
         'cursor',
-        '~/.cursor/.mpga-runtime/cli/dist/index.js',
+        'node ~/.cursor/.mpga-runtime/cli/dist/index.js',
       );
 
       const agentsDir = path.join('~', '.cursor', 'agents');

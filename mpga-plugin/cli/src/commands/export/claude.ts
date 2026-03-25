@@ -77,6 +77,7 @@ function deployClaudePlugin(
       const content = rewriteCliReferences(
         fs.readFileSync(path.join(agentsSrc, f), 'utf-8'),
         cliPath,
+        pluginRoot,
       );
       fs.writeFileSync(path.join(agentsDest, f), content);
     }

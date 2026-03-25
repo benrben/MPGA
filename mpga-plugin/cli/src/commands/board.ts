@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { Command, Option } from 'commander';
 import { loadBoard, recalcStats, saveBoard } from '../board/board.js';
+import { loadAllTasks } from '../board/task.js';
 import { renderBoardMd } from '../board/board-md.js';
 import { writeBoardLiveSnapshot } from '../board/live.js';
 import { writeBoardLiveHtml } from '../board/live-html.js';
@@ -14,10 +15,11 @@ export function persistBoard(
   boardDir: string,
   tasksDir: string,
 ): void {
-  recalcStats(board, tasksDir);
+  const tasks = loadAllTasks(tasksDir);
+  recalcStats(board, tasksDir, tasks);
   saveBoard(boardDir, board);
-  fs.writeFileSync(path.join(boardDir, 'BOARD.md'), renderBoardMd(board, tasksDir));
-  writeBoardLiveSnapshot(board, tasksDir, boardDir);
+  fs.writeFileSync(path.join(boardDir, 'BOARD.md'), renderBoardMd(board, tasksDir, tasks));
+  writeBoardLiveSnapshot(board, tasksDir, boardDir, tasks);
   writeBoardLiveHtml(boardDir);
 }
 

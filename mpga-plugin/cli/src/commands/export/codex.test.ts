@@ -238,7 +238,7 @@ describe('exportCodex', () => {
         expectedSkillsDir,
         '/plugin',
         'codex',
-        `${path.join(tmpDir, '.codex', '.mpga-runtime', 'cli', 'dist', 'index.js').replace(/\\/g, '/')}`,
+        `node ${path.join(tmpDir, '.codex', '.mpga-runtime', 'cli', 'dist', 'index.js').replace(/\\/g, '/')}`,
       );
     });
 

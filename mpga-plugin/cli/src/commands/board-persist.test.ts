@@ -3,6 +3,11 @@ import fs from 'fs';
 import path from 'path';
 
 // Mock dependencies before importing
+vi.mock('../board/task.js', async () => {
+  const actual = await vi.importActual<typeof import('../board/task.js')>('../board/task.js');
+  return { ...actual, loadAllTasks: vi.fn(() => []) };
+});
+
 vi.mock('../board/board.js', () => ({
   recalcStats: vi.fn(),
   saveBoard: vi.fn(),
@@ -43,6 +48,7 @@ import { recalcStats, saveBoard } from '../board/board.js';
 import { renderBoardMd } from '../board/board-md.js';
 import { writeBoardLiveSnapshot } from '../board/live.js';
 import { writeBoardLiveHtml } from '../board/live-html.js';
+import { loadAllTasks } from '../board/task.js';
 
 describe('persistBoard', () => {
   const boardDir = '/tmp/test-project/MPGA/board';
@@ -53,9 +59,9 @@ describe('persistBoard', () => {
     vi.clearAllMocks();
   });
 
-  it('calls recalcStats with board and tasksDir', () => {
+  it('calls recalcStats with board, tasksDir, and pre-loaded tasks', () => {
     persistBoard(mockBoard, boardDir, tasksDir);
-    expect(recalcStats).toHaveBeenCalledWith(mockBoard, tasksDir);
+    expect(recalcStats).toHaveBeenCalledWith(mockBoard, tasksDir, expect.any(Array));
   });
 
   it('calls saveBoard with boardDir and board', () => {
@@ -63,16 +69,34 @@ describe('persistBoard', () => {
     expect(saveBoard).toHaveBeenCalledWith(boardDir, mockBoard);
   });
 
-  it('writes BOARD.md with rendered markdown', () => {
+  it('writes BOARD.md with rendered markdown using pre-loaded tasks', () => {
     persistBoard(mockBoard, boardDir, tasksDir);
-    expect(renderBoardMd).toHaveBeenCalledWith(mockBoard, tasksDir);
+    expect(renderBoardMd).toHaveBeenCalledWith(mockBoard, tasksDir, expect.any(Array));
     expect(fs.writeFileSync).toHaveBeenCalledWith(path.join(boardDir, 'BOARD.md'), '# Mock Board');
   });
 
   it('refreshes live board artifacts from the same persisted state', () => {
     persistBoard(mockBoard, boardDir, tasksDir);
-    expect(writeBoardLiveSnapshot).toHaveBeenCalledWith(mockBoard, tasksDir, boardDir);
+    expect(writeBoardLiveSnapshot).toHaveBeenCalledWith(
+      mockBoard,
+      tasksDir,
+      boardDir,
+      expect.any(Array),
+    );
     expect(writeBoardLiveHtml).toHaveBeenCalledWith(boardDir);
+  });
+
+  it('calls loadAllTasks exactly once and passes result to recalcStats, renderBoardMd, writeBoardLiveSnapshot', () => {
+    const fakeTasks = [{ id: 'T001', column: 'todo' }] as any;
+    vi.mocked(loadAllTasks).mockReturnValue(fakeTasks);
+
+    persistBoard(mockBoard, boardDir, tasksDir);
+
+    expect(loadAllTasks).toHaveBeenCalledTimes(1);
+    expect(loadAllTasks).toHaveBeenCalledWith(tasksDir);
+    expect(recalcStats).toHaveBeenCalledWith(mockBoard, tasksDir, fakeTasks);
+    expect(renderBoardMd).toHaveBeenCalledWith(mockBoard, tasksDir, fakeTasks);
+    expect(writeBoardLiveSnapshot).toHaveBeenCalledWith(mockBoard, tasksDir, boardDir, fakeTasks);
   });
 
   it('calls functions in correct order: recalcStats → saveBoard → writeBoardMd → live artifacts', () => {

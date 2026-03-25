@@ -311,7 +311,7 @@ description: ${descriptions[skillName] ?? skillName}
 
 See MPGA documentation for full protocol.
 
-Run \`npx mpga ${skillName.replace('-', ' ')}\` for CLI equivalent.
+Run \`npx mpga ${skillName.replace(/-/g, ' ')}\` for CLI equivalent.
 `;
 }
 

@@ -188,7 +188,7 @@ export function parseEvidenceLinks(content: string): EvidenceLink[] {
  * Symbol-based format is used when a symbol is present and there is no endLine
  * (i.e., it has a line hint, not a line range).
  */
-function isSymbolBased(link: EvidenceLink): boolean {
+export function isSymbolBased(link: EvidenceLink): boolean {
   return !!link.symbol && !link.endLine;
 }
 
