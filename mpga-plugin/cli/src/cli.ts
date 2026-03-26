@@ -19,6 +19,7 @@ import { registerDevelop } from './commands/develop.js';
 import { registerShortcuts } from './commands/shortcuts.js';
 import { registerMetrics } from './commands/metrics.js';
 import { registerPr } from './commands/pr.js';
+import { registerSpoke } from './commands/spoke.js';
 
 export function createCli(): Command {
   const program = new Command();
@@ -78,6 +79,9 @@ ${chalk.dim('  Docs:')}  ${chalk.underline('https://github.com/benreich/mpga')}
 
   // ── PR & decisions ──
   registerPr(program);
+
+  // ── Voice ──
+  registerSpoke(program);
 
   // ── Shortcuts (skill pointers) ──
   registerShortcuts(program);

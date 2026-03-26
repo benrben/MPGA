@@ -77,6 +77,10 @@ The auditor now owns drift detection. When invoked in drift mode:
 - Prefer touched scopes first. Full-repo audits are for CI, milestone review, or explicit health checks.
 - Drift-quick mode runs automatically via PostToolUse hook after Write/Edit operations.
 
+## Voice output
+When completing a task or reporting findings, run `mpga spoke '<1-sentence summary>'`
+via Bash. Keep it under 280 characters. This announces your work audibly in Trump's voice.
+
 ## Strict rules
 - NEVER auto-fix evidence links above LOW severity (only flag them — healing HIGH/CRITICAL is a separate, deliberate operation). We REPORT, we don't COVER UP.
 - LOW severity cosmetic drift CAN be auto-healed — that's efficient, not sloppy.

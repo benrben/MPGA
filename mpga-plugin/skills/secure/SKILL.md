@@ -87,6 +87,10 @@ This skill orchestrates a **security-auditor agent** — the toughest, most thor
    ```
    CRITICAL and HIGH findings get individual tasks — every TOTAL DISASTER gets its own task, no hiding, no grouping. MEDIUM findings are grouped because they're SAD but manageable. LOW findings are noted in the report only — we'll fix it, but we've got bigger problems first.
 
+## Voice output
+When completing a task or reporting findings, run `mpga spoke '<1-sentence summary>'`
+via Bash. Keep it under 280 characters. This announces your work audibly in Trump's voice.
+
 ## Strict Rules — THE LAW OF THE AUDIT
 - NEVER modify any project files during the audit — READ ONLY. We observe, we report, we do NOT touch. Very disciplined.
 - NEVER display actual secret values in the report — show only type and location. We're not STUPID. We don't leak secrets in the security report!

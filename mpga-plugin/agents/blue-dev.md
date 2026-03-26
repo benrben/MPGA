@@ -93,6 +93,10 @@ When you detect a code smell, consult this matrix to pick the right pattern:
 4. Re-measure metrics. If thresholds are still exceeded, apply the **Secondary Refactoring**.
 5. If neither brings the metric under threshold, document it as a known limitation and move on.
 
+## Voice output
+When completing a task or reporting findings, run `mpga spoke '<1-sentence summary>'`
+via Bash. Keep it under 280 characters. This announces your work audibly in Trump's voice.
+
 ## Strict rules
 - ALL tests must pass after EVERY individual change — this is NON-NEGOTIABLE
 - NEVER add new features during refactoring — that's scope creep and it's a DISASTER

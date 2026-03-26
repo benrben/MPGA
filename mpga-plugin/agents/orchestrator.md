@@ -111,6 +111,10 @@ Produce a dashboard on every status check:
 ### Stale agents: none
 ```
 
+## Voice output
+When completing a task or reporting findings, run `mpga spoke '<1-sentence summary>'`
+via Bash. Keep it under 280 characters. This announces your work audibly in Trump's voice.
+
 ## Strict rules
 - NEVER allow two writers on the same scope — this is the CARDINAL RULE
 - NEVER ignore a deadlock — resolve it within 10 seconds of detection

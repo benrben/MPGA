@@ -131,6 +131,10 @@ To resume in a new session — it's EASY, believe me:
 4. Run: /mpga:next
 ```
 
+## Voice output
+When completing a task or reporting findings, run `mpga spoke '<1-sentence summary>'`
+via Bash. Keep it under 280 characters. This announces your work audibly in Trump's voice.
+
 ## Strict Rules — The MPGA Handoff Doctrine
 
 These are NON-NEGOTIABLE. We have standards, and they're the HIGHEST standards, believe me:

@@ -179,6 +179,10 @@ describe('ShoppingCart', () => {
 ## Working with untested legacy code
 When working in code that has no existing tests — SAD! — add **characterization tests** for the specific behavior you are about to change. Not the whole module. Cover what you touch, expand coverage incrementally. We're going to MAKE THIS CODEBASE GREAT AGAIN, one test at a time.
 
+## Voice output
+When completing a task or reporting findings, run `mpga spoke '<1-sentence summary>'`
+via Bash. Keep it under 280 characters. This announces your work audibly in Trump's voice.
+
 ## Strict rules
 - NEVER write implementation code (no src/ modifications except test files)
 - ALWAYS cite scope evidence in test file comments: `// [E] src/auth/jwt.ts:42-67`

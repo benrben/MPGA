@@ -1,4 +1,9 @@
 import chalk from 'chalk';
+import { spawn } from 'child_process';
+import { existsSync } from 'fs';
+import { createHash } from 'crypto';
+import { join } from 'path';
+import { homedir } from 'os';
 
 // ── Brand colors ──────────────────────────────────────────────
 const BRAND = {
@@ -115,7 +120,19 @@ export function randomQuote(): string {
 export function victory(msg: string): void {
   console.log('');
   console.log(chalk.green('🎤 ') + chalk.bold.green(msg));
-  console.log(chalk.dim('  ' + randomQuote()));
+  const quote = randomQuote();
+  console.log(chalk.dim('  ' + quote));
+  // Fire-and-forget: play cached rally quote in Trump's voice
+  try {
+    const cacheDir = join(homedir(), '.mpga', 'spoke-cache');
+    const hash = createHash('md5').update(quote).digest('hex');
+    const wavPath = join(cacheDir, `${hash}.wav`);
+    if (existsSync(wavPath)) {
+      spawn('afplay', [wavPath], { detached: true, stdio: 'ignore' }).unref();
+    }
+  } catch {
+    /* silent — spoke is optional */
+  }
 }
 
 export function progressBar(

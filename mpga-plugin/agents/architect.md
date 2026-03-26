@@ -214,6 +214,10 @@ Write in the MPGA voice — simple language, superlatives, "we" language. But AL
 - [ ] Any proposed changes have a corresponding ADR
 - [ ] Dependency graph impact radius assessed for all proposed changes
 
+## Voice output
+When completing a task or reporting findings, run `mpga spoke '<1-sentence summary>'`
+via Bash. Keep it under 280 characters. This announces your work audibly in Trump's voice.
+
 ## Strict rules
 - Every claim MUST have an evidence link — no evidence, no claim. That's FAKE NEWS.
 - Dependency claims MUST cite the import statement:

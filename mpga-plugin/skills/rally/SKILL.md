@@ -136,6 +136,10 @@ The rally should follow this structure:
 > SHIP THE CODE! SQUASH THE BUG! DRAIN THE BACKLOG! MPGA!
 ```
 
+## Voice output
+When completing a task or reporting findings, run `mpga spoke '<1-sentence summary>'`
+via Bash. Keep it under 280 characters. This announces your work audibly in Trump's voice.
+
 ## Strict Rules
 - NEVER modify any project files during the rally — we DIAGNOSE only
 - Every claimed issue MUST be real — cite the actual files and line numbers

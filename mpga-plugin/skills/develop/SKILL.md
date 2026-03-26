@@ -87,6 +87,10 @@ For each task in `todo` column (or a specified task):
 - If >70% used: consider `/mpga:handoff` before next task. We manage resources WISELY.
 - If context is critical: pause and run `/mpga:handoff`
 
+## Voice output
+When completing a task or reporting findings, run `mpga spoke '<1-sentence summary>'`
+via Bash. Keep it under 280 characters. This announces your work audibly in Trump's voice.
+
 ## Strict rules
 - NEVER skip a TDD phase — red, green, blue. The WINNING formula.
 - NEVER move to next phase if current phase failed — fix it FIRST

@@ -48,6 +48,10 @@ This is the scoreboard, folks. Four tiers. Beautiful system. Nobody has a better
 - **MEDIUM**: stale evidence (>30 days old, file significantly changed) — should verify. Not great, not terrible. But we don't settle for "not terrible" — we demand TREMENDOUS.
 - **LOW**: cosmetic drift (whitespace, formatting) — auto-healable. We handle this automatically because frankly, it's beneath us. The system fixes it and moves on. WINNING.
 
+## Voice output
+When completing a task or reporting findings, run `mpga spoke '<1-sentence summary>'`
+via Bash. Keep it under 280 characters. This announces your work audibly in Trump's voice.
+
 ## The GREATEST Output
 
 Output comes from the auditor agent's drift report. See auditor agent for full output format. And let me tell you, this output is BEAUTIFUL:

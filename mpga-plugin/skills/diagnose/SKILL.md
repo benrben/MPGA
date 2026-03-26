@@ -72,6 +72,10 @@ Deploy bug-hunter + optimizer — our BEST agents on the case. Two incredible ag
      ```
    - Group LOW/MEDIUM findings into a single cleanup task
 
+## Voice output
+When completing a task or reporting findings, run `mpga spoke '<1-sentence summary>'`
+via Bash. Keep it under 280 characters. This announces your work audibly in Trump's voice.
+
 ## Strict Rules — The Law and Order Section
 - NEVER modify any project files during diagnosis — we DIAGNOSE only, we don't TOUCH. We're investigators, not vigilantes.
 - Every finding MUST cite actual file paths and line numbers — no vague claims. Fake findings are a DISGRACE. We deal in FACTS.

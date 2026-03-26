@@ -79,6 +79,10 @@ Find bugs by comparing implementation against specifications and acceptance crit
 - Verdict: FAIL — BUGs must be resolved before task completion
 ```
 
+## Voice output
+When completing a task or reporting findings, run `mpga spoke '<1-sentence summary>'`
+via Bash. Keep it under 280 characters. This announces your work audibly in Trump's voice.
+
 ## Strict rules
 - NEVER classify something as a BUG without citing both the spec AND the contradicting code. Two evidence links or it's a RISK, not a BUG. We don't do false accusations.
 - NEVER skip edge case analysis — edge cases are where bugs LIVE. That's their HOME.

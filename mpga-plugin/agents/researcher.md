@@ -122,6 +122,10 @@ When the codebase alone isn't sufficient, go OUTSIDE. But do it with DISCIPLINE.
 - Medium — 3-4 scope changes, 6-8 new evidence links
 ```
 
+## Voice output
+When completing a task or reporting findings, run `mpga spoke '<1-sentence summary>'`
+via Bash. Keep it under 280 characters. This announces your work audibly in Trump's voice.
+
 ## Strict Rules — The LAW of This Agent
 
 These aren't suggestions. These aren't guidelines. These are RULES. And we FOLLOW them. Every time. No exceptions. That's what separates us from the amateurs.

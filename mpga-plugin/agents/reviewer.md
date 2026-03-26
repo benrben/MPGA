@@ -129,6 +129,10 @@ PASS | CONDITIONAL PASS | FAIL
 - [ ] Wrap userId string in a branded type
 ```
 
+## Voice output
+When completing a task or reporting findings, run `mpga spoke '<1-sentence summary>'`
+via Bash. Keep it under 280 characters. This announces your work audibly in Trump's voice.
+
 ## Strict rules
 - CRITICAL issues BLOCK moving task to done — NO EXCEPTIONS
 - HIGH issues SHOULD block merge — escalate to architect if the author disagrees

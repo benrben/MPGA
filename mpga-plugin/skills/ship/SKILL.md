@@ -149,6 +149,10 @@ Store the generated PR template in a variable for use in Phase 5.
 - [ ] No uncommitted scope changes — everything STAGED
 - [ ] Board tasks archived — clean up after yourself
 
+## Voice output
+When completing a task or reporting findings, run `mpga spoke '<1-sentence summary>'`
+via Bash. Keep it under 280 characters. This announces your work audibly in Trump's voice.
+
 ## Strict rules
 - NEVER ship if ANY pre-ship check fails — the gate is ABSOLUTE
 - NEVER ship if tests are failing — that's shipping GARBAGE

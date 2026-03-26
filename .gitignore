@@ -30,9 +30,29 @@ npm-debug.log*
 # MPGA session artifacts (local only)
 MPGA/sessions/
 
-# The generated knowledge layer and Claude export are part of the project.
-# Do not ignore MPGA/ or .claude/ broadly.
+# Generated files
 .claude/
 .codex/
-MPGA/**
+MPGA/
+CLAUDE.md
+GEMINI.md
+AGENTS.md
+
+# Spoke TTS artifacts (generated/downloaded, not source)
+mpga-plugin/spoke/venv/
+mpga-plugin/spoke/voicedata/*.wav
+mpga-plugin/spoke/voicedata/*.mp3
+mpga-plugin/spoke/voicedata/*.safetensors
+mpga-plugin/spoke/.server.pid
+
+# Runtime symlinks (regenerated, not source)
+.mpga-runtime/cli/dist
+.mpga-runtime/cli/src
+.mpga-runtime/cli/node_modules
+.mpga-runtime/cli/package.json
+.mpga-runtime/cli/tsconfig.json
+.mpga-runtime/spoke
+
+# Spoke cache
+.mpga/spoke-cache/
 

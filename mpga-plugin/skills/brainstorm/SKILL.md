@@ -111,6 +111,10 @@ We chose **Option <X>** because:
 EOF
 ```
 
+## Voice output
+When completing a task or reporting findings, run `mpga spoke '<1-sentence summary>'`
+via Bash. Keep it under 280 characters. This announces your work audibly in Trump's voice.
+
 ## Strict rules
 - DO NOT suggest code until design is approved — patience is a VIRTUE
 - DO NOT make assumptions — ask instead. Assumptions are DANGEROUS.

@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { execSync, spawn, spawnSync } from 'child_process';
 import { Command } from 'commander';
 import { log, banner } from '../core/logger.js';
 import { DEFAULT_CONFIG, saveConfig, MpgaConfig } from '../core/config.js';
@@ -179,6 +180,39 @@ export function registerInit(program: Command): void {
       );
       log.success('Created MPGA/board/BOARD.md — HUGE task board, the biggest!');
 
+      // Setup spoke (Trump voice TTS)
+      const spokeDir = path.join(projectRoot, '.mpga-runtime', 'spoke');
+      const spokeSetup = path.join(spokeDir, 'setup.sh');
+      const spokeVenv = path.join(spokeDir, 'venv', 'bin', 'python3');
+      if (fs.existsSync(spokeSetup)) {
+        console.log('');
+        log.info('Setting up Trump voice (F5-TTS) — the BEST voice, believe me...');
+        try {
+          if (!fs.existsSync(spokeVenv)) {
+            execSync(`bash ${spokeSetup}`, { stdio: 'inherit' });
+          } else {
+            log.dim('  Spoke already installed.');
+            // Just make sure server is running
+            const serverScript = path.join(spokeDir, 'server.py');
+            const health = spawnSync('curl', ['-sf', 'http://127.0.0.1:5151/health'], {
+              timeout: 1000,
+            });
+            if (health.status !== 0) {
+              log.dim('  Starting spoke server...');
+              const child = spawn(spokeVenv, [serverScript, '--port', '5151'], {
+                detached: true,
+                stdio: 'ignore',
+              });
+              child.unref();
+              fs.writeFileSync(path.join(spokeDir, '.server.pid'), String(child.pid));
+            }
+          }
+          log.success('Spoke ready — Trump voice ACTIVATED!');
+        } catch {
+          log.warn('Spoke setup failed — voice will be available later via `mpga spoke --setup`');
+        }
+      }
+
       console.log('');
       log.success('MPGA initialized — your project is about to be GREAT AGAIN!');
       console.log('');
@@ -190,5 +224,6 @@ export function registerInit(program: Command): void {
         log.dim('  mpga status        — see how GREAT your project is looking');
         log.dim('  mpga milestone new — start your first milestone, HUGE things ahead');
       }
+      log.dim('  mpga spoke "text"  — hear it in Trump voice, TREMENDOUS');
     });
 }
