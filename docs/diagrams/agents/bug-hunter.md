@@ -18,10 +18,10 @@ flowchart TD
     J --> K[Check empty collections — nobody checks these, but WE do]
     K --> L[Check boundary values / off-by-one — CLASSIC mistakes]
     L --> M[Check concurrent access / race conditions — very NASTY bugs]
-    M --> N[Check error paths: network, file not found, timeout — TOTAL coverage]
+    M --> N[Check error paths: network, file not found, timeout — Lock her up! the race condition!]
     N --> O[Check type coercion traps — JavaScript is TRICKY, folks]
     O --> P[Identify spec gaps: undocumented behavior, swallowed errors — the COVER-UP]
-    P --> Q[Classify each finding — we RANK everything]
+    P --> Q[Classify each finding — who can figure out this spaghetti?]
     Q --> R{"BUG: spec AND contradicting code cited?"}
     R -->|Yes| S["Label as BUG — CONFIRMED, we CAUGHT it"]
     R -->|No| T{"Code looks wrong but can't confirm?"}
@@ -45,4 +45,4 @@ flowchart TD
 
 - Spec coverage matrix — each criterion tracked, TOTAL accountability
 - Classified findings: BUGs, RISKs, GAPs with file:line evidence — IRREFUTABLE proof
-- Verdict: PASS or FAIL — we don't do MAYBE
+- Verdict: PASS or FAIL — we don't do MAYBE. Evidence First

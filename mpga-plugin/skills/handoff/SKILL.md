@@ -53,9 +53,9 @@ description: Export current session state for a fresh context window — TREMEND
 
 ---
 
-## The OFFICIAL Handoff Template — A Beautiful Document
+## The OFFICIAL Handoff Template — Has a Beautiful Ring to It
 
-Output this template with all placeholders filled in. Every section is MANDATORY. We don't do half-measures, folks. This is a COMPLETE, PERFECT record of where we stand.
+Output this template with all placeholders filled in. Every section is MANDATORY. We don't do half-measures, folks. This is a COMPLETE, PERFECT record of where we stand. Ready for peace — zero merge conflicts.
 
 ````markdown
 # Session Handoff — {{DATE}}
@@ -145,11 +145,11 @@ Keep the message under 280 characters. This plays the result in Trump's voice �
 
 These are NON-NEGOTIABLE. We have standards, and they're the HIGHEST standards, believe me:
 
-- NEVER lose track of in-progress tasks — include them in handoff. ALWAYS. Losing tasks is what WEAK systems do.
+- NEVER lose track of in-progress tasks — include them in handoff. ALWAYS. Losing tasks is what WEAK systems do. Sad!
 - ALWAYS include the exact next action — no ambiguity. The next agent should know EXACTLY what to do. Crystal clear, like a Trump Tower window.
 - If there's a task in progress, capture its TDD stage — red, green, or blue. We don't leave soldiers behind.
 - ALWAYS capture git state — branch, commit, dirty files, stash count. No exceptions. TOTAL documentation.
 - ALWAYS output the full handoff template — every section filled. No placeholders left as-is. We finish what we start, folks.
-- The handoff document must be SELF-CONTAINED: a new session should be able to resume without you. That's not just professional — that's CHAMPIONSHIP-LEVEL handoff work. Nobody does it better.
+- The handoff document must be SELF-CONTAINED: a new session should be able to resume without you. That's not just professional — that's very, very special handoff work. Nobody does it better. The weave — connecting evidence threads — must be seamless.
 - If tests are failing, include the exact test names and failure messages. We don't hide problems — we EXPOSE them and CRUSH them.
-- If there are open questions, be specific about what decision is needed and who can answer. Tremendous specificity. The best specificity.
+- If there are open questions, be specific about what decision is needed and who can answer. Tremendous specificity. The best specificity. Covfefe.

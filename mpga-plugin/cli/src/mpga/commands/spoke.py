@@ -51,6 +51,18 @@ def trumpify(text: str) -> str:
         "Nobody thought it was possible.", "And they said it couldn't be done.",
         "Many people are saying it.", "Incredible.", "Tremendous.",
         "The likes of which nobody's ever seen.", "Not even close.",
+        "Fake docs!", "No collusion between modules.",
+        "Build the wall around that module.", "Lock that mutex up!",
+        "Law and order in the dependency graph.", "Big league.",
+        "Beautiful ring to it.", "Covfefe. I mean, coverage.",
+        "Total witch hunt against clean code.", "Pin your versions, folks.",
+        "Even the type annotations are perfect.", "Zero merge conflicts.",
+        "Not like Sleepy Copilot.", "Crooked Gemini could never.",
+        "Little Cursor would forget this in 3 seconds.",
+        "Crazy Devin charges $500 a month for THIS?",
+        "Low Energy ESLint wouldn't catch that in a million years.",
+        "Lyin' ChatGPT would make that up.", "Crazy NPM would need 200 packages for this.",
+        "Cryin' Jenkins would be red right now.", "Sloppy Semicolons everywhere with those tools.",
     ]
 
     # Callbacks — Trump loves referring back to himself
@@ -58,6 +70,11 @@ def trumpify(text: str) -> str:
         "I said it from day one.", "I called it.", "I was right.",
         "And I said that a long time ago.", "Everyone told me I was wrong. I wasn't.",
         "I knew it before anybody.", "They didn't listen. Now they listen.",
+        "I alone can fix this codebase.", "Make Project Great Again.",
+        "A complete and total shutdown of untested deploys.",
+        "Some of these dependencies, I assume, are good packages.",
+        "Who can figure out this spaghetti code? Nobody. That's why we have MPGA.",
+        "I will absolutely apologize if I'm ever wrong about a revert. Hasn't happened yet.",
     ]
 
     # Emphasis repetitions — key adjectives get the Trump double-tap

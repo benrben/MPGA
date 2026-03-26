@@ -23,7 +23,7 @@ flowchart TD
 
     K --> L["Risk assessment per task:\nComplexity x Uncertainty x Impact\n= Score (1-125) — we MEASURE risk"]
     L --> M{Score > 50?}
-    M -->|Yes| N["HIGH RISK: flagged PROMINENTLY\nadd Mitigation field\nconsider spike first — be SMART"]
+    M -->|Yes| N["HIGH RISK: flagged PROMINENTLY\nadd Mitigation field\nconsider spike first — Sad! Lock her up! the race condition!"]
     M -->|No| O[LOW/MODERATE risk noted — MANAGEABLE]
 
     N --> P[Critical path analysis — the MAIN event]
@@ -39,7 +39,7 @@ flowchart TD
     U --> V[Show the board — BEAUTIFUL\nmpga board show]
     V --> W{Spoke available?}
     W -->|Yes| X[mpga spoke — PLAN is ready]
-    W -->|No| Y[Ready for /mpga:develop — EXECUTE]
+    W -->|No| Y[Ready for /mpga:develop — MPGA alone can fix it]
     X --> Y
 ```
 
@@ -53,5 +53,5 @@ flowchart TD
 - Tasks added to board with risk assessments — we know the RISKS
 - PLAN.md with full breakdown (tasks, dependencies, risk table, critical path, phases) — VERY detailed
 - Critical path identified with parallel lanes — MAXIMUM efficiency
-- Phase decomposition for large milestones (8+ tasks) — ORGANIZED like a Trump property
+- Phase decomposition for large milestones (8+ tasks) — they should be loyal, pin your versions! Tremendous
 - Board visible with all planned tasks — the WHOLE picture

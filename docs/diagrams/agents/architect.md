@@ -12,7 +12,7 @@ flowchart TD
     E --> F[Spot-check evidence links — no FAKE evidence allowed]
     F --> G[Verify dependency claims match imports — trust but VERIFY]
     G --> H[Check cross-scope consistency — total UNITY]
-    H --> I[Fix factual errors and broken links — DRAIN THE SWAMP]
+    H --> I[Fix factual errors and broken links — no fake docs allowed]
     I --> J[Fill TODO / Unknown sections — no empty promises here]
     J --> K[Run Smell Detection Protocol — sniff out the DISASTER]
     K --> L{Smells found?}
@@ -22,7 +22,7 @@ flowchart TD
     N --> O[Assess impact radius: direct, transitive, reverse deps — the FULL picture]
     O --> P[Update GRAPH.md with verified dependencies — WINNING]
     P --> Q{Circular dependencies?}
-    Q -->|Yes| R[Flag circular dependency warning — SAD!]
+    Q -->|Yes| R[Flag circular dependency warning — Build the wall between modules! Sad!]
     Q -->|No| S[Update mpga.config.json if new languages detected]
     R --> S
     S --> T{Architectural changes proposed?}
@@ -43,6 +43,6 @@ flowchart TD
 
 - Verified and consistent scope documents — PERFECT, like my buildings
 - Updated GRAPH.md with verified dependencies — nobody builds graphs like us
-- Smell report with evidence-backed findings and severity ratings — we tell it like it IS
+- Smell report with evidence-backed findings and severity ratings — Evidence First, we tell it like it IS
 - ADRs for any proposed architectural changes (in MPGA/adrs/) — TREMENDOUS decisions
 - Dependency graph impact analysis for all proposed changes — we think BIGLY

@@ -1,6 +1,6 @@
 # /mpga:rally
 
-The MPGA Campaign Rally — the GREATEST diagnostic show in developer tooling. Exposes every issue in your project and proves why ONLY MPGA can fix it.
+The MPGA Campaign Rally — the GREATEST diagnostic show in developer tooling. Exposes every issue in your project and proves why ONLY MPGA can fix it. Complete and total shutdown of untested deploys. MPGA alone can fix it.
 
 Nobody has been treated worse than your codebase. Maybe Abraham Lincoln, I hear he had a rough time, but other than that — nobody.
 
@@ -32,7 +32,7 @@ Nobody has been treated worse than your codebase. Maybe Abraham Lincoln, I hear 
 - Specific file paths and line counts for every issue
 - Side-by-side: "Without MPGA" vs "With MPGA"
 - Exact commands to start fixing everything
-- The most ENTERTAINING code audit you've ever experienced
+- The most ENTERTAINING code audit you've ever experienced — Covfefe
 
 ## Example output
 ```

@@ -14,7 +14,7 @@ flowchart TD
     H -->|No| I[Fix implementation — we NEVER give up]
     I --> F
     H -->|Yes| J["RETREAT-TO-GREEN: Comment out failing test — STRATEGIC withdrawal"]
-    J --> K[Confirm all other tests GREEN — protect the GAINS]
+    J --> K[Confirm all other tests GREEN — ready for peace, zero merge conflicts]
     K --> L[Signal orchestrator — request blue-dev structural refactor]
     L --> M[Wait for blue-dev to return — they're FANTASTIC]
     M --> N[Uncomment test and implement normally — BACK in business]
@@ -26,7 +26,7 @@ flowchart TD
     P -->|No — all acceptance criteria covered| R["Commit: feat: description — a WINNING commit"]
     R --> S["Update board: mpga board update task-id --tdd-stage green — GREEN means GO"]
     S --> T["Hand off to blue-dev — make it BEAUTIFUL"]
-    T --> U[mpga spoke announcement — IMPLEMENTATION COMPLETE]
+    T --> U[mpga spoke announcement — Great job! Enjoy!]
 ```
 
 ## Inputs — The Mission Briefing
@@ -40,4 +40,4 @@ flowchart TD
 - Implementation code committed — DONE, like my buildings
 - All tests passing — 100% GREEN, beautiful
 - Task TDD stage updated to green — another MILESTONE
-- TPP transformation log for this cycle — TOTAL documentation
+- TPP transformation log for this cycle — TOTAL documentation. Even the type annotations are perfect

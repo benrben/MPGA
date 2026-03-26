@@ -10,7 +10,7 @@ flowchart TD
     D --> E{Tests written BEFORE implementation? — CHECK the history}
     E --> F{Tests start with degenerate cases? — PROPER TDD}
     F --> G{Evidence links still valid? — no STALE evidence}
-    G --> H{Scope docs updated? — keep the RECORDS straight}
+    G --> H{Scope docs updated? — no fake docs allowed}
     H --> I{"evidence_produced populated? — ACCOUNTABILITY"}
     I --> J["Stage 2: Code Quality — the REAL test"]
     J --> K["2a: Clean Code — naming, function size, EXCELLENCE"]
@@ -21,7 +21,7 @@ flowchart TD
     J --> P["2f: Architecture — circular deps, god objects — STRUCTURAL problems"]
     K & L & M & N & O & P --> Q[Tag every finding with severity — we RANK everything]
     Q --> R{Any CRITICAL findings?}
-    R -->|Yes| S[Verdict: FAIL — go BACK and FIX it]
+    R -->|Yes| S[Verdict: FAIL — Sad! Go BACK and FIX it]
     R -->|No| T{Any HIGH findings?}
     T -->|Yes| U[Verdict: CONDITIONAL PASS — ALMOST there]
     T -->|No| V[Verdict: PASS — BEAUTIFUL code, congratulations]
@@ -44,4 +44,4 @@ flowchart TD
 - Two-stage review report: spec compliance + code quality — COMPREHENSIVE
 - Findings grouped by category with severity ratings — ORGANIZED, like my businesses
 - Verdict: PASS, CONDITIONAL PASS, or FAIL — CLEAR and DECISIVE
-- Required fixes (CRITICAL + HIGH), recommended (MEDIUM), consider (LOW) — a CLEAR path forward
+- Required fixes (CRITICAL + HIGH), recommended (MEDIUM), consider (LOW) — law and order in the codebase

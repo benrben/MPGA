@@ -14,13 +14,13 @@ flowchart TD
     H --> I[Fill Who/What triggers it — find callers, routes, event handlers — EVERY entry point]
     I --> J[Fill What happens — data flow story with evidence links, TREMENDOUS detail]
     J --> K[Fill Rules and edge cases — find try/catch, guard clauses, the DEFENSES]
-    K --> L[Fill Concrete examples — 2-3 REAL scenarios, not FAKE ones]
+    K --> L[Fill Concrete examples — 2-3 REAL scenarios, no fake docs]
     L --> M[Fill Traces — step-by-step table, entry through call chain, the FULL journey]
     M --> N[Fill Deeper splits — note potential sub-scopes, think AHEAD]
     N --> O[Fill Confidence and notes — HONEST assessment, always TRUTHFUL]
     O --> P{All TODO sections filled?}
     P -->|Yes, with evidence| Q[Write updated scope document — PUBLISH the findings]
-    P -->|Cannot find evidence| R["Mark as Unknown — never GUESS, that's for losers"]
+    P -->|Cannot find evidence| R["Mark as Unknown — Evidence First, never GUESS. Wrong!"]
     R --> Q
     Q --> S[mpga spoke announcement — TERRITORY MAPPED]
 ```
@@ -35,4 +35,4 @@ flowchart TD
 
 - Updated scope document with evidence-backed descriptions — EVERY claim verified
 - Every claim backed by [E] file:line evidence links — IRREFUTABLE proof
-- Unknowns explicitly marked as [Unknown] — HONEST, unlike the fake news
+- Unknowns explicitly marked as [Unknown] — HONEST, tremendous transparency, believe me

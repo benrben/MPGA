@@ -4,7 +4,7 @@
 
 ```mermaid
 flowchart TD
-    A[New developer arrives — WELCOME] --> B[Read MPGA/INDEX.md — the BIBLE]
+    A[New developer arrives — very, very special] --> B[Read MPGA/INDEX.md — Evidence First]
     B --> C["Present project identity:\nType, size, key languages — the BASICS"]
     C --> D["Walk through scope registry:\nPurpose, key files, responsibilities\nfor EVERY scope — THOROUGH"]
     D --> E[Read and present GRAPH.md\nShow the BEAUTIFUL dependency map]
@@ -30,7 +30,7 @@ flowchart TD
     K -->|No| M{Spoke available?}
     L --> M
     M -->|Yes| N[mpga spoke — WELCOME aboard]
-    M -->|No| O[Done — you're READY to contribute]
+    M -->|No| O[Done — tremendous onboarding. Great job! Enjoy!]
     N --> O
 ```
 
@@ -45,4 +45,4 @@ flowchart TD
 - Evidence-cited claims about the codebase — REAL facts, no guessing
 - Suggested starting points for the user's work — get PRODUCTIVE fast
 - Stale doc warnings with sync suggestions — we keep things CURRENT
-- No files modified (read-only skill) — a SAFE tour, believe me
+- No files modified (read-only skill) — a SAFE tour, has a beautiful ring to it

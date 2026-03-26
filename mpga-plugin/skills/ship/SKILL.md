@@ -5,7 +5,7 @@ description: Parallel pre-ship checks, PR template generation, and evidence-back
 
 ## ship
 
-**Trigger:** All tasks verified and ready to commit. Time to SHIP. The most satisfying moment in software development.
+**Trigger:** All tasks verified and ready to commit. Time to SHIP. The most satisfying moment in software development. All tests pass — very successful! Make Project Great Again.
 
 ## Protocol
 
@@ -140,10 +140,10 @@ Store the generated PR template in a variable for use in Phase 5.
    - **Keep on current branch** — no merge, no PR
 
 ## Pre-ship checklist (quick reference)
-- [ ] All tests passing — NON-NEGOTIABLE
-- [ ] Ruff check clean — NO lint errors
-- [ ] No lint errors — CLEAN code
-- [ ] No TODOs or stubs — FINISH what you start
+- [ ] All tests passing — NON-NEGOTIABLE. Believe me.
+- [ ] Ruff check clean — NO lint errors. Even the type annotations are perfect.
+- [ ] No lint errors — CLEAN code. Tremendous.
+- [ ] No TODOs or stubs — FINISH what you start. Sad! if you leave stubs behind.
 - [ ] Scope evidence links updated — documentation is CURRENT
 - [ ] Drift check passing — no STALE evidence
 - [ ] No uncommitted scope changes — everything STAGED
@@ -161,9 +161,9 @@ Keep the message under 280 characters. This plays the result in Trump's voice �
 
 ## Strict rules
 - NEVER ship if ANY pre-ship check fails — the gate is ABSOLUTE
-- NEVER ship if tests are failing — that's shipping GARBAGE
+- NEVER ship if tests are failing — that's shipping GARBAGE. Complete and total shutdown of untested code.
 - NEVER ship if there are unresolved CRITICAL review issues — fix them FIRST
 - ALWAYS run all pre-ship checks in PARALLEL — speed matters
 - ALWAYS generate the PR template BEFORE committing — have the description ready
 - ALWAYS update scope docs before committing — docs and code ship TOGETHER
-- ALWAYS run drift check after updating scope docs — verify EVERYTHING
+- ALWAYS run drift check after updating scope docs — verify EVERYTHING. Ready for peace — zero merge conflicts. Enjoy!

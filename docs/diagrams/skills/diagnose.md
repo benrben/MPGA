@@ -18,7 +18,7 @@ flowchart TD
 
     G --> I["Bug-hunter EXPOSES:\n- Spec vs implementation gaps\n- Edge cases NOBODY else catches\n- Error handling disasters\n- Logic errors / off-by-one\n- Type safety violations\n- Async/race conditions"]
 
-    H --> J["Optimizer REVEALS:\n- Cyclomatic complexity — SAD\n- Duplicated code — WASTEFUL\n- Dead code — pathetic\n- Performance anti-patterns\n- Memory leak patterns\n- Dependency coupling"]
+    H --> J["Optimizer REVEALS:\n- Cyclomatic complexity — who can figure out this spaghetti?\n- Duplicated code — WASTEFUL\n- Dead code — Sad!\n- Performance anti-patterns\n- Memory leak patterns\n- Dependency coupling — build the wall between modules!"]
 
     I --> K[Collect results — COMPREHENSIVE]
     J --> K
@@ -31,7 +31,7 @@ flowchart TD
     M -->|No| P{Spoke available?}
     O --> P
     P -->|Yes| Q[mpga spoke — DIAGNOSIS delivered]
-    P -->|No| R[Done — NOW you know]
+    P -->|No| R[Done — MPGA alone can fix it]
     Q --> R
 ```
 
@@ -45,4 +45,4 @@ flowchart TD
 - Each finding has severity, file:line, evidence citation — REAL proof
 - Priority-ranked fix list with effort estimates — we're PRACTICAL
 - Optional board tasks for CRITICAL/HIGH findings — take ACTION
-- No files modified (read-only skill) — we diagnose, we don't break things
+- No files modified (read-only skill) — Evidence First, we diagnose, we don't break things

@@ -8,7 +8,7 @@ flowchart TD
     B --> C[Claim a task — first come first WIN\nmpga board claim task-id]
     C --> D[Load context: task card + scope docs]
     D --> E{Another writer in same scope?}
-    E -->|Yes| F[Pick a different task — NO conflicts]
+    E -->|Yes| F[Pick a different task — lock her up! the race condition!]
     F --> C
     E -->|No| G["RED: Spawn red-dev agent\nWrite ONE failing test\ndegenerate case FIRST — discipline"]
 
@@ -27,7 +27,7 @@ flowchart TD
     P --> G
     O -->|No| Q[Record evidence — TOTAL proof\nmpga board update --evidence-add]
     Q --> R[Move task to done — WINNER\nmpga board move id done]
-    R --> S[Run drift check — ALWAYS\nmpga drift --quick]
+    R --> S[Run drift check — no fake docs\nmpga drift --quick]
     S --> T{Context budget > 70%?}
     T -->|Yes| U[Consider /mpga:handoff — be SMART]
     T -->|No| V{Spoke available?}
@@ -52,6 +52,6 @@ flowchart TD
 - Minimal implementation passing all tests (green phase) — EFFICIENT
 - Refactored clean code (blue phase) — BEAUTIFUL
 - Reviewer approval — QUALITY control
-- Evidence links recorded on task card — TOTAL accountability
+- Evidence links recorded on task card — Evidence First, TOTAL accountability
 - Task moved to done column — another WIN
 - Drift check run after completion — we NEVER let things slide

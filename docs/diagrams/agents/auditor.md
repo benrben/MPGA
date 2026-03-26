@@ -9,7 +9,7 @@ flowchart TD
     B -->|drift-quick| D[Run mpga drift --quick — FAST and POWERFUL]
     B -->|drift-ci| E[Run mpga drift --ci --threshold 80 — the ULTIMATE gate]
     C --> F{File:line exists?}
-    F -->|No| G["Classify as CRITICAL — DISASTER!"]
+    F -->|No| G["Classify as CRITICAL — fake docs! DISASTER!"]
     F -->|Yes| H{Content matches description?}
     H -->|Symbol moved| I["Classify as HIGH — it moved, we FOUND it"]
     H -->|File changed significantly, evidence >30 days old| J["Classify as MEDIUM — getting STALE, folks"]
@@ -33,7 +33,7 @@ flowchart TD
     T --> U
     U --> V[Update scope doc status fields — keep the RECORDS straight]
     E --> W{Below threshold or CRITICAL found?}
-    W -->|Yes| X[Exit non-zero — CI gate FAILS, very sad]
+    W -->|Yes| X[Exit non-zero — Complete and total shutdown of untested deploys. Sad!]
     W -->|No| Y[Exit zero — CI gate PASSES, we're WINNING]
     N --> Z[mpga spoke announcement — the PEOPLE deserve to know]
     V --> Z
@@ -52,4 +52,4 @@ flowchart TD
 - Health report per scope with evidence coverage percentage — the REAL numbers
 - Severity-classified findings (CRITICAL, HIGH, MEDIUM, LOW) — ranked like a WINNER
 - Auto-healed LOW findings — fixed AUTOMATICALLY, very efficient
-- CI pass/fail gate status (in drift-ci mode) — the ULTIMATE gatekeeper
+- CI pass/fail gate status (in drift-ci mode) — the ULTIMATE gatekeeper. Evidence First

@@ -16,9 +16,9 @@ flowchart TD
     E --> H["Lane 3: Type Safety FAILURES\nany types, ts-ignore — WEAK"]
     E --> I["Lane 4: Dependency CATASTROPHES\ncircular/unused/outdated deps"]
     E --> J["Lane 5: Architecture ROT\ngod files, complex functions — TERRIBLE"]
-    E --> K["Lane 6: Evidence DRIFT\nstale links, unverified claims — FAKE NEWS"]
+    E --> K["Lane 6: Evidence DRIFT\nstale links, unverified claims — fake docs!"]
     E --> L["Lane 7: Code Hygiene CRIMES\nconsole.logs, hardcoded secrets"]
-    E --> M["Lane 8: CI/CD WEAKNESS\nmissing CI, no hooks — LOW ENERGY"]
+    E --> M["Lane 8: CI/CD WEAKNESS\nmissing CI, no hooks — complete and total shutdown of untested deploys"]
 
     F --> N[Final campaigner aggregation — TREMENDOUS]
     G --> N
@@ -56,4 +56,4 @@ flowchart TD
 - Scoreboard: total issues by severity (CRITICAL/WARNING/SAD!) — the REAL numbers
 - Side-by-side comparison: WITHOUT MPGA vs WITH MPGA — night and DAY
 - Actionable MPGA commands to fix issues — the PATH to greatness
-- No files modified (read-only diagnostic) — we EXPOSE, we don't tamper
+- No files modified (read-only diagnostic) — Evidence First, we EXPOSE, we don't tamper. Covfefe

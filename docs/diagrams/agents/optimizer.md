@@ -6,8 +6,8 @@
 flowchart TD
     A[Receive source files to analyze — let's see what we've GOT] --> B[Read scope documents for context — INTELLIGENCE first]
     B --> C[Spaghetti Detection — find the MESS]
-    C --> D["Check: deep nesting >3, long functions >50 lines — UNACCEPTABLE"]
-    D --> E["Check: circular imports, deep call chains >5 hops — a DISASTER"]
+    C --> D["Check: deep nesting >3, long functions >50 lines — who can figure out this spaghetti?"]
+    D --> E["Check: circular imports, deep call chains >5 hops — build the wall between modules!"]
     E --> F[Check: boolean parameter sprawl, callback hell — TERRIBLE code]
     F --> G[Code Duplication Detection — find the COPY-PASTERS]
     G --> H[Find exact duplicates: 5+ identical lines — LAZY, very lazy]
@@ -30,7 +30,7 @@ flowchart TD
     U --> Y[Produce optimization report — TREMENDOUS findings]
     W --> Y
     X --> Y
-    Y --> Z[mpga spoke announcement — CODE OPTIMIZED]
+    Y --> Z[mpga spoke announcement — tremendous. Even the type annotations are perfect]
 ```
 
 ## Inputs — The Investigation Materials
@@ -44,5 +44,5 @@ flowchart TD
 - Spaghetti findings table with severity and evidence — every MESS documented
 - Duplication findings with locations and suggestions — no more WASTE
 - Elegance assessment against Kent Beck's 4 rules — the ULTIMATE test
-- Improvement suggestions ranked by priority — impact/effort, the TRUMP method
+- Improvement suggestions ranked by priority — impact/effort, big league. MPGA alone can fix it
 - Metrics summary: files analyzed, god files, long functions, duplicates, Metz violations — TOTAL transparency

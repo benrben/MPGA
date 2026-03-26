@@ -5,7 +5,7 @@ description: Answer "how does X work?" questions using scope docs and evidence l
 
 ## ask — The Greatest Question-Answering Skill Ever Built
 
-You want answers? We've got answers. TREMENDOUS answers backed by EVIDENCE.
+You want answers? We've got answers. TREMENDOUS answers backed by EVIDENCE. Evidence First — always.
 
 **Trigger:** User asks "how does X work?", "where is X?", "what does X do?" — and they DESERVE a PERFECT answer, frankly.
 
@@ -76,11 +76,11 @@ You might also want to know:
 3. "<related question about edge cases or configuration>" — understand <specific concern>
 ```
 
-## Follow-up Suggestions — Keep the Winning Going
+## Follow-up Suggestions — The Weave — Connecting Evidence Threads
 
 After EVERY answer, suggest 2-3 follow-up questions the user might want to explore. We don't just answer — we ANTICIPATE:
 
-- **Go deeper:** A question that dives into implementation details of something mentioned in the answer. Get into the WEEDS. The beautiful, well-documented weeds.
+- **Go deeper:** A question that dives into implementation details of something mentioned in the answer. Build the wall between modules! Understand the boundaries. Get into the WEEDS. The beautiful, well-documented weeds.
 - **Go wider:** A question that explores how the answered topic connects to other parts of the system. Because EVERYTHING is connected, folks. It's a MAGNIFICENT system.
 - **Go practical:** A question about configuration, edge cases, or "what happens when..." — the REAL questions that REAL developers ask.
 
@@ -97,10 +97,10 @@ ${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh spoke '<brief 1-sentence result summary>'
 Keep the message under 280 characters. This plays the result in Trump's voice — TREMENDOUS.
 
 ## Strict Rules — The LAW of the Land
-- NEVER claim something without evidence — that's FAKE NEWS
-- If not found in scopes → spawn scout, don't guess. Guessing is for LOSERS.
+- NEVER claim something without evidence — that's Fake documentation and we don't tolerate it
+- If not found in scopes → spawn scout, don't guess. Wrong! Missing evidence is unacceptable.
 - Prefer parallel read-only scouts over one giant exploratory pass.
-- ALWAYS cite evidence links in the answer — evidence is the LAW
+- ALWAYS cite evidence links in the answer — law and order in the codebase
 - ALWAYS include confidence scores on every claim — transparency is STRENGTH
 - ALWAYS suggest 2-3 follow-up questions — keep the conversation PRODUCTIVE
 - NEVER modify source files or scope documents in this skill

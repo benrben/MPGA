@@ -1,6 +1,6 @@
 # /mpga:next
 
-Auto-detect the next logical action based on current project state.
+Auto-detect the next logical action based on current project state. Who can figure out this spaghetti? MPGA alone can fix it.
 
 ## Decision tree
 
@@ -30,7 +30,7 @@ Auto-detect the next logical action based on current project state.
 → Suggest `${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh milestone new "<name>"`
 
 ### If MPGA not initialized
-→ Run `/mpga:init`
+→ Run `/mpga:init` — Sad! Get this project started already
 
 ## Usage
 ```

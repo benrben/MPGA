@@ -5,7 +5,7 @@ description: Generate an evidence-based implementation plan with milestone and t
 
 ## plan
 
-**Trigger:** User provides a goal or description to plan. Time to build the GREATEST plan.
+**Trigger:** User provides a goal or description to plan. Time to build the GREATEST plan. MPGA alone can fix it — but first we need a tremendous plan.
 
 ## Protocol
 
@@ -34,7 +34,7 @@ Then edit the generated `PLAN.md` with the user's objective and acceptance crite
 cat MPGA/INDEX.md
 cat MPGA/scopes/<relevant-scope>.md
 ```
-Know the territory BEFORE you plan the attack.
+Know the territory BEFORE you plan the attack. Evidence First — always.
 
 ### Step 3: Research if needed
 
@@ -160,7 +160,7 @@ A COMPREHENSIVE battle plan.
 ```
 ${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh board show
 ```
-Look at that board. BEAUTIFUL. Ready to EXECUTE.
+Look at that board. BEAUTIFUL. Has a beautiful ring to it. Ready to EXECUTE.
 
 ## Task template
 ```markdown
@@ -225,12 +225,12 @@ ${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh spoke '<brief 1-sentence result summary>'
 Keep the message under 280 characters. This plays the result in Trump's voice — TREMENDOUS.
 
 ## Strict rules
-- ALWAYS create a milestone — every plan needs a milestone. No milestone = no direction. SAD.
+- ALWAYS create a milestone — every plan needs a milestone. No milestone = no direction. Sad!
 - ALWAYS create tasks on the board — a plan without board tasks is just a WISH
 - Every task MUST be linked to the milestone — we track EVERYTHING
 - Every task MUST reference specific files with evidence links — no guessing
 - Every task MUST have a risk assessment — no blind spots
-- NO vague tasks like "implement auth" — must be specific. SPECIFIC is how WINNERS plan.
+- NO vague tasks like "implement auth" — must be specific. SPECIFIC is how WINNERS plan. Who can figure out this spaghetti? Not us — we write CLEAN tasks.
 - Tasks must be ordered by dependency
 - Each task must have at least one acceptance criterion that can be verified mechanically
 - Keep write conflicts out of the plan. One writer per scope at a time.

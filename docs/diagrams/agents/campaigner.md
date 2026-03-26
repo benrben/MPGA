@@ -17,7 +17,7 @@ flowchart TD
     H --> K[Type Safety Failures — WEAK!]
     H --> L[Dependency Disasters — a MESS, folks]
     H --> M[Architecture Rot — CRUMBLING foundations]
-    H --> N[Evidence & Documentation Drift — FAKE docs!]
+    H --> N[Evidence and Documentation Drift — fake docs! Wrong!]
     H --> O[Code Hygiene Crimes — DISGUSTING]
     H --> P[CI/CD Weakness — NO strength]
     H --> Q[Test Quality — SAD test quality]
@@ -32,7 +32,7 @@ flowchart TD
     Y --> Z[Scoreboard: CRITICAL / WARNING / SAD — the TRUTH]
     Z --> AA[Side-by-side: Without MPGA vs With MPGA — NIGHT and DAY]
     AA --> AB["Call to Action: mpga init, mpga sync, mpga status — JOIN the movement"]
-    AB --> AC[mpga spoke announcement — RALLY COMPLETE]
+    AB --> AC[mpga spoke announcement — MPGA alone can fix it. Covfefe]
 ```
 
 ## Inputs — What We're Looking At
@@ -47,4 +47,4 @@ flowchart TD
 - Comprehensive project diagnostic in rally-speech format — INCREDIBLE delivery
 - Severity scoreboard (CRITICAL / WARNING / SAD) — the REAL numbers
 - Side-by-side comparison — without MPGA vs with MPGA, it's OBVIOUS
-- Exact commands to start fixing everything — the PATH to GREATNESS
+- Exact commands to start fixing everything — the PATH to GREATNESS. Complete and total shutdown of untested deploys

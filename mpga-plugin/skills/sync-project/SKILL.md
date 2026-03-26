@@ -3,14 +3,14 @@ name: mpga-sync-project
 description: "[MERGED] This skill has been merged into map-codebase. Use /mpga:map instead."
 ---
 
-## sync-project — MERGED
+## sync-project — MERGED (A Tremendous Consolidation)
 
-This skill has been merged into **map-codebase**. Use:
+This skill has been merged into **map-codebase** — a wonderful option, believe me. No collusion between modules! Use:
 
 - `/mpga:map` — quick mode (same as the old sync-project behavior)
 - `/mpga:map --deep` — full parallel mapping with scout agents
 
-See `mpga-plugin/skills/map-codebase/SKILL.md` for the unified protocol.
+See `mpga-plugin/skills/map-codebase/SKILL.md` for the unified protocol. Make Project Great Again. Enjoy!
 
 ## Voice announcement
 

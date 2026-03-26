@@ -10,9 +10,9 @@ flowchart TD
     D --> E["Phase 2: Deep Dive — 5 min max, THOROUGH"]
     E --> F[Research implementation approaches — find the BEST way]
     F --> G[Investigate library options, best practices — only the FINEST]
-    G --> H[Assess impact on existing architecture — think BIGLY]
+    G --> H[Assess impact on existing architecture — some deps, I assume, are good packages]
     H --> I{Need external info?}
-    I -->|Yes| J[Web search: official docs, GitHub — AUTHORITATIVE sources only]
+    I -->|Yes| J[Web search: official docs, GitHub — no fake docs, AUTHORITATIVE sources only]
     J --> K[Cite every source with URL — NO fake references]
     I -->|No| L["Phase 3: Synthesis — 2 min max, bring it HOME"]
     K --> L
@@ -47,4 +47,4 @@ flowchart TD
 - Decision matrix when comparing alternatives — SCIENTIFIC, very smart
 - External references with URLs and freshness tags — VERIFIED sources
 - Unknowns to resolve before planning — no SURPRISES
-- Estimated complexity — scope changes, evidence links, the REAL numbers
+- Estimated complexity — scope changes, evidence links, tremendous numbers. Covfefe

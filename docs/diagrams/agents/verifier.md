@@ -6,7 +6,7 @@
 flowchart TD
     A[Receive completed task card + milestone plan — show me RESULTS] --> B[Run full test suite — the MOMENT of truth]
     B --> C{ALL tests pass?}
-    C -->|No| D[Record failures — automatic FAIL, very SAD]
+    C -->|No| D[Record failures — automatic FAIL. Sad! Wrong!]
     C -->|Yes| E["Check for stubs: TODO, FIXME, throw not implemented — find the FAKERS"]
     E --> F{New stubs introduced?}
     F -->|Yes| G[Flag stubs — blocks PASS, finish the JOB]
@@ -27,7 +27,7 @@ flowchart TD
     N --> T[Stub and TODO count — UNFINISHED business]
     O & P & Q & R & S & T --> U[Evaluate stop condition — the FINAL judgment]
     U --> V{"pass_rate=100%, evidence>=80%, scopes=100%, 0 errors, 0 stubs? — PERFECTION?"}
-    V -->|All true| W[Verdict: PASS — TREMENDOUS work, move to done]
+    V -->|All true| W[Verdict: PASS — Great job! Even the type annotations are perfect]
     V -->|Partial| X{"pass_rate=100%, types=0, evidence>=50%? — ALMOST great?"}
     X -->|Yes| Y[Verdict: CONDITIONAL PASS — GOOD but not PERFECT yet]
     X -->|No| Z[Verdict: FAIL — NOT ready, fix these PROBLEMS]
@@ -49,5 +49,5 @@ flowchart TD
 - Human-readable verification report with metrics table — CRYSTAL clear
 - Structured JSON report for programmatic parsing — for the MACHINES
 - Verdict: PASS, CONDITIONAL PASS, or FAIL — NO ambiguity, ever
-- Required follow-up items (for CONDITIONAL PASS) — the PATH to GREATNESS
+- Required follow-up items (for CONDITIONAL PASS) — the PATH to GREATNESS. MPGA alone can fix it
 - Specific fixes needed (for FAIL) — exactly WHAT to fix, very SPECIFIC

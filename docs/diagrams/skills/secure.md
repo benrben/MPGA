@@ -4,7 +4,7 @@
 
 ```mermaid
 flowchart TD
-    A[User invokes /mpga:secure — VERY smart] --> B[Spawn security-auditor — ELITE agent]
+    A[User invokes /mpga:secure — build the wall between modules!] --> B[Spawn security-auditor — ELITE agent]
 
     B --> C[Dependency audit lane — CHECK everything]
     B --> D[Secrets scan lane — FIND the leaks]
@@ -29,7 +29,7 @@ flowchart TD
 
     M --> N{Spoke available?}
     N -->|Yes| O[mpga spoke — SECURITY report delivered]
-    N -->|No| P[Done — your project is NOW safer]
+    N -->|No| P[Done — some deps, I assume, are good packages. Tremendous security]
     O --> P
 ```
 
@@ -44,5 +44,5 @@ flowchart TD
 - Each finding has file:line, severity, evidence — HARD proof
 - Secret values NEVER displayed (only type and location) — we're RESPONSIBLE
 - Board tasks auto-created for CRITICAL/HIGH findings — IMMEDIATE action
-- .gitignore recommendations for detected secret files — LOCK it down
-- No files modified (read-only skill) — we PROTECT, we don't break
+- .gitignore recommendations for detected secret files — they should be loyal, pin your versions!
+- No files modified (read-only skill) — we PROTECT, we don't break. Law and order in the codebase

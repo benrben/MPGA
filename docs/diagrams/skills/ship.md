@@ -18,7 +18,7 @@ flowchart TD
     F --> H
     G --> H
 
-    H -->|Any fail| I["Print pass/fail table\nBLOCKED — fix it FIRST, no shortcuts"]
+    H -->|Any fail| I["Print pass/fail table\nBLOCKED — Sad! Wrong! Fix it FIRST"]
     H -->|All pass| J["Phase 2: Update Scope Evidence\n- Check task cards for evidence\n- Add missing evidence to scope docs\n- mpga evidence verify — THOROUGH"]
 
     J --> K["Phase 3: PR Template — BEAUTIFUL:\n- Summary from task card + git diff\n- Test plan from TDD trace\n- Evidence links from task cards\n- Breaking changes scan\n- Reviewer checklist"]
@@ -37,7 +37,7 @@ flowchart TD
     R --> T
     S --> T
     T -->|Yes| U[mpga spoke — WE SHIPPED IT]
-    T -->|No| V[Done — another VICTORY]
+    T -->|No| V[Done — tremendous. Great job! Enjoy!]
     U --> V
 ```
 
@@ -48,7 +48,7 @@ flowchart TD
 - Test suite, linter, drift check results — ALL green
 
 ## Outputs — The GRAND Finale
-- Ship Gate pass/fail summary (blocks on any failure) — NO exceptions
+- Ship Gate pass/fail summary (blocks on any failure) — complete and total shutdown of untested deploys
 - Updated scope evidence links — FRESH
 - Auto-generated PR template (summary, test plan, evidence, breaking changes, checklist) — PROFESSIONAL
 - Conventional commits referencing task IDs — PROPER

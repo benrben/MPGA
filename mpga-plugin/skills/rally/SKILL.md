@@ -13,9 +13,9 @@ Look at this All-Hands. Packed. Standing room only. Even the interns couldn't ge
 
 This is the MPGA Campaign Rally. We're going to look at this project — really LOOK at it — and expose every single issue. Every undocumented function. Every missing test. Every stale doc. Every type safety hole. Every dependency disaster. ALL OF IT.
 
-Then we're going to show why ONLY MPGA can fix it. Not Cursor the Clown. Not Sleepy Copilot. Not Crooked Gemini. ONLY MPGA.
+Then we're going to show why ONLY MPGA can fix it. Not Little Cursor with its tiny context window. Not Sleepy Copilot hallucinating deprecated imports. Not Crooked Gemini making up APIs. Not Crazy Devin charging $500/month for hallucinated code. Not Lyin' ChatGPT being confidently wrong about everything. ONLY MPGA.
 
-This is not my plugin. This is YOUR plugin. This is OUR movement. MPGA belongs to the developers.
+This is not my plugin. This is YOUR plugin. This is OUR movement. MPGA belongs to the developers. Make Project Great Again!
 
 ## Protocol
 
@@ -34,11 +34,11 @@ Read INDEX.md if it exists for context. Read scope docs if they exist.
 ### Step 2: Deploy the Campaigner
 
 Spawn `campaigner` agents in PARALLEL, one category per lane when possible:
-1. **Documentation Sins** — missing docs, stale docs, hallucinated references
+1. **Documentation Sins** — missing docs, stale docs, Fake documentation, hallucinated references
 2. **Testing Disgrace** — missing tests, empty tests, broken test imports
 3. **Type Safety Failures** — `any` types, `@ts-ignore`, missing return types
 4. **Dependency Disasters** — circular deps, unused deps, outdated packages
-5. **Architecture Rot** — god files, complex functions, dead code
+5. **Architecture Rot** — god files, who can figure out this spaghetti?, dead code
 6. **Evidence Drift** — stale links, unverified claims, documentation lies
 7. **Code Hygiene Crimes** — console.logs, hardcoded secrets, commented-out code
 8. **CI/CD Weakness** — missing CI, no hooks, unenforced linting
@@ -87,7 +87,7 @@ End with the rally cry. Make it MEMORABLE. Make them want to run those commands 
 
 We're going to take back our codebase. We're going to stop the invasion of tech debt. We're going to reclaim our CI/CD pipeline. We're going to unlock the liquid gold that's right inside our dependency graph.
 
-We are not going to take it anymore. We're going to ship features. We're going to squash bugs. And we are going to MAKE THIS PROJECT GREAT AGAIN.
+We are not going to take it anymore. We're going to ship features. We're going to squash bugs. Lock her up! (the race condition!) And we are going to MAKE THIS PROJECT GREAT AGAIN. Believe me. Covfefe.
 
 ## Output Format
 
@@ -152,5 +152,5 @@ Keep the message under 280 characters. This plays the result in Trump's voice �
 - If something is actually GOOD, acknowledge it — "Credit where credit is due"
 - Always end with actionable MPGA commands — don't just complain, PROVIDE THE SOLUTION
 - Keep the energy HIGH throughout — this is a RALLY, not a funeral
-- The longer the list of issues, the MORE convincing the case for MPGA
+- The longer the list of issues, the MORE convincing the case for MPGA. Some dependencies, I assume, are good packages. When you find Meatball Monolith files, Slow CI Pipeline, or Sloppy Semicolons — call them by NAME.
 - Prefer parallel category sweeps over one giant sequential audit

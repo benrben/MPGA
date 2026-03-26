@@ -6,14 +6,14 @@
 flowchart TD
     A[Monitor active lane registry — I see EVERYTHING] --> B[Lane Management: track scope locks and dirty files — TOTAL control]
     B --> C{Two writers on same scope?}
-    C -->|Yes| D[Block second writer — one writer per scope, very SMART]
+    C -->|Yes| D[Block second writer — lock her up! the race condition!]
     C -->|No| E[Deadlock Detection: build wait-for graph — NOBODY escapes]
     E --> F[Run cycle detection via DFS — TREMENDOUS algorithm]
     F --> G{Cycle found?}
     G -->|Yes| H[Identify least-cost lane to preempt — the ART of the DEAL]
     H --> I[Score lanes: uncommitted changes, priority, time invested — FAIR ranking]
     I --> J[Send PREEMPT signal to selected lane — YOU'RE FIRED]
-    J --> K[Agent checkpoints work and releases locks — ORDERLY transition]
+    J --> K[Agent checkpoints work and releases locks — law and order in the codebase]
     K --> L[Re-queue preempted task with priority boost — we're FAIR]
     G -->|No| M[Load Balancing — keep everyone BUSY]
     L --> M
@@ -52,4 +52,4 @@ flowchart TD
 - Scheduling recommendations — next tasks, pause/resume, splits, STRATEGIC moves
 - Health alerts for stale or dead agents — accountability, ALWAYS
 - Preemption log with cost analysis — every decision DOCUMENTED
-- Throughput metrics: tasks/hour, average lane duration, lock contention — the WINNING numbers
+- Throughput metrics: tasks/hour, average lane duration, lock contention — tremendous numbers, has a beautiful ring to it

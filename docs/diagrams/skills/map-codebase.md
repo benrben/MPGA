@@ -8,7 +8,7 @@ flowchart TD
 
     B -->|Quick mode\ndefault| C{MPGA initialized?}
     C -->|No| D[mpga init --from-existing — START winning]
-    C -->|Yes| E[Run full sync — FAST\nmpga sync --full]
+    C -->|Yes| E[Run full sync — Evidence First\nmpga sync --full]
     D --> E
     E --> F[Verify evidence health\nmpga evidence verify — TRUST but verify]
     F --> G[Run drift check — ALWAYS\nmpga drift --report]
@@ -32,7 +32,7 @@ flowchart TD
     I --> U{Spoke available?}
     T --> U
     U -->|Yes| V[mpga spoke — MAP complete]
-    U -->|No| W[Done — you now KNOW your codebase]
+    U -->|No| W[Done — tremendous map. No collusion between modules!]
     V --> W
 ```
 
@@ -46,4 +46,4 @@ flowchart TD
 - INDEX.md, GRAPH.md, and scope files regenerated/enriched — FRESH
 - Evidence coverage report — we MEASURE everything
 - List of unknowns needing human review — TRANSPARENT
-- Health report with drift status — the REAL numbers
+- Health report with drift status — big league numbers, believe me

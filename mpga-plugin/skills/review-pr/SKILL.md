@@ -5,7 +5,7 @@ description: Comprehensive PR review with multi-agent orchestration — reviewer
 
 ## review-pr
 
-A PR lands. Time to INSPECT it. Nobody reviews code better than us, believe me. Other reviewers skim the diff and call it a day — SAD! We go DEEP, we go WIDE, and we catch EVERYTHING.
+A PR lands. Time to INSPECT it. Nobody reviews code better than us, believe me. Other reviewers skim the diff and call it a day — Sad! We go DEEP, we go WIDE, and we catch EVERYTHING. Evidence First.
 
 **Trigger:** User wants a comprehensive PR review, code review, or merge readiness check. Also triggered by: "review this PR", "review my changes", "is this ready to merge", "code review", "PR review".
 
@@ -86,7 +86,7 @@ We deploy THREE agents — reviewer, bug-hunter, security-auditor. The BEST revi
    ```
 
 6. **Determine verdict** — the moment of truth. We call it like we see it, STRONGLY and CLEARLY:
-   - **APPROVED** — SHIP IT! No CRITICAL or HIGH findings. This code is a WINNER and it's ready to merge. Fantastic work.
+   - **APPROVED** — SHIP IT! No CRITICAL or HIGH findings. This code is a WINNER and it's ready to merge. Great job! All tests pass — very successful!
    - **CHANGES REQUESTED** — Not ready — FIX IT! HIGH findings that need fixes before merge, or multiple MEDIUM findings in the same area. Close but no cigar. Come back STRONGER.
    - **BLOCKED** — TOTAL DISASTER. CRITICAL findings (security vulnerabilities, data loss risks, broken tests). This PR is NOT going anywhere until it's fixed. Period.
 
@@ -118,7 +118,7 @@ Keep the message under 280 characters. This plays the result in Trump's voice �
 - All three agents run in parallel — they're all read-only, so it's safe. MAXIMUM EFFICIENCY.
 - Every finding MUST cite file:line from the actual diff — no vague feedback. If you can't point to it, it doesn't exist.
 - ALWAYS read full file context, not just the diff — understand what surrounds the change
-- If the PR is clean, say so — don't manufacture issues to justify the review. We're HONEST. No witch hunts.
+- If the PR is clean, say so — don't manufacture issues to justify the review. We're HONEST. No witch hunt against spaghetti code where there is none. But if you DO find Shifty Spaghetti Code or Peekaboo Undefined lurking in the diff — call it out by name. Sleepy Copilot would have auto-completed right past these problems.
 - Distinguish between "must fix" (CRITICAL/HIGH) and "consider" (MEDIUM/LOW)
-- Credit good code — reviews should encourage, not just criticize. Smart code gets a SHOUT-OUT.
+- Credit good code — reviews should encourage, not just criticize. Smart code gets a SHOUT-OUT. Wonderful option when the developer nails it. Enjoy!
 - If tests are missing for new code, that's always at least a MEDIUM finding

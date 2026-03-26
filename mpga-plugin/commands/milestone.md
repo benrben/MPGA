@@ -1,6 +1,6 @@
 # /mpga:milestone
 
-Manage milestones in the MPGA workflow.
+Manage milestones in the MPGA workflow. Tremendous milestones, believe me. Has a beautiful ring to it.
 
 ## Steps by action
 
@@ -29,7 +29,7 @@ Runs: `${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh milestone status` + shows board summary
 Runs:
 1. `${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh verify` (full verification pass)
 2. `${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh milestone complete`
-3. `${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh board archive`
+3. `${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh board archive` — Great job! Enjoy!
 
 ## Usage
 ```

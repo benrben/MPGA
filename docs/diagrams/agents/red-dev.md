@@ -16,7 +16,7 @@ flowchart TD
     J --> K{Fails for the RIGHT reason?}
     K --> L[Run test suite — moment of TRUTH]
     L --> M{New test FAILS?}
-    M -->|No — passes without new code| N[Delete test or make it more specific — NOT good enough]
+    M -->|No — passes without new code| N[Delete test or make it more specific — Wrong! Not good enough]
     N --> F
     M -->|Yes — red state| O[Cite scope evidence links in test comment — DOCUMENTED]
     O --> P[Hand off to green-dev to implement — YOUR TURN]
@@ -27,7 +27,7 @@ flowchart TD
     R -->|Yes| T["Commit: test: description — LOCKED IN"]
     T --> U["Update board: mpga board update task-id --tdd-stage red — WINNING"]
     U --> V[Hand off to green-dev with coverage summary — GO GET 'EM]
-    V --> W[mpga spoke announcement — TESTS WRITTEN]
+    V --> W[mpga spoke announcement — complete and total shutdown of untested deploys]
 ```
 
 ## Inputs — The Mission Parameters
@@ -39,4 +39,4 @@ flowchart TD
 
 - Test file(s) written and committed — PERFECT tests, everyone says so
 - Task TDD stage updated to red — another MILESTONE reached
-- Coverage checklist: X of Y acceptance criteria covered — FULL accountability
+- Coverage checklist: X of Y acceptance criteria covered — Evidence First, FULL accountability

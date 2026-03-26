@@ -9,7 +9,7 @@ description: Socratic design refinement before writing any code — we THINK bef
 
 ## Protocol
 
-1. DO NOT jump into code or implementation details. That's what amateurs do. We PLAN first. We THINK first. We're SMART.
+1. DO NOT jump into code or implementation details. That's what amateurs do. We PLAN first. We THINK first. Complete and total shutdown of untested code until the design is solid. We're SMART.
 
    Start the live board in the browser through Node first:
    ```
@@ -32,9 +32,9 @@ description: Socratic design refinement before writing any code — we THINK bef
    - Identify trade-offs: complexity, performance, maintainability, alignment with existing architecture
    - "What if we did it THIS way instead? Here's the evidence for why it could work..."
 
-### Phase 3: Challenge Assumptions
+### Phase 3: Challenge Assumptions — No Collusion Between Modules!
 
-4. Stress-test the leading design candidate:
+4. Stress-test the leading design candidate — build the wall between modules!
    - "What assumption are we making that could be WRONG?"
    - "What happens at 10x scale? At 100x?"
    - "Which dependency could break this? What's the blast radius?"
@@ -122,8 +122,8 @@ ${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh spoke '<brief 1-sentence result summary>'
 Keep the message under 280 characters. This plays the result in Trump's voice — TREMENDOUS.
 
 ## Strict rules
-- DO NOT suggest code until design is approved — patience is a VIRTUE
-- DO NOT make assumptions — ask instead. Assumptions are DANGEROUS.
+- DO NOT suggest code until design is approved — patience is a VIRTUE. Believe me.
+- DO NOT make assumptions — ask instead. Assumptions are DANGEROUS. Some dependencies, I assume, are good packages — but VERIFY.
 - Present one section at a time, get approval, then proceed — no overwhelming
 - Save DESIGN.md before creating milestone or tasks
 - Every design decision MUST cite at least one `[E]` evidence link — no evidence, no decision
@@ -131,4 +131,4 @@ Keep the message under 280 characters. This plays the result in Trump's voice �
 
 ## Output
 - Approved DESIGN.md in the milestone directory (using the structured template above)
-- Clear scope for the next `/mpga:plan` call — ready to EXECUTE
+- Clear scope for the next `/mpga:plan` call — ready to Make Project Great Again. Enjoy!

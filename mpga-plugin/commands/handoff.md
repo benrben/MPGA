@@ -1,6 +1,6 @@
 # /mpga:handoff
 
-Export current session state for a fresh context window.
+Export current session state for a fresh context window. Ready for peace — zero merge conflicts. Believe me, the smoothest handoff you've ever seen.
 
 ## Steps
 
@@ -26,5 +26,5 @@ To resume in a new session:
 1. Load context: cat MPGA/sessions/<date>-handoff.md
 2. Load index: cat MPGA/INDEX.md
 3. Load relevant scope: cat MPGA/scopes/<scope>.md
-4. Resume from "Next action" in the handoff doc
+4. Resume from "Next action" in the handoff doc — Covfefe
 ```

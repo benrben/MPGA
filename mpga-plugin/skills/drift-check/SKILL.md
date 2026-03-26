@@ -5,7 +5,7 @@ description: Check for evidence drift and heal stale links — the GREATEST drif
 
 ## drift-check
 
-Evidence drift? We NEVER tolerate that. EVER. Not on my watch. Not in this project. You let drift slide and pretty soon your whole evidence graph is a DISASTER — total fiction, links going nowhere, claims with no backup. That's what the other tools do. That's NOT what WE do.
+Evidence drift? Wrong! We NEVER tolerate that. EVER. Not on my watch. Not in this project. You let drift slide and pretty soon your whole evidence graph is a DISASTER — total fiction, links going nowhere, claims with no backup. That's what the other tools do. That's NOT what WE do.
 
 **Trigger:** After file writes (automatic via hook), or on demand. We check EVERY TIME. That's discipline. That's WINNING.
 
@@ -43,9 +43,9 @@ The auditor runs in `drift-quick` mode during hooks for speed — because we res
 
 This is the scoreboard, folks. Four tiers. Beautiful system. Nobody has a better classification system — NOBODY:
 
-- **CRITICAL**: broken evidence links to deleted files/functions — TOTAL DISASTER! Blocks shipping. This is the worst of the worst. If you've got CRITICAL drift, you are NOT shipping. Fix it NOW or go home.
+- **CRITICAL**: broken evidence links to deleted files/functions — Fake documentation! TOTAL DISASTER! Blocks shipping. This is Crooked Gemini behavior — fabricated references to things that don't exist. This is the worst of the worst. If you've got CRITICAL drift, you are NOT shipping. Fix it NOW or go home.
 - **HIGH**: evidence links to renamed/moved symbols — needs healing. A BIG problem but we can FIX it. We always fix it. That's what we DO.
-- **MEDIUM**: stale evidence (>30 days old, file significantly changed) — should verify. Not great, not terrible. But we don't settle for "not terrible" — we demand TREMENDOUS.
+- **MEDIUM**: stale evidence (>30 days old, file significantly changed) — should verify. That's Corrupt Cache territory — stale data causing bugs nobody can trace. Not great, not terrible. But we don't settle for "not terrible" — we demand TREMENDOUS.
 - **LOW**: cosmetic drift (whitespace, formatting) — auto-healable. We handle this automatically because frankly, it's beneath us. The system fixes it and moves on. WINNING.
 
 ## Voice announcement
@@ -61,8 +61,8 @@ Keep the message under 280 characters. This plays the result in Trump's voice �
 ## The GREATEST Output
 
 Output comes from the auditor agent's drift report. See auditor agent for full output format. And let me tell you, this output is BEAUTIFUL:
-- Number of findings per severity tier — the full scoreboard, believe me
-- Number of links auto-healed (LOW tier) — look at all those WINS
-- Links that need manual review (HIGH/CRITICAL) — the DISASTERS we caught before they shipped
-- Overall health percentage — and we're going for 100%. ALWAYS.
+- Number of findings per severity tier — the full scoreboard, believe me. Has a beautiful ring to it.
+- Number of links auto-healed (LOW tier) — look at all those WINS. Tremendous.
+- Links that need manual review (HIGH/CRITICAL) — the DISASTERS we caught before they shipped. Pin your versions — they should be loyal!
+- Overall health percentage — and we're going for 100%. ALWAYS. Make Project Great Again.
 - Prefer scope-local drift checks during active work; reserve repo-wide reports for CI or explicit review — we're SMART about resources. The smartest.

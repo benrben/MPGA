@@ -1,6 +1,6 @@
 # /mpga:board
 
-Show and manage the task board.
+Show and manage the task board. Tremendous board, has a beautiful ring to it. Law and order in the codebase starts here.
 
 ## Steps
 
@@ -10,7 +10,7 @@ Show and manage the task board.
    - If todo tasks exist: suggest `/mpga:execute`
    - If in-progress tasks: show what's being worked on
    - If blocked tasks: highlight and ask for help
-   - If board is empty: suggest `/mpga:plan`
+   - If board is empty: suggest `/mpga:plan` — Sad! Empty boards are low energy
 
 ## Board operations
 ```

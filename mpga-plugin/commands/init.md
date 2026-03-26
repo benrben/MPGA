@@ -1,6 +1,6 @@
 # /mpga:init
 
-Initialize MPGA in the current project and build the knowledge layer.
+Initialize MPGA in the current project and build the knowledge layer. Has a beautiful ring to it. Law and order in the codebase starts now.
 
 ## Steps
 
@@ -17,7 +17,7 @@ The user will have:
 - `MPGA/GRAPH.md` — dependency graph
 - `MPGA/scopes/*.md` — one scope per top-level directory
 - `MPGA/board/board.json` — empty task board
-- `MPGA/mpga.config.json` — configuration
+- `MPGA/mpga.config.json` — configuration — Tremendous setup, enjoy!
 
 ## Usage
 ```

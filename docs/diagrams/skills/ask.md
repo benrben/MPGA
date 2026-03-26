@@ -4,7 +4,7 @@
 
 ```mermaid
 flowchart TD
-    A[User asks a GREAT question] --> B[Read MPGA/INDEX.md — the BEST registry]
+    A[User asks a GREAT question] --> B[Read MPGA/INDEX.md — Evidence First]
     B --> C[Find the key scopes — VERY precise]
     C --> D[Read the scope docs — INCREDIBLE detail]
     D --> E{Answer complete from docs?}
@@ -18,7 +18,7 @@ flowchart TD
     K --> L[Suggest 2-3 follow-ups\ndeeper / wider / WINNING]
     L --> M{Spoke available?}
     M -->|Yes| N[mpga spoke — HUGE announcement]
-    M -->|No| O[Done — BEAUTIFUL]
+    M -->|No| O[Done — tremendous answers, believe me. Covfefe]
     N --> O
 ```
 
@@ -31,6 +31,6 @@ flowchart TD
 - Evidence-backed answer — the MOST accurate, believe me
 - Confidence scores (HIGH/MEDIUM/LOW) on EVERY claim — total transparency
 - Source citations ([E] file:line references) — we ALWAYS cite our sources
-- Known unknowns FLAGGED — we're HONEST, unlike the other tools
+- Known unknowns FLAGGED — no fake docs, we're HONEST
 - 2-3 follow-up question suggestions — keep the MOMENTUM going
 - No files modified (read-only skill) — we don't touch what we don't need to

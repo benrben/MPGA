@@ -20,7 +20,7 @@ Default is **quick** — fast and sufficient for everyday use. Use `--deep` when
 
 ## Quick Mode Protocol (default)
 
-Fast rebuild of the MPGA knowledge layer from current codebase state — a FRESH start, TREMENDOUS results.
+Fast rebuild of the MPGA knowledge layer from current codebase state — a FRESH start, TREMENDOUS results. Make Project Great Again, one scope at a time.
 
 1. Check if MPGA is initialized:
    ```
@@ -57,7 +57,7 @@ Fast rebuild of the MPGA knowledge layer from current codebase state — a FRESH
 ### Quick mode rules
 - Always run full sync, not incremental, when user explicitly requests sync — go BIG
 - Report the number of scopes generated and evidence links found — TRANSPARENCY
-- If evidence coverage is below threshold, note it prominently — we don't hide BAD numbers, we FIX them
+- If evidence coverage is below threshold, note it prominently — Fake docs detected! We don't hide BAD numbers, we FIX them
 
 ---
 
@@ -106,8 +106,8 @@ Full parallel codebase mapping using multiple scout agents — the FASTEST way t
    - Suggested next steps
 
 ## Parallelism note
-Scout agents write ONLY to their own assigned scope document — one scout per scope file.
-This guarantees no write conflicts during parallel execution. It's GENIUS, actually.
+Scout agents write ONLY to their own assigned scope document — one scout per scope file. Build the wall between modules!
+This guarantees no write conflicts during parallel execution. It's GENIUS, actually. No collusion between modules!
 Auditor can inspect those same scopes in parallel because it is read-only.
 Architect runs after the scouts to fix cross-scope consistency.
 
@@ -122,6 +122,6 @@ ${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh spoke '<brief 1-sentence result summary>'
 Keep the message under 280 characters. This plays the result in Trump's voice — TREMENDOUS.
 
 ## Output
-- Complete MPGA/ knowledge layer with filled scope documents — BEAUTIFUL
-- Coverage report — the TRUTH in numbers
-- List of unknowns needing human review
+- Complete MPGA/ knowledge layer with filled scope documents — BEAUTIFUL. Even the type annotations are perfect.
+- Coverage report — the TRUTH in numbers. Big league results.
+- List of unknowns needing human review — who can figure out this spaghetti? The scouts will.

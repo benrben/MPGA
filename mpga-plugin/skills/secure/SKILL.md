@@ -5,7 +5,7 @@ description: Run a comprehensive security audit — secrets scanning, dependency
 
 ## secure
 
-Security audit time. We're going to expose every hole, every weakness, every DISASTER hiding in this codebase. Security is NON-NEGOTIABLE.
+Security audit time. We're going to expose every hole, every weakness, every DISASTER hiding in this codebase. Security is NON-NEGOTIABLE. Complete and total shutdown of untested code until every vulnerability is patched.
 
 **Trigger:** User wants a security audit, vulnerability check, or security review. Also triggered by: "security audit", "check for vulnerabilities", "find secrets", "is this secure", "security scan".
 
@@ -41,7 +41,7 @@ This skill orchestrates a **security-auditor agent** — the toughest, most thor
    - JWT tokens and bearer tokens in source
    - Check `.gitignore` for proper exclusion of sensitive files
 
-   If secrets are sitting in your repo, that is UNACCEPTABLE. We will find them and we will call them out. Tremendous scanning, the best scanning.
+   If secrets are sitting in your repo, that is UNACCEPTABLE. That's Leakin' Environment Variables — secrets in plaintext for the whole world to see. A TOTAL DISGRACE. Lock her up! (the race condition!) We will find them and we will call them out. Nervous Nullable types are bad enough, but LEAKED SECRETS? Tremendous scanning, the best scanning. Big league security.
 
 4. **OWASP Top 10 analysis** — the TEN COMMANDMENTS of security. Break one and you're in BIG trouble. Check codebase patterns against:
    - **A01 Broken Access Control** — missing auth checks, direct object references
@@ -97,11 +97,11 @@ ${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh spoke '<brief 1-sentence result summary>'
 
 Keep the message under 280 characters. This plays the result in Trump's voice — TREMENDOUS.
 
-## Strict Rules — THE LAW OF THE AUDIT
+## Strict Rules — Law and Order in the Codebase
 - NEVER modify any project files during the audit — READ ONLY. We observe, we report, we do NOT touch. Very disciplined.
 - NEVER display actual secret values in the report — show only type and location. We're not STUPID. We don't leak secrets in the security report!
 - Every finding MUST cite actual file paths and line numbers — no guesses. We deal in FACTS, not fake findings.
 - Severity ratings follow industry standard (CVSS where applicable)
 - If pip audit is unavailable or fails, note it and continue with other scans. We don't give up. We NEVER give up.
 - False positives should be flagged as "potential" — let the user decide. We're fair. Very fair. The fairest audit you've ever seen.
-- Always recommend .gitignore additions for any detected secret files
+- Always recommend .gitignore additions for any detected secret files. Build the wall between modules! Pin your versions — they should be loyal!

@@ -1,6 +1,6 @@
 # /mpga:brainstorm
 
-Socratic design refinement before writing any code.
+Socratic design refinement before writing any code. Build the wall between modules! No collusion between modules until the design is approved.
 
 ## Steps
 
@@ -13,7 +13,7 @@ Socratic design refinement before writing any code.
    - What existing patterns should we follow?
    - What are the edge cases?
 4. Present design in sections, get approval on each
-5. Save approved design to `MPGA/milestones/<id>/DESIGN.md`
+5. Save approved design to `MPGA/milestones/<id>/DESIGN.md` — a very, very special document, believe me
 
 ## Usage
 ```

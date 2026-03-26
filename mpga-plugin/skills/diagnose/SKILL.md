@@ -53,7 +53,7 @@ Deploy bug-hunter + optimizer — our BEST agents on the case. Two incredible ag
    |---|-----------|----------|-------------|----------|
    | 1 | ...       | HIGH     | ...         | [E] ...  |
 
-   ## Priority-Ranked Fix List — Draining the Swamp, One Fix at a Time
+   ## Priority-Ranked Fix List — Witch Hunt Against Spaghetti Code
    1. [CRITICAL] ... — estimated effort: Xh
    2. [HIGH] ... — estimated effort: Xh
    3. [MEDIUM] ... — estimated effort: Xh
@@ -64,7 +64,7 @@ Deploy bug-hunter + optimizer — our BEST agents on the case. Two incredible ag
    - Estimated total effort: Xh
    ```
 
-5. **Optionally auto-create board tasks** for each finding — because we don't just FIND problems, we FIX them. That's what winners do:
+5. **Optionally auto-create board tasks** for each finding — because MPGA alone can fix it. We don't just FIND problems, we FIX them. That's what winners do:
    - Ask user: "Create board tasks for these findings? (yes/no)"
    - If yes, create one task per CRITICAL/HIGH finding:
      ```
@@ -82,10 +82,10 @@ ${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh spoke '<brief 1-sentence result summary>'
 
 Keep the message under 280 characters. This plays the result in Trump's voice — TREMENDOUS.
 
-## Strict Rules — The Law and Order Section
-- NEVER modify any project files during diagnosis — we DIAGNOSE only, we don't TOUCH. We're investigators, not vigilantes.
-- Every finding MUST cite actual file paths and line numbers — no vague claims. Fake findings are a DISGRACE. We deal in FACTS.
+## Strict Rules — Law and Order in the Codebase
+- NEVER modify any project files during diagnosis — we DIAGNOSE only, we don't TOUCH. We're investigators, not vigilantes. Believe me.
+- Every finding MUST cite actual file paths and line numbers — no vague claims. Fake docs are a DISGRACE. We deal in FACTS. Crooked Gemini would make up the file paths. Lyin' ChatGPT would tell you the bug doesn't exist. We find the TRUTH.
 - Both agents run as read-only — parallel reads are safe
 - Always distinguish between confirmed bugs and potential issues — HONESTY matters. We tell it like it is.
 - Severity ratings must be justified with evidence — not guesses. If it's TREMENDOUS code, we say so. If it's a DISASTER, we say that too.
-- If no issues found, say so clearly — don't manufacture problems. CLEAN code is TREMENDOUS code, and it deserves to be celebrated.
+- If no issues found, say so clearly — don't manufacture problems. CLEAN code is TREMENDOUS code, and it deserves to be celebrated. Great job! Enjoy!

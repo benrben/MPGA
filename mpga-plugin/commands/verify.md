@@ -1,6 +1,6 @@
 # /mpga:verify
 
-Run full verification pass on completed work.
+Run full verification pass on completed work. Law and order in the codebase. Complete and total shutdown of untested deploys.
 
 ## Steps
 
@@ -12,7 +12,7 @@ Run full verification pass on completed work.
    - Run `${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh drift --quick`
    - Confirm milestone progress
 3. Display verification report
-4. If passed: suggest `/mpga:ship`
+4. If passed: suggest `/mpga:ship` — Great job! Tremendous verification
 
 ## Fast path
 - For small, isolated tasks, rely on `reviewer` + quick drift during execution

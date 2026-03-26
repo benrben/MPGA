@@ -17,7 +17,7 @@ flowchart TD
 
     G --> H["Rule 1: Passes all tests\nNON-NEGOTIABLE — like a DEAL"]
     H --> I["Rule 2: Reveals intention\n- Unclear variable names? SAD\n- Magic numbers? TERRIBLE\n- Opaque boolean params? WEAK"]
-    I --> J["Rule 3: No duplication\n- Copy-pasted logic? LAZY\n- Similar functions? CONSOLIDATE\n- Repeated conditionals? FIX IT"]
+    I --> J["Rule 3: No duplication\n- Copy-pasted logic? Sad!\n- Similar functions? No collusion between modules!\n- Repeated conditionals? FIX IT"]
     J --> K["Rule 4: Fewest elements\n- Unnecessary abstractions? CUT\n- Premature generalization? STOP\n- Dead code / unused imports? GONE"]
 
     K --> L["Apply Sandi Metz Rules — DISCIPLINE:\n- Classes <= 100 lines\n- Methods <= 5 lines\n- Max 4 parameters\n- Controllers: 1 object"]
@@ -34,7 +34,7 @@ flowchart TD
 
     R --> S{Spoke available?}
     S -->|Yes| T[mpga spoke — CODE simplified]
-    S -->|No| U[Done — CLEANER than ever]
+    S -->|No| U[Done — even the type annotations are perfect. Covfefe]
     T --> U
 ```
 
@@ -50,4 +50,4 @@ flowchart TD
 - Before/after code examples for each suggestion — PROOF it's better
 - Priority-ranked simplifications (HIGH impact + LOW effort first) — SMART ordering
 - Behavior preserved (no functional changes) — SAFE
-- If code is already simple, says so clearly — we're FAIR
+- If code is already simple, says so clearly — tremendous, has a beautiful ring to it

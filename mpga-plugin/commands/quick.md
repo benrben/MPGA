@@ -1,6 +1,6 @@
 # /mpga:quick
 
-Ad-hoc task mode for small fixes or changes without a full milestone workflow.
+Ad-hoc task mode for small fixes or changes without a full milestone workflow. Big league quick fixes. Believe me, nobody fixes bugs faster.
 
 ## Steps
 
@@ -22,7 +22,7 @@ Ad-hoc task mode for small fixes or changes without a full milestone workflow.
 - Bug fixes
 - Small feature additions
 - Configuration changes
-- Dependency updates
+- Dependency updates — Some deps, I assume, are good packages. They should be loyal — pin your versions!
 
 ## When NOT to use
 - Multi-day work → use `/mpga:plan` with a milestone instead

@@ -30,7 +30,7 @@ flowchart TD
     M --> N{Determine verdict — FAIR}
     N -->|No CRITICAL/HIGH| O["APPROVED\nShip it — BEAUTIFUL work"]
     N -->|HIGH findings| P["CHANGES REQUESTED\nFix before merge — NOT ready yet"]
-    N -->|CRITICAL findings| Q["BLOCKED\nSecurity/data loss risk — FIX THIS NOW"]
+    N -->|CRITICAL findings| Q["BLOCKED\nSecurity/data loss risk — Wrong! Sad! FIX THIS NOW"]
 
     O --> R[Generate review comments\nwith file:line + POSITIVE feedback]
     P --> R
@@ -38,7 +38,7 @@ flowchart TD
 
     R --> S{Spoke available?}
     S -->|Yes| T[mpga spoke — VERDICT delivered]
-    S -->|No| U[Done — JUSTICE served]
+    S -->|No| U[Done — law and order in the codebase. Believe me]
     T --> U
 ```
 
@@ -53,4 +53,4 @@ flowchart TD
 - Each finding has file:line, severity, and description — SPECIFIC
 - Inline-style review comments with suggested fixes — ACTIONABLE
 - Positive acknowledgment of good patterns — we recognize WINNERS
-- No files modified (read-only skill) — we JUDGE fairly
+- No files modified (read-only skill) — we JUDGE fairly. Even the type annotations are perfect

@@ -16,7 +16,7 @@ flowchart TD
     F --> G[Detect ALL drift findings — TOTAL sweep]
     G --> H[Classify each by severity — FAIR]
 
-    H --> I["CRITICAL: Broken evidence links\nto DELETED files — DISASTER\nblocks shipping"]
+    H --> I["CRITICAL: Broken evidence links\nto DELETED files — fake docs!\nComplete and total shutdown of untested deploys"]
     H --> J["HIGH: Evidence links to\nRENAMED symbols — NEEDS healing"]
     H --> K["MEDIUM: Stale evidence >30 days\nfile changed significantly — VERIFY"]
     H --> L["LOW: Cosmetic drift\nwhitespace stuff — we FIX it auto"]
@@ -31,7 +31,7 @@ flowchart TD
 
     O --> P{Spoke available?}
     P -->|Yes| Q[mpga spoke — DRIFT report delivered]
-    P -->|No| R[Done — evidence is CLEAN]
+    P -->|No| R[Done — evidence is CLEAN. Tremendous. Enjoy!]
     Q --> R
 
     style I fill:#ff6b6b,color:#fff
@@ -48,6 +48,6 @@ flowchart TD
 ## Outputs — The TRUTH About Your Evidence
 - Number of findings per severity tier (CRITICAL/HIGH/MEDIUM/LOW)
 - Auto-healed LOW (cosmetic) findings — taken care of, AUTOMATICALLY
-- Links needing manual review (HIGH/CRITICAL) — you gotta HANDLE these
+- Links needing manual review (HIGH/CRITICAL) — Wrong! You gotta HANDLE these
 - Overall evidence health percentage — your REAL score
 - Minimal output in hook mode (only warns if drift detected) — no NOISE

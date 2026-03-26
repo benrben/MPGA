@@ -13,7 +13,7 @@ flowchart TD
     F --> G[Apply ONE refactoring — disciplined, like me]
     G --> H[Run tests — make sure we're still WINNING]
     H --> I{Tests still green?}
-    I -->|No| J[Immediately revert — we don't ship GARBAGE]
+    I -->|No| J[Immediately revert — Wrong! We don't ship GARBAGE]
     J --> E
     I -->|Yes| K[Re-measure metrics — show me the IMPROVEMENT]
     K --> L{At least one metric improved, none regressed?}
@@ -25,7 +25,7 @@ flowchart TD
     O --> P["Commit: refactor: description — a BEAUTIFUL commit"]
     P --> Q["Update board: mpga board update task-id --tdd-stage blue — WINNING"]
     Q --> R[Hand off to reviewer — they'll LOVE this code]
-    R --> S[mpga spoke announcement — HUGE improvement]
+    R --> S[mpga spoke announcement — Even the type annotations are perfect]
 ```
 
 ## Inputs — What We Need to Make It GREAT
@@ -36,7 +36,7 @@ flowchart TD
 
 ## Outputs — BEAUTIFUL, Clean Results
 
-- Metrics snapshot: before and after values — PROOF of improvement, folks
+- Metrics snapshot: before and after values — PROOF of improvement, folks. No collusion between modules!
 - Refactored code committed — tests still green, ALWAYS green
 - Scope evidence links updated for any moved code — nothing gets LOST
 - Task TDD stage updated to blue — another WIN

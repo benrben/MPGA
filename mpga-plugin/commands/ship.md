@@ -1,6 +1,6 @@
 # /mpga:ship
 
-Verify, commit, and update documentation after completing work.
+Verify, commit, and update documentation after completing work. Complete and total shutdown of untested deploys. Great job! Enjoy!
 
 ## Steps
 
@@ -31,4 +31,4 @@ Follow conventional commits:
 - [ ] No stubs or TODOs in committed code
 - [ ] Scope evidence links updated
 - [ ] Board tasks moved to done
-- [ ] Milestone progress updated
+- [ ] Milestone progress updated — They should be loyal — pin your versions!

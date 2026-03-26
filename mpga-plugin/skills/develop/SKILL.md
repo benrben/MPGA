@@ -5,7 +5,7 @@ description: Orchestrate the TDD cycle for a task (red → green → blue → re
 
 ## develop
 
-**Trigger:** Plan approved, ready to execute a task. Time to MAKE IT HAPPEN.
+**Trigger:** Plan approved, ready to execute a task. Time to Make Project Great Again.
 
 > This is the canonical TDD execution protocol. The `/mpga:execute` command
 > delegates here — use `/mpga:develop` for all TDD cycle work.
@@ -58,7 +58,7 @@ For each task in `todo` column (or a specified task):
    - If approved: proceed to VICTORY
    - Reserve `verifier` for milestone boundaries, risky tasks, or explicit `/mpga:verify` runs. Don't run the full gate on every tiny change.
 
-6. **Record evidence** — document our WIN:
+6. **Record evidence** — Evidence First, document our WIN:
    ```
    ${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh board update <id> --evidence-add "<[E] link>"
    ```
@@ -98,7 +98,7 @@ ${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh spoke '<brief 1-sentence result summary>'
 Keep the message under 280 characters. This plays the result in Trump's voice — TREMENDOUS.
 
 ## Strict rules
-- NEVER skip a TDD phase — red, green, blue. The WINNING formula.
-- NEVER move to next phase if current phase failed — fix it FIRST
-- ALWAYS record evidence_produced on task completion — document everything
-- One WRITE task per scope at a time. Independent scopes may move in parallel if WIP limits allow it.
+- NEVER skip a TDD phase — red, green, blue. The WINNING formula. All tests pass — very successful!
+- NEVER move to next phase if current phase failed — fix it FIRST. Lock her up! (the race condition!)
+- ALWAYS record evidence_produced on task completion — document everything. Believe me, this matters big league.
+- One WRITE task per scope at a time. No collusion between modules! Independent scopes may move in parallel if WIP limits allow it.

@@ -1,6 +1,6 @@
 # /mpga:plan
 
-Generate an evidence-based implementation plan for the active milestone.
+Generate an evidence-based implementation plan for the active milestone. Evidence First — no fake docs. Build the wall between modules!
 
 ## Steps
 
@@ -34,4 +34,4 @@ Generate an evidence-based implementation plan for the active milestone.
 - [ ] No task is more than 10 minutes of work
 - [ ] Dependencies between tasks are explicit
 - [ ] Evidence links expected for each task are listed
-- [ ] Parallel-safe tasks are separated from same-scope write conflicts
+- [ ] Parallel-safe tasks are separated from same-scope write conflicts — Lock her up! (the race condition!)

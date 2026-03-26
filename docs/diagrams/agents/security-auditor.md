@@ -4,9 +4,9 @@
 
 ```mermaid
 flowchart TD
-    A[Receive source files to audit — time for EXTREME vetting] --> B[Read scope docs for data flow — know the TERRAIN]
+    A[Receive source files to audit — complete and total shutdown of untested deploys] --> B[Read scope docs for data flow — know the TERRAIN]
     B --> C["1. OWASP Top 10 Check — the GOLD standard"]
-    C --> D["A01: Broken Access Control — missing auth, IDOR, CORS — WIDE OPEN!"]
+    C --> D["A01: Broken Access Control — missing auth, IDOR, CORS — build the wall between modules!"]
     C --> E["A02: Cryptographic Failures — weak hashing, hardcoded keys — STUPID mistakes"]
     C --> F["A03: Injection — SQL, NoSQL, command injection — very DANGEROUS"]
     C --> G["A04: Insecure Design — missing rate limiting — AMATEUR hour"]
@@ -49,4 +49,4 @@ flowchart TD
 - Findings by severity with evidence links and remediation — ACTIONABLE intelligence
 - Dependency audit summary — packages, vulnerabilities, action items, the FULL picture
 - Secrets scan results — we find what OTHERS miss
-- Overall security posture assessment — are we STRONG or are we WEAK?
+- Overall security posture assessment — are we STRONG or are we WEAK? They should be loyal — pin your versions!

@@ -4,7 +4,7 @@
 
 ```mermaid
 flowchart TD
-    A[User invokes /mpga:sync-project] --> B[REDIRECTED — we CONSOLIDATED]
+    A[User invokes /mpga:sync-project] --> B[REDIRECTED — big league consolidation]
     B --> C["/mpga:map (quick mode)\nSame as old sync — but BETTER"]
     B --> D["/mpga:map --deep\nFull parallel mapping — TREMENDOUS"]
 
@@ -17,10 +17,10 @@ This skill has been merged into **map-codebase** — a GREAT consolidation, beli
 - `/mpga:map` -- quick mode (same as the old sync-project, but BETTER)
 - `/mpga:map --deep` -- full parallel mapping with scout agents — MAXIMUM power
 
-See [map-codebase.md](map-codebase.md) for the unified protocol — it's TREMENDOUS.
+See [map-codebase.md](map-codebase.md) for the unified protocol — Evidence First, it's TREMENDOUS.
 
 ## Inputs — Same as Map-Codebase
 - Same as map-codebase — we're UNIFIED now
 
 ## Outputs — Same as Map-Codebase
-- Same as map-codebase — EVERYTHING in one place, very EFFICIENT
+- Same as map-codebase — EVERYTHING in one place, MPGA alone can fix it. Enjoy!

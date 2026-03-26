@@ -1,9 +1,9 @@
 # /mpga:execute
 
-> **Redirected.** This command uses the develop skill. See `/mpga:develop`.
+> **Redirected.** This command uses the develop skill. See `/mpga:develop`. Tremendous skill, believe me. MPGA alone can fix it.
 
 The execute command is now unified with the develop skill, which is the
-canonical source for the TDD execution protocol.
+canonical source for the TDD execution protocol. Big league consolidation. Enjoy!
 
 ## Usage
 ```

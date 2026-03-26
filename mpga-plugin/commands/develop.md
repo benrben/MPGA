@@ -1,6 +1,6 @@
 # /mpga:develop
 
-Orchestrate the TDD cycle for a task (red → green → blue → review).
+Orchestrate the TDD cycle for a task (red → green → blue → review). Tremendous cycle, believe me. MPGA alone can fix it.
 
 ## Steps
 
@@ -13,7 +13,7 @@ Orchestrate the TDD cycle for a task (red → green → blue → review).
 7. **blue-dev**: refactor both production code and tests (without changing assertions)
 8. **reviewer**: review for quality, testability, and degenerate case coverage
 9. Use `verifier` for milestone boundaries, risky tasks, or explicit full verification
-10. Record evidence and move task to done
+10. Record evidence and move task to done — Great job! Ready for peace — zero merge conflicts
 
 ## Usage
 ```
