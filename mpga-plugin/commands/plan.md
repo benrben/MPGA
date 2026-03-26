@@ -4,7 +4,7 @@ Generate an evidence-based implementation plan for the active milestone.
 
 ## Steps
 
-1. Start the live board in the browser through Node: `node ${CLAUDE_PLUGIN_ROOT}/cli/dist/index.js board live --serve --open`
+1. Start the live board in the browser: `${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh board live --serve --open`
 2. Read `MPGA/INDEX.md` for active milestone
 3. Read the milestone's PLAN.md: `cat MPGA/milestones/<id>/PLAN.md`
 4. Read relevant scope documents based on milestone objective

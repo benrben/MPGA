@@ -1,11 +1,16 @@
-# Dependencies
-node_modules/
-
-# Build output
-dist/
-*.tsbuildinfo
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+*.egg-info/
+.eggs/
+.pytest_cache/
+.ruff_cache/
 
 # Coverage
+htmlcov/
+.coverage
 coverage/
 
 # OS
@@ -25,34 +30,35 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Node.js (legacy — safe to remove once fully cleaned)
+node_modules/
+dist/
+*.tsbuildinfo
 npm-debug.log*
 
-# MPGA session artifacts (local only)
-MPGA/sessions/
+# Generated MPGA knowledge layer (top-level only, NOT the src/mpga/ Python package)
+/MPGA/
 
-# Generated files
+# Generated tool configs (created by mpga export)
 .claude/
 .codex/
-MPGA/
 CLAUDE.md
 GEMINI.md
 AGENTS.md
 
 # Spoke TTS artifacts (generated/downloaded, not source)
 mpga-plugin/spoke/venv/
-mpga-plugin/spoke/voicedata/*.wav
-mpga-plugin/spoke/voicedata/*.mp3
-mpga-plugin/spoke/voicedata/*.safetensors
+mpga-plugin/spoke/voicedata/
 mpga-plugin/spoke/.server.pid
+mpga-plugin/spoke/.server.log
 
-# Runtime symlinks (regenerated, not source)
-.mpga-runtime/cli/dist
-.mpga-runtime/cli/src
-.mpga-runtime/cli/node_modules
-.mpga-runtime/cli/package.json
-.mpga-runtime/cli/tsconfig.json
-.mpga-runtime/spoke
+# Runtime symlinks (regenerated)
+.mpga-runtime/
 
 # Spoke cache
 .mpga/spoke-cache/
 
+# Audio files (voice samples, not source)
+*.mp3
+*.wav

@@ -16,7 +16,7 @@
   ],
   "setup": {
     "script": "scripts/setup.sh",
-    "description": "Builds the bundled MPGA CLI from source (npm install + tsc)"
+    "description": "Builds the bundled MPGA CLI from source (pip install -e .)"
   },
   "bin": {
     "mpga": "bin/mpga.sh"

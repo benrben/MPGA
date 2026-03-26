@@ -19,6 +19,7 @@ import uuid
 import wave
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
+import numpy as np
 import scipy.io.wavfile
 
 SPOKE_DIR = os.path.dirname(__file__)
@@ -27,6 +28,35 @@ REF_AUDIO = os.path.join(SPOKE_DIR, "voicedata", "trump_ref.wav")
 
 _model = None
 _voice = None
+
+# Target RMS level (0.18-0.20 is typical "spoken word" loudness for float32)
+TARGET_RMS = 0.20
+# Hard limiter ceiling to prevent clipping
+LIMITER_CEILING = 0.95
+
+
+def normalize_audio(audio_np):
+    """RMS-normalize audio to consistent loudness, with a limiter to prevent clipping."""
+    arr = audio_np if isinstance(audio_np, np.ndarray) else audio_np.numpy()
+    arr = arr.astype(np.float32)
+
+    # Compute RMS (skip silence at start/end)
+    rms = np.sqrt(np.mean(arr ** 2))
+    if rms < 1e-6:
+        return arr  # silence
+
+    # Scale to target RMS
+    gain = TARGET_RMS / rms
+    arr = arr * gain
+
+    # Soft-clip anything above the ceiling (tanh limiter)
+    arr = np.where(
+        np.abs(arr) > LIMITER_CEILING,
+        np.sign(arr) * LIMITER_CEILING * np.tanh(np.abs(arr) / LIMITER_CEILING),
+        arr,
+    )
+
+    return arr
 
 
 def load_voice_state(path):
@@ -100,9 +130,10 @@ class Handler(BaseHTTPRequestHandler):
         model, voice = get_model()
         t0 = time.time()
         audio = model.generate_audio(voice, text)
+        audio_loud = normalize_audio(audio)
 
         buf = io.BytesIO()
-        scipy.io.wavfile.write(buf, model.sample_rate, audio.numpy())
+        scipy.io.wavfile.write(buf, model.sample_rate, audio_loud)
         wav_data = buf.getvalue()
 
         print(f"[spoke] {time.time()-t0:.1f}s: {text[:60]}")
@@ -127,8 +158,9 @@ class Handler(BaseHTTPRequestHandler):
         for i, chunk_text in enumerate(chunks):
             t0 = time.time()
             audio = model.generate_audio(voice, chunk_text)
+            audio_loud = normalize_audio(audio)
             chunk_path = os.path.join(tempfile.gettempdir(), f"spoke_stream_{i}.wav")
-            scipy.io.wavfile.write(chunk_path, model.sample_rate, audio.numpy())
+            scipy.io.wavfile.write(chunk_path, model.sample_rate, audio_loud)
             elapsed = time.time() - t0
             print(f"[spoke] chunk {i+1}/{len(chunks)} ({elapsed:.1f}s): {chunk_text[:40]}")
             line = json.dumps({"chunk": i, "total": len(chunks), "file": chunk_path}) + "\n"

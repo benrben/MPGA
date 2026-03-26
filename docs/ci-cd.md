@@ -29,12 +29,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-python@v5
         with:
-          node-version: '20'
+          python-version: '3.11'
 
-      - name: Build MPGA CLI
-        run: bash mpga-plugin/scripts/setup.sh
+      - name: Install MPGA CLI
+        run: pip install -e mpga-plugin/
 
       - name: Verify evidence links
         run: bash mpga-plugin/bin/mpga.sh evidence verify
@@ -56,9 +56,9 @@ jobs:
 # .gitlab-ci.yml
 mpga-evidence:
   stage: test
-  image: node:20
+  image: python:3.11
   script:
-    - bash mpga-plugin/scripts/setup.sh
+    - pip install -e mpga-plugin/
     - bash mpga-plugin/bin/mpga.sh evidence verify
     - bash mpga-plugin/bin/mpga.sh drift --ci --threshold 80
   rules:
@@ -76,9 +76,9 @@ pipelines:
     '**':
       - step:
           name: MPGA Evidence Check
-          image: node:20
+          image: python:3.11
           script:
-            - bash mpga-plugin/scripts/setup.sh
+            - pip install -e mpga-plugin/
             - bash mpga-plugin/bin/mpga.sh evidence verify
             - bash mpga-plugin/bin/mpga.sh drift --ci --threshold 80
 ```
@@ -164,13 +164,13 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-python@v5
         with:
-          node-version: '20'
+          python-version: '3.11'
 
       - name: Sync MPGA knowledge layer
         run: |
-          bash mpga-plugin/scripts/setup.sh
+          pip install -e mpga-plugin/
           bash mpga-plugin/bin/mpga.sh sync --incremental
 
       - name: Commit updated knowledge layer

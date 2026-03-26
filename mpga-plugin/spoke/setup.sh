@@ -4,7 +4,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 VENV_DIR="$SCRIPT_DIR/venv"
 VOICEDATA_DIR="$SCRIPT_DIR/voicedata"
-TRUMP_VOICE_URL="https://raw.githubusercontent.com/Supremolink81/TTSCeleb/master/voicedata/donaldtrumpvoice.mp3"
+# Reference audio is bundled at voicedata/trump_ref.wav (from mexico-sending-rapists.mp3)
+# No download needed — the reference clip is checked into the repo.
 
 echo "=== MPGA Spoke Setup (Pocket TTS) ==="
 echo ""
@@ -54,30 +55,17 @@ pip install --upgrade pip --quiet
 pip install pocket-tts scipy --quiet
 echo "  Installed."
 
-# 4. Download voice sample
+# 4. Check reference voice clip
 echo ""
-echo "Downloading Trump voice sample..."
+echo "Checking Trump voice reference..."
 mkdir -p "$VOICEDATA_DIR"
-MP3_FILE="$VOICEDATA_DIR/donaldtrumpvoice.mp3"
-WAV_FILE="$VOICEDATA_DIR/donaldtrumpvoice.wav"
 REF_FILE="$VOICEDATA_DIR/trump_ref.wav"
 
 if [ -f "$REF_FILE" ]; then
-    echo "  Voice sample already exists."
+    echo "  Reference clip present."
 else
-    if [ ! -f "$MP3_FILE" ]; then
-        curl -fsSL -o "$MP3_FILE" "$TRUMP_VOICE_URL"
-        echo "  Downloaded MP3."
-    fi
-    pip install pydub --quiet
-    python -c "
-from pydub import AudioSegment
-audio = AudioSegment.from_mp3('$MP3_FILE')
-audio.export('$WAV_FILE', format='wav')
-clip = audio[:6000]
-clip.export('$REF_FILE', format='wav')
-print('  Created 6s reference clip.')
-"
+    echo "  Error: $REF_FILE not found. It should be bundled in the repo." >&2
+    exit 1
 fi
 
 # 5. Export Trump voice state for fast loading
@@ -99,17 +87,25 @@ fi
 # 6. Start server
 echo ""
 echo "Starting spoke server..."
-python "$SCRIPT_DIR/server.py" --port 5151 &
-SERVER_PID=$!
-echo "$SERVER_PID" > "$SCRIPT_DIR/.server.pid"
 
-for i in $(seq 1 30); do
-    if curl -sf http://127.0.0.1:5151/health >/dev/null 2>&1; then
-        echo "  Server running (PID $SERVER_PID)"
-        break
-    fi
-    sleep 1
-done
+# Kill existing server if running
+if curl -sf http://127.0.0.1:5151/health >/dev/null 2>&1; then
+    echo "  Server already running, skipping."
+    SERVER_PID=$(cat "$SCRIPT_DIR/.server.pid" 2>/dev/null || echo "?")
+else
+    LOG_FILE="$SCRIPT_DIR/.server.log"
+    python "$SCRIPT_DIR/server.py" --port 5151 >"$LOG_FILE" 2>&1 &
+    SERVER_PID=$!
+    echo "$SERVER_PID" > "$SCRIPT_DIR/.server.pid"
+
+    for i in $(seq 1 30); do
+        if curl -sf http://127.0.0.1:5151/health >/dev/null 2>&1; then
+            echo "  Server running (PID $SERVER_PID)"
+            break
+        fi
+        sleep 1
+    done
+fi
 
 echo ""
 echo "============================================"

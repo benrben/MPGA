@@ -10,14 +10,13 @@ The CLI is **bundled inside this plugin** — no separate install needed. It is 
 mpga-plugin/
 ├── .claude-plugin/
 │   └── plugin.json         # Plugin manifest
-├── cli/                    # Bundled MPGA CLI (TypeScript source)
-│   ├── src/                # TypeScript source
-│   ├── package.json
-│   └── tsconfig.json
+├── cli/                    # Bundled MPGA CLI (Python)
+│   ├── src/                # Python source
+│   └── pyproject.toml
 ├── bin/
 │   └── mpga.sh             # Auto-installing CLI wrapper
 ├── scripts/
-│   ├── setup.sh            # Builds the CLI (npm install + tsc)
+│   ├── setup.sh            # Installs the CLI (venv + pip install)
 │   ├── check-cli.sh        # Ensures CLI is built before hooks run
 │   └── format-evidence.sh  # Evidence link formatter
 ├── agents/                 # 10 agent definitions
@@ -80,8 +79,8 @@ The bundled CLI is always invoked via `${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh`. When 
 
 ## How auto-install works
 
-1. `bin/mpga.sh` checks if `cli/dist/index.js` exists
-2. If not: runs `scripts/setup.sh` which does `npm install && npm run build` in `cli/`
+1. `bin/mpga.sh` checks if `cli/.venv/bin/mpga` exists
+2. If not: runs `scripts/setup.sh` which does `python3 -m venv .venv && pip install -e .` in `cli/`
 3. Proceeds to run the CLI
 
 The hook in `hooks/hooks.json` calls `bin/mpga.sh drift --quick` after every Write/Edit — drift checking is always available with no user setup.

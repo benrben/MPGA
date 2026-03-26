@@ -28,9 +28,9 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/node-%3E%3D20-brightgreen" alt="Node >= 20">
+  <img src="https://img.shields.io/badge/python-%3E%3D3.11-brightgreen" alt="Python >= 3.11">
   <img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT License">
-  <img src="https://img.shields.io/badge/TypeScript-strict-blue" alt="TypeScript Strict">
+  <img src="https://img.shields.io/badge/Python-click%20%2B%20rich-blue" alt="Python (click + rich)">
   <img src="https://img.shields.io/badge/AI_tools-6+-orange" alt="6+ AI Tools">
 </p>
 
@@ -113,9 +113,9 @@ Crooked Gemini just makes stuff up. At least when I make a promise about an API,
 
 ## Quick Start
 
-Just run `npx mpga init`. That's all you gotta do. One command. The most beautiful command. And suddenly your AI knows what your code ACTUALLY does.
+Just run `mpga init`. That's all you gotta do. One command. The most beautiful command. And suddenly your AI knows what your code ACTUALLY does.
 
-**Prerequisites:** Node.js >= 20
+**Prerequisites:** Python >= 3.11
 
 ```bash
 # Clone MPGA — the greatest repo
@@ -125,13 +125,13 @@ git clone https://github.com/benreich/mpga.git
 cd your-project
 
 # Initialize the knowledge layer
-npx mpga init --from-existing
+mpga init --from-existing
 
 # Generate everything — it's going to be BEAUTIFUL
-npx mpga sync
+mpga sync
 
 # See your project health
-npx mpga status
+mpga status
 ```
 
 People come up to me, big strong senior engineers, mass tears in their eyes, and they say, "Sir, sir, I've never had documentation that actually matched my code before." And I look at them and I say, "That's because nobody ever ran the mandatory post-edit hooks before. Nobody. But we do. We run them. Every single time. MPGA!"
@@ -253,21 +253,20 @@ cp AGENTS.md .github/copilot-instructions.md
 
 ## Architecture
 
-Look at this architecture. About 5k lines of TypeScript doing more than other tools do in 50k. That's efficiency. That's WINNING.
+Look at this architecture. About 5k lines of Python doing more than other tools do in 50k. That's efficiency. That's WINNING.
 
 The previous CTO — who was a TOTAL DISASTER by the way — never even HEARD of Abstract Syntax Trees, believe me.
 
 ```
 mpga-plugin/
-├── cli/                    The engine (TypeScript, ~5k lines)
-│   ├── src/
+├── cli/                    The engine (Python, ~5k lines)
+│   ├── src/mpga/
 │   │   ├── commands/       14 CLI commands
 │   │   ├── core/           Scanner, config, logger
 │   │   ├── evidence/       AST extraction, drift, parser, resolver
 │   │   ├── generators/     INDEX.md, GRAPH.md, scope.md generators
 │   │   └── board/          Task board state management
-│   ├── bin/mpga.js         Entry point
-│   └── package.json
+│   └── pyproject.toml
 ├── agents/                 10 specialized agents
 ├── skills/                 11 workflow skills
 ├── commands/               21 slash commands (/mpga:*)
@@ -361,7 +360,7 @@ Tomorrow, at noon, the curtain closes on four long quarters of architectural dec
 - [x] The Campaign Rally — **`/mpga:rally`. The greatest diagnostic tool ever built.**
 - [x] Drain the backlog — **Board system with milestones, tasks, and WIP limits.**
 - [x] Mandatory post-edit hooks — **EVERY. SINGLE. TIME. The engineers love it.**
-- [ ] Make npm downloads bigger than lodash — **Working on it. We're CLOSE. Some people say we're already there.**
+- [ ] Make PyPI downloads bigger than requests — **Working on it. We're CLOSE. Some people say we're already there.**
 
 ## What They're Saying
 
@@ -391,7 +390,7 @@ Every single claim in your documentation? CITED. Every function reference? VERIF
 
 We have the best dependency graphs. I know dependency graphs. I have the best dependency graphs.
 
-So the drift detection — and by the way, have you seen our npm download numbers? Incredible. The best. Better than lodash. Well, maybe not lodash, but close. Very close. Some people say better. I don't say it, but some people say it — anyway, the drift detection uses AST parsing, which is — and you know, I went to Wharton, very good school, the best business school, and even there they didn't teach you about Abstract Syntax Trees, but I learned it. I learned it faster than anyone. So the AST —
+So the drift detection — and by the way, have you seen our PyPI download numbers? Incredible. The best. Better than requests. Well, maybe not requests, but close. Very close. Some people say better. I don't say it, but some people say it — anyway, the drift detection uses AST parsing, which is — and you know, I went to Wharton, very good school, the best business school, and even there they didn't teach you about Abstract Syntax Trees, but I learned it. I learned it faster than anyone. So the AST —
 
 Evidence over claims, folks. Evidence. Over. Claims. That's what MPGA is all about. And you know what? The engineers — they love it. They come up to me, big strong senior engineers, mass tears in their eyes, and they say, "Sir, sir, I've never had documentation that actually matched my code before." And I look at them and I say, "That's because nobody ever ran the mandatory post-edit hooks before. Nobody. But we do. We run them. Every single time. MPGA!"
 
@@ -404,8 +403,8 @@ We are ONE team, ONE repo, ONE monorepo, and ONE GLORIOUS DEPLOYMENT PIPELINE UN
 ```bash
 git clone https://github.com/benreich/mpga.git
 cd mpga/mpga-plugin/cli
-npm install && npm run build
-npm test
+python3 -m venv .venv && .venv/bin/pip install -e ".[dev]"
+.venv/bin/pytest
 ```
 
 ### The MPGA Oath of Office

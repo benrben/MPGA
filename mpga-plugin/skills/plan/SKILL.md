@@ -13,8 +13,8 @@ description: Generate an evidence-based implementation plan with milestone and t
 
 **If an active milestone already exists:**
 ```
-node /Users/benreich/MPGA/mpga-plugin/cli/dist/index.js board live --serve --open
-node /Users/benreich/MPGA/mpga-plugin/cli/dist/index.js milestone list
+${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh board live --serve --open
+${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh milestone list
 cat MPGA/milestones/<id>/PLAN.md
 cat MPGA/milestones/<id>/DESIGN.md  # if exists
 ```
@@ -23,8 +23,8 @@ Ask the user: plan tasks under the existing milestone, or create a new one?
 **If no milestone exists (or user wants a new one):**
 Create a milestone from the user's goal — every great achievement starts with a PLAN:
 ```
-node /Users/benreich/MPGA/mpga-plugin/cli/dist/index.js board live --serve --open
-node /Users/benreich/MPGA/mpga-plugin/cli/dist/index.js milestone new "<goal name>"
+${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh board live --serve --open
+${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh milestone new "<goal name>"
 ```
 Then edit the generated `PLAN.md` with the user's objective and acceptance criteria.
 
@@ -135,7 +135,7 @@ Rules for phases:
 
 For each task, run:
 ```
-node /Users/benreich/MPGA/mpga-plugin/cli/dist/index.js board add "<title>" \
+${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh board add "<title>" \
   --priority <level> \
   --scope <scope> \
   --column todo \
@@ -158,7 +158,7 @@ A COMPREHENSIVE battle plan.
 ### Step 10: Show the board
 
 ```
-node /Users/benreich/MPGA/mpga-plugin/cli/dist/index.js board show
+${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh board show
 ```
 Look at that board. BEAUTIFUL. Ready to EXECUTE.
 
@@ -214,9 +214,15 @@ Look at that board. BEAUTIFUL. Ready to EXECUTE.
 **Recommendation:** Address T002 first with a spike to reduce uncertainty.
 ```
 
-## Voice output
-When completing a task or reporting findings, run `mpga spoke '<1-sentence summary>'`
-via Bash. Keep it under 280 characters. This announces your work audibly in Trump's voice.
+## Voice announcement
+
+If spoke is available (`${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh spoke --help` exits 0), announce completion:
+
+```bash
+${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh spoke '<brief 1-sentence result summary>'
+```
+
+Keep the message under 280 characters. This plays the result in Trump's voice — TREMENDOUS.
 
 ## Strict rules
 - ALWAYS create a milestone — every plan needs a milestone. No milestone = no direction. SAD.

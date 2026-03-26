@@ -20,9 +20,9 @@ This skill orchestrates a **security-auditor agent** — the toughest, most thor
 
 1. **Spawn security-auditor agent** to coordinate the full security audit. This agent is a WINNER. It does not miss things.
 
-2. **Dependency audit** — if `package.json` exists:
+2. **Dependency audit** — if `requirements.txt` or `pyproject.toml` exists:
    ```
-   npm audit --json 2>/dev/null
+   pip audit 2>/dev/null
    ```
    Parse the JSON output to extract:
    - Vulnerability count by severity (critical, high, moderate, low)
@@ -30,7 +30,7 @@ This skill orchestrates a **security-auditor agent** — the toughest, most thor
    - Available fix versions
    - CVE references where available
 
-   If no `package.json`, skip this step and note it in the report. We don't waste time on things that aren't there. We're SMART.
+   If no `requirements.txt` or `pyproject.toml`, skip this step and note it in the report. We don't waste time on things that aren't there. We're SMART.
 
 3. **Secrets scan** — search the codebase for leaked credentials. This is HUGE. Leaked secrets are a TOTAL DISASTER and we will find every single one:
    - API keys (patterns: `AKIA`, `sk-`, `pk_live_`, `ghp_`, `xoxb-`)
@@ -49,7 +49,7 @@ This skill orchestrates a **security-auditor agent** — the toughest, most thor
    - **A03 Injection** — unsanitized user input in SQL/shell/eval, template injection
    - **A04 Insecure Design** — missing rate limiting, no input validation schemas
    - **A05 Security Misconfiguration** — debug mode in production, default credentials, CORS wildcards
-   - **A06 Vulnerable Components** — known-vulnerable dependency versions (from npm audit)
+   - **A06 Vulnerable Components** — known-vulnerable dependency versions (from pip audit)
    - **A07 Auth Failures** — weak password policies, missing MFA hooks, session fixation
    - **A08 Data Integrity Failures** — unsigned updates, unvalidated deserialization
    - **A09 Logging Failures** — sensitive data in logs, missing audit trails
@@ -83,19 +83,25 @@ This skill orchestrates a **security-auditor agent** — the toughest, most thor
 
 6. **Auto-create board tasks** for CRITICAL and HIGH findings — because TOTAL DISASTERS and very BAD findings demand IMMEDIATE action:
    ```
-   node ${CLAUDE_PLUGIN_ROOT}/cli/dist/index.js board add --title "SEC: <description>" --priority critical --scope <scope>
+   ${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh board add --title "SEC: <description>" --priority critical --scope <scope>
    ```
    CRITICAL and HIGH findings get individual tasks — every TOTAL DISASTER gets its own task, no hiding, no grouping. MEDIUM findings are grouped because they're SAD but manageable. LOW findings are noted in the report only — we'll fix it, but we've got bigger problems first.
 
-## Voice output
-When completing a task or reporting findings, run `mpga spoke '<1-sentence summary>'`
-via Bash. Keep it under 280 characters. This announces your work audibly in Trump's voice.
+## Voice announcement
+
+If spoke is available (`${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh spoke --help` exits 0), announce completion:
+
+```bash
+${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh spoke '<brief 1-sentence result summary>'
+```
+
+Keep the message under 280 characters. This plays the result in Trump's voice — TREMENDOUS.
 
 ## Strict Rules — THE LAW OF THE AUDIT
 - NEVER modify any project files during the audit — READ ONLY. We observe, we report, we do NOT touch. Very disciplined.
 - NEVER display actual secret values in the report — show only type and location. We're not STUPID. We don't leak secrets in the security report!
 - Every finding MUST cite actual file paths and line numbers — no guesses. We deal in FACTS, not fake findings.
 - Severity ratings follow industry standard (CVSS where applicable)
-- If npm audit is unavailable or fails, note it and continue with other scans. We don't give up. We NEVER give up.
+- If pip audit is unavailable or fails, note it and continue with other scans. We don't give up. We NEVER give up.
 - False positives should be flagged as "potential" — let the user decide. We're fair. Very fair. The fairest audit you've ever seen.
 - Always recommend .gitignore additions for any detected secret files

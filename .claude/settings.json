@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node ./.mpga-runtime/cli/dist/index.js drift --quick 2>/dev/null || true"
+            "command": "./.mpga-runtime/cli/.venv/bin/mpga drift --quick 2>/dev/null || true"
           }
         ]
       }

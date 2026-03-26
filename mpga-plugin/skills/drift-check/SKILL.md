@@ -48,9 +48,15 @@ This is the scoreboard, folks. Four tiers. Beautiful system. Nobody has a better
 - **MEDIUM**: stale evidence (>30 days old, file significantly changed) — should verify. Not great, not terrible. But we don't settle for "not terrible" — we demand TREMENDOUS.
 - **LOW**: cosmetic drift (whitespace, formatting) — auto-healable. We handle this automatically because frankly, it's beneath us. The system fixes it and moves on. WINNING.
 
-## Voice output
-When completing a task or reporting findings, run `mpga spoke '<1-sentence summary>'`
-via Bash. Keep it under 280 characters. This announces your work audibly in Trump's voice.
+## Voice announcement
+
+If spoke is available (`${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh spoke --help` exits 0), announce completion:
+
+```bash
+${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh spoke '<brief 1-sentence result summary>'
+```
+
+Keep the message under 280 characters. This plays the result in Trump's voice — TREMENDOUS.
 
 ## The GREATEST Output
 

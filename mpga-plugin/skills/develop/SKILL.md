@@ -17,12 +17,12 @@ For each task in `todo` column (or a specified task):
 1. **Claim the task** — it's OURS now:
    Start the live board in the browser through Node first:
    ```
-   node ${CLAUDE_PLUGIN_ROOT}/cli/dist/index.js board live --serve --open
+   ${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh board live --serve --open
    ```
 
    Then claim the task:
    ```
-   node ${CLAUDE_PLUGIN_ROOT}/cli/dist/index.js board claim <task-id>
+   ${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh board claim <task-id>
    ```
    Claim the scope-local write lane too. One writer per scope. ALWAYS.
 
@@ -43,14 +43,14 @@ For each task in `todo` column (or a specified task):
    - If handoff cost is dominating and the same scope/fixture is still hot, red-dev MAY queue one additional failing test. Never more than two outstanding red tests.
    - If green-dev signals "retreat-to-green" (architecture blocks): spawn blue-dev for structural refactoring, then resume micro-cycle
    - While red-dev/green-dev own the write lane, `scout` and `auditor` may run in the background as read-only helpers
-   - Update stage: `node ${CLAUDE_PLUGIN_ROOT}/cli/dist/index.js board update <id> --tdd-stage red`
-   - Then: `node ${CLAUDE_PLUGIN_ROOT}/cli/dist/index.js board update <id> --tdd-stage green`
+   - Update stage: `${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh board update <id> --tdd-stage red`
+   - Then: `${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh board update <id> --tdd-stage green`
 
 4. **blue-dev phase** — make it CLEAN:
    - Spawn `blue-dev` agent with passing tests + implementation
    - blue-dev refactors BOTH production code and test code (without changing assertions)
    - Wait for confirmation: tests still passing after refactor — ALWAYS GREEN
-   - Update stage: `node ${CLAUDE_PLUGIN_ROOT}/cli/dist/index.js board update <id> --tdd-stage blue`
+   - Update stage: `${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh board update <id> --tdd-stage blue`
 
 5. **reviewer phase** — the FINAL inspection:
    - Spawn `reviewer` agent — two-stage review (including testability + degenerate case checks)
@@ -60,17 +60,17 @@ For each task in `todo` column (or a specified task):
 
 6. **Record evidence** — document our WIN:
    ```
-   node ${CLAUDE_PLUGIN_ROOT}/cli/dist/index.js board update <id> --evidence-add "<[E] link>"
+   ${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh board update <id> --evidence-add "<[E] link>"
    ```
 
 7. **Move to done** — MISSION ACCOMPLISHED:
    ```
-   node ${CLAUDE_PLUGIN_ROOT}/cli/dist/index.js board move <id> done
+   ${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh board move <id> done
    ```
 
 8. **Drift check** (also triggered automatically by hook after each write):
    ```
-   node ${CLAUDE_PLUGIN_ROOT}/cli/dist/index.js drift --quick
+   ${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh drift --quick
    ```
 
 ## Usage
@@ -83,13 +83,19 @@ For each task in `todo` column (or a specified task):
 ## Context budget management
 - Each TDD task runs in a focused context with only relevant scopes loaded
 - Independent scopes can move in parallel; never allow two writers in the same scope
-- After each task: `node ${CLAUDE_PLUGIN_ROOT}/cli/dist/index.js session budget`
+- After each task: `${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh session budget`
 - If >70% used: consider `/mpga:handoff` before next task. We manage resources WISELY.
 - If context is critical: pause and run `/mpga:handoff`
 
-## Voice output
-When completing a task or reporting findings, run `mpga spoke '<1-sentence summary>'`
-via Bash. Keep it under 280 characters. This announces your work audibly in Trump's voice.
+## Voice announcement
+
+If spoke is available (`${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh spoke --help` exits 0), announce completion:
+
+```bash
+${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh spoke '<brief 1-sentence result summary>'
+```
+
+Keep the message under 280 characters. This plays the result in Trump's voice — TREMENDOUS.
 
 ## Strict rules
 - NEVER skip a TDD phase — red, green, blue. The WINNING formula.

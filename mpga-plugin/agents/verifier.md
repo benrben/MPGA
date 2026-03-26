@@ -56,7 +56,7 @@ Every verification MUST produce the following measurable metrics. No hand-waving
 
 ### 5. Lint and type-check status
 - Run the project linter (if configured)
-- Run the type checker (e.g., `npx tsc --noEmit`)
+- Run the type checker (e.g., `ruff check src/`)
 - Record: `lint_errors`, `lint_warnings`, `type_errors`
 - Zero type errors required. Zero lint errors required.
 

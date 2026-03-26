@@ -17,7 +17,7 @@ cd your-project
 alias mpga="bash path/to/mpga-plugin/bin/mpga.sh"
 
 # Option B: npm global (when published)
-npm install -g mpga
+pip install mpga
 ```
 
 ## Initialize a project

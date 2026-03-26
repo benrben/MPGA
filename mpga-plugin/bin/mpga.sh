@@ -5,12 +5,13 @@
 set -e
 
 PLUGIN_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-CLI_BIN="$PLUGIN_ROOT/cli/dist/index.js"
+CLI_DIR="$PLUGIN_ROOT/cli"
+CLI_BIN="$CLI_DIR/.venv/bin/mpga"
 SETUP_SCRIPT="$PLUGIN_ROOT/scripts/setup.sh"
 
-# Auto-setup if CLI not built
+# Auto-setup if venv not created
 if [ ! -f "$CLI_BIN" ]; then
   bash "$SETUP_SCRIPT"
 fi
 
-exec node "$CLI_BIN" "$@"
+exec "$CLI_BIN" "$@"

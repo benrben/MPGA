@@ -209,8 +209,8 @@ The choice is clear. The vote is obvious.
 **MAKE THIS PROJECT GREAT AGAIN.**
 
 ```bash
-npx mpga init --from-existing
-npx mpga sync
+mpga init --from-existing
+mpga sync
 mpga status
 ```
 

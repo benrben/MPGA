@@ -4,7 +4,7 @@ Socratic design refinement before writing any code.
 
 ## Steps
 
-1. Start the live board in the browser through Node: `node ${CLAUDE_PLUGIN_ROOT}/cli/dist/index.js board live --serve --open`
+1. Start the live board in the browser: `${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh board live --serve --open`
 2. DO NOT jump into code — ask clarifying questions first
 3. Use the Socratic method to refine the design:
    - What problem does this solve?

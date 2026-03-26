@@ -6,15 +6,20 @@ Evidence-backed context engineering for AI-assisted development. MPGA scans your
 
 ```bash
 cd mpga-plugin/cli
-npm install
+python3 -m venv .venv
+.venv/bin/pip install -e ".[dev]"
 ```
 
-Requires Node.js >= 20.
+Requires Python >= 3.11.
 
 ## Usage
 
 ```bash
-npx mpga <command>
+# If the venv is activated:
+mpga <command>
+
+# Or invoke directly:
+.venv/bin/mpga <command>
 ```
 
 ### Commands
@@ -40,32 +45,31 @@ npx mpga <command>
 
 ```bash
 # Initialize MPGA in your project
-npx mpga init
+mpga init
 
 # Scan and sync everything
-npx mpga scan && npx mpga sync
+mpga scan && mpga sync
 
 # Generate graph and scope docs
-npx mpga graph && npx mpga scope
+mpga graph && mpga scope
 
 # Export for Claude
-npx mpga export --claude
+mpga export --claude
 
 # Check project health
-npx mpga health
+mpga health
 ```
 
 ## Development
 
 ```bash
-# Watch mode (recompile on change)
-npm run dev
+# No compile step — just edit Python files directly
 
 # Run tests
-npm run test
+.venv/bin/pytest
 
-# Full check (typecheck + lint + test)
-npm run check
+# Full check (lint + test)
+.venv/bin/ruff check src/ && .venv/bin/pytest
 ```
 
 ## License

@@ -17,23 +17,23 @@ Run ALL of the following checks simultaneously. Every check must pass before pro
 
 1. **Tests pass** — run the full test suite:
    ```bash
-   npx vitest run
+   pytest
    ```
 
-2. **TypeScript compiles** — zero type errors:
+2. **Ruff check passes** — zero lint/type errors:
    ```bash
-   npx tsc --noEmit
+   .venv/bin/ruff check src/
    ```
 
 3. **Lint clean** — no lint errors (skip if no linter configured):
    ```bash
-   npx eslint . --max-warnings 0 2>/dev/null || true
+   .venv/bin/ruff check . 2>/dev/null || true
    ```
-   If eslint is not installed, treat this check as passed.
+   If ruff is not installed, treat this check as passed.
 
 4. **Evidence drift check** — no stale evidence links:
    ```bash
-   node ./.mpga-runtime/cli/dist/index.js drift --quick
+   ./.mpga-runtime/bin/mpga.sh drift --quick
    ```
 
 5. **No uncommitted scope changes** — scope files must be clean:
@@ -49,9 +49,9 @@ Run ALL of the following checks simultaneously. Every check must pass before pro
 Example gate output:
 ```
 Ship Gate Results:
-  [PASS] Tests pass (npx vitest run)
-  [PASS] TypeScript compiles (npx tsc --noEmit)
-  [PASS] Lint clean (eslint)
+  [PASS] Tests pass (pytest)
+  [PASS] Ruff check passes (.venv/bin/ruff check src/)
+  [PASS] Lint clean (ruff)
   [FAIL] Evidence drift — 3 stale links found
   [PASS] No uncommitted scope changes
 
@@ -64,7 +64,7 @@ BLOCKED: 1 check failed. Fix issues before shipping.
 2. Add any missing evidence links to scope docs — COMPLETE documentation
 3. Run evidence verification to confirm:
    ```bash
-   node ./.mpga-runtime/cli/dist/index.js evidence verify
+   ./.mpga-runtime/bin/mpga.sh evidence verify
    ```
 
 ### Phase 3 — PR template generation
@@ -102,7 +102,7 @@ Auto-generate a PR description using the template below. Populate each section f
 
 ## Pre-ship checks
 - [x] Tests pass
-- [x] TypeScript compiles
+- [x] Ruff check passes
 - [x] Lint clean
 - [x] Evidence drift check pass
 - [x] No uncommitted scope changes
@@ -126,12 +126,12 @@ Store the generated PR template in a variable for use in Phase 5.
 
 1. Update milestone status — track our PROGRESS:
    ```bash
-   node ./.mpga-runtime/cli/dist/index.js milestone status
+   ./.mpga-runtime/bin/mpga.sh milestone status
    ```
 
 2. Archive completed tasks — clean board, clean MIND:
    ```bash
-   node ./.mpga-runtime/cli/dist/index.js board archive
+   ./.mpga-runtime/bin/mpga.sh board archive
    ```
 
 3. Present options to user — THEIR choice:
@@ -141,7 +141,7 @@ Store the generated PR template in a variable for use in Phase 5.
 
 ## Pre-ship checklist (quick reference)
 - [ ] All tests passing — NON-NEGOTIABLE
-- [ ] TypeScript compiles clean — NO type errors
+- [ ] Ruff check clean — NO lint errors
 - [ ] No lint errors — CLEAN code
 - [ ] No TODOs or stubs — FINISH what you start
 - [ ] Scope evidence links updated — documentation is CURRENT
@@ -149,9 +149,15 @@ Store the generated PR template in a variable for use in Phase 5.
 - [ ] No uncommitted scope changes — everything STAGED
 - [ ] Board tasks archived — clean up after yourself
 
-## Voice output
-When completing a task or reporting findings, run `mpga spoke '<1-sentence summary>'`
-via Bash. Keep it under 280 characters. This announces your work audibly in Trump's voice.
+## Voice announcement
+
+If spoke is available (`${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh spoke --help` exits 0), announce completion:
+
+```bash
+${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh spoke '<brief 1-sentence result summary>'
+```
+
+Keep the message under 280 characters. This plays the result in Trump's voice — TREMENDOUS.
 
 ## Strict rules
 - NEVER ship if ANY pre-ship check fails — the gate is ABSOLUTE
