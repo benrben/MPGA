@@ -1,35 +1,36 @@
-# Ask — Evidence-Based Question Answering
+# Ask — The BEST Answers, Backed by TREMENDOUS Evidence
 
 ## Workflow
 
 ```mermaid
 flowchart TD
-    A[User asks how/where/what question] --> B[Read MPGA/INDEX.md for scope registry]
-    B --> C[Identify smallest relevant scopes]
-    C --> D[Read relevant scope documents]
-    D --> E{Answer complete from scope docs?}
-    E -->|Yes| F[Compose answer with evidence citations]
-    E -->|No| G[Spawn read-only scout agents in parallel\none per missing scope]
-    G --> H[Each scout gathers evidence, traces, unknowns\nfor its assigned scope]
-    H --> I[Merge scout findings into unified answer]
+    A[User asks a GREAT question] --> B[Read MPGA/INDEX.md — the BEST registry]
+    B --> C[Find the key scopes — VERY precise]
+    C --> D[Read the scope docs — INCREDIBLE detail]
+    D --> E{Answer complete from docs?}
+    E -->|Yes| F[Compose a BEAUTIFUL answer with evidence]
+    E -->|No| G[Deploy read-only scout agents\nthe BEST investigators]
+    G --> H[Each scout gathers TREMENDOUS evidence\nfor its assigned scope]
+    H --> I[Merge findings — NOBODY merges better]
     I --> F
-    F --> J[Rate every claim with confidence score\nHIGH / MEDIUM / LOW]
-    J --> K[Add source citations to every claim\nE links to file:line]
-    K --> L[Suggest 2-3 follow-up questions\ndeeper / wider / practical]
+    F --> J[Rate every claim — HIGH / MEDIUM / LOW\nwe have STANDARDS]
+    J --> K[Add source citations to EVERY claim\nE links — TOTAL accountability]
+    K --> L[Suggest 2-3 follow-ups\ndeeper / wider / WINNING]
     L --> M{Spoke available?}
-    M -->|Yes| N[mpga spoke announcement]
-    M -->|No| O[Done]
+    M -->|Yes| N[mpga spoke — HUGE announcement]
+    M -->|No| O[Done — BEAUTIFUL]
     N --> O
 ```
 
-## Inputs
+## Inputs — What We Need to WIN
 - User question (how does X work, where is X, what does X do)
-- MPGA/INDEX.md scope registry
-- Relevant scope documents
+- MPGA/INDEX.md scope registry — the GREATEST source of truth
+- Relevant scope documents — VERY detailed
 
-## Outputs
-- Evidence-backed answer with confidence scores (HIGH/MEDIUM/LOW) on every claim
-- Source citations ([E] file:line references) for all claims
-- Known unknowns flagged
-- 2-3 follow-up question suggestions
-- No files modified (read-only skill)
+## Outputs — Pure WINNING
+- Evidence-backed answer — the MOST accurate, believe me
+- Confidence scores (HIGH/MEDIUM/LOW) on EVERY claim — total transparency
+- Source citations ([E] file:line references) — we ALWAYS cite our sources
+- Known unknowns FLAGGED — we're HONEST, unlike the other tools
+- 2-3 follow-up question suggestions — keep the MOMENTUM going
+- No files modified (read-only skill) — we don't touch what we don't need to

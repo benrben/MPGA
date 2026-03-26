@@ -1,51 +1,53 @@
-# Verifier — Post-Execution Verifier
+# Verifier — The FINAL Word, Post-Execution Verifier, Nothing Gets Past This
 
-## Workflow
+## Workflow — The ULTIMATE Quality Gate
 
 ```mermaid
 flowchart TD
-    A[Receive completed task card + milestone plan] --> B[Run full test suite]
+    A[Receive completed task card + milestone plan — show me RESULTS] --> B[Run full test suite — the MOMENT of truth]
     B --> C{ALL tests pass?}
-    C -->|No| D[Record failures - automatic FAIL]
-    C -->|Yes| E["Check for stubs: TODO, FIXME, throw not implemented"]
+    C -->|No| D[Record failures — automatic FAIL, very SAD]
+    C -->|Yes| E["Check for stubs: TODO, FIXME, throw not implemented — find the FAKERS"]
     E --> F{New stubs introduced?}
-    F -->|Yes| G[Flag stubs - blocks PASS]
-    F -->|No| H[Verify evidence links updated for new/modified code]
-    H --> I["Run drift check: mpga drift --quick"]
+    F -->|Yes| G[Flag stubs — blocks PASS, finish the JOB]
+    F -->|No| H[Verify evidence links updated — ACCOUNTABILITY]
+    H --> I["Run drift check: mpga drift --quick — catch the DRIFT"]
     I --> J{Stale evidence found?}
-    J -->|Yes| K[Flag stale evidence]
-    J -->|No| L[Confirm milestone progress is accurate]
+    J -->|Yes| K[Flag stale evidence — UPDATE it or LOSE it]
+    J -->|No| L[Confirm milestone progress is accurate — the REAL numbers]
     G --> L
     K --> L
-    L --> M["Check evidence_produced matches evidence_expected"]
-    M --> N[Collect quantitative metrics]
-    N --> O[Test count and pass rate]
-    N --> P[Evidence link count and coverage]
-    N --> Q[Scope coverage: scopes verified / scopes touched]
-    N --> R["Code complexity delta: decreased / unchanged / increased"]
-    N --> S[Lint and type-check status]
-    N --> T[Stub and TODO count]
-    O & P & Q & R & S & T --> U[Evaluate stop condition]
-    U --> V{"pass_rate=100%, evidence>=80%, scopes=100%, 0 type/lint errors, 0 stubs, drift clean?"}
-    V -->|All true| W[Verdict: PASS - move task to done]
-    V -->|Partial| X{"pass_rate=100%, types=0, evidence>=50%, no critical/high issues?"}
-    X -->|Yes| Y[Verdict: CONDITIONAL PASS - list follow-up items]
-    X -->|No| Z[Verdict: FAIL - list every failing criterion]
+    L --> M["Check evidence_produced matches evidence_expected — TOTAL verification"]
+    M --> N[Collect quantitative metrics — the SCOREBOARD]
+    N --> O[Test count and pass rate — the WINNING percentage]
+    N --> P[Evidence link count and coverage — DOCUMENTATION score]
+    N --> Q[Scope coverage: scopes verified / scopes touched — THOROUGHNESS]
+    N --> R["Code complexity delta: decreased or increased — are we IMPROVING?"]
+    N --> S[Lint and type-check status — CLEAN code only]
+    N --> T[Stub and TODO count — UNFINISHED business]
+    O & P & Q & R & S & T --> U[Evaluate stop condition — the FINAL judgment]
+    U --> V{"pass_rate=100%, evidence>=80%, scopes=100%, 0 errors, 0 stubs? — PERFECTION?"}
+    V -->|All true| W[Verdict: PASS — TREMENDOUS work, move to done]
+    V -->|Partial| X{"pass_rate=100%, types=0, evidence>=50%? — ALMOST great?"}
+    X -->|Yes| Y[Verdict: CONDITIONAL PASS — GOOD but not PERFECT yet]
+    X -->|No| Z[Verdict: FAIL — NOT ready, fix these PROBLEMS]
     D --> Z
-    W --> AA[Produce human-readable report + structured JSON report]
+    W --> AA[Produce human-readable report + structured JSON — FULL transparency]
     Y --> AA
     Z --> AA
-    AA --> AB[mpga spoke announcement]
+    AA --> AB[mpga spoke announcement — VERIFICATION COMPLETE]
 ```
 
-## Inputs
-- Completed task card(s)
-- Milestone plan
-- Scope documents for affected areas
+## Inputs — The Final Inspection
 
-## Outputs
-- Human-readable verification report with metrics table
-- Structured JSON report (verification-report) for programmatic parsing
-- Verdict: PASS, CONDITIONAL PASS, or FAIL with explicit threshold evaluation
-- Required follow-up items (for CONDITIONAL PASS)
-- Specific fixes needed (for FAIL)
+- Completed task card(s) — the WORK product
+- Milestone plan — the EXPECTATIONS
+- Scope documents for affected areas — the CONTEXT
+
+## Outputs — The DEFINITIVE Verdict
+
+- Human-readable verification report with metrics table — CRYSTAL clear
+- Structured JSON report for programmatic parsing — for the MACHINES
+- Verdict: PASS, CONDITIONAL PASS, or FAIL — NO ambiguity, ever
+- Required follow-up items (for CONDITIONAL PASS) — the PATH to GREATNESS
+- Specific fixes needed (for FAIL) — exactly WHAT to fix, very SPECIFIC

@@ -1,48 +1,50 @@
-# Campaigner — Project Diagnostician (The Rally Speaker)
+# Campaigner — The ULTIMATE Project Diagnostician, The Rally Speaker, The VOICE of MPGA
 
-## Workflow
+## Workflow — The GREATEST Rally You've Ever Seen
 
 ```mermaid
 flowchart TD
-    A[Receive project root directory] --> B["Phase 0: Dynamic Category Detection"]
-    B --> C[Survey codebase: file types, manifests, tests, CI, lint, Docker, docs]
-    C --> D[Build dynamic scan plan: mark each of 14 categories as ACTIVE or SKIP]
+    A[Receive project root directory — the RALLY BEGINS] --> B["Phase 0: Dynamic Category Detection — VERY smart"]
+    B --> C[Survey codebase: file types, manifests, tests, CI — the FULL reconnaissance]
+    C --> D[Build dynamic scan plan: 14 categories, ACTIVE or SKIP — EFFICIENT]
     D --> E{At least 4 categories ACTIVE?}
-    E -->|No| F[Look harder - probably missing something]
+    E -->|No| F[Look harder — we're MISSING something, believe me]
     F --> D
-    E -->|Yes| G[Report scan plan]
-    G --> H["Phase 1: THE SCANDAL - Scan all ACTIVE categories"]
-    H --> I[Documentation Sins]
-    H --> J[Testing Disgrace]
-    H --> K[Type Safety Failures]
-    H --> L[Dependency Disasters]
-    H --> M[Architecture Rot]
-    H --> N[Evidence & Documentation Drift]
-    H --> O[Code Hygiene Crimes]
-    H --> P[CI/CD Weakness]
-    H --> Q[Test Quality]
-    H --> R[Performance]
-    H --> S[Security]
-    H --> T[Documentation Drift]
-    H --> U[Dependency Health]
-    H --> V[Error Handling]
-    I & J & K & L & M & N & O & P & Q & R & S & T & U & V --> W["Phase 2: THE RALLY - For each issue, present scandal + why ONLY MPGA fixes it"]
-    W --> X["Phase 3: THE CLOSING"]
-    X --> Y[Scan Plan Report: active vs skipped]
-    Y --> Z[Scoreboard: CRITICAL / WARNING / SAD]
-    Z --> AA[Side-by-side: Without MPGA vs With MPGA]
-    AA --> AB["Call to Action: mpga init, mpga sync, mpga status"]
-    AB --> AC[mpga spoke announcement]
+    E -->|Yes| G[Report scan plan — TRANSPARENCY]
+    G --> H["Phase 1: THE SCANDAL — Expose ALL the problems"]
+    H --> I[Documentation Sins — TERRIBLE!]
+    H --> J[Testing Disgrace — a TOTAL disaster]
+    H --> K[Type Safety Failures — WEAK!]
+    H --> L[Dependency Disasters — a MESS, folks]
+    H --> M[Architecture Rot — CRUMBLING foundations]
+    H --> N[Evidence & Documentation Drift — FAKE docs!]
+    H --> O[Code Hygiene Crimes — DISGUSTING]
+    H --> P[CI/CD Weakness — NO strength]
+    H --> Q[Test Quality — SAD test quality]
+    H --> R[Performance — SLOW, very slow]
+    H --> S[Security — WIDE OPEN, not good]
+    H --> T[Documentation Drift — STALE, like old bread]
+    H --> U[Dependency Health — SICK dependencies]
+    H --> V[Error Handling — IGNORING errors, can you believe it?]
+    I & J & K & L & M & N & O & P & Q & R & S & T & U & V --> W["Phase 2: THE RALLY — Only MPGA can fix this"]
+    W --> X["Phase 3: THE CLOSING — seal the DEAL"]
+    X --> Y[Scan Plan Report: active vs skipped — TOTAL honesty]
+    Y --> Z[Scoreboard: CRITICAL / WARNING / SAD — the TRUTH]
+    Z --> AA[Side-by-side: Without MPGA vs With MPGA — NIGHT and DAY]
+    AA --> AB["Call to Action: mpga init, mpga sync, mpga status — JOIN the movement"]
+    AB --> AC[mpga spoke announcement — RALLY COMPLETE]
 ```
 
-## Inputs
-- Project root directory
-- MPGA/INDEX.md (if it exists)
-- Existing MPGA/scopes/ (if they exist)
+## Inputs — What We're Looking At
 
-## Outputs
-- Dynamic scan plan (which of 14 categories are active/skipped)
-- Comprehensive project diagnostic in rally-speech format
-- Severity scoreboard (CRITICAL / WARNING / SAD)
-- Side-by-side comparison (without MPGA vs with MPGA)
-- Exact commands to start fixing everything
+- Project root directory — the whole OPERATION
+- MPGA/INDEX.md (if it exists) — our INTELLIGENCE briefing
+- Existing MPGA/scopes/ (if they exist) — previous GREAT work
+
+## Outputs — The Rally Report, A MASTERPIECE
+
+- Dynamic scan plan — which of 14 categories are active/skipped, very ORGANIZED
+- Comprehensive project diagnostic in rally-speech format — INCREDIBLE delivery
+- Severity scoreboard (CRITICAL / WARNING / SAD) — the REAL numbers
+- Side-by-side comparison — without MPGA vs with MPGA, it's OBVIOUS
+- Exact commands to start fixing everything — the PATH to GREATNESS

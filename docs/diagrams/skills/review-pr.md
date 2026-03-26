@@ -1,56 +1,56 @@
-# Review-PR — Multi-Agent PR Review
+# Review-PR — The TOUGHEST, Most FAIR PR Review
 
 ## Workflow
 
 ```mermaid
 flowchart TD
-    A[User invokes /mpga:review-pr] --> B{PR source?}
-    B -->|PR number given| C["gh pr diff number"]
-    B -->|Branch specified| D["git diff base...feature"]
-    B -->|No args| E["git diff main...HEAD"]
+    A[User invokes /mpga:review-pr — SMART] --> B{PR source?}
+    B -->|PR number given| C["gh pr diff number — PRECISE"]
+    B -->|Branch specified| D["git diff base...feature — TARGETED"]
+    B -->|No args| E["git diff main...HEAD — DEFAULT"]
 
-    C --> F[Read full file context\nfor all changed files]
+    C --> F[Read FULL file context\nfor all changed files — THOROUGH]
     D --> F
     E --> F
 
-    F --> G[Spawn reviewer agent\nread-only / parallel]
-    F --> H[Spawn bug-hunter agent\nread-only / parallel]
-    F --> I[Spawn security-auditor agent\nread-only / parallel]
+    F --> G[Spawn reviewer agent\nthe BEST critic — read-only]
+    F --> H[Spawn bug-hunter agent\nNOTHING gets past this one]
+    F --> I[Spawn security-auditor agent\nFORT KNOX level — read-only]
 
-    G --> J["Code Quality:\n- Style consistency\n- Architecture alignment\n- Naming + API design\n- Test coverage\n- Documentation\n- Commit hygiene\n- DRY violations"]
+    G --> J["Code Quality — STANDARDS matter:\n- Style consistency\n- Architecture alignment\n- Naming + API design\n- Test coverage\n- Documentation\n- Commit hygiene\n- DRY violations"]
 
-    H --> K["Correctness:\n- Logic errors\n- Edge cases (null, empty, boundary)\n- Error handling gaps\n- Race conditions\n- Type safety issues\n- Regression risks\n- Off-by-one errors"]
+    H --> K["Correctness — ZERO tolerance:\n- Logic errors\n- Edge cases (null, empty, boundary)\n- Error handling gaps\n- Race conditions\n- Type safety issues\n- Regression risks\n- Off-by-one errors"]
 
-    I --> L["Security:\n- Injection vulnerabilities\n- Secrets in diff\n- Auth/authz weakening\n- Vulnerable new deps\n- CORS/CSP misconfig\n- Unsanitized user input"]
+    I --> L["Security — TOTAL protection:\n- Injection vulnerabilities\n- Secrets in diff — UNACCEPTABLE\n- Auth/authz weakening\n- Vulnerable new deps\n- CORS/CSP misconfig\n- Unsanitized user input"]
 
-    J --> M[Collect all findings into\nunified PR review]
+    J --> M[Collect ALL findings into\none UNIFIED review — COMPREHENSIVE]
     K --> M
     L --> M
 
-    M --> N{Determine verdict}
-    N -->|No CRITICAL/HIGH| O["APPROVED\nShip it!"]
-    N -->|HIGH findings| P["CHANGES REQUESTED\nFix before merge"]
-    N -->|CRITICAL findings| Q["BLOCKED\nSecurity/data loss risk"]
+    M --> N{Determine verdict — FAIR}
+    N -->|No CRITICAL/HIGH| O["APPROVED\nShip it — BEAUTIFUL work"]
+    N -->|HIGH findings| P["CHANGES REQUESTED\nFix before merge — NOT ready yet"]
+    N -->|CRITICAL findings| Q["BLOCKED\nSecurity/data loss risk — FIX THIS NOW"]
 
-    O --> R[Generate review comments\nwith file:line references\n+ positive feedback]
+    O --> R[Generate review comments\nwith file:line + POSITIVE feedback]
     P --> R
     Q --> R
 
     R --> S{Spoke available?}
-    S -->|Yes| T[mpga spoke announcement]
-    S -->|No| U[Done]
+    S -->|Yes| T[mpga spoke — VERDICT delivered]
+    S -->|No| U[Done — JUSTICE served]
     T --> U
 ```
 
-## Inputs
+## Inputs — What We Review
 - PR number, branch name, or defaults to current branch vs main
-- Full diff and surrounding file context
+- Full diff and surrounding file context — COMPLETE picture
 - Project conventions and patterns
 
-## Outputs
-- Unified PR review report with verdict (APPROVED / CHANGES REQUESTED / BLOCKED)
-- Findings table by category: Code Quality, Correctness, Security
-- Each finding has file:line, severity, and description
-- Inline-style review comments with suggested fixes
-- Positive acknowledgment of good patterns
-- No files modified (read-only skill)
+## Outputs — The FINAL Verdict
+- Unified PR review with verdict (APPROVED / CHANGES REQUESTED / BLOCKED) — CLEAR
+- Findings table by category: Code Quality, Correctness, Security — ORGANIZED
+- Each finding has file:line, severity, and description — SPECIFIC
+- Inline-style review comments with suggested fixes — ACTIONABLE
+- Positive acknowledgment of good patterns — we recognize WINNERS
+- No files modified (read-only skill) — we JUDGE fairly

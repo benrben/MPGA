@@ -1,53 +1,53 @@
-# Simplify — Code Elegance via Kent Beck and Sandi Metz Rules
+# Simplify — Making Code ELEGANT Again (Kent Beck Would Be PROUD)
 
 ## Workflow
 
 ```mermaid
 flowchart TD
-    A[User invokes /mpga:simplify] --> B{Target specified?}
-    B -->|User specifies files| C[Use specified files]
-    B -->|Git diff has changes| D[Use changed files]
+    A[User invokes /mpga:simplify — GREAT instinct] --> B{Target specified?}
+    B -->|User specifies files| C[Use specified files — PRECISION]
+    B -->|Git diff has changes| D[Use changed files — SMART]
     B -->|No target| E[Use current scope\nimplementation files]
 
-    C --> F[Read target code]
+    C --> F[Read target code — EVERY line]
     D --> F
     E --> F
 
-    F --> G["Apply Kent Beck's 4 Rules\n(in priority order)"]
+    F --> G["Apply Kent Beck's 4 Rules\nthe BEST rules in software — in order"]
 
-    G --> H["Rule 1: Passes all tests\n(NON-NEGOTIABLE)"]
-    H --> I["Rule 2: Reveals intention\n- Unclear variable names?\n- Magic numbers?\n- Opaque boolean params?"]
-    I --> J["Rule 3: No duplication\n- Copy-pasted logic?\n- Similar functions differing by one param?\n- Repeated conditionals?"]
-    J --> K["Rule 4: Fewest elements\n- Unnecessary abstractions?\n- Premature generalization?\n- Dead code / unused imports?"]
+    G --> H["Rule 1: Passes all tests\nNON-NEGOTIABLE — like a DEAL"]
+    H --> I["Rule 2: Reveals intention\n- Unclear variable names? SAD\n- Magic numbers? TERRIBLE\n- Opaque boolean params? WEAK"]
+    I --> J["Rule 3: No duplication\n- Copy-pasted logic? LAZY\n- Similar functions? CONSOLIDATE\n- Repeated conditionals? FIX IT"]
+    J --> K["Rule 4: Fewest elements\n- Unnecessary abstractions? CUT\n- Premature generalization? STOP\n- Dead code / unused imports? GONE"]
 
-    K --> L["Apply Sandi Metz Rules:\n- Classes <= 100 lines\n- Methods <= 5 lines\n- Max 4 parameters\n- Controllers: 1 object"]
+    K --> L["Apply Sandi Metz Rules — DISCIPLINE:\n- Classes <= 100 lines\n- Methods <= 5 lines\n- Max 4 parameters\n- Controllers: 1 object"]
 
-    L --> M["Identify simplification targets:\n- Dead code\n- Unnecessary abstractions\n- Premature optimization\n- Over-engineering"]
+    L --> M["Identify simplification targets:\n- Dead code — GET RID of it\n- Unnecessary abstractions — BLOAT\n- Premature optimization — WASTEFUL\n- Over-engineering — COMPLICATED"]
 
-    M --> N["Generate before/after examples\nfor each simplification"]
+    M --> N["Generate before/after examples\nfor each simplification — SEE the diff"]
     N --> O{Tests exist?}
-    O -->|Yes| P[Verify tests still pass\nafter each change]
-    O -->|No| Q[Flag risk: suggest writing\ntests first]
+    O -->|Yes| P[Verify tests still pass\nafter each change — SAFE]
+    O -->|No| Q[Flag risk: write tests FIRST\nbefore simplifying — be SMART]
 
-    P --> R["Produce simplification report:\n- Summary stats\n- Prioritized list (HIGH/MED/LOW)\n- Detailed before/after for each"]
+    P --> R["Produce TREMENDOUS report:\n- Summary stats\n- Prioritized list (HIGH/MED/LOW)\n- Detailed before/after for each"]
     Q --> R
 
     R --> S{Spoke available?}
-    S -->|Yes| T[mpga spoke announcement]
-    S -->|No| U[Done]
+    S -->|Yes| T[mpga spoke — CODE simplified]
+    S -->|No| U[Done — CLEANER than ever]
     T --> U
 ```
 
-## Inputs
+## Inputs — What Needs SIMPLIFYING
 - Target files/directories (optional)
 - Git diff changes (fallback)
 - Current scope implementation files (fallback)
 
-## Outputs
-- Simplification report with summary stats
-- Kent Beck rule violations identified
-- Sandi Metz rule violations with file:line references
-- Before/after code examples for each suggestion
-- Priority-ranked simplifications (HIGH impact + LOW effort first)
-- Behavior preserved (no functional changes)
-- If code is already simple, says so clearly
+## Outputs — ELEGANT Results
+- Simplification report with summary stats — the NUMBERS
+- Kent Beck rule violations identified — we hold you to the BEST standards
+- Sandi Metz rule violations with file:line references — SPECIFIC
+- Before/after code examples for each suggestion — PROOF it's better
+- Priority-ranked simplifications (HIGH impact + LOW effort first) — SMART ordering
+- Behavior preserved (no functional changes) — SAFE
+- If code is already simple, says so clearly — we're FAIR

@@ -1,46 +1,48 @@
-# Bug Hunter — Specification-Based Bug Detection
+# Bug Hunter — The BEST Spec-Based Bug Detective, Nobody Finds Bugs Like Us
 
-## Workflow
+## Workflow — The GREATEST Bug Hunt in History
 
 ```mermaid
 flowchart TD
-    A[Receive task with acceptance criteria] --> B[Read the spec FIRST: task acceptance criteria + scope docs]
-    B --> C[Read the implementation code]
-    C --> D[Trace logic for each acceptance criterion]
+    A[Receive task with acceptance criteria — the MISSION] --> B[Read the spec FIRST — TREMENDOUS intel gathering]
+    B --> C[Read the implementation code — let's see what they DID]
+    C --> D[Trace logic for each acceptance criterion — TOTAL analysis]
     D --> E{Criterion fully implemented?}
-    E -->|Yes| F[Mark as implemented]
-    E -->|Partial| G[Flag as partial implementation]
-    E -->|No code path found| H[Flag as GAP - missing implementation]
-    F --> I[Hunt edge cases]
+    E -->|Yes| F[Mark as implemented — GREAT job]
+    E -->|Partial| G[Flag as partial — NOT good enough]
+    E -->|No code path found| H[Flag as GAP — WHERE IS IT? SAD!]
+    F --> I[Hunt edge cases — this is where bugs HIDE]
     G --> I
     H --> I
-    I --> J[Check null/undefined inputs]
-    J --> K[Check empty collections]
-    K --> L[Check boundary values / off-by-one]
-    L --> M[Check concurrent access / race conditions]
-    M --> N[Check error paths: network, file not found, timeout]
-    N --> O[Check type coercion traps]
-    O --> P[Identify specification gaps: undocumented behavior, silent fallbacks, swallowed errors]
-    P --> Q[Classify each finding]
+    I --> J[Check null/undefined inputs — the SNEAKY ones]
+    J --> K[Check empty collections — nobody checks these, but WE do]
+    K --> L[Check boundary values / off-by-one — CLASSIC mistakes]
+    L --> M[Check concurrent access / race conditions — very NASTY bugs]
+    M --> N[Check error paths: network, file not found, timeout — TOTAL coverage]
+    N --> O[Check type coercion traps — JavaScript is TRICKY, folks]
+    O --> P[Identify spec gaps: undocumented behavior, swallowed errors — the COVER-UP]
+    P --> Q[Classify each finding — we RANK everything]
     Q --> R{"BUG: spec AND contradicting code cited?"}
-    R -->|Yes| S["Label as BUG - confirmed spec deviation"]
-    R -->|No| T{"Code looks wrong but can't confirm against spec?"}
-    T -->|Yes| U["Label as RISK - needs investigation"]
-    T -->|No| V["Label as GAP - missing specification"]
-    S --> W[Build spec coverage matrix]
+    R -->|Yes| S["Label as BUG — CONFIRMED, we CAUGHT it"]
+    R -->|No| T{"Code looks wrong but can't confirm?"}
+    T -->|Yes| U["Label as RISK — needs INVESTIGATION"]
+    T -->|No| V["Label as GAP — the spec LEFT IT OUT"]
+    S --> W[Build spec coverage matrix — the FULL picture]
     U --> W
     V --> W
-    W --> X[Produce structured bug hunt report with file:line evidence]
-    X --> Y[mpga spoke announcement]
+    W --> X[Produce bug hunt report with file:line evidence — TREMENDOUS detail]
+    X --> Y[mpga spoke announcement — BUGS EXPOSED]
 ```
 
-## Inputs
-- Task acceptance criteria (from board task card or milestone plan)
-- Scope documents for the relevant modules
-- Implementation code under investigation
-- Test files (to check what is and is not covered)
+## Inputs — The Investigation Begins
 
-## Outputs
-- Spec coverage matrix (each criterion: implemented? tested? evidence?)
-- Classified findings: BUGs, RISKs, GAPs with file:line evidence
-- Verdict: PASS or FAIL based on whether BUGs exist
+- Task acceptance criteria — from the GREATEST board ever built
+- Scope documents for the relevant modules — our INTELLIGENCE files
+- Implementation code under investigation — the SUSPECT
+- Test files — to check what IS and is NOT covered
+
+## Outputs — The VERDICT, Folks
+
+- Spec coverage matrix — each criterion tracked, TOTAL accountability
+- Classified findings: BUGs, RISKs, GAPs with file:line evidence — IRREFUTABLE proof
+- Verdict: PASS or FAIL — we don't do MAYBE
