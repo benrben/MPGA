@@ -39,5 +39,5 @@ class TestRuntimeExportHelper:
         """Computes project and global vendored cli commands."""
         from mpga.commands.export.runtime import project_vendored_cli_command, global_vendored_cli_command
 
-        assert project_vendored_cli_command() == "node ./.mpga-runtime/cli/dist/index.js"
-        assert global_vendored_cli_command("/tmp/tool-root") == "node /tmp/tool-root/.mpga-runtime/cli/dist/index.js"
+        assert project_vendored_cli_command() == "./.mpga-runtime/bin/mpga.sh"
+        assert global_vendored_cli_command("/tmp/tool-root") == "/tmp/tool-root/.mpga-runtime/bin/mpga.sh"

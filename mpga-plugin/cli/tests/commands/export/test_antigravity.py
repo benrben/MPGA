@@ -47,7 +47,7 @@ class TestAntigravityProjectLevel:
         assert gemini_path.exists()
         content = gemini_path.read_text()
         assert "MPGA-Managed Project Context" in content
-        assert "node ./.mpga-runtime/cli/dist/index.js sync" in content
+        assert "./.mpga-runtime/bin/mpga.sh sync" in content
         assert "MPGA/INDEX.md" in content
 
     def test_gemini_md_includes_milestone(self, tmp_path: Path, monkeypatch):
@@ -90,7 +90,7 @@ class TestAntigravityProjectLevel:
             str(tmp_path / ".agent" / "skills"),
             "/fake/plugin",
             "antigravity",
-            "node ./.mpga-runtime/cli/dist/index.js",
+            "./.mpga-runtime/bin/mpga.sh",
         )
 
     def test_creates_rules_files(self, tmp_path: Path, monkeypatch):
@@ -142,7 +142,7 @@ class TestAntigravityProjectLevel:
         assert "MPGA Evidence Protocol" in content
         assert "[E] filepath:startLine-endLine :: symbolName()" in content
         assert "[Stale:YYYY-MM-DD]" in content
-        assert "node ./.mpga-runtime/cli/dist/index.js evidence heal" in content
+        assert "./.mpga-runtime/bin/mpga.sh evidence heal" in content
 
     def test_tdd_rule_content(self, tmp_path: Path, monkeypatch):
         """mpga-tdd.md contains TDD protocol steps."""
@@ -203,7 +203,7 @@ class TestAntigravityProjectLevel:
         review = (workflows_dir / "mpga-review.md").read_text()
         assert "MPGA Review Workflow" in review
         assert "Spec compliance" in review
-        assert "node ./.mpga-runtime/cli/dist/index.js evidence verify" in review
+        assert "./.mpga-runtime/bin/mpga.sh evidence verify" in review
         assert "npx mpga evidence verify" not in review
 
     # ── Knowledge seeding ──

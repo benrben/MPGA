@@ -32,5 +32,5 @@ class TestExportClaude:
             str(tmp_path / ".claude" / "skills"),
             "/fake/plugin",
             "claude",
-            "node ./.mpga-runtime/cli/dist/index.js",
+            "./.mpga-runtime/bin/mpga.sh",
         )

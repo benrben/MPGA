@@ -179,21 +179,43 @@ def rewrite_cli_references(
     cli_path: str | None = None,
     plugin_root: str | None = None,
 ) -> str:
-    replacement = cli_path if cli_path is not None else "npx mpga"
+    replacement = cli_path if cli_path is not None else "mpga"
+
+    # Legacy Node.js patterns
     next_content = re.sub(
         r"node\s+\$\{CLAUDE_PLUGIN_ROOT\}/cli/dist/index\.js", replacement, content
     )
     next_content = next_content.replace(
         "${CLAUDE_PLUGIN_ROOT}/cli/dist/index.js", replacement
     )
+
+    # Current shell wrapper pattern
     next_content = next_content.replace(
         "${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh", replacement
     )
+
+    # Python venv pattern
+    next_content = next_content.replace(
+        "${CLAUDE_PLUGIN_ROOT}/cli/.venv/bin/mpga", replacement
+    )
+
+    # Runtime patterns
+    next_content = next_content.replace(
+        "./.mpga-runtime/bin/mpga.sh", replacement
+    )
+    next_content = re.sub(
+        r"node\s+\./\.mpga-runtime/cli/dist/index\.js", replacement, next_content
+    )
+    next_content = next_content.replace(
+        "./.mpga-runtime/cli/dist/index.js", replacement
+    )
+
     next_content = re.sub(r"\bnpx mpga\b", replacement, next_content)
 
     if plugin_root:
         normalized_root = plugin_root.replace("\\", "/")
         escaped_root = _escape_regexp(normalized_root)
+        # Legacy node patterns with absolute paths
         next_content = re.sub(
             rf"node\s+{escaped_root}/cli/dist/index\.js", replacement, next_content
         )
@@ -202,6 +224,9 @@ def rewrite_cli_references(
         )
         next_content = re.sub(
             rf"{escaped_root}/bin/mpga\.sh", replacement, next_content
+        )
+        next_content = re.sub(
+            rf"{escaped_root}/cli/\.venv/bin/mpga", replacement, next_content
         )
 
     return next_content

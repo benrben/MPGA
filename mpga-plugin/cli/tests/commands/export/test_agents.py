@@ -74,4 +74,4 @@ class TestExportAgentCliRewriting:
         content = rewrite_cli_references(
             "Use node ${CLAUDE_PLUGIN_ROOT}/cli/dist/index.js drift --quick"
         )
-        assert "npx mpga drift --quick" in content
+        assert "mpga drift --quick" in content

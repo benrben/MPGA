@@ -34,7 +34,7 @@ MOCK_AGENTS = [
 def setup_mocks(monkeypatch):
     mock_copy = MagicMock()
     mock_read = MagicMock(
-        side_effect=lambda _pr, slug, cli=None: f"Instructions for {slug}\nUse {cli or 'npx mpga'} sync"
+        side_effect=lambda _pr, slug, cli=None: f"Instructions for {slug}\nUse {cli or 'mpga'} sync"
     )
     monkeypatch.setattr("mpga.commands.export.codex.AGENTS", MOCK_AGENTS)
     monkeypatch.setattr("mpga.commands.export.codex.SKILL_NAMES", ["sync-project", "plan"])
@@ -146,7 +146,7 @@ class TestCodexProjectLevel:
             expected_skills_dir,
             "/some/plugin",
             "codex",
-            "node ./.mpga-runtime/cli/dist/index.js",
+            "./.mpga-runtime/bin/mpga.sh",
         )
 
     def test_creates_toml_agent_files(self, tmp_path: Path, monkeypatch):
@@ -257,8 +257,8 @@ class TestCodexContentVerification:
 
         content = (project_root / "AGENTS.md").read_text()
         assert "npm test" in content
-        assert "node ./.mpga-runtime/cli/dist/index.js evidence verify" in content
-        assert "node ./.mpga-runtime/cli/dist/index.js board show" in content
+        assert "./.mpga-runtime/bin/mpga.sh evidence verify" in content
+        assert "./.mpga-runtime/bin/mpga.sh board show" in content
 
     def test_root_agents_md_contains_timestamp(self, tmp_path: Path, monkeypatch):
         """Root AGENTS.md contains timestamp."""

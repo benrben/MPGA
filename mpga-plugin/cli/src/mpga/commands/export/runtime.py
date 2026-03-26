@@ -5,8 +5,8 @@ import shutil
 from datetime import datetime, timezone
 from pathlib import Path
 
-RUNTIME_ASSETS = ("bin", "scripts", "cli")
-COPY_EXCLUDES = {"node_modules", ".git", "coverage"}
+RUNTIME_ASSETS = ("bin", "scripts", "cli", "spoke")
+COPY_EXCLUDES = {"node_modules", ".git", "coverage", ".venv", "venv", "__pycache__", ".pytest_cache", "dist"}
 
 
 def _copy_tree(src: Path, dest: Path) -> None:
@@ -23,12 +23,12 @@ def _copy_tree(src: Path, dest: Path) -> None:
 
 
 def project_vendored_cli_command() -> str:
-    return "node ./.mpga-runtime/cli/dist/index.js"
+    return "./.mpga-runtime/bin/mpga.sh"
 
 
 def global_vendored_cli_command(base_dir: str) -> str:
-    p = Path(base_dir) / ".mpga-runtime" / "cli" / "dist" / "index.js"
-    return "node " + str(p).replace("\\", "/")
+    p = Path(base_dir) / ".mpga-runtime" / "bin" / "mpga.sh"
+    return str(p).replace("\\", "/")
 
 
 def copy_vendored_runtime(target_root: str, plugin_root: str | None) -> str | None:

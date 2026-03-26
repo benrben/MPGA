@@ -38,7 +38,7 @@ def setup_mocks(monkeypatch):
     """Set up common mocks for cursor export tests."""
     mock_copy = MagicMock()
     mock_read_instructions = MagicMock(
-        side_effect=lambda _pr, slug, cli=None: f"Instructions for {slug}\n\n{cli or 'npx mpga'} sync"
+        side_effect=lambda _pr, slug, cli=None: f"Instructions for {slug}\n\n{cli or 'mpga'} sync"
     )
 
     monkeypatch.setattr("mpga.commands.export.cursor.AGENTS", MOCK_AGENTS)
@@ -129,7 +129,7 @@ class TestCursorProjectLevel:
         assert "[E]" in content
         assert "[Unknown]" in content
         assert "[Stale:" in content
-        assert "node ./.mpga-runtime/cli/dist/index.js evidence verify" in content
+        assert "./.mpga-runtime/bin/mpga.sh evidence verify" in content
 
     def test_tdd_mdc_content(self, tmp_path: Path, monkeypatch):
         """Generates mpga-tdd.mdc with TDD enforcement."""
@@ -210,7 +210,7 @@ class TestCursorProjectLevel:
             str(tmp_path / ".cursor" / "skills"),
             "/fake/plugin",
             "cursor",
-            "node ./.mpga-runtime/cli/dist/index.js",
+            "./.mpga-runtime/bin/mpga.sh",
         )
 
     def test_creates_agent_files(self, tmp_path: Path, monkeypatch):
@@ -253,7 +253,7 @@ class TestCursorProjectLevel:
         )
 
         content = (tmp_path / ".cursor" / "agents" / "mpga-test-agent.md").read_text()
-        assert "node ./.mpga-runtime/cli/dist/index.js" in content
+        assert "./.mpga-runtime/bin/mpga.sh" in content
         assert "${CLAUDE_PLUGIN_ROOT}/cli/dist/index.js" not in content
 
 
