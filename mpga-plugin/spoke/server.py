@@ -93,19 +93,42 @@ def get_model():
 
 
 def split_text(text):
-    chunks = re.split(r'(?<=[.!?,;:])\s+', text)
+    """Split text into natural sentence chunks for TTS generation.
+
+    Strategy: split only on sentence-ending punctuation (.!?) to keep
+    natural phrasing intact. Merge short fragments into the previous
+    chunk to avoid choppy single-word outputs.
+    """
+    # Split on sentence boundaries only — keep commas/semicolons INSIDE sentences
+    raw = re.split(r'(?<=[.!?])\s+', text)
+
+    # Merge tiny fragments (< 40 chars) with previous chunk
     merged = []
-    buf = ""
-    for c in chunks:
-        buf = (buf + " " + c).strip() if buf else c
-        if len(buf) >= 20:
-            merged.append(buf)
-            buf = ""
-    if buf:
-        if merged:
-            merged[-1] += " " + buf
+    for chunk in raw:
+        chunk = chunk.strip()
+        if not chunk:
+            continue
+        if merged and len(chunk) < 40:
+            merged[-1] += " " + chunk
         else:
-            merged.append(buf)
+            merged.append(chunk)
+
+    # If everything merged into one giant chunk (> 200 chars), split on commas/dashes
+    if len(merged) == 1 and len(merged[0]) > 200:
+        parts = re.split(r'(?<=[,;—–])\s+', merged[0])
+        merged = []
+        buf = ""
+        for p in parts:
+            buf = (buf + " " + p).strip() if buf else p
+            if len(buf) >= 80:
+                merged.append(buf)
+                buf = ""
+        if buf:
+            if merged:
+                merged[-1] += " " + buf
+            else:
+                merged.append(buf)
+
     return merged if merged else [text]
 
 
@@ -129,14 +152,30 @@ class Handler(BaseHTTPRequestHandler):
 
         model, voice = get_model()
         t0 = time.time()
-        audio = model.generate_audio(voice, text)
-        audio_loud = normalize_audio(audio)
+
+        # Split into sentence chunks for natural pacing
+        chunks = split_text(text)
+        audio_parts = []
+        for i, chunk in enumerate(chunks):
+            chunk_audio = model.generate_audio(voice, chunk)
+            chunk_loud = normalize_audio(chunk_audio)
+            audio_parts.append(chunk_loud)
+            print(f"[spoke] chunk {i+1}/{len(chunks)}: {chunk[:50]}")
+
+        # Concatenate all chunks with minimal silence (30ms — just enough for natural breath)
+        silence = np.zeros(int(model.sample_rate * 0.03), dtype=np.float32)
+        combined = []
+        for i, part in enumerate(audio_parts):
+            combined.append(part)
+            if i < len(audio_parts) - 1:
+                combined.append(silence)
+        full_audio = np.concatenate(combined)
 
         buf = io.BytesIO()
-        scipy.io.wavfile.write(buf, model.sample_rate, audio_loud)
+        scipy.io.wavfile.write(buf, model.sample_rate, full_audio)
         wav_data = buf.getvalue()
 
-        print(f"[spoke] {time.time()-t0:.1f}s: {text[:60]}")
+        print(f"[spoke] {time.time()-t0:.1f}s total: {text[:60]}")
         self._send_wav(wav_data)
 
     def _handle_stream(self):

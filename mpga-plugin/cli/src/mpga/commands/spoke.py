@@ -21,6 +21,119 @@ CACHE_DIR = Path.home() / ".mpga" / "spoke-cache"
 PORT = 5151
 
 
+def trumpify(text: str) -> str:
+    """Rewrite text into Trump's natural speaking cadence.
+
+    Studied from hundreds of rally speeches and press conferences.
+    Trump's signature patterns:
+    - Fragments, not sentences. 3-8 words max.
+    - Immediate repetition: "It's big. Very big."
+    - Self-interruption mid-thought: "And by the way—"
+    - Callback: "I told them. I said it from the beginning."
+    - Superlative stacking: "the best, maybe the best ever"
+    - Direct audience address: "you know it", "everybody knows"
+    - Pause-for-effect one-word sentences: "Tremendous." "Beautiful."
+    """
+    import random
+
+    # Sentence starters — Trump almost always opens with one of these
+    openers = [
+        "Look, ", "Here's the thing. ", "And let me tell you something. ",
+        "So, ", "Now, ", "And frankly, ", "You know what? ",
+        "Here's what happened. ", "I'll tell you, ", "People don't know this but, ",
+    ]
+
+    # Mid-speech interjections — dropped between fragments
+    interjections = [
+        "Believe me.", "It's true.", "Everybody knows it.",
+        "True.", "That I can tell you.", "OK?",
+        "You know that.", "Right?", "Think about it.",
+        "Nobody thought it was possible.", "And they said it couldn't be done.",
+        "Many people are saying it.", "Incredible.", "Tremendous.",
+        "The likes of which nobody's ever seen.", "Not even close.",
+    ]
+
+    # Callbacks — Trump loves referring back to himself
+    callbacks = [
+        "I said it from day one.", "I called it.", "I was right.",
+        "And I said that a long time ago.", "Everyone told me I was wrong. I wasn't.",
+        "I knew it before anybody.", "They didn't listen. Now they listen.",
+    ]
+
+    # Emphasis repetitions — key adjectives get the Trump double-tap
+    emphasis = {
+        "good": ["good. Very good.", "good, really good, the best actually"],
+        "great": ["great. Really great.", "great, maybe the greatest ever"],
+        "bad": ["bad. Really bad.", "bad, a total disaster frankly"],
+        "big": ["big. Very big.", "big, tremendously big"],
+        "important": ["important. Very important.", "important, maybe the most important ever"],
+        "fast": ["fast. Incredibly fast.", "fast, like nobody's ever seen"],
+        "best": ["the best. The absolute best.", "the best, and nobody even comes close"],
+        "beautiful": ["beautiful. So beautiful.", "beautiful, the most beautiful you've ever seen"],
+        "strong": ["strong. Very strong.", "strong, the strongest in history"],
+        "smart": ["smart. Very smart.", "smart, genius level frankly"],
+        "clean": ["clean. Very clean.", "clean, the cleanest anyone's ever seen"],
+        "perfect": ["perfect. Absolutely perfect.", "perfect, some say the most perfect ever"],
+        "amazing": ["amazing. Truly amazing.", "amazing, like nothing you've ever seen"],
+        "terrible": ["terrible. Just terrible.", "terrible, maybe the worst ever"],
+        "incredible": ["incredible. Truly incredible.", "incredible, the likes of which nobody's seen"],
+        "tremendous": ["tremendous. Absolutely tremendous.", "tremendous, people can't believe it"],
+    }
+
+    sentences = re.split(r'(?<=[.!?])\s+', text.strip())
+    result = []
+
+    # 40% chance to open with a Trump-style starter
+    if random.random() < 0.4:
+        result.append(random.choice(openers))
+
+    for i, sentence in enumerate(sentences):
+        s = sentence.strip()
+        if not s:
+            continue
+
+        # Break long sentences (>12 words) into Trump fragments
+        words = s.split()
+        if len(words) > 12:
+            mid = len(words) // 2
+            # Find a natural break near the middle (comma, conjunction)
+            break_at = mid
+            for j in range(max(mid - 3, 0), min(mid + 3, len(words))):
+                w = words[j].lower().rstrip(".,!?;:")
+                if w in ("and", "but", "because", "so", "which", "that", "where", "when") or words[j].endswith(","):
+                    break_at = j
+                    break
+            first_half = " ".join(words[:break_at + 1]).rstrip(",")
+            second_half = " ".join(words[break_at + 1:])
+            if first_half and second_half:
+                s = first_half + ". " + second_half
+                if not s.rstrip().endswith((".", "!", "?")):
+                    s = s.rstrip() + "."
+
+        # Apply emphasis doubling (40% chance per matching word)
+        out_words = []
+        for w in s.split():
+            lower = w.lower().rstrip(".,!?;:")
+            punct = w[len(lower):] if len(w) > len(lower) else ""
+            if lower in emphasis and random.random() < 0.4:
+                out_words.append(random.choice(emphasis[lower]) + punct)
+            else:
+                out_words.append(w)
+        s = " ".join(out_words)
+
+        result.append(s)
+
+        # Interjection after sentence (30% chance, never after last)
+        if i < len(sentences) - 1 and random.random() < 0.3:
+            result.append(random.choice(interjections))
+
+    # 25% chance to end with a callback
+    if random.random() < 0.25:
+        result.append(random.choice(callbacks))
+
+    return " ".join(result)
+
+
 def _find_spoke_dir() -> Path:
     """Find the spoke directory — check plugin root first, then .mpga-runtime."""
     # 1. Relative to this file (inside the plugin)
@@ -173,6 +286,9 @@ def spoke_cmd(
 
     # Strip ANSI escape codes
     clean_text = re.sub(r"\x1b\[[0-9;]*m", "", joined_text)
+
+    # Trumpify the text for natural Trump speaking cadence
+    clean_text = trumpify(clean_text)
 
     if not _is_server_running():
         _start_server(spoke_dir)
