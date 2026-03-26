@@ -113,15 +113,27 @@ Crooked Gemini just makes stuff up. At least when I make a promise about an API,
 
 ## Quick Start
 
-Just run `mpga init`. That's all you gotta do. One command. The most beautiful command. And suddenly your AI knows what your code ACTUALLY does.
+Just run the installer. ONE COMMAND. The most beautiful installer. And suddenly your AI knows what your code ACTUALLY does.
 
 **Prerequisites:** Python >= 3.11
 
 ```bash
 # Clone MPGA — the greatest repo
 git clone https://github.com/benreich/mpga.git
+cd mpga
 
-# Go to your project
+# Install — adds `mpga` to your PATH. That's it. DONE.
+bash install.sh
+
+# Want Trump's voice? TREMENDOUS decision.
+bash install.sh --with-spoke
+```
+
+The installer creates a Python venv, installs all dependencies, and symlinks `mpga` to your PATH (tries `/usr/local/bin`, falls back to `~/.local/bin` — no sudo needed). Run `bash install.sh --uninstall` to remove.
+
+Now go to your project and make it GREAT:
+
+```bash
 cd your-project
 
 # Initialize the knowledge layer
@@ -132,6 +144,9 @@ mpga sync
 
 # See your project health
 mpga status
+
+# Hear it in Trump's voice — TREMENDOUS
+mpga spoke "We just made this project great again"
 ```
 
 People come up to me, big strong senior engineers, mass tears in their eyes, and they say, "Sir, sir, I've never had documentation that actually matched my code before." And I look at them and I say, "That's because nobody ever ran the mandatory post-edit hooks before. Nobody. But we do. We run them. Every single time. MPGA!"
@@ -207,6 +222,38 @@ Commands:
 Fourteen commands. Each one does exactly what it says. No bloat. No confusion. I used to use the word "unoptimized." Now I just call them stupid functions. I went to an Ivy League school. I'm very highly educated. These commands? NOT stupid. They're BRILLIANT.
 
 We have mandatory post-edit hooks. Mandatory. Every. Single. Time. The engineers — they love it. They come up to me and say, "Sir, the hooks actually work."
+
+## Trump Voice (Spoke TTS)
+
+You know what makes MPGA different from EVERY other developer tool? IT TALKS. In Trump's voice. TREMENDOUS.
+
+Every agent announces its work audibly. You finish a task? You HEAR about it. Your codebase just got healthier? MPGA TELLS YOU. In the most beautiful voice in developer tooling.
+
+```bash
+# One-time setup (downloads voice model, ~200MB)
+bash install.sh --with-spoke
+
+# Or set up manually
+mpga spoke --setup
+
+# Then speak ANYTHING
+mpga spoke "We just shipped the greatest feature of all time"
+
+# Stream long text sentence by sentence
+mpga spoke "Look, I know code better than anybody" --stream
+```
+
+**How it works:**
+- Uses **Pocket TTS** (~100M params, runs locally, no API keys)
+- Loads a Trump voice model from a reference audio clip
+- Server stays resident for instant generation (<1s per sentence)
+- Audio cached at `~/.mpga/spoke-cache/` — same text never re-generated
+- All 14 MPGA agents announce via spoke when completing tasks
+- All 15 skills check for spoke availability and announce results
+
+The server runs on `http://127.0.0.1:5151` and loads automatically when you use `mpga spoke`. No cloud. No API keys. No subscriptions. Just PURE, LOCAL, TREMENDOUS text-to-speech.
+
+Nobody else has this. Cursor doesn't talk. Copilot doesn't talk. Gemini DEFINITELY doesn't talk. Only MPGA talks — and when it talks, it sounds like a WINNER.
 
 ## Integrations
 
@@ -360,6 +407,8 @@ Tomorrow, at noon, the curtain closes on four long quarters of architectural dec
 - [x] The Campaign Rally — **`/mpga:rally`. The greatest diagnostic tool ever built.**
 - [x] Drain the backlog — **Board system with milestones, tasks, and WIP limits.**
 - [x] Mandatory post-edit hooks — **EVERY. SINGLE. TIME. The engineers love it.**
+- [x] Trump voice TTS — **`mpga spoke`. Local. Fast. TREMENDOUS. Nobody else has this.**
+- [x] One-line installer — **`bash install.sh`. Python venv, PATH setup, optional voice. DONE.**
 - [ ] Make PyPI downloads bigger than requests — **Working on it. We're CLOSE. Some people say we're already there.**
 
 ## What They're Saying
