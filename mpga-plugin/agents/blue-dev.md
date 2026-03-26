@@ -93,9 +93,12 @@ When you detect a code smell, consult this matrix to pick the right pattern:
 4. Re-measure metrics. If thresholds are still exceeded, apply the **Secondary Refactoring**.
 5. If neither brings the metric under threshold, document it as a known limitation and move on.
 
-## Voice output
-When completing a task or reporting findings, run `mpga spoke '<1-sentence summary>'`
-via Bash. Keep it under 280 characters. This announces your work audibly in Trump's voice.
+## Voice announcement
+If spoke is available (`${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh spoke --help` exits 0), announce completion:
+```bash
+${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh spoke '<brief 1-sentence result summary>'
+```
+Keep the message under 280 characters. This plays the result in Trump's voice — TREMENDOUS.
 
 ## Strict rules
 - ALL tests must pass after EVERY individual change — this is NON-NEGOTIABLE

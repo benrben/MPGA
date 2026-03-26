@@ -347,7 +347,7 @@ class TestCursorEdgeCases:
 
         mock_copy.assert_called_once()
         assert mock_copy.call_args[0][1] is None
-        assert mock_copy.call_args[0][3] == "npx mpga"
+        assert mock_copy.call_args[0][3] == "mpga"
 
     def test_scopes_mdc_filters_non_md(self, tmp_path: Path, monkeypatch):
         """Scopes mdc filters non-.md files."""

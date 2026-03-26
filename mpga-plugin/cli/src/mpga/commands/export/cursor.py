@@ -35,7 +35,7 @@ def export_cursor(
     if is_global:
         home = os.environ.get("HOME", "~")
         cursor_root = str(Path(home) / ".cursor")
-        cli_command = global_vendored_cli_command(cursor_root) if plugin_root else "npx mpga"
+        cli_command = global_vendored_cli_command(cursor_root) if plugin_root else "mpga"
         copy_vendored_runtime(cursor_root, plugin_root)
         log.info("Add the following to Cursor Settings > General > Rules for AI:")
         log.info("\n" + _generate_cursor_global(cli_command))
@@ -52,7 +52,7 @@ def export_cursor(
             )
         log.success(f"Generated ~/.cursor/agents/ ({len(AGENTS)} agents)")
     else:
-        cli_command = project_vendored_cli_command() if plugin_root else "npx mpga"
+        cli_command = project_vendored_cli_command() if plugin_root else "mpga"
         copy_vendored_runtime(project_root, plugin_root)
         # Rules
         rules_dir = Path(project_root) / ".cursor" / "rules"

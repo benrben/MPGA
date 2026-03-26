@@ -32,7 +32,7 @@ def export_antigravity(
     if is_global:
         home = os.environ.get("HOME", "~")
         gemini_root = str(Path(home) / ".gemini")
-        cli_command = global_vendored_cli_command(gemini_root) if plugin_root else "npx mpga"
+        cli_command = global_vendored_cli_command(gemini_root) if plugin_root else "mpga"
         copy_vendored_runtime(gemini_root, plugin_root)
         ag_global_skills_dir = str(
             Path(home) / ".gemini" / "antigravity" / "skills"
@@ -46,7 +46,7 @@ def export_antigravity(
         )
         log.success("Generated ~/.antigravity/rules/mpga-global.md")
     else:
-        cli_command = project_vendored_cli_command() if plugin_root else "npx mpga"
+        cli_command = project_vendored_cli_command() if plugin_root else "mpga"
         copy_vendored_runtime(project_root, plugin_root)
         # GEMINI.md constitution
         (Path(project_root) / "GEMINI.md").write_text(

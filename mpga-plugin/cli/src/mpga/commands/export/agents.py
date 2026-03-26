@@ -298,7 +298,7 @@ def _copy_dir(
             if cli_path:
                 content = rewrite_cli_references(content, cli_path, plugin_root)
             elif tool_name != "claude":
-                # Rewrite CLAUDE_PLUGIN_ROOT references to use npx mpga for non-Claude tools
+                # Rewrite CLAUDE_PLUGIN_ROOT references to use mpga for non-Claude tools
                 content = rewrite_cli_references(content, None, plugin_root)
             dest_path.write_text(content, encoding="utf-8")
 
@@ -333,7 +333,7 @@ description: {desc}
 
 See MPGA documentation for full protocol.
 
-Run `npx mpga {cli_equivalent}` for CLI equivalent.
+Run `mpga {cli_equivalent}` for CLI equivalent.
 """
 
 

@@ -35,7 +35,7 @@ def export_codex(
     if is_global:
         home = os.environ.get("HOME", "~")
         codex_global_dir = str(Path(home) / ".codex")
-        cli_command = global_vendored_cli_command(codex_global_dir) if plugin_root else "npx mpga"
+        cli_command = global_vendored_cli_command(codex_global_dir) if plugin_root else "mpga"
         copy_vendored_runtime(codex_global_dir, plugin_root)
         Path(codex_global_dir).mkdir(parents=True, exist_ok=True)
         (Path(codex_global_dir) / "AGENTS.md").write_text(
@@ -54,7 +54,7 @@ def export_codex(
             )
         log.success(f"Generated ~/.codex/agents/ ({len(AGENTS)} TOML agents)")
     else:
-        cli_command = project_vendored_cli_command() if plugin_root else "npx mpga"
+        cli_command = project_vendored_cli_command() if plugin_root else "mpga"
         copy_vendored_runtime(project_root, plugin_root)
         # Root AGENTS.md
         (Path(project_root) / "AGENTS.md").write_text(
