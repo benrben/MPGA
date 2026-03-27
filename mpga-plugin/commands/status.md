@@ -4,7 +4,7 @@ Show the MPGA project health dashboard. Tremendous transparency, big league numb
 
 ## Steps
 
-1. Run `${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh status` and display the output
+1. Run `mpga status` and display the output
 2. If MPGA not initialized → suggest `/mpga:init`
 3. Highlight any issues (stale evidence, blocked tasks) — Sad! Wrong! Fix them now
 

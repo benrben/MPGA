@@ -16,10 +16,7 @@ flowchart TD
     F --> J[Rate every claim — HIGH / MEDIUM / LOW\nwe have STANDARDS]
     J --> K[Add source citations to EVERY claim\nE links — TOTAL accountability]
     K --> L[Suggest 2-3 follow-ups\ndeeper / wider / WINNING]
-    L --> M{Spoke available?}
-    M -->|Yes| N[mpga spoke — HUGE announcement]
-    M -->|No| O[Done — tremendous answers, believe me. Covfefe]
-    N --> O
+    L --> M[mpga spoke — if available]
 ```
 
 ## Inputs — What We Need to WIN

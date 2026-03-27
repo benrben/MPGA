@@ -31,7 +31,7 @@ flowchart TD
     U --> W
     V --> W
     W --> X[Produce bug hunt report with file:line evidence — TREMENDOUS detail]
-    X --> Y[mpga spoke announcement — BUGS EXPOSED]
+    X --> Y[mpga spoke — if available]
 ```
 
 ## Inputs — The Investigation Begins

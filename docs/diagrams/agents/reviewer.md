@@ -5,21 +5,21 @@
 ```mermaid
 flowchart TD
     A[Receive code changes + scope docs + criteria — the EVIDENCE] --> B[Review the DIFF first — very SMART, not the whole repo]
-    B --> C["Stage 1: Spec Compliance — did they DO what they SAID?"]
-    C --> D{Implementation matches acceptance criteria?}
-    D --> E{Tests written BEFORE implementation? — CHECK the history}
-    E --> F{Tests start with degenerate cases? — PROPER TDD}
-    F --> G{Evidence links still valid? — no STALE evidence}
-    G --> H{Scope docs updated? — no fake docs allowed}
-    H --> I{"evidence_produced populated? — ACCOUNTABILITY"}
-    I --> J["Stage 2: Code Quality — the REAL test"]
+    B --> C["Stage 1: Spec Compliance — run ALL checks, accumulate findings"]
+    C --> C1{Implementation matches acceptance criteria?}
+    C --> C2{Tests written BEFORE implementation? — check history}
+    C --> C3{Tests start with degenerate cases? — TPP}
+    C --> C4{Evidence links still valid? — no stale evidence}
+    C --> C5{Scope docs updated after changes?}
+    C --> C6{"evidence_produced populated?"}
+    C1 & C2 & C3 & C4 & C5 & C6 --> J["Stage 2: Code Quality — the REAL test\n(Stage 1 findings accumulated above)"]
     J --> K["2a: Clean Code — naming, function size, EXCELLENCE"]
     J --> L["2b: Performance — no re-renders, no O of n squared — FAST code"]
     J --> M["2c: Security — XSS, SQL injection, TOTAL protection"]
     J --> N["2d: Test Smells — duplicated setup, brittle assertions — WEAK tests"]
     J --> O["2e: Code Smells — long methods, feature envy, dead code — SLOPPY"]
     J --> P["2f: Architecture — circular deps, god objects — STRUCTURAL problems"]
-    K & L & M & N & O & P --> Q[Tag every finding with severity — we RANK everything]
+    K & L & M & N & O & P --> Q["Tag every finding:\n- Severity (CRITICAL/HIGH/MEDIUM/LOW)\n- Skip: pre-existing, linter-caught, low-confidence\nACCUMULATE all findings"]
     Q --> R{Any CRITICAL findings?}
     R -->|Yes| S[Verdict: FAIL — Sad! Go BACK and FIX it]
     R -->|No| T{Any HIGH findings?}
@@ -28,7 +28,7 @@ flowchart TD
     S --> W[List required fixes — do THIS before coming back]
     U --> W
     V --> X[List recommended and consider items — even WINNERS can improve]
-    W --> Y[mpga spoke announcement — REVIEW COMPLETE]
+    W --> Y[mpga spoke — if available]
     X --> Y
 ```
 

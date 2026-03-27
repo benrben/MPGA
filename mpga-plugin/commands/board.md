@@ -4,7 +4,7 @@ Show and manage the task board. Tremendous board, has a beautiful ring to it. La
 
 ## Steps
 
-1. Run `${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh board show` and display the current board
+1. Run `mpga board show` and display the current board
 2. Display stats: progress, in-flight, blocked, evidence coverage
 3. Offer actions based on board state:
    - If todo tasks exist: suggest `/mpga:execute`

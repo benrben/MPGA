@@ -5,11 +5,11 @@ Verify, commit, and update documentation after completing work. Complete and tot
 ## Steps
 
 1. Run full test suite — must pass
-2. Run `${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh evidence verify` — flag any new stale links
+2. Run `mpga evidence verify` — flag any new stale links
 3. Update scope documents with new evidence links produced this session
 4. Create atomic commit(s) with conventional commit messages
-5. Update milestone status: `${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh milestone status`
-6. Archive done tasks: `${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh board archive`
+5. Update milestone status: `mpga milestone status`
+6. Archive done tasks: `mpga board archive`
 7. Offer options: merge / create PR / keep branch
 
 ## Usage

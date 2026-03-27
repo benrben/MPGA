@@ -13,11 +13,11 @@ flowchart TD
     G --> H[Find exact duplicates: 5+ identical lines — LAZY, very lazy]
     H --> I[Find structural duplicates: same logic, different names — SNEAKY duplication]
     I --> J[Find missed utility extraction and copy-paste test setup — WASTEFUL]
-    J --> K["Elegance Assessment: Kent Beck's 4 Rules — the GOLD standard"]
-    K --> L{Passes all tests?}
-    L --> M{Reveals intention?}
-    M --> N{No duplication?}
-    N --> O{Fewest elements?}
+    J --> K["Elegance Assessment — Kent Beck's 4 Rules (in priority order)"]
+    K --> L["Rule 1: Passes all tests — find untested paths, missing coverage"]
+    L --> M["Rule 2: Reveals intention — unclear names, magic numbers, opaque params"]
+    M --> N["Rule 3: No duplication — copy-paste, structural duplicates, missed extractions"]
+    N --> O["Rule 4: Fewest elements — dead code, unnecessary abstractions, over-engineering"]
     O --> P["Sandi Metz Rules Check — very STRICT, I like it"]
     P --> Q["Classes <100 lines? Methods <5 lines? Params <=4? — DISCIPLINE"]
     Q --> R[Rate each finding: HIGH / MEDIUM / LOW — we RANK everything]
@@ -30,7 +30,7 @@ flowchart TD
     U --> Y[Produce optimization report — TREMENDOUS findings]
     W --> Y
     X --> Y
-    Y --> Z[mpga spoke announcement — tremendous. Even the type annotations are perfect]
+    Y --> Z[mpga spoke — if available]
 ```
 
 ## Inputs — The Investigation Materials

@@ -9,7 +9,7 @@ Run full verification pass on completed work. Law and order in the codebase. Com
    - Run full test suite
    - Check for stubs/incomplete implementations
    - Verify evidence links are updated
-   - Run `${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh drift --quick`
+   - Run `mpga drift --quick`
    - Confirm milestone progress
 3. Display verification report
 4. If passed: suggest `/mpga:ship` — Great job! Tremendous verification

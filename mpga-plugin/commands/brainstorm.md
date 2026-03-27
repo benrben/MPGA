@@ -4,7 +4,7 @@ Socratic design refinement before writing any code. Build the wall between modul
 
 ## Steps
 
-1. Start the live board in the browser: `${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh board live --serve --open`
+1. Start the live board in the browser: `mpga board live --serve --open`
 2. DO NOT jump into code — ask clarifying questions first
 3. Use the Socratic method to refine the design:
    - What problem does this solve?

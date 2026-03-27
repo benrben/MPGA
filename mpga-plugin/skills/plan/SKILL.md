@@ -13,8 +13,8 @@ description: Generate an evidence-based implementation plan with milestone and t
 
 **If an active milestone already exists:**
 ```
-${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh board live --serve --open
-${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh milestone list
+mpga board live --serve --open
+mpga milestone list
 cat MPGA/milestones/<id>/PLAN.md
 cat MPGA/milestones/<id>/DESIGN.md  # if exists
 ```
@@ -23,8 +23,8 @@ Ask the user: plan tasks under the existing milestone, or create a new one?
 **If no milestone exists (or user wants a new one):**
 Create a milestone from the user's goal — every great achievement starts with a PLAN:
 ```
-${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh board live --serve --open
-${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh milestone new "<goal name>"
+mpga board live --serve --open
+mpga milestone new "<goal name>"
 ```
 Then edit the generated `PLAN.md` with the user's objective and acceptance criteria.
 
@@ -135,7 +135,7 @@ Rules for phases:
 
 For each task, run:
 ```
-${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh board add "<title>" \
+mpga board add "<title>" \
   --priority <level> \
   --scope <scope> \
   --column todo \
@@ -158,7 +158,7 @@ A COMPREHENSIVE battle plan.
 ### Step 10: Show the board
 
 ```
-${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh board show
+mpga board show
 ```
 Look at that board. BEAUTIFUL. Has a beautiful ring to it. Ready to EXECUTE.
 
@@ -216,10 +216,10 @@ Look at that board. BEAUTIFUL. Has a beautiful ring to it. Ready to EXECUTE.
 
 ## Voice announcement
 
-If spoke is available (`${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh spoke --help` exits 0), announce completion:
+If spoke is available (`mpga spoke --help` exits 0), announce completion:
 
 ```bash
-${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh spoke '<brief 1-sentence result summary>'
+mpga spoke '<brief 1-sentence result summary>'
 ```
 
 Keep the message under 280 characters. This plays the result in Trump's voice — TREMENDOUS.

@@ -28,11 +28,8 @@ flowchart TD
     L --> M{User wants board tasks?}
     M -->|Yes| N[Create tasks for CRITICAL/HIGH\nfindings — FIX THEM]
     N --> O[Group LOW/MEDIUM into\none cleanup task — EFFICIENT]
-    M -->|No| P{Spoke available?}
+    M -->|No| P[mpga spoke — if available]
     O --> P
-    P -->|Yes| Q[mpga spoke — DIAGNOSIS delivered]
-    P -->|No| R[Done — MPGA alone can fix it]
-    Q --> R
 ```
 
 ## Inputs — Point Us at the Problem

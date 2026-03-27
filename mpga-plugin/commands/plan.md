@@ -4,7 +4,7 @@ Generate an evidence-based implementation plan for the active milestone. Evidenc
 
 ## Steps
 
-1. Start the live board in the browser: `${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh board live --serve --open`
+1. Start the live board in the browser: `mpga board live --serve --open`
 2. Read `MPGA/INDEX.md` for active milestone
 3. Read the milestone's PLAN.md: `cat MPGA/milestones/<id>/PLAN.md`
 4. Read relevant scope documents based on milestone objective
@@ -17,10 +17,10 @@ Generate an evidence-based implementation plan for the active milestone. Evidenc
    - One write lane per scope
 7. Create task cards on the board:
    ```
-   ${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh board add "<title>" --priority <p> --scope <scope> --column todo
+   mpga board add "<title>" --priority <p> --scope <scope> --column todo
    ```
 8. Write the plan to `MPGA/milestones/<id>/PLAN.md`
-9. Show board: `${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh board show`
+9. Show board: `mpga board show`
 
 ## Usage
 ```

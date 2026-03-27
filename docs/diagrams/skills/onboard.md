@@ -27,11 +27,8 @@ flowchart TD
 
     J --> K{Scope docs stale?}
     K -->|Yes| L[Suggest mpga sync — REFRESH them]
-    K -->|No| M{Spoke available?}
+    K -->|No| M[mpga spoke — if available]
     L --> M
-    M -->|Yes| N[mpga spoke — WELCOME aboard]
-    M -->|No| O[Done — tremendous onboarding. Great job! Enjoy!]
-    N --> O
 ```
 
 ## Inputs — The Foundation

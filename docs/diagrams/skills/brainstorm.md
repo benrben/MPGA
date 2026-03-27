@@ -12,20 +12,13 @@ flowchart TD
     E --> F["Phase 3: STRESS-TEST the Design\nScale, dependencies, blast radius\nwe leave NOTHING to chance"]
     F --> G["Phase 4: Close the DEAL\nPresent sections one at a time"]
 
-    G --> H[User experience / API shape]
-    H --> I{User approves? GREAT taste}
-    I -->|No| H
-    I -->|Yes| J[Data model — VERY important]
-    J --> K{User approves?}
-    K -->|No| J
-    K -->|Yes| L[Integration + Security + Testing]
-    L --> M{User approves?}
-    M -->|No| L
-    M -->|Yes| N[Save DESIGN.md — a MASTERPIECE\nMPGA/milestones/id/DESIGN.md]
-    N --> O{Spoke available?}
-    O -->|Yes| P[mpga spoke — YUGE announcement]
-    O -->|No| Q[Ready for /mpga:plan — has a beautiful ring to it]
-    P --> Q
+    G --> H["Present design sections ONE at a time —\n1. User experience / API shape\n2. Data model\n3. Integration + Security + Testing\nRevise each until approved before moving on"]
+    H --> I{Section approved?}
+    I -->|No — revise| H
+    I -->|Yes| J{More sections?}
+    J -->|Yes| H
+    J -->|No — all approved| K[Save DESIGN.md — a MASTERPIECE\nMPGA/milestones/id/DESIGN.md]
+    K --> O[mpga spoke — if available]
 ```
 
 ## Inputs — The Raw Materials

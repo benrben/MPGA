@@ -26,7 +26,7 @@ flowchart TD
     P -->|No — all acceptance criteria covered| R["Commit: feat: description — a WINNING commit"]
     R --> S["Update board: mpga board update task-id --tdd-stage green — GREEN means GO"]
     S --> T["Hand off to blue-dev — make it BEAUTIFUL"]
-    T --> U[mpga spoke announcement — Great job! Enjoy!]
+    T --> U[mpga spoke — if available]
 ```
 
 ## Inputs — The Mission Briefing

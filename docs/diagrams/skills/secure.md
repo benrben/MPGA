@@ -27,10 +27,7 @@ flowchart TD
 
     L --> M["Auto-create board tasks:\n- Individual tasks for CRITICAL/HIGH\n- Grouped task for MEDIUM\n- LOW noted in report only — EFFICIENT"]
 
-    M --> N{Spoke available?}
-    N -->|Yes| O[mpga spoke — SECURITY report delivered]
-    N -->|No| P[Done — some deps, I assume, are good packages. Tremendous security]
-    O --> P
+    M --> N[mpga spoke — if available]
 ```
 
 ## Inputs — What We Scan

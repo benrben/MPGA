@@ -9,12 +9,10 @@ flowchart TD
     C --> D[Build coverage checklist: map criteria to tests — TOTAL coverage plan]
     D --> E[Start with most DEGENERATE test case: null, zero, empty — the BASICS]
     E --> F[Write ONE failing test — describes expected behavior, VERY precise]
-    F --> G[Run test quality self-check — we have STANDARDS]
-    G --> H{Name describes behavior?}
-    H --> I{Follows Arrange-Act-Assert?}
-    I --> J{One behavior per test?}
-    J --> K{Fails for the RIGHT reason?}
-    K --> L[Run test suite — moment of TRUTH]
+    F --> G["Quality self-check — 4 gates, ALL must pass:\n1. Name describes behavior, not impl\n2. Follows Arrange-Act-Assert\n3. One behavior per test\n4. Fails for the RIGHT reason"]
+    G --> H{All 4 gates pass?}
+    H -->|No — rewrite| F
+    H -->|Yes| L[Run test suite — moment of TRUTH]
     L --> M{New test FAILS?}
     M -->|No — passes without new code| N[Delete test or make it more specific — Wrong! Not good enough]
     N --> F
@@ -27,7 +25,7 @@ flowchart TD
     R -->|Yes| T["Commit: test: description — LOCKED IN"]
     T --> U["Update board: mpga board update task-id --tdd-stage red — WINNING"]
     U --> V[Hand off to green-dev with coverage summary — GO GET 'EM]
-    V --> W[mpga spoke announcement — complete and total shutdown of untested deploys]
+    V --> W[mpga spoke — if available]
 ```
 
 ## Inputs — The Mission Parameters

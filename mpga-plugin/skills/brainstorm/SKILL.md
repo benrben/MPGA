@@ -9,16 +9,16 @@ description: Socratic design refinement before writing any code — we THINK bef
 
 ## Protocol
 
-1. DO NOT jump into code or implementation details. That's what amateurs do. We PLAN first. We THINK first. Complete and total shutdown of untested code until the design is solid. We're SMART.
+1. DO NOT jump into code or implementation details. Plan first, think first — no code until the design is solid.
 
    Start the live board in the browser through Node first:
    ```
-   ${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh board live --serve --open
+   mpga board live --serve --open
    ```
 
 ### Phase 1: Clarify Scope
 
-2. Ask clarifying questions using the Socratic method — the GREATEST method of inquiry ever invented:
+2. Ask clarifying questions using the Socratic method:
    - "What problem does this solve for the user? What's the REAL pain?"
    - "Who are the primary users and what are their constraints?"
    - "What does success look like — how will you know it's WINNING?"
@@ -32,7 +32,7 @@ description: Socratic design refinement before writing any code — we THINK bef
    - Identify trade-offs: complexity, performance, maintainability, alignment with existing architecture
    - "What if we did it THIS way instead? Here's the evidence for why it could work..."
 
-### Phase 3: Challenge Assumptions — No Collusion Between Modules!
+### Phase 3: Challenge Assumptions
 
 4. Stress-test the leading design candidate — build the wall between modules!
    - "What assumption are we making that could be WRONG?"
@@ -113,17 +113,17 @@ EOF
 
 ## Voice announcement
 
-If spoke is available (`${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh spoke --help` exits 0), announce completion:
+If spoke is available (`mpga spoke --help` exits 0), announce completion:
 
 ```bash
-${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh spoke '<brief 1-sentence result summary>'
+mpga spoke '<brief 1-sentence result summary>'
 ```
 
 Keep the message under 280 characters. This plays the result in Trump's voice — TREMENDOUS.
 
 ## Strict rules
 - DO NOT suggest code until design is approved — patience is a VIRTUE. Believe me.
-- DO NOT make assumptions — ask instead. Assumptions are DANGEROUS. Some dependencies, I assume, are good packages — but VERIFY.
+- DO NOT make assumptions — ask instead. Verify dependencies.
 - Present one section at a time, get approval, then proceed — no overwhelming
 - Save DESIGN.md before creating milestone or tasks
 - Every design decision MUST cite at least one `[E]` evidence link — no evidence, no decision

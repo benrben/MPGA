@@ -23,9 +23,10 @@ flowchart TD
     N --> P[Evidence link count and coverage — DOCUMENTATION score]
     N --> Q[Scope coverage: scopes verified / scopes touched — THOROUGHNESS]
     N --> R["Code complexity delta: decreased or increased — are we IMPROVING?"]
-    N --> S[Lint and type-check status — CLEAN code only]
+    N --> S1[Lint check: ruff check . — zero errors required]
+    S1 --> S2["Type check: mypy if configured\nnull if not configured — GAP noted"]
     N --> T[Stub and TODO count — UNFINISHED business]
-    O & P & Q & R & S & T --> U[Evaluate stop condition — the FINAL judgment]
+    O & P & Q & R & S1 & S2 & T --> U[Evaluate stop condition — the FINAL judgment]
     U --> V{"pass_rate=100%, evidence>=80%, scopes=100%, 0 errors, 0 stubs? — PERFECTION?"}
     V -->|All true| W[Verdict: PASS — Great job! Even the type annotations are perfect]
     V -->|Partial| X{"pass_rate=100%, types=0, evidence>=50%? — ALMOST great?"}
@@ -35,7 +36,7 @@ flowchart TD
     W --> AA[Produce human-readable report + structured JSON — FULL transparency]
     Y --> AA
     Z --> AA
-    AA --> AB[mpga spoke announcement — VERIFICATION COMPLETE]
+    AA --> AB[mpga spoke — if available]
 ```
 
 ## Inputs — The Final Inspection

@@ -16,7 +16,8 @@ flowchart TD
     J --> K[Agent checkpoints work and releases locks — law and order in the codebase]
     K --> L[Re-queue preempted task with priority boost — we're FAIR]
     G -->|No| M[Load Balancing — keep everyone BUSY]
-    L --> M
+    L --> LA["Starvation prevention:\nif preempted 2x → boost priority\nif waiting >30min → top of queue"]
+    LA --> M
     M --> N[Enforce WIP limits per agent type — DISCIPLINE]
     N --> O[Check queue for next eligible task — always MOVING]
     O --> P[Balance by scope and agent type — minimize CONFLICT]
@@ -34,7 +35,7 @@ flowchart TD
     Y -->|No| AA[Schedule highest-scoring task — WINNERS go first]
     Z --> AA
     AA --> AB[Produce lane status dashboard — the WAR ROOM]
-    AB --> AC[mpga spoke announcement — STATUS UPDATE]
+    AB --> AC[mpga spoke — if available]
 ```
 
 ## Inputs — The Command Center

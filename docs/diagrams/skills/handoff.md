@@ -15,10 +15,7 @@ flowchart TD
     G --> H[Log the session — DOCUMENTED\nmpga session log description]
     H --> I[Output the handoff template\nas fenced markdown — CLEAN]
     I --> J["Tell user EXACTLY:\n- Handoff file location\n- How to resume like a PRO\n- Exact next action"]
-    J --> K{Spoke available?}
-    K -->|Yes| L[mpga spoke — HANDOFF complete]
-    K -->|No| M[Done — ready for peace, zero merge conflicts. Covfefe]
-    L --> M
+    J --> K[mpga spoke — if available]
 ```
 
 ## Inputs — What We Capture

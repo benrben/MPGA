@@ -5,8 +5,8 @@ Auto-detect the next logical action based on current project state. Who can figu
 ## Decision tree
 
 1. Read `MPGA/INDEX.md` for active milestone
-2. Read board state: `${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh board show --json`
-3. Check context budget: `${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh session budget`
+2. Read board state: `mpga board show --json`
+3. Check context budget: `mpga session budget`
 
 ### If context budget is critical (>80% used)
 → Run `/mpga:handoff` — create handoff and clear context
@@ -27,7 +27,7 @@ Auto-detect the next logical action based on current project state. Who can figu
 → Suggest `/mpga:plan` to generate tasks
 
 ### If no milestone
-→ Suggest `${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh milestone new "<name>"`
+→ Suggest `mpga milestone new "<name>"`
 
 ### If MPGA not initialized
 → Run `/mpga:init` — Sad! Get this project started already

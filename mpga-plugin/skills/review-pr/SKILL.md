@@ -105,10 +105,10 @@ The review should be structured for easy consumption — because WINNERS respect
 
 ## Voice announcement
 
-If spoke is available (`${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh spoke --help` exits 0), announce completion:
+If spoke is available (`mpga spoke --help` exits 0), announce completion:
 
 ```bash
-${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh spoke '<brief 1-sentence result summary>'
+mpga spoke '<brief 1-sentence result summary>'
 ```
 
 Keep the message under 280 characters. This plays the result in Trump's voice — TREMENDOUS.

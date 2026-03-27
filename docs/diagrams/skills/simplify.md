@@ -26,16 +26,13 @@ flowchart TD
 
     M --> N["Generate before/after examples\nfor each simplification — SEE the diff"]
     N --> O{Tests exist?}
-    O -->|Yes| P[Verify tests still pass\nafter each change — SAFE]
+    O -->|Yes| P["Apply simplifications one at a time —\nrun tests after EACH change\nRevert immediately if tests break"]
     O -->|No| Q[Flag risk: write tests FIRST\nbefore simplifying — be SMART]
 
-    P --> R["Produce TREMENDOUS report:\n- Summary stats\n- Prioritized list (HIGH/MED/LOW)\n- Detailed before/after for each"]
+    P --> R["Produce simplification report:\n- Stats: violations found and fixed\n- Applied changes with before/after\n- Skipped items needing manual review"]
     Q --> R
 
-    R --> S{Spoke available?}
-    S -->|Yes| T[mpga spoke — CODE simplified]
-    S -->|No| U[Done — even the type annotations are perfect. Covfefe]
-    T --> U
+    R --> S[mpga spoke — if available]
 ```
 
 ## Inputs — What Needs SIMPLIFYING
@@ -44,10 +41,9 @@ flowchart TD
 - Current scope implementation files (fallback)
 
 ## Outputs — ELEGANT Results
-- Simplification report with summary stats — the NUMBERS
-- Kent Beck rule violations identified — we hold you to the BEST standards
-- Sandi Metz rule violations with file:line references — SPECIFIC
-- Before/after code examples for each suggestion — PROOF it's better
-- Priority-ranked simplifications (HIGH impact + LOW effort first) — SMART ordering
-- Behavior preserved (no functional changes) — SAFE
+- Changes APPLIED and committed — not just suggested, actually DONE
+- Simplification report: violations found, applied, and skipped — FULL transparency
+- Kent Beck and Sandi Metz violations with file:line references — SPECIFIC
+- Before/after for each applied change — PROOF it's better
+- Tests verified green after each change — SAFE, always SAFE
 - If code is already simple, says so clearly — tremendous, has a beautiful ring to it

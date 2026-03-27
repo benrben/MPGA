@@ -29,10 +29,7 @@ flowchart TD
 
     N --> O["Output — the FULL report:\n- Findings per severity tier\n- Auto-healed count\n- Manual review needed\n- Overall health percentage"]
 
-    O --> P{Spoke available?}
-    P -->|Yes| Q[mpga spoke — DRIFT report delivered]
-    P -->|No| R[Done — evidence is CLEAN. Tremendous. Enjoy!]
-    Q --> R
+    O --> P[mpga spoke — if available]
 
     style I fill:#ff6b6b,color:#fff
     style J fill:#ffa500,color:#fff

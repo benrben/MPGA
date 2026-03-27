@@ -8,24 +8,26 @@ flowchart TD
     B --> C{All tests green?}
     C -->|No| STOP[STOP — do NOT proceed, that would be STUPID]
     C -->|Yes| D[Measure baseline metrics — function length, complexity, the WHOLE deal]
-    D --> E[Identify refactoring opportunities — find the MESS]
-    E --> F[Select Fowler refactoring pattern — only the BEST patterns]
+    D --> E{Refactoring opportunities found?}
+    E -->|None remaining| O[Update scope evidence links — keep the RECORDS perfect]
+    E -->|Yes| F[Select Fowler refactoring pattern — only the BEST patterns]
     F --> G[Apply ONE refactoring — disciplined, like me]
     G --> H[Run tests — make sure we're still WINNING]
     H --> I{Tests still green?}
     I -->|No| J[Immediately revert — Wrong! We don't ship GARBAGE]
-    J --> E
+    J --> JA{Untried patterns remain?}
+    JA -->|Yes| E
+    JA -->|No| JB[Document as known limitation — make a note and MOVE ON]
+    JB --> O
     I -->|Yes| K[Re-measure metrics — show me the IMPROVEMENT]
     K --> L{At least one metric improved, none regressed?}
-    L -->|No| M[Consider reverting — not worth it, BAD deal]
-    L -->|Yes| N{More refactoring opportunities?}
-    M --> N
-    N -->|Yes| F
-    N -->|No| O[Update scope evidence links — keep the RECORDS perfect]
+    L -->|No| M[Revert — no improvement, BAD deal]
+    L -->|Yes| E
+    M --> E
     O --> P["Commit: refactor: description — a BEAUTIFUL commit"]
     P --> Q["Update board: mpga board update task-id --tdd-stage blue — WINNING"]
     Q --> R[Hand off to reviewer — they'll LOVE this code]
-    R --> S[mpga spoke announcement — Even the type annotations are perfect]
+    R --> S[mpga spoke — if available]
 ```
 
 ## Inputs — What We Need to Make It GREAT

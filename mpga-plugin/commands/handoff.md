@@ -4,15 +4,15 @@ Export current session state for a fresh context window. Ready for peace — zer
 
 ## Steps
 
-1. Check context budget: `${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh session budget`
+1. Check context budget: `mpga session budget`
 2. Summarize current session state:
    - What was accomplished this session
    - Current milestone/phase/task
    - Key decisions made (with rationale)
    - Open questions and blockers
    - Files modified this session
-3. Save handoff document: `${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh session handoff --accomplished "<summary>"`
-4. Log the session: `${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh session log "<brief description of work done>"`
+3. Save handoff document: `mpga session handoff --accomplished "<summary>"`
+4. Log the session: `mpga session log "<brief description of work done>"`
 5. Tell the user the handoff file location and how to resume
 
 ## Usage

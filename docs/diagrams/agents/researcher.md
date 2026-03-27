@@ -31,7 +31,7 @@ flowchart TD
     V -->|Yes| W["Tag as Incomplete, ship what you have — SPEED matters"]
     V -->|No| X[Produce final research report — a MASTERPIECE]
     W --> X
-    X --> Y[mpga spoke announcement — RESEARCH COMPLETE]
+    X --> Y[mpga spoke — if available]
 ```
 
 ## Inputs — The Research Briefing

@@ -37,10 +37,7 @@ flowchart TD
 
     T --> U[Update PLAN.md — the MASTERPLAN\ntasks, risks, critical path, phases]
     U --> V[Show the board — BEAUTIFUL\nmpga board show]
-    V --> W{Spoke available?}
-    W -->|Yes| X[mpga spoke — PLAN is ready]
-    W -->|No| Y[Ready for /mpga:develop — MPGA alone can fix it]
-    X --> Y
+    V --> W[mpga spoke — if available]
 ```
 
 ## Inputs — The Raw Vision

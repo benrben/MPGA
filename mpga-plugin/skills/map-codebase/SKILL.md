@@ -24,28 +24,28 @@ Fast rebuild of the MPGA knowledge layer from current codebase state — a FRESH
 
 1. Check if MPGA is initialized:
    ```
-   /Users/benreich/MPGA/mpga-plugin/bin/mpga.sh status 2>/dev/null || echo "NOT_INITIALIZED"
+   mpga status 2>/dev/null || echo "NOT_INITIALIZED"
    ```
-   If not initialized: run `/Users/benreich/MPGA/mpga-plugin/bin/mpga.sh init --from-existing` first — gotta lay the FOUNDATION
+   If not initialized: run `mpga init --from-existing` first — gotta lay the FOUNDATION
 
 2. Run full sync — regenerate EVERYTHING:
    ```
-   /Users/benreich/MPGA/mpga-plugin/bin/mpga.sh sync --full
+   mpga sync --full
    ```
 
 3. Verify evidence health — check the INTEGRITY:
    ```
-   /Users/benreich/MPGA/mpga-plugin/bin/mpga.sh evidence verify
+   mpga evidence verify
    ```
 
 4. Run drift check — find the PROBLEMS:
    ```
-   /Users/benreich/MPGA/mpga-plugin/bin/mpga.sh drift --report
+   mpga drift --report
    ```
 
 5. Show health report — the SCOREBOARD:
    ```
-   /Users/benreich/MPGA/mpga-plugin/bin/mpga.sh health
+   mpga health
    ```
 
 ### Quick mode output
@@ -67,11 +67,11 @@ Full parallel codebase mapping using multiple scout agents — the FASTEST way t
 
 1. If this is the first map, run a full sync to generate scope scaffolds with static analysis — the FOUNDATION:
    ```
-   /Users/benreich/MPGA/mpga-plugin/bin/mpga.sh sync --full
+   mpga sync --full
    ```
    If MPGA already exists and only part of the repo changed, prefer:
    ```
-   /Users/benreich/MPGA/mpga-plugin/bin/mpga.sh sync --incremental
+   mpga sync --incremental
    ```
 
 2. List the generated scope documents — see what we're working with:
@@ -113,10 +113,10 @@ Architect runs after the scouts to fix cross-scope consistency.
 
 ## Voice announcement
 
-If spoke is available (`${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh spoke --help` exits 0), announce completion:
+If spoke is available (`mpga spoke --help` exits 0), announce completion:
 
 ```bash
-${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh spoke '<brief 1-sentence result summary>'
+mpga spoke '<brief 1-sentence result summary>'
 ```
 
 Keep the message under 280 characters. This plays the result in Trump's voice — TREMENDOUS.

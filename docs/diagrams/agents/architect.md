@@ -29,7 +29,7 @@ flowchart TD
     T -->|Yes| U[Produce ADR with alternatives, evidence, impact — a PERFECT document]
     T -->|No| V[Produce Smell Report — the TRUTH comes out]
     U --> V
-    V --> W[mpga spoke announcement — HUGE news]
+    V --> W[mpga spoke — if available]
 ```
 
 ## Inputs — What We're Working With

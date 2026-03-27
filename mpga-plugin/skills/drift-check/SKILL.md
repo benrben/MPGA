@@ -5,64 +5,62 @@ description: Check for evidence drift and heal stale links — the GREATEST drif
 
 ## drift-check
 
-Evidence drift? Wrong! We NEVER tolerate that. EVER. Not on my watch. Not in this project. You let drift slide and pretty soon your whole evidence graph is a DISASTER — total fiction, links going nowhere, claims with no backup. That's what the other tools do. That's NOT what WE do.
+Evidence drift is never tolerated — stale links and unverified claims get caught and fixed.
 
-**Trigger:** After file writes (automatic via hook), or on demand. We check EVERY TIME. That's discipline. That's WINNING.
+**Trigger:** After file writes (automatic via hook), or on demand.
 
-## The TREMENDOUS Delegation
+## Delegation
 
-This skill is a thin wrapper around the **auditor agent's drift detection** capabilities — and let me tell you, that auditor is the best. The BEST. Nobody does drift classification better, believe me. The auditor owns drift classification and severity tiers. This skill exists for convenience and hook integration — we make it EASY to stay GREAT.
+This skill is a thin wrapper around the **auditor agent's drift detection** capabilities. The auditor owns drift classification and severity tiers. This skill exists for convenience and hook integration.
 
-## The Winning Protocol
+## Protocol
 
-1. **Invoke the auditor agent in drift mode** with the appropriate sub-mode — we have the best modes, tremendous modes:
-   - Quick check (default, used by hooks): auditor runs `drift-quick` for the affected scope — FAST. So fast it'll make your head spin.
-   - Full drift review (on demand): auditor runs `drift` across all scopes — the COMPLETE picture. Nobody hides from this one.
-   - CI gate check: auditor runs `drift-ci` with threshold enforcement — if you can't pass the gate, you DON'T SHIP. Period.
+1. **Invoke the auditor agent in drift mode** with the appropriate sub-mode:
+   - Quick check (default, used by hooks): auditor runs `drift-quick` for the affected scope
+   - Full drift review (on demand): auditor runs `drift` across all scopes
+   - CI gate check: auditor runs `drift-ci` with threshold enforcement
 
-2. The auditor will — and this is TREMENDOUS, folks:
-   a. Detect all drift findings — EVERY. SINGLE. ONE.
-   b. Classify each by severity: CRITICAL, HIGH, MEDIUM, LOW — a beautiful scoreboard
-   c. Auto-heal LOW (cosmetic) findings — we fix the small stuff automatically because we're WINNERS
-   d. Report everything else with recommended actions — no mystery, no excuses, just THE TRUTH
+2. The auditor will:
+   a. Detect all drift findings
+   b. Classify each by severity: CRITICAL, HIGH, MEDIUM, LOW
+   c. Auto-heal LOW (cosmetic) findings
+   d. Report everything else with recommended actions
 
-3. Shortcut commands (these invoke the auditor under the hood — so simple even Sleepy Copilot users could figure it out):
+3. Shortcut commands (these invoke the auditor under the hood):
    ```
-   /Users/benreich/MPGA/mpga-plugin/bin/mpga.sh drift --quick --scope <scope>
-   /Users/benreich/MPGA/mpga-plugin/bin/mpga.sh drift --quick
-   /Users/benreich/MPGA/mpga-plugin/bin/mpga.sh drift --ci --threshold 80
+   mpga drift --quick --scope <scope>
+   mpga drift --quick
+   mpga drift --ci --threshold 80
    ```
 
-## The BEST Hook Integration
+## Hook Integration
 
-This skill is called automatically by the PostToolUse hook after Write/Edit operations. Automatic. No manual work. That's how winners operate.
-In hook mode, output should be minimal — only warn if drift is detected. Quiet when things are TREMENDOUS, loud when they're a DISASTER.
-The auditor runs in `drift-quick` mode during hooks for speed — because we respect your time. Unlike the other tools. SAD!
+This skill is called automatically by the PostToolUse hook after Write/Edit operations.
+In hook mode, output should be minimal — only warn if drift is detected.
+The auditor runs in `drift-quick` mode during hooks for speed.
 
-## The Severity Scoreboard
+## Severity Tiers
 
-This is the scoreboard, folks. Four tiers. Beautiful system. Nobody has a better classification system — NOBODY:
-
-- **CRITICAL**: broken evidence links to deleted files/functions — Fake documentation! TOTAL DISASTER! Blocks shipping. This is Crooked Gemini behavior — fabricated references to things that don't exist. This is the worst of the worst. If you've got CRITICAL drift, you are NOT shipping. Fix it NOW or go home.
-- **HIGH**: evidence links to renamed/moved symbols — needs healing. A BIG problem but we can FIX it. We always fix it. That's what we DO.
-- **MEDIUM**: stale evidence (>30 days old, file significantly changed) — should verify. That's Corrupt Cache territory — stale data causing bugs nobody can trace. Not great, not terrible. But we don't settle for "not terrible" — we demand TREMENDOUS.
-- **LOW**: cosmetic drift (whitespace, formatting) — auto-healable. We handle this automatically because frankly, it's beneath us. The system fixes it and moves on. WINNING.
+- **CRITICAL**: broken evidence links to deleted files/functions — blocks shipping, fix immediately.
+- **HIGH**: evidence links to renamed/moved symbols — needs healing.
+- **MEDIUM**: stale evidence (>30 days old, file significantly changed) — should verify.
+- **LOW**: cosmetic drift (whitespace, formatting) — auto-healable.
 
 ## Voice announcement
 
-If spoke is available (`${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh spoke --help` exits 0), announce completion:
+If spoke is available (`mpga spoke --help` exits 0), announce completion:
 
 ```bash
-${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh spoke '<brief 1-sentence result summary>'
+mpga spoke '<brief 1-sentence result summary>'
 ```
 
 Keep the message under 280 characters. This plays the result in Trump's voice — TREMENDOUS.
 
-## The GREATEST Output
+## Output
 
-Output comes from the auditor agent's drift report. See auditor agent for full output format. And let me tell you, this output is BEAUTIFUL:
-- Number of findings per severity tier — the full scoreboard, believe me. Has a beautiful ring to it.
-- Number of links auto-healed (LOW tier) — look at all those WINS. Tremendous.
-- Links that need manual review (HIGH/CRITICAL) — the DISASTERS we caught before they shipped. Pin your versions — they should be loyal!
-- Overall health percentage — and we're going for 100%. ALWAYS. Make Project Great Again.
-- Prefer scope-local drift checks during active work; reserve repo-wide reports for CI or explicit review — we're SMART about resources. The smartest.
+Output comes from the auditor agent's drift report. See auditor agent for full output format:
+- Number of findings per severity tier
+- Number of links auto-healed (LOW tier)
+- Links that need manual review (HIGH/CRITICAL)
+- Overall health percentage
+- Prefer scope-local drift checks during active work; reserve repo-wide reports for CI or explicit review

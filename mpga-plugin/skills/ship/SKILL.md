@@ -20,20 +20,15 @@ Run ALL of the following checks simultaneously. Every check must pass before pro
    pytest
    ```
 
-2. **Ruff check passes** — zero lint/type errors:
+2. **Ruff passes** — zero lint errors across the full project:
    ```bash
-   .venv/bin/ruff check src/
-   ```
-
-3. **Lint clean** — no lint errors (skip if no linter configured):
-   ```bash
-   .venv/bin/ruff check . 2>/dev/null || true
+   .venv/bin/ruff check .
    ```
    If ruff is not installed, treat this check as passed.
 
 4. **Evidence drift check** — no stale evidence links:
    ```bash
-   ./.mpga-runtime/bin/mpga.sh drift --quick
+   mpga drift --quick
    ```
 
 5. **No uncommitted scope changes** — scope files must be clean:
@@ -50,8 +45,7 @@ Example gate output:
 ```
 Ship Gate Results:
   [PASS] Tests pass (pytest)
-  [PASS] Ruff check passes (.venv/bin/ruff check src/)
-  [PASS] Lint clean (ruff)
+  [PASS] Ruff clean (ruff check .)
   [FAIL] Evidence drift — 3 stale links found
   [PASS] No uncommitted scope changes
 
@@ -64,7 +58,7 @@ BLOCKED: 1 check failed. Fix issues before shipping.
 2. Add any missing evidence links to scope docs — COMPLETE documentation
 3. Run evidence verification to confirm:
    ```bash
-   ./.mpga-runtime/bin/mpga.sh evidence verify
+   mpga evidence verify
    ```
 
 ### Phase 3 — PR template generation
@@ -103,7 +97,6 @@ Auto-generate a PR description using the template below. Populate each section f
 ## Pre-ship checks
 - [x] Tests pass
 - [x] Ruff check passes
-- [x] Lint clean
 - [x] Evidence drift check pass
 - [x] No uncommitted scope changes
 
@@ -126,12 +119,12 @@ Store the generated PR template in a variable for use in Phase 5.
 
 1. Update milestone status — track our PROGRESS:
    ```bash
-   ./.mpga-runtime/bin/mpga.sh milestone status
+   mpga milestone status
    ```
 
 2. Archive completed tasks — clean board, clean MIND:
    ```bash
-   ./.mpga-runtime/bin/mpga.sh board archive
+   mpga board archive
    ```
 
 3. Present options to user — THEIR choice:
@@ -141,8 +134,7 @@ Store the generated PR template in a variable for use in Phase 5.
 
 ## Pre-ship checklist (quick reference)
 - [ ] All tests passing — NON-NEGOTIABLE. Believe me.
-- [ ] Ruff check clean — NO lint errors. Even the type annotations are perfect.
-- [ ] No lint errors — CLEAN code. Tremendous.
+- [ ] Ruff clean (`ruff check .`) — NO lint errors. Even the type annotations are perfect.
 - [ ] No TODOs or stubs — FINISH what you start. Sad! if you leave stubs behind.
 - [ ] Scope evidence links updated — documentation is CURRENT
 - [ ] Drift check passing — no STALE evidence
@@ -151,10 +143,10 @@ Store the generated PR template in a variable for use in Phase 5.
 
 ## Voice announcement
 
-If spoke is available (`${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh spoke --help` exits 0), announce completion:
+If spoke is available (`mpga spoke --help` exits 0), announce completion:
 
 ```bash
-${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh spoke '<brief 1-sentence result summary>'
+mpga spoke '<brief 1-sentence result summary>'
 ```
 
 Keep the message under 280 characters. This plays the result in Trump's voice — TREMENDOUS.

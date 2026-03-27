@@ -35,7 +35,7 @@ flowchart TD
     E --> W{Below threshold or CRITICAL found?}
     W -->|Yes| X[Exit non-zero — Complete and total shutdown of untested deploys. Sad!]
     W -->|No| Y[Exit zero — CI gate PASSES, we're WINNING]
-    N --> Z[mpga spoke announcement — the PEOPLE deserve to know]
+    N --> Z[mpga spoke — if available]
     V --> Z
     X --> Z
     Y --> Z

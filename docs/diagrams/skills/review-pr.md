@@ -9,9 +9,12 @@ flowchart TD
     B -->|Branch specified| D["git diff base...feature — TARGETED"]
     B -->|No args| E["git diff main...HEAD — DEFAULT"]
 
-    C --> F[Read FULL file context\nfor all changed files — THOROUGH]
-    D --> F
-    E --> F
+    C --> EA{Eligible for review?}
+    D --> EA
+    E --> EA
+    EA -->|Draft PR| EB[Skip — draft not ready for review]
+    EA -->|Zero diff lines| EC[Skip — nothing changed]
+    EA -->|Yes| F[Read FULL file context\nfor all changed files — THOROUGH]
 
     F --> G[Spawn reviewer agent\nthe BEST critic — read-only]
     F --> H[Spawn bug-hunter agent\nNOTHING gets past this one]
@@ -36,10 +39,7 @@ flowchart TD
     P --> R
     Q --> R
 
-    R --> S{Spoke available?}
-    S -->|Yes| T[mpga spoke — VERDICT delivered]
-    S -->|No| U[Done — law and order in the codebase. Believe me]
-    T --> U
+    R --> S[mpga spoke — if available]
 ```
 
 ## Inputs — What We Review

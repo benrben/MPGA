@@ -1,4 +1,4 @@
-# Security Auditor — The TOUGHEST Security Expert, OWASP, npm audit, Secrets Scan — TOTAL Protection
+# Security Auditor — The TOUGHEST Security Expert, OWASP, Dependency Audit, Secrets Scan — TOTAL Protection
 
 ## Workflow — Building the GREATEST Security Wall
 
@@ -11,22 +11,25 @@ flowchart TD
     C --> F["A03: Injection — SQL, NoSQL, command injection — very DANGEROUS"]
     C --> G["A04: Insecure Design — missing rate limiting — AMATEUR hour"]
     C --> H["A05: Security Misconfiguration — debug mode, default creds — EMBARRASSING"]
-    C --> I["A06: Vulnerable Components — covered by npm audit — KNOWN threats"]
+    C --> I["A06: Vulnerable Components — covered by dependency audit — KNOWN threats"]
     C --> J["A07: Auth Failures — session mgmt, weak passwords — PATHETIC"]
     C --> K["A08: Integrity Failures — insecure deserialization — SNEAKY attacks"]
     C --> L["A09: Logging Failures — missing auth logging — NO visibility"]
     C --> M["A10: SSRF — user-supplied URLs fetched server-side — VERY bad"]
     D & E & F & G & H & I & J & K & L & M --> N["2. Dependency Vulnerability Check — scan the SUPPLY chain"]
-    N --> O{package.json exists?}
-    O -->|Yes| P[Run npm audit --json — get the REAL numbers]
-    O -->|No| Q[Note as GAP — needs ATTENTION]
+    N --> O{Package manager detected?}
+    O -->|npm — package.json| P[Run npm audit --json]
+    O -->|Python — pyproject.toml or requirements.txt| PA[Run pip audit]
+    O -->|Both| P & PA
+    O -->|Neither| Q[Note as GAP — no dependency scanner found]
     P --> R["3. Secrets Scan — find the LEAKS"]
+    PA --> R
     Q --> R
     R --> S[Scan for API keys, passwords, tokens, private keys — EVERYTHING]
     S --> T{Matches found?}
     T -->|Yes| U{Env var reference or test fixture?}
     U -->|Yes| V[Exclude — not a real secret, FALSE alarm]
-    U -->|No| W[Flag as finding — EXPOSED, very bad]
+    U -->|No| W[Flag as finding — EXPOSED, very bad, CRITICAL]
     T -->|No| X["4. Security Headers Check — the LAST line of defense"]
     V --> X
     W --> X
@@ -34,7 +37,7 @@ flowchart TD
     Y --> Z[Classify all findings: CRITICAL / HIGH / MEDIUM / LOW — RANKED]
     Z --> AA[Provide remediation steps — HOW to fix it, very SPECIFIC]
     AA --> AB[Produce security audit report — covering ALL 10 OWASP categories]
-    AB --> AC[mpga spoke announcement — SECURITY ASSESSED]
+    AB --> AC[mpga spoke — if available]
 ```
 
 ## Inputs — The Security Briefing
@@ -47,6 +50,6 @@ flowchart TD
 
 - OWASP Top 10 coverage table (PASS/FAIL/WARN) — EVERY category covered
 - Findings by severity with evidence links and remediation — ACTIONABLE intelligence
-- Dependency audit summary — packages, vulnerabilities, action items, the FULL picture
+- Dependency audit summary (npm and/or pip) — packages, vulnerabilities, action items, the FULL picture
 - Secrets scan results — we find what OTHERS miss
-- Overall security posture assessment — are we STRONG or are we WEAK? They should be loyal — pin your versions!
+- Overall security posture: CRITICAL/HIGH block release, MEDIUM/LOW are planned — law and order in the codebase

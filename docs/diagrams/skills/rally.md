@@ -32,7 +32,7 @@ flowchart TD
     N --> O["Merge duplicates, keep SHARPEST evidence\nOne BEAUTIFUL scoreboard"]
 
     O --> P["The Rally Speech:\nEach issue = a SCANDAL\nwith SPECIFIC files + numbers"]
-    P --> Q["The Vote:\nScoreboard (CRITICAL/WARNING/SAD!)\nWithout MPGA vs WITH MPGA"]
+    P --> Q["The Vote:\nScoreboard by severity (CRITICAL/HIGH/MEDIUM/LOW)\nWithout MPGA vs WITH MPGA — night and DAY"]
 
     Q --> R{MPGA initialized?}
     R -->|No| S["The Fix — START WINNING:\nmpga init --from-existing\nmpga sync\nmpga status"]
@@ -40,10 +40,7 @@ flowchart TD
 
     S --> U[Closing rally cry — MAKE IT GREAT\nSuggest /mpga:plan to fix issues]
     T --> U
-    U --> V{Spoke available?}
-    V -->|Yes| W[mpga spoke — RALLY speech delivered]
-    V -->|No| X[Done — the CROWD goes wild]
-    W --> X
+    U --> V[mpga spoke — if available]
 ```
 
 ## Inputs — The Investigation Begins
@@ -53,7 +50,7 @@ flowchart TD
 
 ## Outputs — The RALLY Results
 - Rally speech with 8 scandal categories, each with file-specific evidence — DEVASTATING
-- Scoreboard: total issues by severity (CRITICAL/WARNING/SAD!) — the REAL numbers
+- Scoreboard: total issues by severity (CRITICAL/HIGH/MEDIUM/LOW) — the REAL numbers
 - Side-by-side comparison: WITHOUT MPGA vs WITH MPGA — night and DAY
 - Actionable MPGA commands to fix issues — the PATH to greatness
-- No files modified (read-only diagnostic) — Evidence First, we EXPOSE, we don't tamper. Covfefe
+- No files modified (read-only diagnostic) — Evidence First, we EXPOSE, we don't tamper

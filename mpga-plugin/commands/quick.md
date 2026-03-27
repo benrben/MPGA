@@ -7,9 +7,9 @@ Ad-hoc task mode for small fixes or changes without a full milestone workflow. B
 1. Read `MPGA/INDEX.md` for project context
 2. Find relevant scope doc(s) for the task
 3. Create a mini-plan (1-3 tasks) on the board:
-   `${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh board add "<sub-task>" --priority medium`
+   `mpga board add "<sub-task>" --priority medium`
 4. Execute TDD cycle (red → green → blue → review) in a single scope-local write lane
-5. Run `${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh evidence verify` after completion
+5. Run `mpga evidence verify` after completion
 6. Commit with descriptive message
 
 ## Usage

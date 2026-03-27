@@ -7,16 +7,14 @@ flowchart TD
     A[User invokes /mpga:ship — IT'S TIME] --> B["Phase 1: Pre-Ship Checks\nThe TOUGHEST Ship Gate"]
 
     B --> C[Tests pass — NON-NEGOTIABLE\npytest]
-    B --> D[Ruff check passes — CLEAN\nruff check src/]
-    B --> E[Lint clean — SPOTLESS\nruff check .]
-    B --> F[Evidence drift check — VERIFIED\nmpga drift --quick]
-    B --> G["No uncommitted scope changes\ngit diff -- MPGA/scopes/ — LOCKED"]
+    B --> D[Ruff passes — zero errors\nruff check .]
+    B --> E[Evidence drift clean — VERIFIED\nmpga drift --quick]
+    B --> F["No uncommitted scope changes\ngit diff -- MPGA/scopes/ — LOCKED"]
 
     C --> H{All checks pass?}
     D --> H
     E --> H
     F --> H
-    G --> H
 
     H -->|Any fail| I["Print pass/fail table\nBLOCKED — Sad! Wrong! Fix it FIRST"]
     H -->|All pass| J["Phase 2: Update Scope Evidence\n- Check task cards for evidence\n- Add missing evidence to scope docs\n- mpga evidence verify — THOROUGH"]
@@ -33,12 +31,9 @@ flowchart TD
     P -->|Merge to main| R[Direct merge\nif on feature branch — DECISIVE]
     P -->|Keep on branch| S[No merge, no PR — your CALL]
 
-    Q --> T{Spoke available?}
+    Q --> T[mpga spoke — if available]
     R --> T
     S --> T
-    T -->|Yes| U[mpga spoke — WE SHIPPED IT]
-    T -->|No| V[Done — tremendous. Great job! Enjoy!]
-    U --> V
 ```
 
 ## Inputs — Everything Must Be READY

@@ -83,16 +83,16 @@ This skill orchestrates a **security-auditor agent** — the toughest, most thor
 
 6. **Auto-create board tasks** for CRITICAL and HIGH findings — because TOTAL DISASTERS and very BAD findings demand IMMEDIATE action:
    ```
-   ${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh board add --title "SEC: <description>" --priority critical --scope <scope>
+   mpga board add --title "SEC: <description>" --priority critical --scope <scope>
    ```
    CRITICAL and HIGH findings get individual tasks — every TOTAL DISASTER gets its own task, no hiding, no grouping. MEDIUM findings are grouped because they're SAD but manageable. LOW findings are noted in the report only — we'll fix it, but we've got bigger problems first.
 
 ## Voice announcement
 
-If spoke is available (`${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh spoke --help` exits 0), announce completion:
+If spoke is available (`mpga spoke --help` exits 0), announce completion:
 
 ```bash
-${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh spoke '<brief 1-sentence result summary>'
+mpga spoke '<brief 1-sentence result summary>'
 ```
 
 Keep the message under 280 characters. This plays the result in Trump's voice — TREMENDOUS.

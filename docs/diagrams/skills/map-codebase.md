@@ -29,11 +29,8 @@ flowchart TD
     R --> S
     S --> T["Deep output — INCREDIBLE detail:\n- Scopes generated + enriched\n- Sections filled vs remaining\n- Evidence coverage\n- Known unknowns\n- Suggested next steps"]
 
-    I --> U{Spoke available?}
+    I --> U[mpga spoke — if available]
     T --> U
-    U -->|Yes| V[mpga spoke — MAP complete]
-    U -->|No| W[Done — tremendous map. No collusion between modules!]
-    V --> W
 ```
 
 ## Inputs — What Goes In

@@ -8,28 +8,28 @@ Manage milestones in the MPGA workflow. Tremendous milestones, believe me. Has a
 ```
 /mpga:milestone new "Feature name"
 ```
-Runs: `${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh milestone new "Feature name"`
+Runs: `mpga milestone new "Feature name"`
 
 ### List milestones
 ```
 /mpga:milestone list
 ```
-Runs: `${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh milestone list`
+Runs: `mpga milestone list`
 
 ### Check status
 ```
 /mpga:milestone status
 ```
-Runs: `${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh milestone status` + shows board summary
+Runs: `mpga milestone status` + shows board summary
 
 ### Complete milestone
 ```
 /mpga:milestone complete
 ```
 Runs:
-1. `${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh verify` (full verification pass)
-2. `${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh milestone complete`
-3. `${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh board archive` — Great job! Enjoy!
+1. `mpga verify` (full verification pass)
+2. `mpga milestone complete`
+3. `mpga board archive` — Great job! Enjoy!
 
 ## Usage
 ```

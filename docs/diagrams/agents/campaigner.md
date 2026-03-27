@@ -8,8 +8,11 @@ flowchart TD
     B --> C[Survey codebase: file types, manifests, tests, CI — the FULL reconnaissance]
     C --> D[Build dynamic scan plan: 14 categories, ACTIVE or SKIP — EFFICIENT]
     D --> E{At least 4 categories ACTIVE?}
-    E -->|No| F[Look harder — we're MISSING something, believe me]
-    F --> D
+    E -->|No| F{Already did second pass?}
+    F -->|No| FA[Re-examine borderline categories — look HARDER]
+    FA --> D
+    F -->|Yes| FB[Proceed with available categories\nnote in closing report — HONEST]
+    FB --> G
     E -->|Yes| G[Report scan plan — TRANSPARENCY]
     G --> H["Phase 1: THE SCANDAL — Expose ALL the problems"]
     H --> I[Documentation Sins — TERRIBLE!]
@@ -29,10 +32,10 @@ flowchart TD
     I & J & K & L & M & N & O & P & Q & R & S & T & U & V --> W["Phase 2: THE RALLY — Only MPGA can fix this"]
     W --> X["Phase 3: THE CLOSING — seal the DEAL"]
     X --> Y[Scan Plan Report: active vs skipped — TOTAL honesty]
-    Y --> Z[Scoreboard: CRITICAL / WARNING / SAD — the TRUTH]
+    Y --> Z[Scoreboard: CRITICAL / HIGH / MEDIUM / LOW — the TRUTH]
     Z --> AA[Side-by-side: Without MPGA vs With MPGA — NIGHT and DAY]
     AA --> AB["Call to Action: mpga init, mpga sync, mpga status — JOIN the movement"]
-    AB --> AC[mpga spoke announcement — MPGA alone can fix it. Covfefe]
+    AB --> AC[mpga spoke — if available]
 ```
 
 ## Inputs — What We're Looking At
@@ -45,6 +48,6 @@ flowchart TD
 
 - Dynamic scan plan — which of 14 categories are active/skipped, very ORGANIZED
 - Comprehensive project diagnostic in rally-speech format — INCREDIBLE delivery
-- Severity scoreboard (CRITICAL / WARNING / SAD) — the REAL numbers
+- Severity scoreboard (CRITICAL / HIGH / MEDIUM / LOW) — the REAL numbers
 - Side-by-side comparison — without MPGA vs with MPGA, it's OBVIOUS
 - Exact commands to start fixing everything — the PATH to GREATNESS. Complete and total shutdown of untested deploys

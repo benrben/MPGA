@@ -5,7 +5,9 @@
 ```mermaid
 flowchart TD
     A[User invokes /mpga:develop — SMART] --> B[Fire up the live board\nmpga board live --serve --open]
-    B --> C[Claim a task — first come first WIN\nmpga board claim task-id]
+    B --> BA{Context budget < 70%?}
+    BA -->|No — too full| BB[Run /mpga:handoff FIRST\nbefore claiming new work — be SMART]
+    BA -->|Yes — go| C[Claim a task — first come first WIN\nmpga board claim task-id]
     C --> D[Load context: task card + scope docs]
     D --> E{Another writer in same scope?}
     E -->|Yes| F[Pick a different task — lock her up! the race condition!]
@@ -15,12 +17,18 @@ flowchart TD
     G --> H["GREEN: Spawn green-dev agent\nMake that test pass\nMINIMAL code — no bloat"]
     H --> I{All acceptance criteria covered?}
     I -->|No| J[red-dev writes the NEXT test\nslightly tougher — WINNING]
-    J --> K[green-dev makes it pass — EASY]
+    J --> JA{green-dev signaled retreat?}
+    JA -->|Yes| JB["Spawn blue-dev for structural refactor\nThen resume micro-cycle — TEAMWORK"]
+    JB --> K
+    JA -->|No| K
     K --> I
 
     I -->|Yes| L["BLUE: Spawn blue-dev agent\nRefactor — make it BEAUTIFUL\nassertions UNCHANGED"]
     L --> M{Tests still passing?}
-    M -->|No| L
+    M -->|No| MA{Blue-dev exhausted attempts?}
+    MA -->|No| L
+    MA -->|Yes| MB[Document limitations\nproceed with reviewer — BEST we can do]
+    MB --> N
     M -->|Yes| N[Spawn reviewer agent\nTwo-stage review — RIGOROUS]
     N --> O{CRITICAL issues?}
     O -->|Yes| P[Loop back — we FIX things here]
@@ -29,11 +37,9 @@ flowchart TD
     Q --> R[Move task to done — WINNER\nmpga board move id done]
     R --> S[Run drift check — no fake docs\nmpga drift --quick]
     S --> T{Context budget > 70%?}
-    T -->|Yes| U[Consider /mpga:handoff — be SMART]
-    T -->|No| V{Spoke available?}
-    V -->|Yes| W[mpga spoke — VICTORY lap]
-    V -->|No| X[Done — pick next task, KEEP WINNING]
-    W --> X
+    T -->|Yes| U[Run /mpga:handoff — context is FULL]
+    T -->|No| V[mpga spoke — if available]
+    U --> V
 
     subgraph "Background helpers — the BEST support"
         Y[scout agent]

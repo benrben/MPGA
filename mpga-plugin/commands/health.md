@@ -4,7 +4,7 @@ Show comprehensive project health report. Even the type annotations are perfect.
 
 ## Steps
 
-1. Run `${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh health --verbose`
+1. Run `mpga health --verbose`
 2. Show evidence health per scope
 3. Show board stats
 4. Show drift status

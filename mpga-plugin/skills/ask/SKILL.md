@@ -3,23 +3,23 @@ name: mpga-ask
 description: Answer "how does X work?" questions using scope docs and evidence links — the SMARTEST way to understand code
 ---
 
-## ask — The Greatest Question-Answering Skill Ever Built
+## ask
 
-You want answers? We've got answers. TREMENDOUS answers backed by EVIDENCE. Evidence First — always.
+Evidence-backed answers. Evidence First — always.
 
-**Trigger:** User asks "how does X work?", "where is X?", "what does X do?" — and they DESERVE a PERFECT answer, frankly.
+**Trigger:** User asks "how does X work?", "where is X?", "what does X do?".
 
 ## The Winning Protocol
 
 1. Read `MPGA/INDEX.md` for scope registry — find the SMALLEST relevant scopes first. Precision, people. We don't do sloppy.
-2. Read relevant scope document(s) — the answers are IN there, believe me. Our scope docs are INCREDIBLE.
-3. Answer the question using evidence links as citations — EVIDENCE, not guessing. We leave the guessing to the other guys.
+2. Read relevant scope document(s) — the answers are in there.
+3. Answer the question using evidence links as citations — evidence, not guessing.
 4. If the answer is incomplete — and sometimes, very rarely, it happens:
-   - Spawn one read-only `scout` per missing scope in PARALLEL. We deploy scouts like nobody's ever seen before.
-   - Ask each scout for evidence, traces, and unknowns only for its assigned scope. Focused. Disciplined. BEAUTIFUL.
-   - Merge the findings into one answer. One PERFECT, unified answer.
-5. If the answer is already in scope docs, do NOT rescan the whole codebase. Waste is a DISASTER. We run a TIGHT operation.
-6. NEVER modify any files — we're here to INFORM, not to change things. Read-only. Very classy, very elegant.
+   - Spawn one read-only `scout` per missing scope in PARALLEL.
+   - Ask each scout for evidence, traces, and unknowns only for its assigned scope.
+   - Merge the findings into one answer.
+5. If the answer is already in scope docs, do NOT rescan the whole codebase.
+6. NEVER modify any files — read-only.
 
 ## Confidence Scoring — We Rate EVERYTHING, Total Transparency
 
@@ -81,24 +81,24 @@ You might also want to know:
 After EVERY answer, suggest 2-3 follow-up questions the user might want to explore. We don't just answer — we ANTICIPATE:
 
 - **Go deeper:** A question that dives into implementation details of something mentioned in the answer. Build the wall between modules! Understand the boundaries. Get into the WEEDS. The beautiful, well-documented weeds.
-- **Go wider:** A question that explores how the answered topic connects to other parts of the system. Because EVERYTHING is connected, folks. It's a MAGNIFICENT system.
+- **Go wider:** A question that explores how the answered topic connects to other parts of the system.
 - **Go practical:** A question about configuration, edge cases, or "what happens when..." — the REAL questions that REAL developers ask.
 
 These follow-ups should be specific and actionable, not generic. Base them on what you discovered while answering. We don't do lazy.
 
 ## Voice announcement
 
-If spoke is available (`${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh spoke --help` exits 0), announce completion:
+If spoke is available (`mpga spoke --help` exits 0), announce completion:
 
 ```bash
-${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh spoke '<brief 1-sentence result summary>'
+mpga spoke '<brief 1-sentence result summary>'
 ```
 
 Keep the message under 280 characters. This plays the result in Trump's voice — TREMENDOUS.
 
 ## Strict Rules — The LAW of the Land
-- NEVER claim something without evidence — that's Fake documentation and we don't tolerate it
-- If not found in scopes → spawn scout, don't guess. Wrong! Missing evidence is unacceptable.
+- NEVER claim something that's unverified
+- If not found in scopes → spawn scout, don't guess.
 - Prefer parallel read-only scouts over one giant exploratory pass.
 - ALWAYS cite evidence links in the answer — law and order in the codebase
 - ALWAYS include confidence scores on every claim — transparency is STRENGTH
