@@ -13,6 +13,7 @@ from .agents import (
     AgentMeta,
     copy_skills_to,
     read_agent_instructions,
+    resolve_model,
 )
 from .runtime import (
     copy_vendored_runtime,
@@ -97,10 +98,12 @@ def _generate_cursor_agent_md(
     """Generate Cursor-format agent markdown (.cursor/agents/mpga-<slug>.md)"""
     instructions = read_agent_instructions(plugin_root, agent.slug, cli_command)
 
+    model = resolve_model(agent.tier, "cursor") if agent.tier else (agent.model or "")
+
     return f"""---
 name: {agent.name}
 description: {agent.description}
-model: {agent.model}
+model: {model}
 readonly: {str(agent.readonly).lower()}
 is_background: {str(agent.is_background).lower()}
 ---
@@ -203,21 +206,17 @@ STOP. Delete it. Write the test first.
 """
 
 
-def _generate_cursor_scopes_mdc(mpga_dir: str) -> str:
+def _scope_lines(mpga_dir: str) -> str:
+    """Return a markdown bullet list of known scopes, or a fallback hint."""
     scopes_dir = Path(mpga_dir) / "scopes"
-    scope_lines = "- (no scopes yet \u2014 run `mpga sync` to generate)"
-
     if scopes_dir.exists():
-        scopes = [
-            f.stem
-            for f in sorted(scopes_dir.iterdir())
-            if f.suffix == ".md"
-        ]
+        scopes = [f.stem for f in sorted(scopes_dir.iterdir()) if f.suffix == ".md"]
         if scopes:
-            scope_lines = "\n".join(
-                f"- {s} \u2192 @MPGA/scopes/{s}.md" for s in scopes
-            )
+            return "\n".join(f"- {s} \u2192 @MPGA/scopes/{s}.md" for s in scopes)
+    return "- (no scopes yet \u2014 run `mpga sync` to generate)"
 
+
+def _generate_cursor_scopes_mdc(mpga_dir: str) -> str:
     return f"""---
 description: "Load MPGA scope documents when working on specific features. Use when the user asks about a specific feature area or module."
 globs:
@@ -228,7 +227,7 @@ alwaysApply: false
 
 When working on a specific feature, load the relevant scope document:
 
-{scope_lines}
+{_scope_lines(mpga_dir)}
 
 Each scope doc contains:
 - Evidence links proving how the feature actually works

@@ -13,6 +13,7 @@ from .agents import (
     AgentMeta,
     copy_skills_to,
     read_agent_instructions,
+    resolve_model,
 )
 from .runtime import (
     copy_vendored_runtime,
@@ -100,9 +101,11 @@ def _generate_codex_agent_toml(
 
     escaped_desc = agent.description.replace('"', '\\"')
 
+    model = resolve_model(agent.tier, "codex") if agent.tier else (agent.model or "")
+
     return f"""name = "{agent.name}"
 description = "{escaped_desc}"
-model = "{agent.model}"
+model = "{model}"
 sandbox_mode = "{agent.sandbox_mode}"
 
 developer_instructions = \"\"\"
@@ -201,21 +204,24 @@ Do NOT modify files in this directory manually. Use:
 """
 
 
+def _evidence_section(scope_content: str) -> str:
+    """Return a markdown bullet list of up to 5 evidence links from scope_content."""
+    links = re.findall(r"\[E\] .+", scope_content)[:5]
+    if links:
+        return "\n".join(f"- {l}" for l in links)
+    return "- (run `mpga sync` to populate evidence links)"
+
+
 def _generate_subdir_agents_md(project_root: str, scopes_dir: str) -> None:
     scopes_path = Path(scopes_dir)
     scopes = [f for f in scopes_path.iterdir() if f.suffix == ".md"]
     for scope_file in scopes:
         scope_name = scope_file.stem
-        scope_content = scope_file.read_text(encoding="utf-8")
-        evidence_links = re.findall(r"\[E\] .+", scope_content)[:5]
-        if evidence_links:
-            evidence_section = "\n".join(f"- {l}" for l in evidence_links)
-        else:
-            evidence_section = "- (run `mpga sync` to populate evidence links)"
-
         src_dir = Path(project_root) / "src" / scope_name
         if not src_dir.exists():
             continue
+
+        scope_content = scope_file.read_text(encoding="utf-8")
 
         (src_dir / "AGENTS.md").write_text(
             f"""# {scope_name} Module \u2014 MPGA Scope
@@ -224,7 +230,7 @@ For detailed evidence-backed documentation of this module,
 read: MPGA/scopes/{scope_name}.md
 
 ## Key evidence
-{evidence_section}
+{_evidence_section(scope_content)}
 
 ## Dependencies
 See MPGA/scopes/{scope_name}.md for full dependency graph.

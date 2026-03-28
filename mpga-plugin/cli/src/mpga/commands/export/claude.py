@@ -8,12 +8,18 @@ from pathlib import Path
 
 from mpga.core.logger import log
 
-from .agents import SKILL_NAMES, copy_skills_to, rewrite_cli_references
+from .agents import AGENTS, SKILL_NAMES, copy_skills_to, resolve_model, rewrite_cli_references
 from .runtime import (
     copy_vendored_runtime,
     global_vendored_cli_command,
     project_vendored_cli_command,
 )
+
+
+def rewrite_agent_frontmatter_model(content: str, tier: str) -> str:
+    """Rewrite the model: line in YAML frontmatter to the resolved Claude model ID."""
+    resolved = resolve_model(tier, "claude")
+    return re.sub(r"^(model:\s*).*$", rf"\1{resolved}", content, flags=re.MULTILINE)
 
 
 # --- Claude Code export -------------------------------------------------------
@@ -89,12 +95,16 @@ def _deploy_claude_plugin(
     if agents_src.exists():
         agents_dest.mkdir(parents=True, exist_ok=True)
         md_files = [f for f in agents_src.iterdir() if f.suffix == ".md"]
+        tier_by_slug = {a.slug: a.tier for a in AGENTS if a.tier is not None}
         for f in md_files:
             content = rewrite_cli_references(
                 f.read_text(encoding="utf-8"),
                 cli_path,
                 plugin_root,
             )
+            slug = f.stem
+            if slug in tier_by_slug:
+                content = rewrite_agent_frontmatter_model(content, tier_by_slug[slug])
             (agents_dest / f.name).write_text(content, encoding="utf-8")
         log.success(f".claude/agents/ ({len(md_files)} agents)")
 
