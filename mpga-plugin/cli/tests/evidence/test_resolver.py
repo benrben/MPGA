@@ -2,8 +2,6 @@
 
 from pathlib import Path
 
-import pytest
-
 from mpga.evidence.parser import EvidenceLink
 from mpga.evidence.resolver import resolve_evidence, verify_all_links
 

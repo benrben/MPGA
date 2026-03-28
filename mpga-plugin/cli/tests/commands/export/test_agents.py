@@ -2,8 +2,6 @@
 
 from pathlib import Path
 
-import pytest
-
 
 class TestExportAgentCliRewriting:
     """export agent/skill CLI rewriting tests."""

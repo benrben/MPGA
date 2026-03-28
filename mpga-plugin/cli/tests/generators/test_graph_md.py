@@ -1,9 +1,7 @@
 from pathlib import Path
 
-import pytest
-
+from mpga.core.scanner import FileInfo, ScanResult
 from mpga.generators.graph_md import build_graph
-from mpga.core.scanner import ScanResult, FileInfo
 
 
 def _scan_fixture(files):

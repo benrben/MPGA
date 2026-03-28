@@ -8,8 +8,10 @@ Acceptance criteria → Test status
 ──────────────────────────────────
 [x] AC1: high-tier agent generates TOML with model = "gpt-5.4"           → test_high_tier_toml_contains_gpt_5_4
 [x] AC2: mid-tier agent generates TOML with model = "gpt-5.3-codex"      → test_mid_tier_toml_contains_gpt_5_3_codex
-[x] AC3: small-tier agent generates TOML with model = "gpt-5.1-codex-mini" → test_small_tier_toml_contains_gpt_5_1_codex_mini
-[x] AC4: high-tier agent TOML does NOT contain "claude-opus-4-6"          → test_high_tier_toml_does_not_leak_claude_model
+[x] AC3: small-tier agent generates TOML with model = "gpt-5.1-codex-mini"
+    → test_small_tier_toml_contains_gpt_5_1_codex_mini
+[x] AC4: high-tier agent TOML does NOT contain "claude-opus-4-6"
+    → test_high_tier_toml_does_not_leak_claude_model
 
 Untested branches / edge cases:
 - [ ] agent.model is None (degenerate — tier-only agent, model field not set)

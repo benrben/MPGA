@@ -2,11 +2,8 @@
 
 from pathlib import Path
 
-import pytest
-
 from mpga.core.scanner import detect_language
 from mpga.evidence.ast import extract_symbols, find_symbol, verify_range
-
 
 # ---------------------------------------------------------------------------
 # detect_language

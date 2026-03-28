@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional
 
 from mpga.board.task import Task, load_all_tasks
 from mpga.core.config import find_project_root
@@ -13,11 +12,11 @@ from mpga.core.logger import console, log
 def handle_board_search(
     query: str,
     *,
-    priority: Optional[str] = None,
-    column: Optional[str] = None,
-    scope: Optional[str] = None,
-    agent: Optional[str] = None,
-    tags: Optional[str] = None,
+    priority: str | None = None,
+    column: str | None = None,
+    scope: str | None = None,
+    agent: str | None = None,
+    tags: str | None = None,
 ) -> list[Task]:
     """Search and filter board tasks by criteria.
 

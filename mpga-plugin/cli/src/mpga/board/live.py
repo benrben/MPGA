@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from mpga.board.board import BoardLane, BoardRun, BoardState
 from mpga.board.task import Task, load_all_tasks
@@ -13,9 +13,9 @@ from mpga.board.task import Task, load_all_tasks
 @dataclass
 class BoardLiveEvent:
     type: str
-    lane_id: Optional[str] = None
-    task_id: Optional[str] = None
-    status: Optional[str] = None
+    lane_id: str | None = None
+    task_id: str | None = None
+    status: str | None = None
     extra: dict[str, Any] = field(default_factory=dict)
 
 
@@ -25,10 +25,10 @@ class BoardLiveTaskSummary:
     title: str
     column: str
     priority: str
-    assigned: Optional[str] = None
-    lane_id: Optional[str] = None
+    assigned: str | None = None
+    lane_id: str | None = None
     run_status: str = "queued"
-    current_agent: Optional[str] = None
+    current_agent: str | None = None
     file_locks: list[dict[str, Any]] = field(default_factory=list)
     scope_locks: list[dict[str, Any]] = field(default_factory=list)
 
@@ -36,7 +36,7 @@ class BoardLiveTaskSummary:
 @dataclass
 class BoardLiveSnapshot:
     generated_at: str
-    milestone: Optional[str]
+    milestone: str | None
     stats: Any  # BoardStats
     scheduler: Any  # BoardScheduler
     ui: Any  # BoardUI
@@ -98,7 +98,7 @@ def build_board_live_snapshot(
     board: BoardState,
     tasks_dir: str,
     board_dir: str,
-    preloaded_tasks: Optional[list[Task]] = None,
+    preloaded_tasks: list[Task] | None = None,
 ) -> BoardLiveSnapshot:
     tasks = preloaded_tasks if preloaded_tasks is not None else load_all_tasks(tasks_dir)
     columns: dict[str, list[BoardLiveTaskSummary]] = {
@@ -115,7 +115,7 @@ def build_board_live_snapshot(
             columns[task.column].append(_summarize_task(task))
 
     return BoardLiveSnapshot(
-        generated_at=datetime.now(timezone.utc).isoformat(),
+        generated_at=datetime.now(UTC).isoformat(),
         milestone=board.milestone,
         stats=board.stats,
         scheduler=board.scheduler,
@@ -204,7 +204,7 @@ def write_board_live_snapshot(
     board: BoardState,
     tasks_dir: str,
     board_dir: str,
-    preloaded_tasks: Optional[list[Task]] = None,
+    preloaded_tasks: list[Task] | None = None,
 ) -> str:
     live_dir = Path(get_board_live_dir(board_dir))
     live_dir.mkdir(parents=True, exist_ok=True)

@@ -1,6 +1,5 @@
 """Tests for board CLI enum validation and handleBoardClaim."""
 
-import json
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -8,7 +7,6 @@ import pytest
 
 from mpga.board.board import BoardState
 from mpga.board.task import Task
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -69,6 +67,7 @@ class TestCliEnumValidation:
     def test_rejects_invalid_priority_in_add(self):
         """Rejects invalid priority in board add."""
         from click.testing import CliRunner
+
         from mpga.commands.board_cmd import board_add
 
         runner = CliRunner()
@@ -78,6 +77,7 @@ class TestCliEnumValidation:
     def test_rejects_invalid_column_in_add(self):
         """Rejects invalid column in board add."""
         from click.testing import CliRunner
+
         from mpga.commands.board_cmd import board_add
 
         runner = CliRunner()
@@ -87,6 +87,7 @@ class TestCliEnumValidation:
     def test_rejects_invalid_tdd_stage(self):
         """Rejects invalid tdd-stage in board update."""
         from click.testing import CliRunner
+
         from mpga.commands.board_cmd import board_update
 
         runner = CliRunner()
@@ -96,6 +97,7 @@ class TestCliEnumValidation:
     def test_rejects_invalid_status(self):
         """Rejects invalid status in board update."""
         from click.testing import CliRunner
+
         from mpga.commands.board_cmd import board_update
 
         runner = CliRunner()

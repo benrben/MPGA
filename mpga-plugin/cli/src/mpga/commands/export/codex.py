@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from mpga.core.logger import log
@@ -20,7 +20,6 @@ from .runtime import (
     global_vendored_cli_command,
     project_vendored_cli_command,
 )
-
 
 # --- Codex / Gemini CLI export ------------------------------------------------
 
@@ -117,7 +116,7 @@ developer_instructions = \"\"\"
 def _generate_agents_md(
     index_content: str, _project_name: str, cli_command: str
 ) -> str:
-    now = datetime.now(timezone.utc).isoformat()
+    now = datetime.now(UTC).isoformat()
 
     return f"""# MPGA \u2014 Evidence-Backed Context Engineering
 
@@ -208,7 +207,7 @@ def _evidence_section(scope_content: str) -> str:
     """Return a markdown bullet list of up to 5 evidence links from scope_content."""
     links = re.findall(r"\[E\] .+", scope_content)[:5]
     if links:
-        return "\n".join(f"- {l}" for l in links)
+        return "\n".join(f"- {lnk}" for lnk in links)
     return "- (run `mpga sync` to populate evidence links)"
 
 

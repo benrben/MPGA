@@ -6,13 +6,12 @@ subcommand to a Click command with the same options and arguments.
 
 from __future__ import annotations
 
-import os
 import re
 import sys
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Literal, Optional
+from typing import Literal
 
 import click
 
@@ -20,7 +19,6 @@ from mpga.board.board import load_board, recalc_stats, save_board
 from mpga.board.board_md import render_board_md
 from mpga.core.config import find_project_root
 from mpga.core.logger import console, log
-
 
 # ---------------------------------------------------------------------------
 # Data types
@@ -63,9 +61,9 @@ def _list_milestones(milestones_dir: str) -> list[MilestoneInfo]:
                 name=m.group(2).replace("-", " ") if m else d.name,
                 dir_path=str(d),
                 status="complete" if summary_path.exists() else "active",
-                created=datetime.fromtimestamp(d.stat().st_birthtime, tz=timezone.utc).strftime("%Y-%m-%d")
+                created=datetime.fromtimestamp(d.stat().st_birthtime, tz=UTC).strftime("%Y-%m-%d")
                 if hasattr(d.stat(), "st_birthtime")
-                else datetime.fromtimestamp(d.stat().st_ctime, tz=timezone.utc).strftime("%Y-%m-%d"),
+                else datetime.fromtimestamp(d.stat().st_ctime, tz=UTC).strftime("%Y-%m-%d"),
             )
         )
     return results
@@ -114,7 +112,7 @@ def complete_active_milestone(project_root: str) -> CompleteMilestoneResult:
 
     milestone_slug = board.milestone
     milestone_dir = Path(project_root) / "MPGA" / "milestones" / milestone_slug
-    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    today = datetime.now(UTC).strftime("%Y-%m-%d")
 
     recalc_stats(board, tasks_dir)
     (milestone_dir / "SUMMARY.md").write_text(
@@ -168,7 +166,7 @@ def milestone_new(name: str) -> None:
 
     dir_path.mkdir()
 
-    now = datetime.now(timezone.utc).isoformat()
+    now = datetime.now(UTC).isoformat()
     today = now.split("T")[0]
 
     # PLAN.md

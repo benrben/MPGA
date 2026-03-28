@@ -6,9 +6,8 @@ subcommand to a Click command with the same options and arguments.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Optional
 
 import click
 
@@ -18,7 +17,6 @@ from mpga.commands.board_handlers import persist_board
 from mpga.commands.develop_scheduler import run_develop_task
 from mpga.core.config import find_project_root
 from mpga.core.logger import console, log
-
 
 # -- Handlers ---------------------------------------------------------------
 
@@ -82,7 +80,7 @@ def handle_develop_abort(task_id: str) -> None:
 
     # Move task back to todo
     task.column = "todo"
-    task.updated = datetime.now(timezone.utc).isoformat()
+    task.updated = datetime.now(UTC).isoformat()
 
     Path(task_file).write_text(render_task_file(task), encoding="utf-8")
 
@@ -109,7 +107,7 @@ def handle_develop_resume(task_id: str) -> None:
     # Resume: move to in-progress, set running
     task.column = "in-progress"
     task.run_status = "running"
-    task.updated = datetime.now(timezone.utc).isoformat()
+    task.updated = datetime.now(UTC).isoformat()
 
     Path(task_file).write_text(render_task_file(task), encoding="utf-8")
 
@@ -133,7 +131,7 @@ def develop() -> None:
 @click.option("--parallel", "parallel", default="auto", help="Parallel scheduling mode")
 @click.option("--lanes", "lanes", type=int, default=None, help="Maximum number of parallel lanes")
 @click.option("--dashboard", is_flag=True, default=False, help="Refresh live board artifacts during scheduling")
-def develop_run(task_id: str, parallel: str, lanes: Optional[int], dashboard: bool) -> None:
+def develop_run(task_id: str, parallel: str, lanes: int | None, dashboard: bool) -> None:
     run_develop_task(task_id, parallel=parallel, lanes=lanes, dashboard=dashboard)
 
 

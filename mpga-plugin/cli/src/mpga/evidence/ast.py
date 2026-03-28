@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Literal, Optional
+from typing import Literal
 
 from mpga.core.scanner import detect_language
 
@@ -146,7 +146,66 @@ def _extract_symbols_regex(content: str, language: str) -> list[SymbolLocation]:
     return symbols
 
 
+_SOURCE_EXTENSIONS = {".py", ".ts", ".tsx", ".js", ".jsx", ".go", ".rs"}
+_CONFIG_EXTENSIONS = {".json", ".yaml", ".yml", ".toml", ".env", ".css", ".md", ".mdx"}
+
+
+def _extract_symbols_ast_python(content: str) -> list[SymbolLocation]:
+    """Extract symbols from Python source using ast.parse(); falls back to regex on SyntaxError."""
+    import ast as _ast
+
+    try:
+        tree = _ast.parse(content)
+    except SyntaxError:
+        return _extract_symbols_regex(content, "python")
+
+    results: list[SymbolLocation] = []
+
+    class _Visitor(_ast.NodeVisitor):
+        def __init__(self) -> None:
+            self._in_class = False
+
+        def visit_ClassDef(self, node: _ast.ClassDef) -> None:
+            results.append(SymbolLocation(
+                name=node.name,
+                type="class",
+                start_line=node.lineno,
+                end_line=getattr(node, "end_lineno", node.lineno),
+            ))
+            prev = self._in_class
+            self._in_class = True
+            self.generic_visit(node)
+            self._in_class = prev
+
+        def _visit_func(self, node: _ast.FunctionDef | _ast.AsyncFunctionDef) -> None:
+            sym_type = "method" if self._in_class else "function"
+            results.append(SymbolLocation(
+                name=node.name,
+                type=sym_type,  # type: ignore[arg-type]
+                start_line=node.lineno,
+                end_line=getattr(node, "end_lineno", node.lineno),
+            ))
+            # Don't recurse into nested functions by default
+            prev = self._in_class
+            self._in_class = False
+            self.generic_visit(node)
+            self._in_class = prev
+
+        def visit_FunctionDef(self, node: _ast.FunctionDef) -> None:
+            self._visit_func(node)
+
+        def visit_AsyncFunctionDef(self, node: _ast.AsyncFunctionDef) -> None:
+            self._visit_func(node)
+
+    _Visitor().visit(tree)
+    return results
+
+
 def extract_symbols(filepath: str, project_root: str) -> list[SymbolLocation]:
+    ext = Path(filepath).suffix.lower()
+    if ext not in _SOURCE_EXTENSIONS:
+        return []
+
     full_path = Path(project_root) / filepath
     if not full_path.exists():
         return []
@@ -156,6 +215,9 @@ def extract_symbols(filepath: str, project_root: str) -> list[SymbolLocation]:
     except OSError:
         return []
 
+    if ext == ".py":
+        return _extract_symbols_ast_python(content)
+
     language = detect_language(filepath)
     return _extract_symbols_regex(content, language)
 
@@ -164,7 +226,7 @@ def find_symbol(
     filepath: str,
     symbol_name: str,
     project_root: str,
-) -> Optional[SymbolLocation]:
+) -> SymbolLocation | None:
     symbols = extract_symbols(filepath, project_root)
     for s in symbols:
         if s.name == symbol_name:
@@ -176,7 +238,7 @@ def verify_range(
     filepath: str,
     start_line: int,
     end_line: int,
-    symbol: Optional[str],
+    symbol: str | None,
     project_root: str,
 ) -> bool:
     """Verify that a line range contains the expected symbol."""

@@ -14,13 +14,12 @@ from .export.claude import export_claude
 from .export.codex import export_codex
 from .export.cursor import export_cursor
 
-
 # --- Main export command ------------------------------------------------------
 
 
 @click.command("export")
 @click.option("--claude", "do_claude", is_flag=True, help="Generate CLAUDE.md + .claude/skills/ for Claude Code")
-@click.option("--cursor", "do_cursor", is_flag=True, help="Generate .cursor/rules/*.mdc + .cursor/skills/ + .cursor/agents/")
+@click.option("--cursor", "do_cursor", is_flag=True, help="Generate .cursor/rules/*.mdc + .cursor/skills/ + .cursor/agents/")  # noqa: E501
 @click.option("--codex", "do_codex", is_flag=True, help="Generate AGENTS.md + .codex/skills/ + .codex/agents/*.toml")
 @click.option(
     "--antigravity",

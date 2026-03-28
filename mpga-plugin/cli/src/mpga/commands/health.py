@@ -7,7 +7,7 @@ from pathlib import Path
 
 import click
 
-from mpga.board.board import BoardState, load_board, recalc_stats
+from mpga.board.board import load_board, recalc_stats
 from mpga.core.config import find_project_root, load_config
 from mpga.core.logger import (
     grade_color,

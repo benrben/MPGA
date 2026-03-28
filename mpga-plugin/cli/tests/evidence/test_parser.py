@@ -1,15 +1,13 @@
 """Tests for mpga.evidence.parser -- converted from parser.test.ts."""
 
-import pytest
 
 from mpga.evidence.parser import (
     EvidenceLink,
+    evidence_stats,
+    format_evidence_link,
     parse_evidence_link,
     parse_evidence_links,
-    format_evidence_link,
-    evidence_stats,
 )
-
 
 # ---------------------------------------------------------------------------
 # parse_evidence_link

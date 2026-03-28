@@ -2,9 +2,6 @@
 
 from pathlib import Path
 
-import pytest
-
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -15,7 +12,7 @@ def setup_board_with_tasks(tmp_path: Path, monkeypatch) -> Path:
     tasks_dir = board_dir / "tasks"
     tasks_dir.mkdir(parents=True, exist_ok=True)
 
-    from mpga.board.board import create_empty_board, save_board, add_task, AddTaskOptions
+    from mpga.board.board import AddTaskOptions, add_task, create_empty_board, save_board
     from mpga.board.task import parse_task_file, render_task_file
 
     board = create_empty_board()
@@ -35,14 +32,14 @@ def setup_board_with_tasks(tmp_path: Path, monkeypatch) -> Path:
         scopes=["core"],
         tags=["testing"],
     ))
-    t3 = add_task(board, str(tasks_dir), AddTaskOptions(
+    add_task(board, str(tasks_dir), AddTaskOptions(
         title="Refactor board layout",
         column="backlog",
         priority="medium",
         scopes=["board"],
         tags=["refactor"],
     ))
-    t4 = add_task(board, str(tasks_dir), AddTaskOptions(
+    add_task(board, str(tasks_dir), AddTaskOptions(
         title="Update documentation",
         column="done",
         priority="low",

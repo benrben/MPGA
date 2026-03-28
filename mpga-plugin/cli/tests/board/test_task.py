@@ -3,8 +3,14 @@ from pathlib import Path
 
 import pytest
 
-from mpga.board.task import task_filename, render_task_file, parse_task_file, Task, FileLock, ScopeLock
-
+from mpga.board.task import (
+    FileLock,
+    ScopeLock,
+    Task,
+    parse_task_file,
+    render_task_file,
+    task_filename,
+)
 
 # ── task_filename ──
 

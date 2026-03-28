@@ -2,8 +2,6 @@
 
 from pathlib import Path
 
-import pytest
-
 
 class TestRuntimeExportHelper:
     """runtime export helper tests."""
@@ -37,7 +35,10 @@ class TestRuntimeExportHelper:
 
     def test_vendored_cli_commands(self):
         """Computes project and global vendored cli commands."""
-        from mpga.commands.export.runtime import project_vendored_cli_command, global_vendored_cli_command
+        from mpga.commands.export.runtime import (
+            global_vendored_cli_command,
+            project_vendored_cli_command,
+        )
 
         assert project_vendored_cli_command() == "./.mpga-runtime/bin/mpga.sh"
         assert global_vendored_cli_command("/tmp/tool-root") == "/tmp/tool-root/.mpga-runtime/bin/mpga.sh"

@@ -168,7 +168,8 @@ def scan(project_root: str | Path, ignore: list[str], deep: bool = False) -> Sca
 
 def detect_project_type(result: ScanResult) -> str:
     langs = result.languages
-    has_file = lambda pattern: any(pattern in f.filepath for f in result.files)
+    def has_file(pattern):
+        return any(pattern in f.filepath for f in result.files)
 
     if "typescript" in langs and has_file("next.config"):
         return "Next.js"

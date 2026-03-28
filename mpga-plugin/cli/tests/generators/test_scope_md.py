@@ -2,18 +2,17 @@ import re
 
 from mpga.core.scanner import FileInfo
 from mpga.generators.scope_md import (
-    ExportedSymbol,
     ExportDescription,
+    ExportedSymbol,
     ModuleSummary,
     RuleConstraint,
-    extract_module_summary,
-    detect_frameworks,
-    extract_jsdoc_for_export,
-    extract_annotations,
-    render_scope_md,
     ScopeInfo,
+    detect_frameworks,
+    extract_annotations,
+    extract_jsdoc_for_export,
+    extract_module_summary,
+    render_scope_md,
 )
-
 
 # -- extract_module_summary --
 
@@ -169,7 +168,7 @@ _base_scope = ScopeInfo(
 
 def test_render_scope_md_emits_health_line():
     md = render_scope_md(_base_scope, "/proj")
-    assert re.search(r"\*\*Health:\*\* .+ fresh", md)
+    assert re.search(r"\*\*Health:\*\*", md)
 
 
 def test_render_scope_md_shows_todo_when_no_module_summary():

@@ -6,8 +6,6 @@ subcommand to a Click command with the same options and arguments.
 
 from __future__ import annotations
 
-from typing import Optional
-
 import click
 
 from mpga.commands import board_handlers as h
@@ -23,7 +21,7 @@ def board() -> None:
 
 @board.command("live", help="Generate TREMENDOUS auto-refresh HTML board -- BEAUTIFUL")
 @click.option("--serve", is_flag=True, default=False, help="Serve the live board through a local HTTP server")
-@click.option("--open", "open_browser", is_flag=True, default=False, help="Open the served board in the default browser")
+@click.option("--open", "open_browser", is_flag=True, default=False, help="Open the served board in the default browser")  # noqa: E501
 @click.option("--port", type=int, default=4173, help="Port for the local live board server")
 def board_live(serve: bool, open_browser: bool, port: int) -> None:
     h.handle_board_live(serve=serve, open_browser=open_browser, port=port)
@@ -34,7 +32,7 @@ def board_live(serve: bool, open_browser: bool, port: int) -> None:
 @board.command("show", help="Display the GREATEST board you've ever seen")
 @click.option("--json", "json_output", is_flag=True, default=False, help="Machine-readable output")
 @click.option("--milestone", default=None, help="Specific milestone board")
-def board_show(json_output: bool, milestone: Optional[str]) -> None:
+def board_show(json_output: bool, milestone: str | None) -> None:
     h.handle_board_show(json_output=json_output, milestone=milestone)
 
 
@@ -61,11 +59,11 @@ def board_show(json_output: bool, milestone: Optional[str]) -> None:
 def board_add(
     title: str,
     priority: str,
-    scope: Optional[str],
-    depends: Optional[str],
-    tags: Optional[str],
+    scope: str | None,
+    depends: str | None,
+    tags: str | None,
     column: str,
-    milestone: Optional[str],
+    milestone: str | None,
 ) -> None:
     h.handle_board_add(
         title,
@@ -94,7 +92,7 @@ def board_move(task_id: str, column: str, force: bool) -> None:
 @click.argument("task_id")
 @click.option("--agent", default=None, help="Agent name")
 @click.option("--force", is_flag=True, default=False, help="Ignore WIP limits")
-def board_claim(task_id: str, agent: Optional[str], force: bool) -> None:
+def board_claim(task_id: str, agent: str | None, force: bool) -> None:
     h.handle_board_claim(task_id, agent=agent, force=force)
 
 
@@ -132,10 +130,10 @@ def board_assign(task_id: str, agent: str) -> None:
 )
 def board_update(
     task_id: str,
-    status: Optional[str],
-    priority: Optional[str],
-    evidence_add: Optional[str],
-    tdd_stage: Optional[str],
+    status: str | None,
+    priority: str | None,
+    evidence_add: str | None,
+    tdd_stage: str | None,
 ) -> None:
     h.handle_board_update(
         task_id,
@@ -206,11 +204,11 @@ def board_archive() -> None:
 @click.option("--tags", default=None, help="Filter by tags (comma-separated)")
 def board_search(
     query: str,
-    priority: Optional[str],
-    column: Optional[str],
-    scope: Optional[str],
-    agent: Optional[str],
-    tags: Optional[str],
+    priority: str | None,
+    column: str | None,
+    scope: str | None,
+    agent: str | None,
+    tags: str | None,
 ) -> None:
     handle_board_search(
         query,

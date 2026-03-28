@@ -6,12 +6,12 @@ import pytest
 from mpga.board.board import (
     AddTaskOptions,
     BoardLane,
-    load_board,
-    save_board,
-    create_empty_board,
-    recalc_stats,
     add_task,
+    create_empty_board,
+    load_board,
     move_task,
+    recalc_stats,
+    save_board,
 )
 from mpga.board.task import parse_task_file
 

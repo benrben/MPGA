@@ -1,12 +1,9 @@
 """Tests for persistBoard function."""
 
 from pathlib import Path
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import MagicMock
 
-import pytest
-
-from mpga.board.board import BoardState, create_empty_board
-
+from mpga.board.board import create_empty_board
 
 # ---------------------------------------------------------------------------
 # Tests: persistBoard
@@ -151,11 +148,11 @@ class TestPersistBoard:
     def test_correct_call_order(self, monkeypatch):
         """Calls functions in correct order: recalcStats -> saveBoard -> writeBoardMd -> live artifacts."""
         call_order = []
-        monkeypatch.setattr("mpga.commands.board_handlers.recalc_stats", lambda *a, **kw: call_order.append("recalcStats"))
+        monkeypatch.setattr("mpga.commands.board_handlers.recalc_stats", lambda *a, **kw: call_order.append("recalcStats"))  # noqa: E501
         monkeypatch.setattr("mpga.commands.board_handlers.save_board", lambda *a: call_order.append("saveBoard"))
-        monkeypatch.setattr("mpga.commands.board_handlers.render_board_md", lambda *a, **kw: (call_order.append("renderBoardMd"), "")[1])
-        monkeypatch.setattr("mpga.commands.board_handlers.write_board_live_snapshot", lambda *a, **kw: (call_order.append("writeBoardLiveSnapshot"), "")[1])
-        monkeypatch.setattr("mpga.commands.board_handlers.write_board_live_html", lambda *a: (call_order.append("writeBoardLiveHtml"), "")[1])
+        monkeypatch.setattr("mpga.commands.board_handlers.render_board_md", lambda *a, **kw: (call_order.append("renderBoardMd"), "")[1])  # noqa: E501
+        monkeypatch.setattr("mpga.commands.board_handlers.write_board_live_snapshot", lambda *a, **kw: (call_order.append("writeBoardLiveSnapshot"), "")[1])  # noqa: E501
+        monkeypatch.setattr("mpga.commands.board_handlers.write_board_live_html", lambda *a: (call_order.append("writeBoardLiveHtml"), "")[1])  # noqa: E501
         monkeypatch.setattr("mpga.commands.board_handlers.load_all_tasks", lambda *a: [])
 
         from mpga.commands.board_handlers import persist_board

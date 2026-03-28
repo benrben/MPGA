@@ -1,8 +1,7 @@
+from mpga.core.config import DEFAULT_CONFIG, KnowledgeLayerConfig
+from mpga.core.scanner import FileInfo, ScanResult
 from mpga.generators.index_md import render_index_md
-from mpga.core.config import DEFAULT_CONFIG, MpgaConfig, KnowledgeLayerConfig
-from mpga.core.scanner import ScanResult, FileInfo
-from mpga.generators.scope_md import ScopeInfo, ExportedSymbol
-
+from mpga.generators.scope_md import ExportedSymbol, ScopeInfo
 
 _minimal_scope = ScopeInfo(
     name="alpha",

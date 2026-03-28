@@ -2,15 +2,15 @@ from pathlib import Path
 
 import pytest
 
-from mpga.board.board_md import render_board_md
 from mpga.board.board import (
     AddTaskOptions,
     BoardStats,
-    create_empty_board,
-    save_board,
     add_task,
+    create_empty_board,
     recalc_stats,
+    save_board,
 )
+from mpga.board.board_md import render_board_md
 
 
 @pytest.fixture

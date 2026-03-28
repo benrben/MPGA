@@ -8,7 +8,6 @@ import subprocess
 from functools import partial
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
-from typing import Optional
 
 CONTENT_TYPES: dict[str, str] = {
     ".html": "text/html; charset=utf-8",
@@ -54,14 +53,14 @@ class _BoardLiveHandler(SimpleHTTPRequestHandler):
 
     # --- path resolution (mirrors the TS resolveRequestPath) ----------------
 
-    def _resolve_request_path(self) -> Optional[str]:
+    def _resolve_request_path(self) -> str | None:
         raw_path = self.path or "/"
         # Strip query string
         pathname = raw_path.split("?")[0].split("#")[0]
         relative = "index.html" if pathname == "/" else pathname.lstrip("/")
         resolved = Path(self._live_dir).resolve() / relative
         live_root = str(Path(self._live_dir).resolve()) + os.sep
-        index_path = str((Path(self._live_dir).resolve() / "index.html"))
+        index_path = str(Path(self._live_dir).resolve() / "index.html")
         if str(resolved).startswith(live_root) or str(resolved) == index_path:
             return str(resolved)
         return None

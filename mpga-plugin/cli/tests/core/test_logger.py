@@ -2,9 +2,7 @@
 
 import re
 
-import pytest
-
-from mpga.core.logger import progress_bar, RALLY_QUOTES, random_quote, victory
+from mpga.core.logger import RALLY_QUOTES, progress_bar, random_quote, victory
 
 
 def strip_ansi(s: str) -> str:

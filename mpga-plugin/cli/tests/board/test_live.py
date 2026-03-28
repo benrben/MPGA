@@ -3,13 +3,20 @@ from pathlib import Path
 
 import pytest
 
-from mpga.board.board import AddTaskOptions, BoardLane, BoardRun, add_task, create_empty_board, recalc_stats
-from mpga.board.task import FileLock, parse_task_file, render_task_file
+from mpga.board.board import (
+    AddTaskOptions,
+    BoardLane,
+    BoardRun,
+    add_task,
+    create_empty_board,
+    recalc_stats,
+)
 from mpga.board.live import (
     build_board_live_snapshot,
     read_recent_board_events,
     write_board_live_snapshot,
 )
+from mpga.board.task import FileLock, parse_task_file, render_task_file
 
 
 @pytest.fixture

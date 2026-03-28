@@ -3,11 +3,9 @@
 import json
 from pathlib import Path
 
-import pytest
 from click.testing import CliRunner
 
 from tests.conftest import write_file
-
 
 # ---------------------------------------------------------------------------
 # Helpers

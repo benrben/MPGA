@@ -55,6 +55,7 @@ _COMMANDS: dict[str, tuple[str, str]] = {
     "init":       ("mpga.commands.init", "init_cmd"),
     "scan":       ("mpga.commands.scan", "scan_cmd"),
     "sync":       ("mpga.commands.sync", "sync_cmd"),
+    "normalize":  ("mpga.commands.normalize", "normalize_cmd"),
     "status":     ("mpga.commands.status", "status_cmd"),
     "health":     ("mpga.commands.health", "health_cmd"),
     # Evidence & drift

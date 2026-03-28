@@ -1,13 +1,9 @@
 """Tests for the Codex export module."""
 
-import os
 from pathlib import Path
 from unittest.mock import MagicMock
 
-import pytest
-
 from mpga.commands.export.agents import AgentMeta
-
 
 MOCK_AGENTS = [
     AgentMeta(
@@ -230,11 +226,11 @@ class TestCodexGlobalExport:
 
         from mpga.commands.export.codex import export_codex
 
-        # Should not throw
+        # Should not throw on HOME lookup — may fail on path creation, which is fine
         try:
             export_codex("/unused", "/unused/MPGA", "", "proj", None, True)
-        except Exception:
-            pass  # May fail on path creation but should not throw on HOME lookup
+        except (FileNotFoundError, PermissionError, OSError):
+            pass
 
 
 # ---------------------------------------------------------------------------
@@ -283,7 +279,7 @@ class TestCodexContentVerification:
         scopes_dir.mkdir(parents=True, exist_ok=True)
 
         links = [f"[E] src/big/file{i}.ts:1-10 :: fn{i}()" for i in range(8)]
-        (scopes_dir / "big.md").write_text(f"# Big\n" + "\n".join(links) + "\n")
+        (scopes_dir / "big.md").write_text("# Big\n" + "\n".join(links) + "\n")
 
         src_big_dir = project_root / "src" / "big"
         src_big_dir.mkdir(parents=True, exist_ok=True)
@@ -293,5 +289,102 @@ class TestCodexContentVerification:
         export_codex(str(project_root), str(mpga_dir), "", "proj", None, False)
 
         content = (src_big_dir / "AGENTS.md").read_text()
-        evidence_lines = [l for l in content.split("\n") if "[E]" in l]
+        evidence_lines = [ln for ln in content.split("\n") if "[E]" in ln]
         assert len(evidence_lines) <= 5
+
+
+# ---------------------------------------------------------------------------
+# T034: Regression tests — frontmatter stripping + SKILL.md model field
+# ---------------------------------------------------------------------------
+
+class TestCodexRegressionT034:
+    """Regression tests for M005: frontmatter stripping and SKILL.md model injection."""
+
+    def test_developer_instructions_strips_frontmatter(self, tmp_path):
+        """read_agent_instructions strips YAML frontmatter — no '---' in output."""
+        from mpga.commands.export.agents import read_agent_instructions
+
+        agents_dir = tmp_path / "agents"
+        agents_dir.mkdir()
+        agent_file = agents_dir / "test-agent.md"
+        agent_file.write_text(
+            "---\nname: test-agent\nmodel: opus\ndescription: A test agent\n---\n"
+            "# Agent: Test\n\nActual instructions here.\n"
+        )
+
+        result = read_agent_instructions(str(tmp_path), "test-agent")
+
+        assert "---" not in result
+        assert "name: test-agent" not in result
+        assert "model: opus" not in result
+
+    def test_developer_instructions_preserves_body(self, tmp_path):
+        """read_agent_instructions keeps body text below frontmatter."""
+        from mpga.commands.export.agents import read_agent_instructions
+
+        agents_dir = tmp_path / "agents"
+        agents_dir.mkdir()
+        agent_file = agents_dir / "test-agent.md"
+        agent_file.write_text(
+            "---\nname: test-agent\nmodel: opus\n---\n"
+            "# Agent: Test\n\nActual instructions here.\nMore body text.\n"
+        )
+
+        result = read_agent_instructions(str(tmp_path), "test-agent")
+
+        assert "Actual instructions here." in result
+        assert "More body text." in result
+
+    def test_inject_model_into_skill_md_basic(self):
+        """_inject_model_into_skill_md inserts model: field into frontmatter."""
+        from mpga.commands.export.agents import _inject_model_into_skill_md
+
+        content = "---\nname: my-skill\ndescription: A skill\n---\n\n## Content\n"
+        result = _inject_model_into_skill_md(content, "gpt-5.3-codex")
+        assert "model: gpt-5.3-codex" in result
+
+    def test_inject_model_no_double_inject(self):
+        """_inject_model_into_skill_md is a no-op when model: already present."""
+        from mpga.commands.export.agents import _inject_model_into_skill_md
+
+        content = "---\nname: my-skill\nmodel: existing-model\n---\n\n## Content\n"
+        result = _inject_model_into_skill_md(content, "gpt-5.3-codex")
+        assert result.count("model:") == 1
+
+    def test_inject_model_empty_model_is_noop(self):
+        """_inject_model_into_skill_md with empty model string → content unchanged."""
+        from mpga.commands.export.agents import _inject_model_into_skill_md
+
+        content = "---\nname: my-skill\n---\n\n## Content\n"
+        result = _inject_model_into_skill_md(content, "")
+        assert result == content
+
+    def test_fallback_skill_md_contains_model_for_codex(self, tmp_path):
+        """copy_skills_to with tool_name='codex' produces SKILL.md with model: field."""
+        from mpga.commands.export.agents import MODEL_TIERS, copy_skills_to
+
+        target_skills = tmp_path / "skills"
+        copy_skills_to(str(target_skills), None, "codex")
+
+        # At least one SKILL.md should have been written via fallback
+        skill_files = list(target_skills.rglob("SKILL.md"))
+        assert len(skill_files) > 0
+
+        codex_model = MODEL_TIERS["codex"]["mid"]
+        for skill_md in skill_files:
+            content = skill_md.read_text()
+            assert f"model: {codex_model}" in content, (
+                f"{skill_md.name} missing model field. Content:\n{content}"
+            )
+
+    def test_non_codex_skill_md_has_no_model_field(self, tmp_path):
+        """copy_skills_to with tool_name='claude' does NOT inject model: into SKILL.md."""
+        from mpga.commands.export.agents import copy_skills_to
+
+        target_skills = tmp_path / "skills"
+        copy_skills_to(str(target_skills), None, "claude")
+
+        for skill_md in target_skills.rglob("SKILL.md"):
+            content = skill_md.read_text()
+            # The fallback template for claude should not have a model: line
+            assert "model: gpt-" not in content

@@ -1,13 +1,15 @@
 """Tests for mpga.core.scanner -- converted from scanner.test.ts."""
 
-import os
-import stat
 from pathlib import Path
 
-import pytest
-
-from mpga.core.scanner import detect_language, count_lines, scan, detect_project_type, ScanResult, FileInfo
-
+from mpga.core.scanner import (
+    FileInfo,
+    ScanResult,
+    count_lines,
+    detect_language,
+    detect_project_type,
+    scan,
+)
 
 # ---------------------------------------------------------------------------
 # detect_language

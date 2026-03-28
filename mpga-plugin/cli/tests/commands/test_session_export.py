@@ -3,11 +3,7 @@
 import json
 from pathlib import Path
 
-import pytest
 from click.testing import CliRunner
-
-from tests.conftest import write_file
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -349,7 +345,7 @@ class TestAgentsMetadata:
             assert slug in agent_slugs
 
         for agent in AGENTS:
-            assert agent.slug, f"Agent missing slug"
+            assert agent.slug, "Agent missing slug"
             assert agent.name, f"Agent {agent.slug} missing name"
             assert agent.description, f"Agent {agent.slug} missing description"
             assert agent.model, f"Agent {agent.slug} missing model"

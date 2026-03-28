@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-from typing import Optional
-
 from mpga.board.board import BoardState
-from mpga.board.task import Column, Task, load_all_tasks
+from mpga.board.task import Task, load_all_tasks
 from mpga.core.logger import progress_bar
 
 TDD_ICONS: dict[str, str] = {
@@ -34,7 +32,7 @@ WIP_LIMITS_DEFAULT: dict[str, int] = {"in-progress": 3, "testing": 3, "review": 
 def render_board_md(
     board: BoardState,
     tasks_dir: str,
-    preloaded_tasks: Optional[list[Task]] = None,
+    preloaded_tasks: list[Task] | None = None,
 ) -> str:
     tasks = preloaded_tasks if preloaded_tasks is not None else load_all_tasks(tasks_dir)
     by_column: dict[str, list[Task]] = {
@@ -60,7 +58,7 @@ def render_board_md(
         f"**Progress: {progress_bar(stats.done, stats.total)}** ({stats.done}/{stats.total} tasks)"
     )
     lines.append(
-        f"**Evidence: {progress_bar(stats.evidence_produced, stats.evidence_expected)}** ({stats.evidence_produced}/{stats.evidence_expected} links produced)"
+        f"**Evidence: {progress_bar(stats.evidence_produced, stats.evidence_expected)}** ({stats.evidence_produced}/{stats.evidence_expected} links produced)"  # noqa: E501
     )
     health = (
         f"\u26a0 {stats.blocked} blocked task(s)"
@@ -79,7 +77,7 @@ def render_board_md(
         lines.append("| ID | Task | Agent | TDD | Priority |")
         lines.append("|----|------|-------|-----|----------|")
         for t in in_progress:
-            tdd = (TDD_ICONS.get(t.tdd_stage or "", "") + " " + (t.tdd_stage or "")).strip() if t.tdd_stage else "\u2014"
+            tdd = (TDD_ICONS.get(t.tdd_stage or "", "") + " " + (t.tdd_stage or "")).strip() if t.tdd_stage else "\u2014"  # noqa: E501
             status = (STATUS_ICONS.get(t.status or "", "") + " ") if t.status else ""
             assigned = t.assigned or "\u2014"
             pri = PRIORITY_ICONS.get(t.priority, "") + " " + t.priority
@@ -94,7 +92,7 @@ def render_board_md(
         lines.append("| ID | Task | Agent | TDD | Priority |")
         lines.append("|----|------|-------|-----|----------|")
         for t in testing:
-            tdd = (TDD_ICONS.get(t.tdd_stage or "", "") + " " + (t.tdd_stage or "")).strip() if t.tdd_stage else "\u2014"
+            tdd = (TDD_ICONS.get(t.tdd_stage or "", "") + " " + (t.tdd_stage or "")).strip() if t.tdd_stage else "\u2014"  # noqa: E501
             assigned = t.assigned or "\u2014"
             pri = PRIORITY_ICONS.get(t.priority, "") + " " + t.priority
             lines.append(f"| {t.id} | {t.title} | {assigned} | {tdd} | {pri} |")

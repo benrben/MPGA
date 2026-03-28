@@ -1,14 +1,15 @@
 """Shared fixtures for MPGA CLI tests."""
 
-import pytest
 from pathlib import Path
+
+import pytest
 
 
 @pytest.fixture(autouse=True)
 def _patch_logger_stderr(monkeypatch):
     """Patch log.error to avoid Rich Console.print(stderr=True) which is unsupported in Rich 14+."""
     try:
-        from mpga.core.logger import console, log
+        from mpga.core.logger import console
 
         original_print = console.print
 

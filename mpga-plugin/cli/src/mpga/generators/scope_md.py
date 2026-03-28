@@ -2,12 +2,42 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from mpga.core.config import MpgaConfig
+from mpga.core.logger import log
 from mpga.core.scanner import FileInfo, ScanResult
 from mpga.generators.graph_md import GraphData
+
+_SOURCE_EXTENSIONS = {".py", ".ts", ".tsx", ".js", ".jsx", ".go", ".rs"}
+
+
+def _choose_evidence_form(
+    filepath: str,
+    symbol: str | None,
+    project_root: str,
+    fallback_lines: tuple[int, int] | None = None,
+) -> str:
+    """Return the canonical evidence form for a file+symbol pair.
+
+    Source files with a known symbol use ``file#symbol:lineHint``.
+    Config/doc files use ``file:start-end`` (structural, range-based).
+    Falls back to ``file`` alone when no line information is available.
+    """
+    ext = Path(filepath).suffix.lower()
+    if ext in _SOURCE_EXTENSIONS and symbol:
+        try:
+            from mpga.evidence.ast import find_symbol as _find_symbol
+
+            loc = _find_symbol(filepath, symbol, project_root)
+            if loc:
+                return f"[E] {filepath}#{symbol}:{loc.start_line}"
+        except Exception as exc:
+            log.debug(f"AST lookup failed for {filepath}#{symbol}: {exc}")
+    if fallback_lines:
+        return f"[E] {filepath}:{fallback_lines[0]}-{fallback_lines[1]}"
+    return f"[E] `{filepath}`"
 
 # Pre-compiled regex for detecting inter-scope imports inside group_into_scopes loop.
 _SCOPE_IMPORT_RE = re.compile(r"""(?:from|import)\s+['"]([^'"]+)['"]""")
@@ -183,8 +213,8 @@ def extract_module_summary(content: str) -> str | None:
             cleaned = " ".join(
                 line
                 for line in (
-                    re.sub(r"^\s*\*\s?", "", l).strip()
-                    for l in jsdoc_match.group(1).split("\n")
+                    re.sub(r"^\s*\*\s?", "", raw_line).strip()
+                    for raw_line in jsdoc_match.group(1).split("\n")
                 )
                 if not line.startswith("@") and line
             ).strip()
@@ -202,7 +232,7 @@ def extract_module_summary(content: str) -> str | None:
         else:
             break
     if comment_lines:
-        joined = " ".join(l for l in comment_lines if l).strip()
+        joined = " ".join(ln for ln in comment_lines if ln).strip()
         if joined:
             return joined
 
@@ -250,8 +280,8 @@ def extract_jsdoc_for_export(content: str, symbol_name: str) -> str | None:
     lines = [
         line
         for line in (
-            re.sub(r"^\s*\*\s?", "", l).strip()
-            for l in match.group(1).split("\n")
+            re.sub(r"^\s*\*\s?", "", raw_line).strip()
+            for raw_line in match.group(1).split("\n")
         )
         if line and not line.startswith("@")
     ]
@@ -277,8 +307,8 @@ def extract_annotations(content: str, symbol_name: str) -> list[str]:
         return []
 
     annotations: list[str] = []
-    for l in match.group(1).split("\n"):
-        line = re.sub(r"^\s*\*\s?", "", l).strip()
+    for raw_line in match.group(1).split("\n"):
+        line = re.sub(r"^\s*\*\s?", "", raw_line).strip()
         if line.startswith("@throws") or line.startswith("@deprecated"):
             annotations.append(line)
     return annotations
@@ -502,18 +532,18 @@ def group_into_scopes(
 # Scope markdown rendering
 # ---------------------------------------------------------------------------
 
-def render_scope_md(scope: ScopeInfo, _project_root: str) -> str:
+def render_scope_md(scope: ScopeInfo, project_root: str) -> str:
     """Renders a complete scope markdown document from a ScopeInfo object, including
     summary, entry points, context, relationships, evidence index, and file listing.
 
     Args:
         scope: The ScopeInfo to render into markdown.
-        _project_root: The project root path (reserved for future use).
+        project_root: The project root path used for symbol resolution.
 
     Returns:
         The full markdown string for the scope document.
     """
-    now = datetime.now(timezone.utc).isoformat().split("T")[0]
+    now = datetime.now(UTC).isoformat().split("T")[0]
     lines: list[str] = []
 
     # -- Summary --
@@ -521,7 +551,7 @@ def render_scope_md(scope: ScopeInfo, _project_root: str) -> str:
     lines.append("")
     lines.append("## Summary")
     lines.append("")
-    lines.append("- **Health:** \u2713 fresh")
+    lines.append("- **Health:** [Unknown] — not yet verified")
     total_lines = sum(f.lines for f in scope.files)
     lines.append(
         f"The **{scope.name}** module \u2014 TREMENDOUS \u2014"
@@ -551,7 +581,7 @@ def render_scope_md(scope: ScopeInfo, _project_root: str) -> str:
         )
         lines.append("")
         for ep in scope.entry_points:
-            lines.append(f"- [E] `{ep}`")
+            lines.append(f"- {_choose_evidence_form(ep, None, project_root)}")
     else:
         lines.append(
             "- <!-- TODO: Find the main entry points."
@@ -563,7 +593,7 @@ def render_scope_md(scope: ScopeInfo, _project_root: str) -> str:
     lines.append("## Context / stack / skills")
     lines.append("")
     lang_set = {f.language for f in scope.files}
-    langs = [l for l in lang_set if l != "other"]
+    langs = [lang for lang in lang_set if lang != "other"]
     if langs:
         lines.append(f"- **Languages:** {', '.join(langs)}")
     symbol_kinds = {e.kind for e in scope.exports}
@@ -597,9 +627,10 @@ def render_scope_md(scope: ScopeInfo, _project_root: str) -> str:
     lines.append("")
     if scope.export_descriptions:
         for ed in scope.export_descriptions:
+            ev = _choose_evidence_form(ed.filepath, ed.symbol, project_root)
             lines.append(
                 f"- **{ed.symbol}** ({ed.kind})"
-                f" \u2014 {ed.description} [E] `{ed.filepath}`"
+                f" \u2014 {ed.description} {ev}"
             )
         lines.append("")
     else:
@@ -725,10 +756,11 @@ def render_scope_md(scope: ScopeInfo, _project_root: str) -> str:
         lines.append("| Claim | Evidence |")
         lines.append("|-------|----------|")
         for exp in scope.exports[:MAX_EVIDENCE_INDEX_ENTRIES]:
-            lines.append(
-                f"| `{exp.symbol}` ({exp.kind})"
-                f" | [E] {exp.filepath} :: {exp.symbol} |"
+            ev = _choose_evidence_form(
+                exp.filepath, exp.symbol, project_root,
+                fallback_lines=(1, 1),
             )
+            lines.append(f"| `{exp.symbol}` ({exp.kind}) | {ev} |")
         if len(scope.exports) > MAX_EVIDENCE_INDEX_ENTRIES:
             lines.append(
                 f"| ... | {len(scope.exports) - MAX_EVIDENCE_INDEX_ENTRIES}"

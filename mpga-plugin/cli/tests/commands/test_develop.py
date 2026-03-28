@@ -1,13 +1,9 @@
 """Tests for the develop command (status, abort, resume)."""
 
-import json
 from pathlib import Path
 
 import pytest
 from click.testing import CliRunner
-
-from tests.conftest import write_file
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -23,8 +19,8 @@ def setup_board(tmp_path: Path) -> Path:
 
 def seed_running_task(tmp_path: Path, board_dir: Path) -> str:
     """Seed a running task and return its task ID."""
-    from mpga.board.board import create_empty_board, save_board, add_task, AddTaskOptions
-    from mpga.board.task import parse_task_file, render_task_file, FileLock, ScopeLock
+    from mpga.board.board import AddTaskOptions, add_task, create_empty_board, save_board
+    from mpga.board.task import FileLock, ScopeLock, parse_task_file, render_task_file
 
     tasks_dir = board_dir / "tasks"
 
@@ -161,9 +157,9 @@ class TestDevelopAbort:
 
         task_id = seed_running_task(tmp_path, board_dir)
 
-        from mpga.commands.develop import handle_develop_abort
-        from mpga.board.task import parse_task_file
         from mpga.board.board import load_board
+        from mpga.board.task import parse_task_file
+        from mpga.commands.develop import handle_develop_abort
 
         handle_develop_abort(task_id)
 
@@ -224,8 +220,8 @@ class TestDevelopResume:
 
         task_id = seed_running_task(tmp_path, board_dir)
 
-        from mpga.commands.develop import handle_develop_abort, handle_develop_resume
         from mpga.board.task import parse_task_file
+        from mpga.commands.develop import handle_develop_abort, handle_develop_resume
 
         handle_develop_abort(task_id)
         handle_develop_resume(task_id)

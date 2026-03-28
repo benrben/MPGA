@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from mpga.core.logger import log
@@ -13,7 +13,6 @@ from .runtime import (
     global_vendored_cli_command,
     project_vendored_cli_command,
 )
-
 
 # --- Antigravity export -------------------------------------------------------
 
@@ -104,7 +103,7 @@ def _generate_gemini_md(
     )
     milestone = milestones_match.group(1).strip() if milestones_match else "(none)"
 
-    now = datetime.now(timezone.utc).isoformat()
+    now = datetime.now(UTC).isoformat()
 
     return f"""# MPGA-Managed Project Context \u2014 the GREATEST Context, Everybody Says So
 
@@ -157,7 +156,7 @@ def _generate_antigravity_context_md(
     )
     milestone = milestones_match.group(1).strip() if milestones_match else "(none)"
 
-    now = datetime.now(timezone.utc).isoformat()
+    now = datetime.now(UTC).isoformat()
 
     return f"""# MPGA Project Context
 
@@ -344,7 +343,7 @@ def _seed_antigravity_knowledge_items(project_root: str, scopes_dir: str) -> Non
         evidence_links = re.findall(r"\[E\] .+", scope_content)[:10]
 
         if evidence_links:
-            evidence_section = "\n".join(f"- {l}" for l in evidence_links)
+            evidence_section = "\n".join(f"- {lnk}" for lnk in evidence_links)
         else:
             evidence_section = "- (run `mpga sync` to populate)"
 

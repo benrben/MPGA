@@ -1,24 +1,19 @@
 """Tests for the develop-scheduler module."""
 
-import json
 from pathlib import Path
 
-import pytest
-
-from tests.conftest import write_file
-from mpga.board.board import AddTaskOptions, create_empty_board, save_board, add_task, load_board
+from mpga.board.board import AddTaskOptions, add_task, create_empty_board, load_board, save_board
 from mpga.board.task import FileLock, parse_task_file, render_task_file
 from mpga.commands.develop_scheduler import (
     PersistLaneTransitionOptions,
     TddCheckpoint,
-    split_into_file_groups,
     can_acquire_file_locks,
-    run_develop_task,
-    save_tdd_checkpoint,
     load_tdd_checkpoint,
     persist_lane_transition,
+    run_develop_task,
+    save_tdd_checkpoint,
+    split_into_file_groups,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -164,7 +159,7 @@ class TestDevelopScheduler:
         holder_task.run_status = "running"
         holder_task.lane_id = "holder-lane"
         holder_task.file_locks = [
-            FileLock(path="src/shared.ts", lane_id="holder-lane", agent="mpga-green-dev", acquired_at="2026-03-24T12:00:00.000Z"),
+            FileLock(path="src/shared.ts", lane_id="holder-lane", agent="mpga-green-dev", acquired_at="2026-03-24T12:00:00.000Z"),  # noqa: E501
         ]
         holder_path.write_text(render_task_file(holder_task))
 
@@ -178,7 +173,7 @@ class TestDevelopScheduler:
         contender_path = next(f for f in tasks_dir.iterdir() if f.name.startswith(contender.id))
         contender_task = parse_task_file(str(contender_path))
         contender_task.file_locks = [
-            FileLock(path="src/shared.ts", lane_id="c-lane", agent="mpga-red-dev", acquired_at="2026-03-24T12:00:00.000Z"),
+            FileLock(path="src/shared.ts", lane_id="c-lane", agent="mpga-red-dev", acquired_at="2026-03-24T12:00:00.000Z"),  # noqa: E501
         ]
         contender_path.write_text(render_task_file(contender_task))
 

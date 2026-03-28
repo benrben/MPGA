@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Optional
-
 import click
 
 from mpga.core.logger import log

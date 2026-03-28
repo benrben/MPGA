@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from mpga.core.config import MpgaConfig
 from mpga.core.scanner import ScanResult, detect_project_type
@@ -18,8 +18,9 @@ def render_index_md(
     scopes: list[ScopeInfo],
     active_milestone: str | None,
     evidence_coverage: float,
+    scope_health: dict | None = None,
 ) -> str:
-    now = datetime.now(timezone.utc).isoformat()
+    now = datetime.now(UTC).isoformat()
     project_type = detect_project_type(scan_result)
     total_files = scan_result.total_files
     total_lines = scan_result.total_lines
@@ -102,9 +103,22 @@ def render_index_md(
     lines.append("|-------|--------|---------------|---------------|")
     today = now.split("T")[0]
     for scope in scopes:
-        lines.append(
-            f"| {scope.name} | \u2713 fresh | 0/{len(scope.exports)} | {today} |"
-        )
+        if scope_health and scope.name in scope_health:
+            sr = scope_health[scope.name]
+            total = sr.total_links
+            valid = sr.valid_links + sr.healed_links
+            pct = sr.health_pct
+            if pct >= 80:
+                status = "✓ fresh"
+            elif pct >= 50:
+                status = "⚠ stale"
+            else:
+                status = "✗ broken"
+            link_count = f"{valid}/{total}"
+        else:
+            status = "[Unknown]"
+            link_count = f"0/{len(scope.exports)}"
+        lines.append(f"| {scope.name} | {status} | {link_count} | {today} |")
     lines.append("")
 
     lines.append("## Active milestone")

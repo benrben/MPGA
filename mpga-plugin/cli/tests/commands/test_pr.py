@@ -2,15 +2,11 @@
 
 import json
 import subprocess
-from pathlib import Path
 from datetime import date
+from pathlib import Path
 from unittest.mock import MagicMock
 
-import pytest
 from click.testing import CliRunner
-
-from tests.conftest import write_file
-
 
 # ---------------------------------------------------------------------------
 # Helpers (reused from metrics tests)
@@ -60,7 +56,7 @@ def write_task_file(tasks_dir: Path, task_id: str, title: str, overrides: dict |
         else:
             fm_lines.append(f"{k}: {v}")
     body = f"# {task_id}: {title}\n\n## Description\nTest task\n"
-    (tasks_dir / filename).write_text(f"---\n" + "\n".join(fm_lines) + "\n---\n\n" + body)
+    (tasks_dir / filename).write_text("---\n" + "\n".join(fm_lines) + "\n---\n\n" + body)
 
 
 def seed_project(root: Path, *, milestone: str | None = None, tasks: list[dict] | None = None):

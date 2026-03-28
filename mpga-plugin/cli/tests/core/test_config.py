@@ -1,22 +1,17 @@
 """Tests for mpga.core.config -- converted from config.test.ts."""
 
-import json
-import copy
-from dataclasses import replace
 from pathlib import Path
 
 import pytest
 
 from mpga.core.config import (
     DEFAULT_CONFIG,
-    MpgaConfig,
     default_config,
+    get_config_value,
     load_config,
     save_config,
-    get_config_value,
     set_config_value,
 )
-
 
 # ---------------------------------------------------------------------------
 # DEFAULT_CONFIG

@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import os
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from mpga.core.logger import log
@@ -154,7 +154,7 @@ def _generate_claude_md(index_content: str, _project_name: str) -> str:
     )
     milestone = milestones_match.group(1).strip() if milestones_match else "(none)"
 
-    now = datetime.now(timezone.utc).isoformat()
+    now = datetime.now(UTC).isoformat()
 
     return f"""# MPGA-Managed Project Context
 

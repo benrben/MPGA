@@ -2,12 +2,11 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Optional
 
 from mpga.board.live import BoardLiveSnapshot, _snapshot_to_dict
 
 
-def _serialize_snapshot_for_html(snapshot: Optional[BoardLiveSnapshot]) -> str:
+def _serialize_snapshot_for_html(snapshot: BoardLiveSnapshot | None) -> str:
     if snapshot is None:
         raw = json.dumps(None)
     else:
@@ -20,7 +19,7 @@ def _serialize_snapshot_for_html(snapshot: Optional[BoardLiveSnapshot]) -> str:
     )
 
 
-def _read_embedded_snapshot(board_dir: str) -> Optional[BoardLiveSnapshot]:
+def _read_embedded_snapshot(board_dir: str) -> BoardLiveSnapshot | None:
     snapshot_path = Path(board_dir) / "live" / "snapshot.json"
     if not snapshot_path.exists():
         return None
@@ -31,7 +30,7 @@ def _read_embedded_snapshot(board_dir: str) -> Optional[BoardLiveSnapshot]:
         # just need it to round-trip through _snapshot_to_dict, so we
         # reconstruct a minimal BoardLiveSnapshot from the persisted JSON.
         from mpga.board.board import BoardScheduler, BoardStats, BoardUI
-        from mpga.board.live import BoardLiveEvent, BoardLiveTaskSummary, BoardLane, BoardRun
+        from mpga.board.live import BoardLane, BoardLiveEvent, BoardLiveTaskSummary, BoardRun
 
         stats_raw = raw.get("stats", {})
         sched_raw = raw.get("scheduler", {})
@@ -120,7 +119,7 @@ def _read_embedded_snapshot(board_dir: str) -> Optional[BoardLiveSnapshot]:
         return None
 
 
-def render_board_live_html(initial_snapshot: Optional[BoardLiveSnapshot] = None) -> str:
+def render_board_live_html(initial_snapshot: BoardLiveSnapshot | None = None) -> str:
     serialized = _serialize_snapshot_for_html(initial_snapshot)
     return f"""<!doctype html>
 <html lang="en">
@@ -253,7 +252,8 @@ def render_board_live_html(initial_snapshot: Optional[BoardLiveSnapshot] = None)
     <main>
       <section class="hero">
         <h1>Live Board</h1>
-        <p>Auto-refreshing MPGA board view. Tracks columns, active lanes, lock ownership, and recent transitions from file-backed state.</p>
+        <p>Auto-refreshing MPGA board view. Tracks columns, active lanes,
+        lock ownership, and recent transitions from file-backed state.</p>
         <div class="stats" data-section="stats"></div>
       </section>
       <section class="grid">
@@ -381,7 +381,8 @@ def render_board_live_html(initial_snapshot: Optional[BoardLiveSnapshot] = None)
         lastSnapshot = snapshot;
         renderStats(snapshot);
         renderColumns(snapshot);
-        renderList('lanes', snapshot.active_lanes, (lane) => lane.id + ' · ' + (lane.current_agent || 'idle') + ' · ' + lane.status);
+        renderList('lanes', snapshot.active_lanes,
+          (lane) => lane.id + ' · ' + (lane.current_agent || 'idle') + ' · ' + lane.status);
         renderList('locks', collectLocks(snapshot), (value) => value);
         renderList('events', snapshot.recent_events, (event) => JSON.stringify(event));
       }}

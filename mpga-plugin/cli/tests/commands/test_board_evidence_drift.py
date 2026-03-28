@@ -3,11 +3,6 @@
 import json
 from pathlib import Path
 
-import pytest
-
-from tests.conftest import write_file
-
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -36,7 +31,7 @@ def make_task_file(task_id: str, title: str, column: str = "backlog", priority: 
         "---",
         f'id: "{task_id}"',
         f'title: "{title}"',
-        f'status: "active"',
+        'status: "active"',
         f'column: "{column}"',
         f'priority: "{priority}"',
         "milestone: null",
@@ -312,6 +307,7 @@ class TestEvidenceVerify:
         monkeypatch.setattr("mpga.commands.drift.find_project_root", lambda: tmp_path)
 
         from click.testing import CliRunner
+
         from mpga.commands.evidence import evidence_verify
 
         runner = CliRunner()
@@ -337,6 +333,7 @@ class TestEvidenceVerify:
         monkeypatch.setattr("mpga.commands.drift.find_project_root", lambda: tmp_path)
 
         from click.testing import CliRunner
+
         from mpga.commands.evidence import evidence_verify
 
         runner = CliRunner()
@@ -359,10 +356,11 @@ class TestEvidenceAdd:
         monkeypatch.setattr("mpga.commands.drift.find_project_root", lambda: tmp_path)
 
         from click.testing import CliRunner
+
         from mpga.commands.evidence import evidence_add
 
         runner = CliRunner()
-        result = runner.invoke(evidence_add, ["core", "[E] src/utils.ts:10-15 :: multiply()"])
+        runner.invoke(evidence_add, ["core", "[E] src/utils.ts:10-15 :: multiply()"])
 
         content = (tmp_path / "MPGA" / "scopes" / "core.md").read_text()
         assert "[E] src/utils.ts:10-15 :: multiply()" in content
@@ -379,6 +377,7 @@ class TestEvidenceAdd:
         monkeypatch.setattr("mpga.commands.drift.find_project_root", lambda: tmp_path)
 
         from click.testing import CliRunner
+
         from mpga.commands.evidence import evidence_add
 
         runner = CliRunner()
@@ -395,6 +394,7 @@ class TestEvidenceAdd:
         monkeypatch.setattr("mpga.commands.drift.find_project_root", lambda: tmp_path)
 
         from click.testing import CliRunner
+
         from mpga.commands.evidence import evidence_add
 
         runner = CliRunner()
@@ -417,6 +417,7 @@ class TestDrift:
         monkeypatch.setattr("mpga.commands.drift.find_project_root", lambda: tmp_path)
 
         from click.testing import CliRunner
+
         from mpga.commands.drift import drift
 
         runner = CliRunner()
@@ -442,6 +443,7 @@ class TestDrift:
         monkeypatch.setattr("mpga.commands.drift.find_project_root", lambda: tmp_path)
 
         from click.testing import CliRunner
+
         from mpga.commands.drift import drift
 
         runner = CliRunner()
@@ -456,6 +458,7 @@ class TestDrift:
         monkeypatch.setattr("mpga.commands.drift.find_project_root", lambda: tmp_path)
 
         from click.testing import CliRunner
+
         from mpga.commands.drift import drift
 
         runner = CliRunner()
@@ -471,6 +474,7 @@ class TestDrift:
         monkeypatch.setattr("mpga.commands.drift.find_project_root", lambda: tmp_path)
 
         from click.testing import CliRunner
+
         from mpga.commands.drift import drift
 
         runner = CliRunner()
@@ -491,6 +495,7 @@ class TestDrift:
         monkeypatch.setattr("mpga.commands.drift.find_project_root", lambda: tmp_path)
 
         from click.testing import CliRunner
+
         from mpga.commands.drift import drift
 
         runner = CliRunner()
@@ -508,6 +513,7 @@ class TestDrift:
         monkeypatch.setattr("mpga.commands.drift.find_project_root", lambda: tmp_path)
 
         from click.testing import CliRunner
+
         from mpga.commands.drift import drift
 
         runner = CliRunner()

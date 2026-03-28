@@ -4,7 +4,7 @@ import json
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Literal, Optional
+from typing import Literal
 
 import frontmatter
 
@@ -21,7 +21,7 @@ class FileLock:
     lane_id: str
     agent: str
     acquired_at: str
-    heartbeat_at: Optional[str] = None
+    heartbeat_at: str | None = None
 
 
 @dataclass
@@ -30,7 +30,7 @@ class ScopeLock:
     lane_id: str
     agent: str
     acquired_at: str
-    heartbeat_at: Optional[str] = None
+    heartbeat_at: str | None = None
 
 
 @dataclass
@@ -38,30 +38,30 @@ class Task:
     id: str
     title: str
     column: Column
-    status: Optional[TaskStatus]
+    status: TaskStatus | None
     priority: Priority
     created: str
     updated: str
     depends_on: list[str] = field(default_factory=list)
     blocks: list[str] = field(default_factory=list)
     scopes: list[str] = field(default_factory=list)
-    tdd_stage: Optional[TddStage] = None
-    lane_id: Optional[str] = None
+    tdd_stage: TddStage | None = None
+    lane_id: str | None = None
     run_status: RunStatus = "queued"
-    current_agent: Optional[str] = None
+    current_agent: str | None = None
     file_locks: list[FileLock] = field(default_factory=list)
     scope_locks: list[ScopeLock] = field(default_factory=list)
-    started_at: Optional[str] = None
-    finished_at: Optional[str] = None
-    heartbeat_at: Optional[str] = None
+    started_at: str | None = None
+    finished_at: str | None = None
+    heartbeat_at: str | None = None
     evidence_expected: list[str] = field(default_factory=list)
     evidence_produced: list[str] = field(default_factory=list)
     tags: list[str] = field(default_factory=list)
     time_estimate: str = "5min"
     body: str = ""
-    milestone: Optional[str] = None
-    phase: Optional[int] = None
-    assigned: Optional[str] = None
+    milestone: str | None = None
+    phase: int | None = None
+    assigned: str | None = None
 
 
 def task_filename(id: str, title: str) -> str:
@@ -141,7 +141,7 @@ def render_task_file(task: Task) -> str:
     return f"---\n{fm}\n---\n\n{body}"
 
 
-def parse_task_file(filepath: str) -> Optional[Task]:
+def parse_task_file(filepath: str) -> Task | None:
     p = Path(filepath)
     if not p.exists():
         return None

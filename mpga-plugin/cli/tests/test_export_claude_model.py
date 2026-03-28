@@ -2,7 +2,8 @@
 
 Coverage checklist for: T005 — Rewrite `model:` frontmatter in agent .md files on export
 Evidence: [E] mpga-plugin/cli/src/mpga/commands/export/claude.py:87-99 :: _deploy_claude_plugin agent copy loop
-Evidence: [E] mpga-plugin/cli/src/mpga/commands/export/agents.py:13-16 :: MODEL_TIERS ("mid" → claude-sonnet-4-6, "high" → claude-opus-4-6, "small" → claude-haiku-4-5)
+Evidence: [E] mpga-plugin/cli/src/mpga/commands/export/agents.py:13-16 :: MODEL_TIERS
+  ("mid" → claude-sonnet-4-6, "high" → claude-opus-4-6, "small" → claude-haiku-4-5)
 
 Acceptance criteria → Test status
 ──────────────────────────────────
@@ -19,10 +20,8 @@ Untested branches / edge cases:
 - [ ] model: line already contains the fully-resolved ID
 """
 
-import pytest
 
 from mpga.commands.export.claude import rewrite_agent_frontmatter_model
-
 
 # ---------------------------------------------------------------------------
 # Degenerate case — minimal frontmatter, single model line

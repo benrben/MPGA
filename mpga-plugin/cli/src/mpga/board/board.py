@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from mpga.board.task import (
     Column,
@@ -21,9 +21,9 @@ class BoardLane:
     id: str
     task_ids: list[str] = field(default_factory=list)
     status: str = "queued"  # 'queued' | 'running' | 'blocked' | 'done' | 'failed'
-    scope: Optional[str] = None
+    scope: str | None = None
     files: list[str] = field(default_factory=list)
-    current_agent: Optional[str] = None
+    current_agent: str | None = None
     updated_at: str = ""
 
 
@@ -33,9 +33,9 @@ class BoardRun:
     lane_id: str
     task_id: str
     status: str = "queued"  # 'queued' | 'running' | 'handoff' | 'done' | 'failed'
-    agent: Optional[str] = None
+    agent: str | None = None
     started_at: str = ""
-    finished_at: Optional[str] = None
+    finished_at: str | None = None
 
 
 @dataclass
@@ -47,7 +47,7 @@ class BoardStats:
     progress_pct: int = 0
     evidence_produced: int = 0
     evidence_expected: int = 0
-    avg_task_time: Optional[str] = None
+    avg_task_time: str | None = None
 
 
 @dataclass
@@ -66,7 +66,7 @@ class BoardUI:
 @dataclass
 class BoardState:
     version: str = "1.0.0"
-    milestone: Optional[str] = None
+    milestone: str | None = None
     updated: str = ""
     columns: dict[str, list[str]] = field(default_factory=lambda: {
         "backlog": [],
@@ -90,7 +90,7 @@ class BoardState:
 
 
 def _now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
+    return datetime.now(UTC).isoformat()
 
 
 def load_board(board_dir: str) -> BoardState:
@@ -220,7 +220,7 @@ def _normalize_board_state(board: dict[str, Any]) -> BoardState:
 def recalc_stats(
     board: BoardState,
     tasks_dir: str,
-    preloaded_tasks: Optional[list[Task]] = None,
+    preloaded_tasks: list[Task] | None = None,
 ) -> BoardState:
     tasks = preloaded_tasks if preloaded_tasks is not None else load_all_tasks(tasks_dir)
     total = len(tasks)
@@ -273,12 +273,12 @@ def next_task_id(board: BoardState, prefix: str = "T") -> str:
 @dataclass
 class AddTaskOptions:
     title: str
-    column: Optional[Column] = None
-    priority: Optional[str] = None
-    scopes: Optional[list[str]] = None
-    depends: Optional[list[str]] = None
-    tags: Optional[list[str]] = None
-    milestone: Optional[str] = None
+    column: Column | None = None
+    priority: str | None = None
+    scopes: list[str] | None = None
+    depends: list[str] | None = None
+    tags: list[str] | None = None
+    milestone: str | None = None
 
 
 def add_task(
@@ -329,7 +329,7 @@ def add_task(
 @dataclass
 class MoveResult:
     success: bool
-    error: Optional[str] = None
+    error: str | None = None
 
 
 def move_task(
@@ -373,7 +373,7 @@ def move_task(
     return MoveResult(success=True)
 
 
-def find_task_file(tasks_dir: str, task_id: str) -> Optional[str]:
+def find_task_file(tasks_dir: str, task_id: str) -> str | None:
     p = Path(tasks_dir)
     if not p.exists():
         return None

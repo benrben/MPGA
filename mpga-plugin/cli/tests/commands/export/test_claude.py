@@ -3,8 +3,6 @@
 from pathlib import Path
 from unittest.mock import MagicMock
 
-import pytest
-
 
 class TestExportClaude:
     """exportClaude tests."""

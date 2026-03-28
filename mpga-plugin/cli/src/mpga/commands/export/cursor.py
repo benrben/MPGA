@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from mpga.core.logger import log
@@ -20,7 +20,6 @@ from .runtime import (
     global_vendored_cli_command,
     project_vendored_cli_command,
 )
-
 
 # --- Cursor export ------------------------------------------------------------
 
@@ -121,7 +120,7 @@ def _generate_cursor_project_mdc(
     )
     milestone = milestones_match.group(1).strip() if milestones_match else "(none)"
 
-    now = datetime.now(timezone.utc).isoformat()
+    now = datetime.now(UTC).isoformat()
 
     return f"""---
 description: "MPGA project context \u2014 evidence-backed navigation layer"
@@ -218,7 +217,8 @@ def _scope_lines(mpga_dir: str) -> str:
 
 def _generate_cursor_scopes_mdc(mpga_dir: str) -> str:
     return f"""---
-description: "Load MPGA scope documents when working on specific features. Use when the user asks about a specific feature area or module."
+description: "Load MPGA scope documents when working on specific features.
+  Use when the user asks about a specific feature area or module."
 globs:
 alwaysApply: false
 ---

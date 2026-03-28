@@ -8,14 +8,12 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Optional
 
 from mpga.board.board import (
     BoardLane,
     BoardRun,
-    BoardState,
     find_task_file,
     load_board,
     recalc_stats,
@@ -28,13 +26,11 @@ from mpga.board.task import (
     FileLock,
     RunStatus,
     ScopeLock,
-    TddStage,
     load_all_tasks,
     parse_task_file,
     render_task_file,
 )
 from mpga.core.config import find_project_root
-
 
 # ---------------------------------------------------------------------------
 # Data types
@@ -46,18 +42,18 @@ class PersistLaneTransitionOptions:
     task_id: str
     lane_id: str
     status: RunStatus
-    agent: Optional[str] = None
-    files: Optional[list[str]] = None
-    scope: Optional[str] = None
+    agent: str | None = None
+    files: list[str] | None = None
+    scope: str | None = None
 
 
 @dataclass
 class TddCheckpoint:
     stage: str  # 'red' | 'green' | 'blue' | 'review'
     saved_at: str
-    last_test_file: Optional[str] = None
-    last_impl_file: Optional[str] = None
-    failing_test: Optional[str] = None
+    last_test_file: str | None = None
+    last_impl_file: str | None = None
+    failing_test: str | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -78,7 +74,7 @@ def render_checkpoint_section(checkpoint: TddCheckpoint) -> str:
     return "\n".join(lines)
 
 
-def parse_checkpoint_section(body: str) -> Optional[TddCheckpoint]:
+def parse_checkpoint_section(body: str) -> TddCheckpoint | None:
     section_start = body.find("## TDD Checkpoint")
     if section_start == -1:
         return None
@@ -88,7 +84,7 @@ def parse_checkpoint_section(body: str) -> Optional[TddCheckpoint]:
     next_section = after_header.find("\n## ", 1)
     section_text = after_header if next_section == -1 else after_header[:next_section]
 
-    def get_value(key: str) -> Optional[str]:
+    def get_value(key: str) -> str | None:
         match = re.search(rf"^- {key}: (.+)$", section_text, re.MULTILINE)
         return match.group(1) if match else None
 
@@ -150,7 +146,7 @@ def save_tdd_checkpoint(
     Path(task_file).write_text(render_task_file(task), encoding="utf-8")
 
 
-def load_tdd_checkpoint(tasks_dir: str, task_id: str) -> Optional[TddCheckpoint]:
+def load_tdd_checkpoint(tasks_dir: str, task_id: str) -> TddCheckpoint | None:
     task_file = find_task_file(tasks_dir, task_id)
     if not task_file:
         return None
@@ -194,7 +190,7 @@ def _merge_file_groups(groups: list[list[str]]) -> list[list[str]]:
 def split_into_file_groups(
     task_id: str,
     groups: list[list[str]],
-    scope: Optional[str] = None,
+    scope: str | None = None,
 ) -> list[BoardLane]:
     merged = _merge_file_groups(groups)
     normalized = merged if merged else [[]]
@@ -207,7 +203,7 @@ def split_into_file_groups(
             scope=scope,
             files=files,
             current_agent=None,
-            updated_at=datetime.now(timezone.utc).isoformat(),
+            updated_at=datetime.now(UTC).isoformat(),
         )
         for index, files in enumerate(normalized)
     ]
@@ -253,7 +249,7 @@ def persist_lane_transition(
         if not task:
             raise RuntimeError(f"Could not parse task '{opts.task_id}'")
 
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(UTC).isoformat()
         files = opts.files or []
         is_terminal = opts.status in ("done", "failed")
 
@@ -339,7 +335,7 @@ def run_develop_task(
     task_id: str,
     *,
     parallel: str = "auto",
-    lanes: Optional[int] = None,
+    lanes: int | None = None,
     dashboard: bool = False,
 ) -> list[str]:
     project_root = find_project_root() or str(Path.cwd())

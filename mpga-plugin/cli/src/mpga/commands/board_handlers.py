@@ -8,16 +8,14 @@ from __future__ import annotations
 
 import json
 import os
-import shutil
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Optional
 
 from mpga.board.board import (
+    AddTaskOptions,
     BoardState,
     add_task,
-    AddTaskOptions,
     check_wip_limit,
     find_task_file,
     load_board,
@@ -29,11 +27,7 @@ from mpga.board.board_md import render_board_md
 from mpga.board.live import write_board_live_snapshot
 from mpga.board.live_html import write_board_live_html
 from mpga.board.task import (
-    Column,
-    Priority,
     Task,
-    TaskStatus,
-    TddStage,
     load_all_tasks,
     parse_task_file,
     render_task_file,
@@ -41,7 +35,6 @@ from mpga.board.task import (
 from mpga.commands.board_live_server import create_board_live_server, open_board_live_url
 from mpga.core.config import find_project_root
 from mpga.core.logger import console, log
-
 
 # ---------------------------------------------------------------------------
 # Shared helpers
@@ -62,6 +55,7 @@ def persist_board(board: BoardState, board_dir: str, tasks_dir: str) -> None:
     recalc_stats(board, tasks_dir, tasks)
     save_board(board_dir, board)
     board_md_path = Path(board_dir) / "BOARD.md"
+    board_md_path.parent.mkdir(parents=True, exist_ok=True)
     board_md_path.write_text(render_board_md(board, tasks_dir, tasks), encoding="utf-8")
     write_board_live_snapshot(board, tasks_dir, board_dir, tasks)
     write_board_live_html(board_dir)
@@ -72,7 +66,7 @@ def persist_board(board: BoardState, board_dir: str, tasks_dir: str) -> None:
 # ---------------------------------------------------------------------------
 
 
-def handle_board_show(*, json_output: bool = False, milestone: Optional[str] = None) -> None:
+def handle_board_show(*, json_output: bool = False, milestone: str | None = None) -> None:
     project_root = find_project_root() or Path.cwd()
     board_dir = get_board_dir(project_root)
     tasks_dir = get_tasks_dir(project_root)
@@ -128,11 +122,11 @@ def handle_board_add(
     title: str,
     *,
     priority: str = "medium",
-    scope: Optional[str] = None,
-    depends: Optional[str] = None,
-    tags: Optional[str] = None,
+    scope: str | None = None,
+    depends: str | None = None,
+    tags: str | None = None,
     column: str = "backlog",
-    milestone: Optional[str] = None,
+    milestone: str | None = None,
 ) -> None:
     project_root = find_project_root() or Path.cwd()
     board_dir = get_board_dir(project_root)
@@ -177,7 +171,7 @@ def handle_board_move(task_id: str, column: str, *, force: bool = False) -> None
     log.success(f"Moved {task_id} -> {column}")
 
 
-def handle_board_claim(task_id: str, *, agent: Optional[str] = None, force: bool = False) -> None:
+def handle_board_claim(task_id: str, *, agent: str | None = None, force: bool = False) -> None:
     project_root = find_project_root() or Path.cwd()
     board_dir = get_board_dir(project_root)
     tasks_dir = get_tasks_dir(project_root)
@@ -206,7 +200,7 @@ def handle_board_claim(task_id: str, *, agent: Optional[str] = None, force: bool
         sys.exit(1)
 
     task.assigned = agent or "agent"
-    task.updated = datetime.now(timezone.utc).isoformat()
+    task.updated = datetime.now(UTC).isoformat()
 
     old_column = task.column
     task.column = "in-progress"
@@ -234,7 +228,7 @@ def handle_board_assign(task_id: str, agent: str) -> None:
         sys.exit(1)
 
     task.assigned = agent
-    task.updated = datetime.now(timezone.utc).isoformat()
+    task.updated = datetime.now(UTC).isoformat()
     Path(task_file).write_text(render_task_file(task), encoding="utf-8")
 
     log.success(f"{task_id} assigned to {agent}")
@@ -243,10 +237,10 @@ def handle_board_assign(task_id: str, agent: str) -> None:
 def handle_board_update(
     task_id: str,
     *,
-    status: Optional[str] = None,
-    priority: Optional[str] = None,
-    evidence_add: Optional[str] = None,
-    tdd_stage: Optional[str] = None,
+    status: str | None = None,
+    priority: str | None = None,
+    evidence_add: str | None = None,
+    tdd_stage: str | None = None,
 ) -> None:
     project_root = find_project_root() or Path.cwd()
     board_dir = get_board_dir(project_root)
@@ -270,7 +264,7 @@ def handle_board_update(
         task.evidence_produced.append(evidence_add)
     if tdd_stage:
         task.tdd_stage = tdd_stage  # type: ignore[assignment]
-    task.updated = datetime.now(timezone.utc).isoformat()
+    task.updated = datetime.now(UTC).isoformat()
 
     Path(task_file).write_text(render_task_file(task), encoding="utf-8")
 
@@ -296,7 +290,7 @@ def handle_board_block(task_id: str, reason: str) -> None:
         sys.exit(1)
 
     task.status = "blocked"  # type: ignore[assignment]
-    now_iso = datetime.now(timezone.utc).isoformat()
+    now_iso = datetime.now(UTC).isoformat()
     task.body += f"\n\n## Blocked\n{now_iso}: {reason}\n"
     task.updated = now_iso
     Path(task_file).write_text(render_task_file(task), encoding="utf-8")
@@ -323,7 +317,7 @@ def handle_board_unblock(task_id: str) -> None:
         sys.exit(1)
 
     task.status = None
-    task.updated = datetime.now(timezone.utc).isoformat()
+    task.updated = datetime.now(UTC).isoformat()
     Path(task_file).write_text(render_task_file(task), encoding="utf-8")
 
     board = load_board(board_dir)

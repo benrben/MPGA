@@ -3,11 +3,7 @@
 import json
 from pathlib import Path
 
-import pytest
 from click.testing import CliRunner
-
-from tests.conftest import write_file
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -82,7 +78,7 @@ def write_task_file(tasks_dir: Path, task_id: str, title: str, overrides: dict |
             fm_lines.append(f"{k}: {v}")
 
     body = f"# {task_id}: {title}\n\n## Description\nTest task\n"
-    content = f"---\n" + "\n".join(fm_lines) + "\n---\n\n" + body
+    content = "---\n" + "\n".join(fm_lines) + "\n---\n\n" + body
     (tasks_dir / filename).write_text(content)
 
 

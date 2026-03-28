@@ -4,14 +4,12 @@ import json
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 import click
 
 from mpga.board.task import Task, load_all_tasks
 from mpga.core.config import find_project_root
 from mpga.core.logger import log, mini_banner
-
 
 # ---------------------------------------------------------------------------
 # metrics helpers
@@ -45,7 +43,7 @@ def _compute_metrics(tasks: list[Task]) -> dict:
     )
 
     # Average task completion time
-    avg_task_time: Optional[str] = None
+    avg_task_time: str | None = None
     completed_with_times = [
         t for t in done_tasks if t.started_at and t.finished_at
     ]
@@ -120,7 +118,7 @@ def metrics_cmd(as_json: bool) -> None:
 
 @click.command("changelog")
 @click.option("--since", default=None, help="Only include tasks completed after this date")
-def changelog_cmd(since: Optional[str]) -> None:
+def changelog_cmd(since: str | None) -> None:
     """Generate changelog from completed tasks."""
     project_root = find_project_root() or Path.cwd()
     mpga_dir = Path(project_root) / "MPGA"

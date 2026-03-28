@@ -2,9 +2,8 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Optional
 
 from mpga.evidence.parser import EvidenceLink, parse_evidence_links
 from mpga.evidence.resolver import verify_all_links
@@ -80,7 +79,7 @@ class DriftReport:
 def run_drift_check(
     project_root: str,
     ci_threshold: int,
-    scope_filter: Optional[str] = None,
+    scope_filter: str | None = None,
 ) -> DriftReport:
     """Run a drift check across all scope files in the project.
 
@@ -98,7 +97,7 @@ def run_drift_check(
     mpga_dir = Path(project_root) / "MPGA"
     scopes_dir = mpga_dir / "scopes"
 
-    now = datetime.now(timezone.utc).isoformat()
+    now = datetime.now(UTC).isoformat()
     reports: list[ScopeDriftReport] = []
 
     if not scopes_dir.exists():
@@ -125,9 +124,9 @@ def run_drift_check(
         scope_path = scopes_dir / scope_file
         content = scope_path.read_text(encoding="utf-8")
         links = [
-            l
-            for l in parse_evidence_links(content)
-            if l.type in ("valid", "stale")
+            lnk
+            for lnk in parse_evidence_links(content)
+            if lnk.type in ("valid", "stale")
         ]
 
         results = verify_all_links(links, project_root)
@@ -253,3 +252,31 @@ def heal_scope_file(report: ScopeDriftReport) -> HealResult:
             healed += 1
 
     return HealResult(healed=healed, content=updated)
+
+
+def try_downgrade_stale(item: StaleDriftItem, project_root: str) -> str | None:
+    """Downgrade a stale symbol reference to a valid line-range reference when possible.
+
+    If the referenced file still exists and ``start_line`` falls within the file,
+    returns ``[E] filepath:start-end``.  Returns ``None`` if the file is missing
+    or the line hint is out of range.
+    """
+    link = item.link
+    if not link.filepath or link.start_line is None:
+        return None
+
+    full_path = Path(project_root) / link.filepath
+    if not full_path.exists():
+        return None
+
+    try:
+        with full_path.open(encoding="utf-8") as fh:
+            line_count = sum(1 for _ in fh)
+    except OSError:
+        return None
+
+    if link.start_line > line_count:
+        return None
+
+    end = link.end_line if link.end_line is not None else link.start_line
+    return f"[E] {link.filepath}:{link.start_line}-{end}"

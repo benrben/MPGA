@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import shutil
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 RUNTIME_ASSETS = ("bin", "scripts", "cli", "spoke")
@@ -47,7 +47,7 @@ def copy_vendored_runtime(target_root: str, plugin_root: str | None) -> str | No
         copied_assets.append(asset)
 
     manifest = {
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": datetime.now(UTC).isoformat(),
         "source_root": str(Path(plugin_root)).replace("\\", "/"),
         "assets": copied_assets,
     }

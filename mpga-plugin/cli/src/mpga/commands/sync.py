@@ -12,6 +12,7 @@ from mpga.evidence.drift import run_drift_check
 from mpga.generators.graph_md import build_graph, render_graph_md
 from mpga.generators.index_md import render_index_md
 from mpga.generators.scope_md import group_into_scopes, render_scope_md
+from mpga.pipeline import normalize
 
 
 @click.command("sync")
@@ -56,6 +57,12 @@ def sync_cmd(full: bool, incremental: bool) -> None:
         scope_path.write_text(scope_md)
     log.success(f"Generated {len(scopes)} scope documents")
 
+    # Step 3b: Normalize — verify→heal→re-verify→rewrite health
+    log.info("Normalizing evidence health...")
+    norm_result = normalize(str(project_root), config)
+    if norm_result.links_healed:
+        log.success(f"Healed {norm_result.links_healed} evidence link(s) across {norm_result.scopes_healed} scope(s)")
+
     # Step 4: Generate INDEX.md
     log.info("Generating INDEX.md \u2014 the most BEAUTIFUL index...")
 
@@ -75,7 +82,10 @@ def sync_cmd(full: bool, incremental: bool) -> None:
         else drift_report.valid_links / drift_report.total_links
     )
 
-    index_md = render_index_md(scan_result, config, scopes, active_milestone, evidence_coverage)
+    index_md = render_index_md(
+        scan_result, config, scopes, active_milestone, evidence_coverage,
+        scope_health=norm_result.scope_health,
+    )
     (mpga_dir / "INDEX.md").write_text(index_md)
     log.success("INDEX.md generated")
 

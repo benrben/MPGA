@@ -7,10 +7,8 @@ subcommand to a Click command with the same options and arguments.
 from __future__ import annotations
 
 import os
-import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Optional
 
 import click
 
@@ -18,7 +16,6 @@ from mpga.board.board import load_board, recalc_stats
 from mpga.board.task import load_all_tasks
 from mpga.core.config import find_project_root
 from mpga.core.logger import console, log
-
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -64,7 +61,7 @@ def session() -> None:
 
 @session.command("handoff", help="Export current session state for fresh context")
 @click.option("--accomplished", default=None, help="What was accomplished this session")
-def session_handoff(accomplished: Optional[str]) -> None:
+def session_handoff(accomplished: str | None) -> None:
     project_root = find_project_root() or str(Path.cwd())
     sessions_dir = _get_sessions_dir(project_root)
     Path(sessions_dir).mkdir(parents=True, exist_ok=True)
@@ -79,7 +76,7 @@ def session_handoff(accomplished: Optional[str]) -> None:
     tasks = load_all_tasks(tasks_dir)
     in_progress = [t for t in tasks if t.column in ("in-progress", "testing", "review")]
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     date_str = now.strftime("%Y-%m-%d")
     time_str = now.strftime("%H-%M-%S")
     filename = f"{date_str}-{time_str}-handoff.md"
@@ -114,7 +111,8 @@ def session_handoff(accomplished: Optional[str]) -> None:
 
 ## Current state
 - **Milestone:** {board.milestone if board else 'none'}
-- **Board:** {board.stats.done if board else 0}/{board.stats.total if board else 0} tasks done ({board.stats.progress_pct if board else 0}%)
+- **Board:** {board.stats.done if board else 0}/{board.stats.total if board else 0} tasks done
+- **Progress:** {board.stats.progress_pct if board else 0}%
 - **In flight:** {len(in_progress)} task(s)
 
 ## In-flight tasks
@@ -189,7 +187,7 @@ def session_log(message: str) -> None:
     Path(sessions_dir).mkdir(parents=True, exist_ok=True)
 
     log_path = Path(sessions_dir) / "session-log.md"
-    now = datetime.now(timezone.utc).isoformat()
+    now = datetime.now(UTC).isoformat()
 
     entry = f"\n- {now}: {message}\n"
     if log_path.exists():

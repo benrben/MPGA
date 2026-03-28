@@ -2,9 +2,7 @@
 
 from pathlib import Path
 
-import pytest
-
-from mpga.evidence.drift import run_drift_check, heal_scope_file, ScopeDriftReport, HealedDriftItem
+from mpga.evidence.drift import HealedDriftItem, ScopeDriftReport, heal_scope_file, run_drift_check
 from mpga.evidence.parser import EvidenceLink
 
 

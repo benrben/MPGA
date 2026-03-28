@@ -1,8 +1,6 @@
 """Tests for shortcut commands (diagnose, secure, simplify)."""
 
-from pathlib import Path
 
-import pytest
 from click.testing import CliRunner
 
 

@@ -1,10 +1,6 @@
 """Tests for the board live server."""
 
 from pathlib import Path
-from io import BytesIO
-from unittest.mock import MagicMock, patch
-
-import pytest
 
 
 class TestCreateBoardLiveServer:

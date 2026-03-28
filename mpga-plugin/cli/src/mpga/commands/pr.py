@@ -12,7 +12,6 @@ from mpga.board.task import load_all_tasks
 from mpga.core.config import find_project_root
 from mpga.core.logger import log
 
-
 # ---------------------------------------------------------------------------
 # pr command
 # ---------------------------------------------------------------------------

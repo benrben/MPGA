@@ -3,12 +3,10 @@
 from pathlib import Path
 from unittest.mock import MagicMock
 
-import pytest
-
 
 def setup_mocks(monkeypatch):
     mock_copy = MagicMock()
-    monkeypatch.setattr("mpga.commands.export.antigravity.SKILL_NAMES", ["sync-project", "brainstorm", "plan", "develop", "drift-check"])
+    monkeypatch.setattr("mpga.commands.export.antigravity.SKILL_NAMES", ["sync-project", "brainstorm", "plan", "develop", "drift-check"])  # noqa: E501
     monkeypatch.setattr("mpga.commands.export.antigravity.copy_skills_to", mock_copy)
     return mock_copy
 
@@ -41,7 +39,7 @@ class TestAntigravityProjectLevel:
 
         from mpga.commands.export.antigravity import export_antigravity
 
-        export_antigravity(str(tmp_path), str(mpga_dir), default_index_content(), "test-project", "/fake/plugin", False, {})
+        export_antigravity(str(tmp_path), str(mpga_dir), default_index_content(), "test-project", "/fake/plugin", False, {})  # noqa: E501
 
         gemini_path = tmp_path / "GEMINI.md"
         assert gemini_path.exists()
@@ -58,7 +56,7 @@ class TestAntigravityProjectLevel:
 
         from mpga.commands.export.antigravity import export_antigravity
 
-        export_antigravity(str(tmp_path), str(mpga_dir), default_index_content("M002-beta"), "test-project", "/fake/plugin", False, {})
+        export_antigravity(str(tmp_path), str(mpga_dir), default_index_content("M002-beta"), "test-project", "/fake/plugin", False, {})  # noqa: E501
 
         content = (tmp_path / "GEMINI.md").read_text()
         assert "M002-beta" in content
@@ -71,7 +69,7 @@ class TestAntigravityProjectLevel:
 
         from mpga.commands.export.antigravity import export_antigravity
 
-        export_antigravity(str(tmp_path), str(mpga_dir), "# Project: test-project\n\n## Identity\n- stuff\n", "test-project", "/fake/plugin", False, {})
+        export_antigravity(str(tmp_path), str(mpga_dir), "# Project: test-project\n\n## Identity\n- stuff\n", "test-project", "/fake/plugin", False, {})  # noqa: E501
 
         content = (tmp_path / "GEMINI.md").read_text()
         assert "(none)" in content
@@ -84,7 +82,7 @@ class TestAntigravityProjectLevel:
 
         from mpga.commands.export.antigravity import export_antigravity
 
-        export_antigravity(str(tmp_path), str(mpga_dir), default_index_content(), "test-project", "/fake/plugin", False, {})
+        export_antigravity(str(tmp_path), str(mpga_dir), default_index_content(), "test-project", "/fake/plugin", False, {})  # noqa: E501
 
         mock_copy.assert_called_once_with(
             str(tmp_path / ".agent" / "skills"),
@@ -101,7 +99,7 @@ class TestAntigravityProjectLevel:
 
         from mpga.commands.export.antigravity import export_antigravity
 
-        export_antigravity(str(tmp_path), str(mpga_dir), default_index_content(), "test-project", "/fake/plugin", False, {})
+        export_antigravity(str(tmp_path), str(mpga_dir), default_index_content(), "test-project", "/fake/plugin", False, {})  # noqa: E501
 
         rules_dir = tmp_path / ".antigravity" / "rules"
         assert rules_dir.exists()
@@ -119,7 +117,7 @@ class TestAntigravityProjectLevel:
 
         from mpga.commands.export.antigravity import export_antigravity
 
-        export_antigravity(str(tmp_path), str(mpga_dir), default_index_content(), "test-project", "/fake/plugin", False, {})
+        export_antigravity(str(tmp_path), str(mpga_dir), default_index_content(), "test-project", "/fake/plugin", False, {})  # noqa: E501
 
         content = (tmp_path / ".antigravity" / "rules" / "mpga-context.md").read_text()
         assert "MPGA Project Context" in content
@@ -136,7 +134,7 @@ class TestAntigravityProjectLevel:
 
         from mpga.commands.export.antigravity import export_antigravity
 
-        export_antigravity(str(tmp_path), str(mpga_dir), default_index_content(), "test-project", "/fake/plugin", False, {})
+        export_antigravity(str(tmp_path), str(mpga_dir), default_index_content(), "test-project", "/fake/plugin", False, {})  # noqa: E501
 
         content = (tmp_path / ".antigravity" / "rules" / "mpga-evidence.md").read_text()
         assert "MPGA Evidence Protocol" in content
@@ -152,7 +150,7 @@ class TestAntigravityProjectLevel:
 
         from mpga.commands.export.antigravity import export_antigravity
 
-        export_antigravity(str(tmp_path), str(mpga_dir), default_index_content(), "test-project", "/fake/plugin", False, {})
+        export_antigravity(str(tmp_path), str(mpga_dir), default_index_content(), "test-project", "/fake/plugin", False, {})  # noqa: E501
 
         content = (tmp_path / ".antigravity" / "rules" / "mpga-tdd.md").read_text()
         assert "RED" in content
@@ -170,7 +168,7 @@ class TestAntigravityProjectLevel:
 
         from mpga.commands.export.antigravity import export_antigravity
 
-        export_antigravity(str(tmp_path), str(mpga_dir), default_index_content(), "test-project", "/fake/plugin", False, {})
+        export_antigravity(str(tmp_path), str(mpga_dir), default_index_content(), "test-project", "/fake/plugin", False, {})  # noqa: E501
 
         workflows_dir = tmp_path / ".agents" / "workflows"
         assert workflows_dir.exists()
@@ -188,7 +186,7 @@ class TestAntigravityProjectLevel:
 
         from mpga.commands.export.antigravity import export_antigravity
 
-        export_antigravity(str(tmp_path), str(mpga_dir), default_index_content(), "test-project", "/fake/plugin", False, {})
+        export_antigravity(str(tmp_path), str(mpga_dir), default_index_content(), "test-project", "/fake/plugin", False, {})  # noqa: E501
 
         workflows_dir = tmp_path / ".agents" / "workflows"
 
@@ -218,7 +216,7 @@ class TestAntigravityProjectLevel:
 
         from mpga.commands.export.antigravity import export_antigravity
 
-        export_antigravity(str(tmp_path), str(mpga_dir), default_index_content(), "test-project", "/fake/plugin", False, {})
+        export_antigravity(str(tmp_path), str(mpga_dir), default_index_content(), "test-project", "/fake/plugin", False, {})  # noqa: E501
 
         ki_dir = tmp_path / ".antigravity" / "knowledge"
         assert not (ki_dir / "mpga-core.md").exists()
@@ -236,7 +234,7 @@ class TestAntigravityProjectLevel:
 
         from mpga.commands.export.antigravity import export_antigravity
 
-        export_antigravity(str(tmp_path), str(mpga_dir), default_index_content(), "test-project", "/fake/plugin", False, {"knowledge": True})
+        export_antigravity(str(tmp_path), str(mpga_dir), default_index_content(), "test-project", "/fake/plugin", False, {"knowledge": True})  # noqa: E501
 
         ki_dir = tmp_path / ".antigravity" / "knowledge"
         assert ki_dir.exists()
@@ -261,7 +259,7 @@ class TestAntigravityProjectLevel:
 
         from mpga.commands.export.antigravity import export_antigravity
 
-        export_antigravity(str(tmp_path), str(mpga_dir), default_index_content(), "test-project", "/fake/plugin", False, {"knowledge": True})
+        export_antigravity(str(tmp_path), str(mpga_dir), default_index_content(), "test-project", "/fake/plugin", False, {"knowledge": True})  # noqa: E501
 
         ki_dir = tmp_path / ".antigravity" / "knowledge"
         assert not ki_dir.exists()

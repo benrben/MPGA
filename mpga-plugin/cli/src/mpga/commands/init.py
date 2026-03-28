@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import json
 import subprocess
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import click
 
-from mpga.core.config import MpgaConfig, default_config, save_config
+from mpga.core.config import default_config, save_config
 from mpga.core.logger import banner, log
 from mpga.core.scanner import detect_project_type, scan
 
@@ -122,7 +122,7 @@ def init_cmd(from_zero: bool, from_existing: bool) -> None:
             )
 
             # Auto-detect languages
-            langs = [l for l in scan_result.languages if l not in ("other", "markdown")]
+            langs = [lang for lang in scan_result.languages if lang not in ("other", "markdown")]
             if langs:
                 config.project.languages = langs
             if scan_result.entry_points:
@@ -134,7 +134,7 @@ def init_cmd(from_zero: bool, from_existing: bool) -> None:
     save_config(config, config_path)
     log.success("Created MPGA/mpga.config.json \u2014 the BEST configuration, believe me!")
 
-    now = datetime.now(timezone.utc).isoformat()
+    now = datetime.now(UTC).isoformat()
 
     # Write INDEX.md
     (mpga_dir / "INDEX.md").write_text(_index_template(project_name, project_type, now))

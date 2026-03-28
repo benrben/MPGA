@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Literal, Optional
+from typing import Literal
 
-from mpga.evidence.parser import EvidenceLink, is_symbol_based
 from mpga.evidence.ast import find_symbol, verify_range
+from mpga.evidence.parser import EvidenceLink, is_symbol_based
 
 # Confidence when only the file exists (no symbol or line range).
 CONFIDENCE_FILE_ONLY = 0.8
@@ -25,9 +25,9 @@ ResolutionStatus = Literal["valid", "healed", "stale"]
 class ResolvedEvidence:
     status: ResolutionStatus
     confidence: float
-    start_line: Optional[int] = None
-    end_line: Optional[int] = None
-    healed_from: Optional[str] = None  # description of what changed
+    start_line: int | None = None
+    end_line: int | None = None
+    healed_from: str | None = None  # description of what changed
 
 
 def resolve_evidence(link: EvidenceLink, project_root: str) -> ResolvedEvidence:

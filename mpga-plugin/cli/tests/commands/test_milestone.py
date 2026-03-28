@@ -1,14 +1,10 @@
 """Tests for the milestone command."""
 
 import json
-from pathlib import Path
 from datetime import date
+from pathlib import Path
 
-import pytest
 from click.testing import CliRunner
-
-from tests.conftest import write_file
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -86,8 +82,8 @@ class TestCompleteActiveMilestone:
         milestone_dir.mkdir(parents=True, exist_ok=True)
         (board_dir / "board.json").write_text(make_board_json({"milestone": "M001-test"}))
 
-        from mpga.commands.milestone import complete_active_milestone
         from mpga.board.board import load_board
+        from mpga.commands.milestone import complete_active_milestone
 
         result = complete_active_milestone(str(tmp_path))
         assert result.ok is True
@@ -242,8 +238,8 @@ class TestMilestoneNew:
         seed_project(tmp_path)
         monkeypatch.setattr("mpga.commands.milestone.find_project_root", lambda: str(tmp_path))
 
-        from mpga.commands.milestone import milestone_new
         from mpga.board.board import load_board
+        from mpga.commands.milestone import milestone_new
 
         runner = CliRunner()
         result = runner.invoke(milestone_new, ["Test Link"])
@@ -371,8 +367,8 @@ class TestMilestoneComplete:
         seed_project(tmp_path, milestone="M001-finish-me", milestones=["M001-finish-me"])
         monkeypatch.setattr("mpga.commands.milestone.find_project_root", lambda: str(tmp_path))
 
-        from mpga.commands.milestone import complete_active_milestone
         from mpga.board.board import load_board
+        from mpga.commands.milestone import complete_active_milestone
 
         result = complete_active_milestone(str(tmp_path))
         assert result.ok is True
