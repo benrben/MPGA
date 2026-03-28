@@ -12,8 +12,12 @@ Usage:
 import io
 import json
 import os
+import queue
 import re
+import subprocess
+import sys
 import tempfile
+import threading
 import time
 import uuid
 import wave
@@ -33,6 +37,12 @@ _voice = None
 TARGET_RMS = 0.20
 # Hard limiter ceiling to prevent clipping
 LIMITER_CEILING = 0.95
+
+# Thread-safe queue for /speak endpoint
+_speak_queue: queue.Queue = queue.Queue(maxsize=10)
+
+# Maximum allowed request body size (bytes)
+MAX_BODY = 65_536
 
 
 def normalize_audio(audio_np):
@@ -132,12 +142,76 @@ def split_text(text):
     return merged if merged else [text]
 
 
+def _generate_wav_bytes(text: str) -> bytes:
+    """Generate audio for text and return WAV bytes.
+
+    Takes a text string, splits into chunks, generates audio per chunk,
+    normalizes, concatenates, and returns WAV bytes.
+    """
+    model, voice = get_model()
+    t0 = time.time()
+
+    # Split into sentence chunks for natural pacing
+    chunks = split_text(text)
+    audio_parts = []
+    for i, chunk in enumerate(chunks):
+        chunk_audio = model.generate_audio(voice, chunk)
+        chunk_loud = normalize_audio(chunk_audio)
+        audio_parts.append(chunk_loud)
+        print(f"[spoke] chunk {i+1}/{len(chunks)}: {chunk[:50]}")
+
+    # Concatenate all chunks with minimal silence (30ms — just enough for natural breath)
+    silence = np.zeros(int(model.sample_rate * 0.03), dtype=np.float32)
+    combined = []
+    for i, part in enumerate(audio_parts):
+        combined.append(part)
+        if i < len(audio_parts) - 1:
+            combined.append(silence)
+    full_audio = np.concatenate(combined)
+
+    buf = io.BytesIO()
+    scipy.io.wavfile.write(buf, model.sample_rate, full_audio)
+    wav_data = buf.getvalue()
+
+    print(f"[spoke] {time.time()-t0:.1f}s total: {text[:60]}")
+    return wav_data
+
+
+def _speak_worker():
+    """Background worker thread that reads from _speak_queue and plays audio."""
+    while True:
+        text = _speak_queue.get()
+        tmp_path: str | None = None
+        try:
+            wav_data = _generate_wav_bytes(text)
+            with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
+                tmp.write(wav_data)
+                tmp_path = tmp.name
+            subprocess.run(["afplay", tmp_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        except Exception as e:
+            print(f"[spoke] worker error: {e}", file=sys.stderr)
+        finally:
+            _speak_queue.task_done()
+            if tmp_path is not None:
+                try:
+                    os.unlink(tmp_path)
+                except Exception:
+                    pass
+
+
+# Start the background worker thread
+_worker_thread = threading.Thread(target=_speak_worker, daemon=True)
+_worker_thread.start()
+
+
 class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         if self.path == "/generate":
             self._handle_generate()
         elif self.path == "/stream":
             self._handle_stream()
+        elif self.path == "/speak":
+            self._handle_speak()
         else:
             self.send_error(404)
 
@@ -146,44 +220,44 @@ class Handler(BaseHTTPRequestHandler):
         if not body:
             return
         text = body.get("text", "")
-        if not text:
+        if not text.strip():
             self.send_error(400, "No text")
             return
 
-        model, voice = get_model()
-        t0 = time.time()
-
-        # Split into sentence chunks for natural pacing
-        chunks = split_text(text)
-        audio_parts = []
-        for i, chunk in enumerate(chunks):
-            chunk_audio = model.generate_audio(voice, chunk)
-            chunk_loud = normalize_audio(chunk_audio)
-            audio_parts.append(chunk_loud)
-            print(f"[spoke] chunk {i+1}/{len(chunks)}: {chunk[:50]}")
-
-        # Concatenate all chunks with minimal silence (30ms — just enough for natural breath)
-        silence = np.zeros(int(model.sample_rate * 0.03), dtype=np.float32)
-        combined = []
-        for i, part in enumerate(audio_parts):
-            combined.append(part)
-            if i < len(audio_parts) - 1:
-                combined.append(silence)
-        full_audio = np.concatenate(combined)
-
-        buf = io.BytesIO()
-        scipy.io.wavfile.write(buf, model.sample_rate, full_audio)
-        wav_data = buf.getvalue()
-
-        print(f"[spoke] {time.time()-t0:.1f}s total: {text[:60]}")
+        wav_data = _generate_wav_bytes(text)
         self._send_wav(wav_data)
+
+    def _handle_speak(self):
+        body = self._read_json()
+        if not body:
+            return
+        text = body.get("text", "")
+        if not text.strip():
+            self.send_error(400, "No text")
+            return
+
+        try:
+            _speak_queue.put_nowait(text)
+            resp = json.dumps({"status": "queued"}).encode("utf-8")
+            self.send_response(202)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(resp)))
+            self.end_headers()
+            self.wfile.write(resp)
+        except queue.Full:
+            resp = json.dumps({"status": "busy", "error": "Queue full"}).encode("utf-8")
+            self.send_response(503)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(resp)))
+            self.end_headers()
+            self.wfile.write(resp)
 
     def _handle_stream(self):
         body = self._read_json()
         if not body:
             return
         text = body.get("text", "")
-        if not text:
+        if not text.strip():
             self.send_error(400, "No text")
             return
 
@@ -198,20 +272,34 @@ class Handler(BaseHTTPRequestHandler):
             t0 = time.time()
             audio = model.generate_audio(voice, chunk_text)
             audio_loud = normalize_audio(audio)
-            chunk_path = os.path.join(tempfile.gettempdir(), f"spoke_stream_{i}.wav")
-            scipy.io.wavfile.write(chunk_path, model.sample_rate, audio_loud)
-            elapsed = time.time() - t0
-            print(f"[spoke] chunk {i+1}/{len(chunks)} ({elapsed:.1f}s): {chunk_text[:40]}")
-            line = json.dumps({"chunk": i, "total": len(chunks), "file": chunk_path}) + "\n"
-            self.wfile.write(line.encode())
-            self.wfile.flush()
+            fd, chunk_path = tempfile.mkstemp(suffix=".wav", prefix="spoke_stream_")
+            try:
+                os.close(fd)
+                scipy.io.wavfile.write(chunk_path, model.sample_rate, audio_loud)
+                elapsed = time.time() - t0
+                print(f"[spoke] chunk {i+1}/{len(chunks)} ({elapsed:.1f}s): {chunk_text[:40]}")
+                line = json.dumps({"chunk": i, "total": len(chunks), "file": chunk_path}) + "\n"
+                self.wfile.write(line.encode())
+                self.wfile.flush()
+            finally:
+                try:
+                    os.unlink(chunk_path)
+                except Exception:
+                    pass
 
     def _read_json(self):
         length = int(self.headers.get("Content-Length", 0))
         if not length:
             self.send_error(400, "Empty body")
             return None
-        return json.loads(self.rfile.read(length))
+        if length > MAX_BODY:
+            self.send_error(413, "Body too large")
+            return None
+        try:
+            return json.loads(self.rfile.read(length))
+        except json.JSONDecodeError:
+            self.send_error(400, "Invalid JSON")
+            return None
 
     def _send_wav(self, data):
         self.send_response(200)

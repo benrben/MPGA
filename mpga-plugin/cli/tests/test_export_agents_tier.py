@@ -16,9 +16,6 @@ Acceptance criteria → Test status
 [ ] AC9: unknown provider falls back to claude tier            → test_resolve_unknown_provider_falls_back
 [ ] AC10: tier="invalid" is rejected                           → test_agent_meta_rejects_invalid_tier
 
-Untested branches / edge cases:
-- [ ] resolve_model with tier="mid" for unknown provider (fallback path)
-- [ ] resolve_model with tier="small" for unknown provider (fallback path)
 """
 
 import pytest
@@ -57,9 +54,6 @@ class TestAgentMetaTierField:
         assert agent.tier == "high"
 
     def test_agent_meta_rejects_invalid_tier(self):
-        # Sanity: valid tier is accepted and stored.
-        assert _make_agent(tier="high").tier == "high"
-
         # Invalid value must raise ValueError at runtime (Literal is not enforced
         # by Python itself, so __post_init__ guards this explicitly).
         with pytest.raises(ValueError):
@@ -104,9 +98,25 @@ class TestResolveModelAntigravity:
         assert resolve_model("high", "antigravity") == "gemini-2.5-pro"
 
 
+class TestResolveModelCursor:
+    """resolve_model returns correct model string for cursor provider."""
+
+    def test_resolve_high_cursor(self):
+        assert resolve_model("high", "cursor") == "claude-opus-4-6"
+
+    def test_resolve_mid_cursor(self):
+        assert resolve_model("mid", "cursor") == "claude-sonnet-4-6"
+
+
 class TestResolveModelFallback:
     """resolve_model falls back to claude tier for unknown providers."""
 
     def test_resolve_unknown_provider_falls_back_to_claude(self):
         # Unknown provider must fall back to the claude tier map.
         assert resolve_model("high", "unknown-provider") == "claude-opus-4-6"
+
+    def test_resolve_mid_fallback(self):
+        assert resolve_model("mid", "unknown-provider") == "claude-sonnet-4-6"
+
+    def test_resolve_small_fallback(self):
+        assert resolve_model("small", "unknown-provider") == "claude-haiku-4-5"

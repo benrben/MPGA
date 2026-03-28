@@ -235,6 +235,31 @@ def _generate_via_server(text: str, wav_path: Path) -> None:
         wav_path.write_bytes(resp.read())
 
 
+def _speak_via_queue(text: str) -> None:
+    """POST text to /speak queue endpoint; handle non-202 gracefully."""
+    body = json.dumps({"text": text}).encode("utf-8")
+    req = urllib.request.Request(
+        f"http://127.0.0.1:{PORT}/speak",
+        data=body,
+        headers={
+            "Content-Type": "application/json",
+            "Content-Length": str(len(body)),
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            if resp.status != 202:
+                log.error(f"Spoke queue returned {resp.status}")
+    except urllib.error.HTTPError as e:
+        if e.code == 503:
+            log.error("Spoke queue is busy — try again shortly")
+        else:
+            log.error(f"Spoke queue error: {e.code}")
+    except Exception as exc:
+        log.error(f"Spoke queue request failed: {exc}")
+
+
 def _stream_via_server(text: str) -> None:
     """Stream via server -- plays each sentence chunk as it's generated."""
     body = json.dumps({"text": text}).encode("utf-8")
@@ -272,11 +297,13 @@ def _stream_via_server(text: str) -> None:
 @click.option("--setup", is_flag=True, help="Run one-time setup (install deps, download voice)")
 @click.option("--no-cache", "no_cache", is_flag=True, help="Skip cache, regenerate audio")
 @click.option("--stream", is_flag=True, help="Stream sentence-by-sentence (play while generating)")
+@click.option("--sync", is_flag=True, help="Single-shot generation with cache (synchronous, bypasses queue)")
 def spoke_cmd(
     text: tuple[str, ...],
     setup: bool,
     no_cache: bool,
     stream: bool,
+    sync: bool,
 ) -> None:
     """Speak text in Trump voice via F5-TTS -- TREMENDOUS."""
     spoke_dir = _find_spoke_dir()
@@ -318,29 +345,33 @@ def spoke_cmd(
             log.error("Streaming TTS failed")
         return
 
-    # Single-shot mode with cache
-    md5_hash = hashlib.md5(clean_text.encode()).hexdigest()
-    wav_path = CACHE_DIR / f"{md5_hash}.wav"
+    if sync:
+        # Single-shot mode with cache
+        md5_hash = hashlib.md5(clean_text.encode()).hexdigest()
+        wav_path = CACHE_DIR / f"{md5_hash}.wav"
 
-    CACHE_DIR.mkdir(parents=True, exist_ok=True)
+        CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
-    use_cache = not no_cache
-    if use_cache and wav_path.exists():
+        use_cache = not no_cache
+        if use_cache and wav_path.exists():
+            subprocess.run(
+                ["afplay", str(wav_path)],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            return
+
+        try:
+            _generate_via_server(clean_text, wav_path)
+        except Exception:
+            log.error("TTS generation failed")
+            return
+
         subprocess.run(
             ["afplay", str(wav_path)],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
         )
-        return
-
-    try:
-        _generate_via_server(clean_text, wav_path)
-    except Exception:
-        log.error("TTS generation failed")
-        return
-
-    subprocess.run(
-        ["afplay", str(wav_path)],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-    )
+    else:
+        # Queue mode bypasses cache — fire-and-forget semantics; cache only operative with --sync
+        _speak_via_queue(clean_text)
