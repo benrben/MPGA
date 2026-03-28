@@ -4,11 +4,23 @@ import os
 import re
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Literal
 
 
 # --- Agent metadata -----------------------------------------------------------
-# Canonical list of MPGA agents with their per-tool attributes.
-# The markdown instructions live in mpga-plugin/agents/<slug>.md.
+# Canonical list of MPGA agents. Markdown instructions: mpga-plugin/agents/<slug>.md.
+
+MODEL_TIERS: dict[str, dict[str, str]] = {
+    "claude":      {"high": "claude-opus-4-6",  "mid": "claude-sonnet-4-6", "small": "claude-haiku-4-5"},
+    "codex":       {"high": "gpt-5.4",           "mid": "gpt-5.3-codex",    "small": "gpt-5.1-codex-mini"},
+    "cursor":      {"high": "claude-opus-4-6",  "mid": "claude-sonnet-4-6", "small": "claude-haiku-4-5"},
+    "antigravity": {"high": "gemini-2.5-pro",   "mid": "gemini-2.5-flash",  "small": "gemini-2.0-flash-lite"},
+}
+
+
+def resolve_model(tier: str, provider: str) -> str:
+    tiers = MODEL_TIERS.get(provider, MODEL_TIERS["claude"])
+    return tiers[tier]
 
 
 @dataclass
@@ -16,10 +28,18 @@ class AgentMeta:
     slug: str  # filename slug (e.g. "red-dev")
     name: str  # display name
     description: str  # one-line description for agent routing
-    model: str  # preferred model
     readonly: bool  # Cursor: cannot write files
     is_background: bool  # Cursor: can run in parallel
     sandbox_mode: str  # Codex: workspace | none
+    tier: Literal["high", "mid", "small"] | None = None  # capability tier
+    model: str | None = None  # legacy: preferred model string
+
+    def __post_init__(self) -> None:
+        # Python does not enforce Literal types at runtime, so validate explicitly.
+        if self.tier is not None and self.tier not in ("high", "mid", "small"):
+            raise ValueError(f"Invalid tier: {self.tier!r}. Must be 'high', 'mid', or 'small'.")
+        if self.model is None and self.tier is not None:
+            self.model = resolve_model(self.tier, "claude")
 
 
 AGENTS: list[AgentMeta] = [
@@ -27,7 +47,7 @@ AGENTS: list[AgentMeta] = [
         slug="campaigner",
         name="mpga-campaigner",
         description="Read-only rally diagnostician. Runs a category-by-category audit and aggregates the sharpest evidence-backed case for fixing the project.",
-        model="claude-opus-4-6",
+        tier="high",
         readonly=True,
         is_background=True,
         sandbox_mode="none",
@@ -36,7 +56,7 @@ AGENTS: list[AgentMeta] = [
         slug="red-dev",
         name="mpga-red-dev",
         description="Write failing tests FIRST for a task. Use at the start of every TDD cycle (RED = failing test bar). Never writes implementation code.",
-        model="claude-sonnet-4-6",
+        tier="mid",
         readonly=False,
         is_background=False,
         sandbox_mode="workspace",
@@ -45,7 +65,7 @@ AGENTS: list[AgentMeta] = [
         slug="green-dev",
         name="mpga-green-dev",
         description="Write minimal implementation to make a failing test pass (GREEN = passing test bar). Use after red-dev has written tests. Never modifies tests.",
-        model="claude-sonnet-4-6",
+        tier="mid",
         readonly=False,
         is_background=False,
         sandbox_mode="workspace",
@@ -54,7 +74,7 @@ AGENTS: list[AgentMeta] = [
         slug="blue-dev",
         name="mpga-blue-dev",
         description="Refactor passing code and tests for quality without changing behavior. Use after green-dev. Updates evidence links in scope docs.",
-        model="claude-sonnet-4-6",
+        tier="mid",
         readonly=False,
         is_background=False,
         sandbox_mode="workspace",
@@ -63,7 +83,7 @@ AGENTS: list[AgentMeta] = [
         slug="scout",
         name="mpga-scout",
         description="Read-only codebase explorer. Traces execution paths, maps dependencies, and builds evidence links. Never modifies files.",
-        model="claude-sonnet-4-6",
+        tier="mid",
         readonly=True,
         is_background=True,
         sandbox_mode="none",
@@ -72,7 +92,7 @@ AGENTS: list[AgentMeta] = [
         slug="architect",
         name="mpga-architect",
         description="Structural analysis agent. Generates and updates GRAPH.md and scope docs from scout findings. Every claim must cite evidence.",
-        model="claude-opus-4-6",
+        tier="high",
         readonly=False,
         is_background=False,
         sandbox_mode="workspace",
@@ -81,7 +101,7 @@ AGENTS: list[AgentMeta] = [
         slug="auditor",
         name="mpga-auditor",
         description="Evidence integrity checker. Verifies evidence links resolve, flags stale links, calculates scope health. Read-only \u2014 only flags, never auto-fixes.",
-        model="claude-sonnet-4-6",
+        tier="mid",
         readonly=True,
         is_background=True,
         sandbox_mode="none",
@@ -90,7 +110,7 @@ AGENTS: list[AgentMeta] = [
         slug="researcher",
         name="mpga-researcher",
         description="Domain research before planning. Reads scope docs, identifies knowledge gaps, investigates library options and pitfalls.",
-        model="claude-opus-4-6",
+        tier="high",
         readonly=True,
         is_background=False,
         sandbox_mode="none",
@@ -99,7 +119,7 @@ AGENTS: list[AgentMeta] = [
         slug="reviewer",
         name="mpga-reviewer",
         description="Two-stage code reviewer. Stage 1: spec compliance + evidence validity. Stage 2: code quality + security. Critical issues block progress.",
-        model="claude-opus-4-6",
+        tier="high",
         readonly=True,
         is_background=False,
         sandbox_mode="none",
@@ -108,7 +128,7 @@ AGENTS: list[AgentMeta] = [
         slug="verifier",
         name="mpga-verifier",
         description="Post-execution verification. Runs test suite, checks for stubs, verifies evidence links updated, confirms milestone progress.",
-        model="claude-sonnet-4-6",
+        tier="mid",
         readonly=True,
         is_background=False,
         sandbox_mode="workspace",
@@ -117,7 +137,7 @@ AGENTS: list[AgentMeta] = [
         slug="bug-hunter",
         name="mpga-bug-hunter",
         description="Specification-based bug detection. Compares implementation against acceptance criteria, finds edge cases and specification gaps.",
-        model="claude-opus-4-6",
+        tier="high",
         readonly=True,
         is_background=True,
         sandbox_mode="none",
@@ -126,7 +146,7 @@ AGENTS: list[AgentMeta] = [
         slug="optimizer",
         name="mpga-optimizer",
         description="Code quality analyzer. Detects spaghetti, duplication, and elegance issues using Kent Beck and Sandi Metz rules.",
-        model="claude-sonnet-4-6",
+        tier="mid",
         readonly=True,
         is_background=True,
         sandbox_mode="none",
@@ -135,7 +155,7 @@ AGENTS: list[AgentMeta] = [
         slug="security-auditor",
         name="mpga-security-auditor",
         description="Security-focused code review. Checks OWASP Top 10, scans for hardcoded secrets, runs npm audit, flags missing input validation.",
-        model="claude-sonnet-4-6",
+        tier="mid",
         readonly=True,
         is_background=True,
         sandbox_mode="none",
@@ -144,7 +164,7 @@ AGENTS: list[AgentMeta] = [
         slug="orchestrator",
         name="mpga-orchestrator",
         description="Dynamic lane management and deadlock detection. Monitors parallel task execution, resolves conflicts, balances load across lanes.",
-        model="claude-opus-4-6",
+        tier="high",
         readonly=True,
         is_background=True,
         sandbox_mode="none",
