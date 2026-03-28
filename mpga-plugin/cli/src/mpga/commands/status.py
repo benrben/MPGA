@@ -7,7 +7,7 @@ from pathlib import Path
 
 import click
 
-from mpga.core.config import find_project_root, load_config
+from mpga.core.config import find_project_root, get_last_sync, load_config
 from mpga.core.logger import log, mini_banner, progress_bar
 
 
@@ -38,13 +38,10 @@ def status_cmd(as_json: bool) -> None:
         scopes = [f.name for f in scopes_dir.iterdir() if f.suffix == ".md"]
 
     # Read INDEX.md for last sync info
-    last_sync = "never"
+    last_sync = get_last_sync(mpga_dir)
     evidence_coverage = "0%"
     if index_path.exists():
         content = index_path.read_text(encoding="utf-8")
-        sync_match = re.search(r"\*\*Last sync:\*\* (.+)", content)
-        if sync_match and "run" not in sync_match.group(1):
-            last_sync = sync_match.group(1)
         cov_match = re.search(r"\*\*Evidence coverage:\*\* ([\d.]+%)", content)
         if cov_match:
             evidence_coverage = cov_match.group(1)

@@ -225,10 +225,14 @@ def heal_scope_file(report: ScopeDriftReport) -> HealResult:
     )
 
     for item in sorted_items:
-        new_link = (
-            f"[E] {item.link.filepath}:{item.new_start}-{item.new_end}"
-            + (f" :: {item.link.symbol}()" if item.link.symbol else "")
-        )
+        if item.link.symbol and item.link.end_line is None:
+            # Symbol-based: preserve #symbol:lineHint format
+            new_link = f"[E] {item.link.filepath}#{item.link.symbol}:{item.new_start}"
+        else:
+            new_link = (
+                f"[E] {item.link.filepath}:{item.new_start}-{item.new_end}"
+                + (f" :: {item.link.symbol}()" if item.link.symbol else "")
+            )
         # Match the original evidence link in the file, accounting for
         # markdown table pipes and backticks
         if not item.link.filepath:

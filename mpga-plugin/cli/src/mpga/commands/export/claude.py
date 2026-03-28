@@ -8,7 +8,7 @@ from pathlib import Path
 
 from mpga.core.logger import log
 
-from .agents import AGENTS, SKILL_NAMES, copy_skills_to, resolve_model, rewrite_cli_references
+from .agents import AGENTS, SKILL_NAMES, copy_skills_to, extract_active_milestone, resolve_model, rewrite_cli_references
 from .runtime import (
     copy_vendored_runtime,
     global_vendored_cli_command,
@@ -149,10 +149,7 @@ def _deploy_claude_plugin(
 
 
 def _generate_claude_md(index_content: str, _project_name: str) -> str:
-    milestones_match = re.search(
-        r"## Active milestone\n([\s\S]*?)(?=\n##|$)", index_content
-    )
-    milestone = milestones_match.group(1).strip() if milestones_match else "(none)"
+    milestone = extract_active_milestone(index_content)
 
     now = datetime.now(UTC).isoformat()
 

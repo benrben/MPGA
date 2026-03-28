@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from mpga.board.board import BoardState
+from mpga.board.board import WIP_LIMITS_DEFAULT, BoardState
 from mpga.board.task import Task, load_all_tasks
 from mpga.core.logger import progress_bar
 
@@ -26,7 +26,6 @@ STATUS_ICONS: dict[str, str] = {
     "paused": "\u23f8\ufe0f paused",
 }
 
-WIP_LIMITS_DEFAULT: dict[str, int] = {"in-progress": 3, "testing": 3, "review": 2}
 
 
 def render_board_md(

@@ -42,7 +42,6 @@ def normalize(project_root: str, config: MpgaConfig) -> NormalizeResult:
 
     # --- Pass 1 ---
     report: DriftReport = run_drift_check(project_root, threshold)
-    Path(project_root) / "MPGA" / "scopes"
 
     for scope_report in report.scopes:
         # Heal line-drifted symbols

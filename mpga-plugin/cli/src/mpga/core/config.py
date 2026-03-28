@@ -198,6 +198,19 @@ def _config_to_dict(cfg: MpgaConfig) -> dict[str, Any]:
 # -- Filesystem operations -------------------------------------------------------
 
 
+def get_last_sync(mpga_dir: "Path") -> str:
+    """Read the last sync timestamp from MPGA/INDEX.md."""
+    import re
+    index_path = mpga_dir / "INDEX.md"
+    if not index_path.exists():
+        return "never"
+    content = index_path.read_text(encoding="utf-8")
+    m = re.search(r"\*\*Last sync:\*\* (.+)", content)
+    if m and "run" not in m.group(1):
+        return m.group(1)
+    return "never"
+
+
 def find_project_root(start_dir: str | Path | None = None) -> Path | None:
     d = Path(start_dir) if start_dir else Path.cwd()
     while True:

@@ -10,6 +10,7 @@ import click
 
 from mpga.core.config import find_project_root, load_config
 from mpga.core.logger import console, log
+from mpga.commands.evidence import EVIDENCE_HEALTH_GOOD_PCT, EVIDENCE_HEALTH_WARN_PCT
 from mpga.evidence.drift import heal_scope_file, run_drift_check
 
 
@@ -65,9 +66,9 @@ def drift(
         return
 
     for scope_report in report.scopes:
-        if scope_report.health_pct >= 80:
+        if scope_report.health_pct >= EVIDENCE_HEALTH_GOOD_PCT:
             icon = "[green]\u2713 healthy[/]"
-        elif scope_report.health_pct >= 50:
+        elif scope_report.health_pct >= EVIDENCE_HEALTH_WARN_PCT:
             icon = "[yellow]\u26a0 drift[/]"
         else:
             icon = "[red]\u2717 stale[/]"

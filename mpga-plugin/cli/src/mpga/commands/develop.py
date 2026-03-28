@@ -18,6 +18,19 @@ from mpga.commands.develop_scheduler import run_develop_task
 from mpga.core.config import find_project_root
 from mpga.core.logger import console, log
 
+# -- Helpers ----------------------------------------------------------------
+
+
+def _load_task_or_raise(tasks_dir: str, task_id: str):
+    task_file = find_task_file(tasks_dir, task_id)
+    if not task_file:
+        raise click.ClickException(f"Task '{task_id}' not found")
+    task = parse_task_file(task_file)
+    if not task:
+        raise click.ClickException(f"Could not parse task '{task_id}'")
+    return task_file, task
+
+
 # -- Handlers ---------------------------------------------------------------
 
 
@@ -25,13 +38,7 @@ def handle_develop_status(task_id: str) -> None:
     project_root = find_project_root() or str(Path.cwd())
     tasks_dir = str(Path(project_root) / "MPGA" / "board" / "tasks")
 
-    task_file = find_task_file(tasks_dir, task_id)
-    if not task_file:
-        raise click.ClickException(f"Task '{task_id}' not found")
-
-    task = parse_task_file(task_file)
-    if not task:
-        raise click.ClickException(f"Could not parse task '{task_id}'")
+    task_file, task = _load_task_or_raise(tasks_dir, task_id)
 
     log.header(f"Develop Status: {task.id}")
     console.print(f"  Title:         {task.title}")
@@ -62,13 +69,7 @@ def handle_develop_abort(task_id: str) -> None:
     board_dir = str(Path(project_root) / "MPGA" / "board")
     tasks_dir = str(Path(board_dir) / "tasks")
 
-    task_file = find_task_file(tasks_dir, task_id)
-    if not task_file:
-        raise click.ClickException(f"Task '{task_id}' not found")
-
-    task = parse_task_file(task_file)
-    if not task:
-        raise click.ClickException(f"Could not parse task '{task_id}'")
+    task_file, task = _load_task_or_raise(tasks_dir, task_id)
 
     # Release all locks
     task.file_locks = []
@@ -96,13 +97,7 @@ def handle_develop_resume(task_id: str) -> None:
     board_dir = str(Path(project_root) / "MPGA" / "board")
     tasks_dir = str(Path(board_dir) / "tasks")
 
-    task_file = find_task_file(tasks_dir, task_id)
-    if not task_file:
-        raise click.ClickException(f"Task '{task_id}' not found")
-
-    task = parse_task_file(task_file)
-    if not task:
-        raise click.ClickException(f"Could not parse task '{task_id}'")
+    task_file, task = _load_task_or_raise(tasks_dir, task_id)
 
     # Resume: move to in-progress, set running
     task.column = "in-progress"

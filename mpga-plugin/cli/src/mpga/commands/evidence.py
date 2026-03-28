@@ -18,6 +18,15 @@ EVIDENCE_HEALTH_GOOD_PCT = 80
 EVIDENCE_HEALTH_WARN_PCT = 50
 
 
+def _scope_health_icon(health_pct: int) -> str:
+    """Return a Rich-markup health icon for the given health percentage."""
+    if health_pct >= EVIDENCE_HEALTH_GOOD_PCT:
+        return "[green]\u2713[/]"
+    if health_pct >= EVIDENCE_HEALTH_WARN_PCT:
+        return "[yellow]\u26a0[/]"
+    return "[red]\u2717[/]"
+
+
 @click.group("evidence")
 def evidence() -> None:
     """Evidence link management."""
@@ -42,12 +51,7 @@ def evidence_verify(scope: str | None, as_json: bool) -> None:
     log.header("Evidence Verification")
 
     for scope_report in report.scopes:
-        if scope_report.health_pct >= EVIDENCE_HEALTH_GOOD_PCT:
-            icon = "[green]\u2713[/]"
-        elif scope_report.health_pct >= EVIDENCE_HEALTH_WARN_PCT:
-            icon = "[yellow]\u26a0[/]"
-        else:
-            icon = "[red]\u2717[/]"
+        icon = _scope_health_icon(scope_report.health_pct)
         console.print(
             f"\n{icon} [bold]{scope_report.scope}[/]  "
             f"{scope_report.health_pct}% ({scope_report.valid_links}/{scope_report.total_links} valid)"
@@ -60,9 +64,14 @@ def evidence_verify(scope: str | None, as_json: bool) -> None:
         if scope_report.healed_items:
             log.dim("  Healed links:")
             for item in scope_report.healed_items:
+                was_range = (
+                    f"{item.link.start_line}-{item.link.end_line}"
+                    if item.link.start_line is not None
+                    else "(symbol-only)"
+                )
                 log.dim(
                     f"    {item.link.filepath}:{item.new_start}-{item.new_end} "
-                    f"(was {item.link.start_line}-{item.link.end_line})"
+                    f"(was {was_range})"
                 )
 
     console.print("")
@@ -97,6 +106,12 @@ def evidence_heal(auto: bool, scope: str | None) -> None:
     for scope_report in report.scopes:
         if not scope_report.healed_items:
             continue
+        if not auto:
+            log.info(f"  {scope_report.scope}: {len(scope_report.healed_items)} link(s) to heal")
+            for item in scope_report.healed_items:
+                log.dim(f"    {item.link.filepath}: lines {item.link.start_line}-{item.link.end_line} → {item.new_start}-{item.new_end}")
+            if not click.confirm(f"Apply {len(scope_report.healed_items)} heal(s) to {scope_report.scope}?"):
+                continue
         result = heal_scope_file(scope_report)
         if result.healed > 0:
             Path(scope_report.scope_path).write_text(result.content, encoding="utf-8")

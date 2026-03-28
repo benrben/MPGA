@@ -14,6 +14,7 @@ from .agents import (
     copy_skills_to,
     read_agent_instructions,
     resolve_model,
+    write_agents,
 )
 from .runtime import (
     copy_vendored_runtime,
@@ -46,12 +47,7 @@ def export_codex(
         copy_skills_to(global_skills_dir, plugin_root, "codex", cli_command)
         log.success(f"Generated ~/.codex/skills/ ({len(SKILL_NAMES)} skills)")
         global_agents_dir = Path(codex_global_dir) / "agents"
-        global_agents_dir.mkdir(parents=True, exist_ok=True)
-        for agent in AGENTS:
-            (global_agents_dir / f"{agent.name}.toml").write_text(
-                _generate_codex_agent_toml(agent, plugin_root, cli_command),
-                encoding="utf-8",
-            )
+        write_agents(global_agents_dir, lambda a: _generate_codex_agent_toml(a, plugin_root, cli_command), ".toml", AGENTS)
         log.success(f"Generated ~/.codex/agents/ ({len(AGENTS)} TOML agents)")
     else:
         cli_command = project_vendored_cli_command() if plugin_root else "mpga"
@@ -76,12 +72,7 @@ def export_codex(
         log.success(f".codex/skills/ ({len(SKILL_NAMES)} skills)")
         # TOML agents
         codex_agents_dir = Path(project_root) / ".codex" / "agents"
-        codex_agents_dir.mkdir(parents=True, exist_ok=True)
-        for agent in AGENTS:
-            (codex_agents_dir / f"{agent.name}.toml").write_text(
-                _generate_codex_agent_toml(agent, plugin_root, cli_command),
-                encoding="utf-8",
-            )
+        write_agents(codex_agents_dir, lambda a: _generate_codex_agent_toml(a, plugin_root, cli_command), ".toml", AGENTS)
         log.success(f".codex/agents/ ({len(AGENTS)} TOML agents)")
 
 

@@ -95,3 +95,26 @@ def sync_cmd(full: bool, incremental: bool) -> None:
     log.dim(f"  {len(scopes)} scopes in MPGA/scopes/ \u2014 WINNING!")
     log.dim("  Run `mpga evidence verify` to check evidence health \u2014 believe me, you want to")
     log.dim("  Run `mpga status` to view your INCREDIBLE dashboard")
+
+
+@click.command("normalize")
+def normalize_cmd() -> None:
+    """Run the verify→heal→re-verify pipeline and rewrite scope health lines."""
+    project_root = find_project_root() or Path.cwd()
+    mpga_dir = Path(project_root) / "MPGA"
+
+    if not mpga_dir.exists():
+        log.error("MPGA not initialized — run `mpga init` first.")
+        import sys
+        sys.exit(1)
+
+    config = load_config(project_root)
+    log.header("MPGA Normalize — Healing the Evidence Layer")
+
+    result = normalize(str(project_root), config)
+
+    log.success(
+        f"Normalized {result.scopes_healed} scope(s), "
+        f"healed {result.links_healed} link(s)"
+    )
+    victory("Evidence layer is HEALTHY again!")

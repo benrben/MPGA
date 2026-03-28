@@ -19,6 +19,20 @@ from mpga.core.logger import log
 
 CACHE_DIR = Path.home() / ".mpga" / "spoke-cache"
 PORT = 5151
+CACHE_MAX_BYTES = 100 * 1024 * 1024  # 100 MB hard cap
+
+
+def _evict_cache() -> None:
+    """Evict oldest WAV files from the cache if total size exceeds CACHE_MAX_BYTES."""
+    files = sorted(CACHE_DIR.glob("*.wav"), key=lambda p: p.stat().st_mtime)
+    total = sum(f.stat().st_size for f in files)
+    while total > CACHE_MAX_BYTES and files:
+        oldest = files.pop(0)
+        total -= oldest.stat().st_size
+        try:
+            oldest.unlink()
+        except OSError:
+            pass
 
 
 def trumpify(text: str) -> str:
@@ -366,6 +380,8 @@ def spoke_cmd(
         except Exception:
             log.error("TTS generation failed")
             return
+
+        _evict_cache()
 
         subprocess.run(
             ["afplay", str(wav_path)],

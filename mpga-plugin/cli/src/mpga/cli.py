@@ -55,7 +55,7 @@ _COMMANDS: dict[str, tuple[str, str]] = {
     "init":       ("mpga.commands.init", "init_cmd"),
     "scan":       ("mpga.commands.scan", "scan_cmd"),
     "sync":       ("mpga.commands.sync", "sync_cmd"),
-    "normalize":  ("mpga.commands.normalize", "normalize_cmd"),
+    "normalize":  ("mpga.commands.sync", "normalize_cmd"),
     "status":     ("mpga.commands.status", "status_cmd"),
     "health":     ("mpga.commands.health", "health_cmd"),
     # Evidence & drift
@@ -80,10 +80,6 @@ _COMMANDS: dict[str, tuple[str, str]] = {
     "decision":   ("mpga.commands.pr", "decision_cmd"),
     # Voice
     "spoke":      ("mpga.commands.spoke", "spoke_cmd"),
-    # Shortcuts
-    "diagnose":   ("mpga.commands.shortcuts", "diagnose_cmd"),
-    "simplify":   ("mpga.commands.shortcuts", "simplify_cmd"),
-    "secure":     ("mpga.commands.shortcuts", "secure_cmd"),
 }
 
 
@@ -91,3 +87,36 @@ _COMMANDS: dict[str, tuple[str, str]] = {
 @click.version_option(VERSION, "-v", "--version", message="%(version)s")
 def main() -> None:
     """Evidence-backed context engineering for AI-assisted development"""
+
+
+from mpga.core.logger import log as _log  # noqa: E402
+
+
+@main.command("diagnose")
+@click.argument("files", nargs=-1)
+def diagnose_cmd(files: tuple[str, ...]) -> None:
+    """Run bug-hunter + optimizer diagnosis."""
+    _log.header("Diagnose")
+    if files:
+        click.echo(f"  Target files: {', '.join(files)}")
+    click.echo("  Use /mpga:diagnose to run bug-hunter + optimizer in your AI coding agent.")
+    _log.dim("  This skill analyzes code for bugs, performance issues, and optimization opportunities.")
+
+
+@main.command("secure")
+def secure_cmd() -> None:
+    """Run security audit."""
+    _log.header("Secure")
+    click.echo("  Use /mpga:secure to run a security audit in your AI coding agent.")
+    _log.dim("  This skill scans for vulnerabilities, insecure patterns, and secrets exposure.")
+
+
+@main.command("simplify")
+@click.argument("files", nargs=-1)
+def simplify_cmd(files: tuple[str, ...]) -> None:
+    """Improve code elegance."""
+    _log.header("Simplify")
+    if files:
+        click.echo(f"  Target files: {', '.join(files)}")
+    click.echo("  Use /mpga:simplify to improve code elegance in your AI coding agent.")
+    _log.dim("  This skill reduces complexity, removes duplication, and improves readability.")

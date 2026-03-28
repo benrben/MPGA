@@ -7,7 +7,7 @@ from pathlib import Path
 
 from mpga.core.logger import log
 
-from .agents import SKILL_NAMES, copy_skills_to
+from .agents import SKILL_NAMES, copy_skills_to, extract_active_milestone
 from .runtime import (
     copy_vendored_runtime,
     global_vendored_cli_command,
@@ -98,10 +98,7 @@ def export_antigravity(
 def _generate_gemini_md(
     index_content: str, _project_name: str, cli_command: str
 ) -> str:
-    milestones_match = re.search(
-        r"## Active milestone\n([\s\S]*?)(?=\n##|$)", index_content
-    )
-    milestone = milestones_match.group(1).strip() if milestones_match else "(none)"
+    milestone = extract_active_milestone(index_content)
 
     now = datetime.now(UTC).isoformat()
 
@@ -151,10 +148,7 @@ Generated: {now}
 def _generate_antigravity_context_md(
     index_content: str, _project_name: str, cli_command: str
 ) -> str:
-    milestones_match = re.search(
-        r"## Active milestone\n([\s\S]*?)(?=\n##|$)", index_content
-    )
-    milestone = milestones_match.group(1).strip() if milestones_match else "(none)"
+    milestone = extract_active_milestone(index_content)
 
     now = datetime.now(UTC).isoformat()
 

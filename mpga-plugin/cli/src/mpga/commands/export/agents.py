@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import re
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
@@ -249,6 +250,26 @@ def rewrite_cli_references(
         )
 
     return next_content
+
+
+def extract_active_milestone(index_content: str) -> str:
+    """Extract the active milestone text from INDEX.md content."""
+    m = re.search(r"## Active milestone\n([\s\S]*?)(?=\n##|$)", index_content)
+    return m.group(1).strip() if m else "(none)"
+
+
+def write_agents(
+    agents_dir: Path,
+    generator: Callable[[AgentMeta], str],
+    suffix: str,
+    agents: list[AgentMeta] | None = None,
+) -> None:
+    """Write agent files for all AGENTS using the given generator function."""
+    agents_dir.mkdir(parents=True, exist_ok=True)
+    for agent in (agents if agents is not None else AGENTS):
+        (agents_dir / f"{agent.name}{suffix}").write_text(
+            generator(agent), encoding="utf-8"
+        )
 
 
 # --- Plugin root finder -------------------------------------------------------

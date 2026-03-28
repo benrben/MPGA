@@ -9,7 +9,7 @@ class TestDiagnoseShortcut:
 
     def test_prints_skill_instruction(self):
         """Prints instruction to use /mpga:diagnose skill."""
-        from mpga.commands.shortcuts import diagnose_cmd
+        from mpga.cli import diagnose_cmd
 
         runner = CliRunner()
         result = runner.invoke(diagnose_cmd, [])
@@ -19,7 +19,7 @@ class TestDiagnoseShortcut:
 
     def test_accepts_optional_file_arguments(self):
         """Accepts optional file arguments."""
-        from mpga.commands.shortcuts import diagnose_cmd
+        from mpga.cli import diagnose_cmd
 
         runner = CliRunner()
         result = runner.invoke(diagnose_cmd, ["src/foo.ts", "src/bar.ts"])
@@ -34,7 +34,7 @@ class TestSecureShortcut:
 
     def test_prints_skill_instruction(self):
         """Prints instruction to use /mpga:secure skill."""
-        from mpga.commands.shortcuts import secure_cmd
+        from mpga.cli import secure_cmd
 
         runner = CliRunner()
         result = runner.invoke(secure_cmd, [])
@@ -48,7 +48,7 @@ class TestSimplifyShortcut:
 
     def test_prints_skill_instruction(self):
         """Prints instruction to use /mpga:simplify skill."""
-        from mpga.commands.shortcuts import simplify_cmd
+        from mpga.cli import simplify_cmd
 
         runner = CliRunner()
         result = runner.invoke(simplify_cmd, [])
@@ -58,7 +58,7 @@ class TestSimplifyShortcut:
 
     def test_accepts_optional_file_arguments(self):
         """Accepts optional file arguments."""
-        from mpga.commands.shortcuts import simplify_cmd
+        from mpga.cli import simplify_cmd
 
         runner = CliRunner()
         result = runner.invoke(simplify_cmd, ["src/utils.ts"])

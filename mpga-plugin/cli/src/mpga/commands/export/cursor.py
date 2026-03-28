@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os
-import re
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -12,8 +11,10 @@ from .agents import (
     SKILL_NAMES,
     AgentMeta,
     copy_skills_to,
+    extract_active_milestone,
     read_agent_instructions,
     resolve_model,
+    write_agents,
 )
 from .runtime import (
     copy_vendored_runtime,
@@ -44,12 +45,7 @@ def export_cursor(
         log.success(f"Generated ~/.cursor/skills/ ({len(SKILL_NAMES)} skills)")
         # Global agents
         global_agents_dir = Path(home) / ".cursor" / "agents"
-        global_agents_dir.mkdir(parents=True, exist_ok=True)
-        for agent in AGENTS:
-            (global_agents_dir / f"{agent.name}.md").write_text(
-                _generate_cursor_agent_md(agent, plugin_root, cli_command),
-                encoding="utf-8",
-            )
+        write_agents(global_agents_dir, lambda a: _generate_cursor_agent_md(a, plugin_root, cli_command), ".md", AGENTS)
         log.success(f"Generated ~/.cursor/agents/ ({len(AGENTS)} agents)")
     else:
         cli_command = project_vendored_cli_command() if plugin_root else "mpga"
@@ -77,12 +73,7 @@ def export_cursor(
         log.success(f".cursor/skills/ ({len(SKILL_NAMES)} skills)")
         # Agents
         cursor_agents_dir = Path(project_root) / ".cursor" / "agents"
-        cursor_agents_dir.mkdir(parents=True, exist_ok=True)
-        for agent in AGENTS:
-            (cursor_agents_dir / f"{agent.name}.md").write_text(
-                _generate_cursor_agent_md(agent, plugin_root, cli_command),
-                encoding="utf-8",
-            )
+        write_agents(cursor_agents_dir, lambda a: _generate_cursor_agent_md(a, plugin_root, cli_command), ".md", AGENTS)
         log.success(f".cursor/agents/ ({len(AGENTS)} agents)")
 
 
@@ -115,10 +106,7 @@ def _generate_cursor_project_mdc(
     _project_name: str,
     cli_command: str,
 ) -> str:
-    milestones_match = re.search(
-        r"## Active milestone\n([\s\S]*?)(?=\n##|$)", index_content
-    )
-    milestone = milestones_match.group(1).strip() if milestones_match else "(none)"
+    milestone = extract_active_milestone(index_content)
 
     now = datetime.now(UTC).isoformat()
 
@@ -240,11 +228,13 @@ Always check the scope BEFORE making changes.
 
 
 def _generate_cursor_global(cli_command: str) -> str:
-    return """When you see an MPGA/ directory in any project:
+    return f"""When you see an MPGA/ directory in any project:
 - Read MPGA/INDEX.md before starting any task
 - Use evidence links [E] format: [E] file:line :: symbol()
 - Mark unknowns as [Unknown] \u2014 never guess
 - Follow TDD: test first, implement second, refactor third
 - Check MPGA/board/BOARD.md for task assignments
 - After modifying code, consider if evidence links need updating
-- Prefer reading scope docs over scanning entire directories"""
+- Prefer reading scope docs over scanning entire directories
+- Run `{cli_command} drift --quick` after modifying files
+- Run `{cli_command} evidence verify` to check evidence health"""

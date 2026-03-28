@@ -34,7 +34,7 @@ def _choose_evidence_form(
             if loc:
                 return f"[E] {filepath}#{symbol}:{loc.start_line}"
         except Exception as exc:
-            log.debug(f"AST lookup failed for {filepath}#{symbol}: {exc}")
+            log.dim(f"AST lookup failed for {filepath}#{symbol}: {exc}")
     if fallback_lines:
         return f"[E] {filepath}:{fallback_lines[0]}-{fallback_lines[1]}"
     return f"[E] `{filepath}`"

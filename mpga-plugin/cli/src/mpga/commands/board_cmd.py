@@ -9,7 +9,7 @@ from __future__ import annotations
 import click
 
 from mpga.commands import board_handlers as h
-from mpga.commands.board_search import handle_board_search
+from mpga.commands.board_handlers import handle_board_search
 
 
 @click.group("board", help="The GREATEST task board ever built")

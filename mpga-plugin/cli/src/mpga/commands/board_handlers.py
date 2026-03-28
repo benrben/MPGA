@@ -23,6 +23,7 @@ from mpga.board.board import (
     recalc_stats,
     save_board,
 )
+from mpga.board.board_lock import with_board_lock
 from mpga.board.board_md import render_board_md
 from mpga.board.live import write_board_live_snapshot
 from mpga.board.live_html import write_board_live_html
@@ -49,6 +50,12 @@ def get_tasks_dir(project_root: str | Path) -> str:
     return str(Path(project_root) / "MPGA" / "board" / "tasks")
 
 
+def _board_context() -> tuple[Path, str, str]:
+    """Return (project_root, board_dir, tasks_dir) for the current project."""
+    project_root = find_project_root() or Path.cwd()
+    return project_root, get_board_dir(project_root), get_tasks_dir(project_root)
+
+
 def persist_board(board: BoardState, board_dir: str, tasks_dir: str) -> None:
     """Recalculate stats, save board.json, and regenerate BOARD.md in one call."""
     tasks = load_all_tasks(tasks_dir)
@@ -67,12 +74,9 @@ def persist_board(board: BoardState, board_dir: str, tasks_dir: str) -> None:
 
 
 def handle_board_show(*, json_output: bool = False, milestone: str | None = None) -> None:
-    project_root = find_project_root() or Path.cwd()
-    board_dir = get_board_dir(project_root)
-    tasks_dir = get_tasks_dir(project_root)
+    project_root, board_dir, tasks_dir = _board_context()
 
     board = load_board(board_dir)
-    persist_board(board, board_dir, tasks_dir)
 
     if json_output:
         tasks = load_all_tasks(tasks_dir)
@@ -92,12 +96,10 @@ def handle_board_live(
     open_browser: bool = False,
     port: int = 4173,
 ) -> None:
-    project_root = find_project_root() or Path.cwd()
-    board_dir = get_board_dir(project_root)
-    tasks_dir = get_tasks_dir(project_root)
+    project_root, board_dir, tasks_dir = _board_context()
 
     board = load_board(board_dir)
-    persist_board(board, board_dir, tasks_dir)
+    with_board_lock(board_dir, lambda: persist_board(board, board_dir, tasks_dir))
 
     live_dir = str(Path(board_dir) / "live")
     log.success(f"Generated live board artifacts in {os.path.join('MPGA', 'board', 'live')}")
@@ -128,9 +130,7 @@ def handle_board_add(
     column: str = "backlog",
     milestone: str | None = None,
 ) -> None:
-    project_root = find_project_root() or Path.cwd()
-    board_dir = get_board_dir(project_root)
-    tasks_dir = get_tasks_dir(project_root)
+    project_root, board_dir, tasks_dir = _board_context()
 
     board = load_board(board_dir)
 
@@ -148,16 +148,14 @@ def handle_board_add(
         ),
     )
 
-    persist_board(board, board_dir, tasks_dir)
+    with_board_lock(board_dir, lambda: persist_board(board, board_dir, tasks_dir))
 
     log.success(f"Created task {task.id}: {task.title}")
     log.dim(f"  Column: {task.column}  Priority: {task.priority}")
 
 
 def handle_board_move(task_id: str, column: str, *, force: bool = False) -> None:
-    project_root = find_project_root() or Path.cwd()
-    board_dir = get_board_dir(project_root)
-    tasks_dir = get_tasks_dir(project_root)
+    project_root, board_dir, tasks_dir = _board_context()
 
     board = load_board(board_dir)
     result = move_task(board, tasks_dir, task_id, column, force)  # type: ignore[arg-type]
@@ -166,15 +164,13 @@ def handle_board_move(task_id: str, column: str, *, force: bool = False) -> None
         log.error(result.error or "Move failed")
         sys.exit(1)
 
-    persist_board(board, board_dir, tasks_dir)
+    with_board_lock(board_dir, lambda: persist_board(board, board_dir, tasks_dir))
 
     log.success(f"Moved {task_id} -> {column}")
 
 
 def handle_board_claim(task_id: str, *, agent: str | None = None, force: bool = False) -> None:
-    project_root = find_project_root() or Path.cwd()
-    board_dir = get_board_dir(project_root)
-    tasks_dir = get_tasks_dir(project_root)
+    project_root, board_dir, tasks_dir = _board_context()
 
     board = load_board(board_dir)
 
@@ -208,14 +204,13 @@ def handle_board_claim(task_id: str, *, agent: str | None = None, force: bool = 
     board.columns["in-progress"].append(task_id)
 
     Path(task_file).write_text(render_task_file(task), encoding="utf-8")
-    persist_board(board, board_dir, tasks_dir)
+    with_board_lock(board_dir, lambda: persist_board(board, board_dir, tasks_dir))
 
     log.success(f"{task_id} claimed by {task.assigned} -> in-progress")
 
 
 def handle_board_assign(task_id: str, agent: str) -> None:
-    project_root = find_project_root() or Path.cwd()
-    tasks_dir = get_tasks_dir(project_root)
+    project_root, board_dir, tasks_dir = _board_context()
 
     task_file = find_task_file(tasks_dir, task_id)
     if not task_file:
@@ -242,9 +237,7 @@ def handle_board_update(
     evidence_add: str | None = None,
     tdd_stage: str | None = None,
 ) -> None:
-    project_root = find_project_root() or Path.cwd()
-    board_dir = get_board_dir(project_root)
-    tasks_dir = get_tasks_dir(project_root)
+    project_root, board_dir, tasks_dir = _board_context()
 
     task_file = find_task_file(tasks_dir, task_id)
     if not task_file:
@@ -269,15 +262,13 @@ def handle_board_update(
     Path(task_file).write_text(render_task_file(task), encoding="utf-8")
 
     board = load_board(board_dir)
-    persist_board(board, board_dir, tasks_dir)
+    with_board_lock(board_dir, lambda: persist_board(board, board_dir, tasks_dir))
 
     log.success(f"Updated {task_id}")
 
 
 def handle_board_block(task_id: str, reason: str) -> None:
-    project_root = find_project_root() or Path.cwd()
-    board_dir = get_board_dir(project_root)
-    tasks_dir = get_tasks_dir(project_root)
+    project_root, board_dir, tasks_dir = _board_context()
 
     task_file = find_task_file(tasks_dir, task_id)
     if not task_file:
@@ -296,15 +287,13 @@ def handle_board_block(task_id: str, reason: str) -> None:
     Path(task_file).write_text(render_task_file(task), encoding="utf-8")
 
     board = load_board(board_dir)
-    persist_board(board, board_dir, tasks_dir)
+    with_board_lock(board_dir, lambda: persist_board(board, board_dir, tasks_dir))
 
     log.warn(f"{task_id} marked as blocked: {reason}")
 
 
 def handle_board_unblock(task_id: str) -> None:
-    project_root = find_project_root() or Path.cwd()
-    board_dir = get_board_dir(project_root)
-    tasks_dir = get_tasks_dir(project_root)
+    project_root, board_dir, tasks_dir = _board_context()
 
     task_file = find_task_file(tasks_dir, task_id)
     if not task_file:
@@ -321,14 +310,13 @@ def handle_board_unblock(task_id: str) -> None:
     Path(task_file).write_text(render_task_file(task), encoding="utf-8")
 
     board = load_board(board_dir)
-    persist_board(board, board_dir, tasks_dir)
+    with_board_lock(board_dir, lambda: persist_board(board, board_dir, tasks_dir))
 
     log.success(f"{task_id} unblocked")
 
 
 def handle_board_deps(task_id: str) -> None:
-    project_root = find_project_root() or Path.cwd()
-    tasks_dir = get_tasks_dir(project_root)
+    project_root, board_dir, tasks_dir = _board_context()
 
     tasks = load_all_tasks(tasks_dir)
     task_map: dict[str, Task] = {t.id: t for t in tasks}
@@ -364,9 +352,7 @@ def handle_board_deps(task_id: str) -> None:
 
 
 def handle_board_stats() -> None:
-    project_root = find_project_root() or Path.cwd()
-    board_dir = get_board_dir(project_root)
-    tasks_dir = get_tasks_dir(project_root)
+    project_root, board_dir, tasks_dir = _board_context()
 
     board = load_board(board_dir)
     recalc_stats(board, tasks_dir)
@@ -393,9 +379,7 @@ def handle_board_stats() -> None:
 
 
 def handle_board_archive() -> None:
-    project_root = find_project_root() or Path.cwd()
-    board_dir = get_board_dir(project_root)
-    tasks_dir = get_tasks_dir(project_root)
+    project_root, board_dir, tasks_dir = _board_context()
 
     board = load_board(board_dir)
     done_ids = board.columns["done"]
@@ -421,7 +405,68 @@ def handle_board_archive() -> None:
         archived += 1
 
     board.columns["done"] = []
-    persist_board(board, board_dir, tasks_dir)
+    with_board_lock(board_dir, lambda: persist_board(board, board_dir, tasks_dir))
 
     relative = os.path.relpath(archive_dir, str(project_root))
     log.success(f"Archived {archived} done task(s) to {relative}")
+
+
+def handle_board_search(
+    query: str,
+    *,
+    priority: str | None = None,
+    column: str | None = None,
+    scope: str | None = None,
+    agent: str | None = None,
+    tags: str | None = None,
+) -> list[Task]:
+    """Search and filter board tasks by criteria.
+
+    Returns matching tasks (also prints them to console).
+    """
+    project_root, board_dir, tasks_dir = _board_context()
+
+    all_tasks = load_all_tasks(tasks_dir)
+    results = all_tasks
+
+    # Text search across task titles (case-insensitive)
+    if query and query.strip():
+        q = query.lower()
+        results = [t for t in results if q in t.title.lower()]
+
+    # Filter by priority
+    if priority:
+        results = [t for t in results if t.priority == priority]
+
+    # Filter by column
+    if column:
+        results = [t for t in results if t.column == column]
+
+    # Filter by scope
+    if scope:
+        results = [t for t in results if scope in t.scopes]
+
+    # Filter by assigned agent
+    if agent:
+        results = [t for t in results if t.assigned == agent]
+
+    # Filter by tags (comma-separated -- task must have ALL specified tags)
+    if tags:
+        required_tags = [s.strip() for s in tags.split(",")]
+        results = [t for t in results if all(tag in t.tags for tag in required_tags)]
+
+    # Print results
+    if not results:
+        log.info("No tasks match the given criteria.")
+        return results
+
+    log.header(f"Search Results ({len(results)} task{'s' if len(results) != 1 else ''})")
+    for t in results:
+        parts = [t.id, t.title, f"[{t.column}]", t.priority]
+        if t.assigned:
+            parts.append(f"@{t.assigned}")
+        if t.tags:
+            parts.append(f"#{','.join(t.tags)}")
+        console.print(f"  {'  '.join(parts)}")
+
+    return results

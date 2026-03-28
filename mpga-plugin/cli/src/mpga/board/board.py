@@ -15,6 +15,8 @@ from mpga.board.task import (
     task_filename,
 )
 
+WIP_LIMITS_DEFAULT: dict[str, int] = {"in-progress": 3, "testing": 3, "review": 2}
+
 
 @dataclass
 class BoardLane:
@@ -77,11 +79,7 @@ class BoardState:
         "done": [],
     })
     stats: BoardStats = field(default_factory=BoardStats)
-    wip_limits: dict[str, int] = field(default_factory=lambda: {
-        "in-progress": 3,
-        "testing": 3,
-        "review": 2,
-    })
+    wip_limits: dict[str, int] = field(default_factory=lambda: dict(WIP_LIMITS_DEFAULT))
     next_task_id: int = 1
     lanes: dict[str, BoardLane] = field(default_factory=dict)
     active_runs: dict[str, BoardRun] = field(default_factory=dict)
@@ -131,7 +129,7 @@ def create_empty_board() -> BoardState:
             "evidence_produced": 0,
             "evidence_expected": 0,
         },
-        "wip_limits": {"in-progress": 3, "testing": 3, "review": 2},
+        "wip_limits": dict(WIP_LIMITS_DEFAULT),
         "next_task_id": 1,
     })
 
