@@ -56,9 +56,9 @@ mpga-plugin/spoke/.server.log
 # Runtime symlinks (regenerated)
 .mpga-runtime/
 
-# Spoke cache
-.mpga/spoke-cache/
+# MPGA user cache (spoke-cache, session data, future caches)
+.mpga/
 
-# Audio files (voice samples, not source)
+# Audio files (generated voice samples, not source)
 *.mp3
 *.wav
