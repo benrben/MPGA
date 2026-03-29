@@ -78,6 +78,10 @@ _COMMANDS: dict[str, tuple[str, str]] = {
     # PR & decisions
     "pr":         ("mpga.commands.pr", "pr_cmd"),
     "decision":   ("mpga.commands.pr", "decision_cmd"),
+    # UI / design
+    "wireframe":  ("mpga.commands.wireframe", "wireframe_cmd"),
+    "preview":    ("mpga.commands.preview", "preview_cmd"),
+    "design-system": ("mpga.commands.design_system", "design_system"),
     # Voice
     "spoke":      ("mpga.commands.spoke", "spoke_cmd"),
 }

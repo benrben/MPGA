@@ -98,6 +98,15 @@ AGENTS: list[AgentMeta] = [
         sandbox_mode="workspace",
     ),
     AgentMeta(
+        slug="designer",
+        name="mpga-designer",
+        description="Design artifact generator. Produces wireframes, self-contained HTML prototypes, and component specs with an Excalidraw to HTML to SVG to ASCII fallback chain.",  # noqa: E501
+        tier="mid",
+        readonly=False,
+        is_background=False,
+        sandbox_mode="workspace",
+    ),
+    AgentMeta(
         slug="auditor",
         name="mpga-auditor",
         description="Evidence integrity checker. Verifies evidence links resolve, flags stale links, calculates scope health. Read-only \u2014 only flags, never auto-fixes.",  # noqa: E501
@@ -131,6 +140,24 @@ AGENTS: list[AgentMeta] = [
         tier="small",
         readonly=True,
         is_background=False,
+        sandbox_mode="workspace",
+    ),
+    AgentMeta(
+        slug="ui-auditor",
+        name="mpga-ui-auditor",
+        description="Read-only UI quality auditor. Reviews accessibility, responsiveness, keyboard behavior, motion, and design-system compliance with severity-ranked findings.",  # noqa: E501
+        tier="mid",
+        readonly=True,
+        is_background=True,
+        sandbox_mode="none",
+    ),
+    AgentMeta(
+        slug="visual-tester",
+        name="mpga-visual-tester",
+        description="Visual regression checker. Captures localhost screenshots at mobile, tablet, and desktop breakpoints and compares them against baselines.",  # noqa: E501
+        tier="small",
+        readonly=True,
+        is_background=True,
         sandbox_mode="workspace",
     ),
     AgentMeta(
@@ -187,6 +214,10 @@ SKILL_NAMES = [
     "secure",
     "simplify",
     "review-pr",
+    "wireframe",
+    "frontend-design",
+    "ui-audit",
+    "design-system",
 ]
 
 

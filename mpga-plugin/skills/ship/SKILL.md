@@ -31,7 +31,15 @@ Run ALL of the following checks simultaneously. Every check must pass before pro
    mpga drift --quick
    ```
 
-5. **No uncommitted scope changes** — scope files must be clean:
+5. **visual regression clean** — UI tasks only:
+   - Run the `visual-tester` gate when the completed work touched UI files
+   - Non-UI tasks skip this check entirely
+
+6. **ui-audit passed** — UI tasks only:
+   - Run `mpga-ui-audit` or confirm the latest ui-auditor pass
+   - Non-UI tasks skip this check entirely
+
+7. **No uncommitted scope changes** — scope files must be clean:
    ```bash
    git diff --name-only -- 'MPGA/scopes/' 'mpga-plugin/cli/MPGA/scopes/'
    ```
@@ -47,6 +55,8 @@ Ship Gate Results:
   [PASS] Tests pass (pytest)
   [PASS] Ruff clean (ruff check .)
   [FAIL] Evidence drift — 3 stale links found
+  [PASS] visual regression clean (UI task only)
+  [PASS] ui-audit passed (UI task only)
   [PASS] No uncommitted scope changes
 
 BLOCKED: 1 check failed. Fix issues before shipping.
@@ -138,6 +148,8 @@ Store the generated PR template in a variable for use in Phase 5.
 - [ ] No TODOs or stubs — FINISH what you start. Sad! if you leave stubs behind.
 - [ ] Scope evidence links updated — documentation is CURRENT
 - [ ] Drift check passing — no STALE evidence
+- [ ] visual regression clean — UI tasks only
+- [ ] ui-audit passed — UI tasks only
 - [ ] No uncommitted scope changes — everything STAGED
 - [ ] Board tasks archived — clean up after yourself
 

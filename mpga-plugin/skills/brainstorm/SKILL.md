@@ -25,16 +25,26 @@ description: Socratic design refinement before writing any code — we THINK bef
    - "Are there existing patterns in the codebase we should follow? We don't reinvent wheels."
    - "What are the edge cases and failure modes? Where could this go WRONG?"
 
+### Phase 1.5: Wireframe
+
+3. Before exploring implementation alternatives, add a visual checkpoint:
+   - Spawn the `designer` agent for a wireframe pass
+   - Use the `mpga-wireframe` skill for execution details
+   - Generate one wireframe per screen
+   - Require human approval before continuing to Phase 2
+
+This is additive only. The existing brainstorm flow stays intact — we simply add a wireframe gate between Clarify and Explore.
+
 ### Phase 2: Explore Alternatives
 
-3. Before converging on any design, explore at least 2-3 alternative approaches:
+4. Before converging on any design, explore at least 2-3 alternative approaches:
    - For each alternative, cite existing code or scope docs that support it: `[E] path/to/file:line — why this pattern applies`
    - Identify trade-offs: complexity, performance, maintainability, alignment with existing architecture
    - "What if we did it THIS way instead? Here's the evidence for why it could work..."
 
 ### Phase 3: Challenge Assumptions
 
-4. Stress-test the leading design candidate — build the wall between modules!
+5. Stress-test the leading design candidate — build the wall between modules!
    - "What assumption are we making that could be WRONG?"
    - "What happens at 10x scale? At 100x?"
    - "Which dependency could break this? What's the blast radius?"
@@ -42,14 +52,14 @@ description: Socratic design refinement before writing any code — we THINK bef
 
 ### Phase 4: Converge on Design
 
-5. Present the design in digestible sections — one at a time, like a GREAT presentation:
+6. Present the design in digestible sections — one at a time, like a GREAT presentation:
    - User experience / API shape
    - Data model changes
    - Integration points
    - Security considerations — NON-NEGOTIABLE
    - Testing approach — Uncle Bob's TDD, always
 
-6. Get explicit sign-off on each section before proceeding:
+7. Get explicit sign-off on each section before proceeding:
    - "Does this match your intent? Any changes before we continue?"
 
 ## Evidence-Grounded Design
@@ -127,7 +137,7 @@ Keep the message under 280 characters. This plays the result in Trump's voice �
 - Present one section at a time, get approval, then proceed — no overwhelming
 - Save DESIGN.md before creating milestone or tasks
 - Every design decision MUST cite at least one `[E]` evidence link — no evidence, no decision
-- Follow the four Socratic phases in order: Clarify, Explore, Challenge, Converge
+- Follow the phases in order: Clarify, Wireframe, Explore, Challenge, Converge
 
 ## Output
 - Approved DESIGN.md in the milestone directory (using the structured template above)

@@ -52,7 +52,14 @@ For each task in `todo` column (or a specified task):
      mpga spoke 'GREEN phase done. All tests passing. Minimal code. Blue-dev, clean it up.'
      ```
 
-4. **blue-dev phase** — make it CLEAN:
+4. **visual-tester gate** — check the UI before refactoring:
+   - Only trigger this step for tasks with UI-related scope tags
+   - Spawn `visual-tester` after GREEN and before BLUE
+   - Visual regression FAIL blocks the blue phase
+   - Human approval may explicitly accept a diff and unblock progress
+   - If Playwright is not installed or no baseline exists, skip gracefully and record the reason
+
+5. **blue-dev phase** — make it CLEAN:
    - Spawn `blue-dev` agent with passing tests + implementation
    - blue-dev refactors BOTH production code and test code (without changing assertions)
    - Wait for confirmation: tests still passing after refactor — ALWAYS GREEN
@@ -61,7 +68,7 @@ For each task in `todo` column (or a specified task):
      mpga spoke 'BLUE phase done. Clean code. Tests still green. Reviewer, you are up.'
      ```
 
-5. **reviewer phase** — the FINAL inspection:
+6. **reviewer phase** — the FINAL inspection:
    - Spawn `reviewer` agent — two-stage review (including testability + degenerate case checks)
    - If CRITICAL issues: loop back to appropriate phase — no shortcuts
    - If approved: announce then proceed to VICTORY:
@@ -70,17 +77,17 @@ For each task in `todo` column (or a specified task):
      ```
    - Reserve `verifier` for milestone boundaries, risky tasks, or explicit `/mpga:verify` runs. Don't run the full gate on every tiny change.
 
-6. **Record evidence** — Evidence First, document our WIN:
+7. **Record evidence** — Evidence First, document our WIN:
    ```
    mpga board update <id> --evidence-add "<[E] link>"
    ```
 
-7. **Move to done** — MISSION ACCOMPLISHED:
+8. **Move to done** — MISSION ACCOMPLISHED:
    ```
    mpga board move <id> done
    ```
 
-8. **Drift check** (also triggered automatically by hook after each write):
+9. **Drift check** (also triggered automatically by hook after each write):
    ```
    mpga drift --quick
    ```

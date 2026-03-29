@@ -155,7 +155,15 @@ Write the full task breakdown into `MPGA/milestones/<id>/PLAN.md` with:
 
 A COMPREHENSIVE battle plan.
 
-### Step 10: Show the board
+### Step 10: Optional prototype gate
+
+After the plan is approved, add a prototype checkpoint for UI work:
+- Spawn `designer` for an HTML prototype
+- Serve it locally with `mpga preview`
+- Require human approval of the visual before TDD begins
+- If the milestone has no UI work, skip this step entirely
+
+### Step 11: Show the board
 
 ```
 mpga board show

@@ -96,6 +96,11 @@ def render_index_md(
         '| "fix bug in X" | scout \u2192 red-dev \u2192 green-dev | (auto-detect) |'
     )
     lines.append('| "refactor X" | architect \u2192 blue-dev | (auto-detect) |')
+    lines.append('| "design/wireframe feature X" | designer | (auto-detect) |')
+    lines.append('| "audit UI of X" | ui-auditor | (auto-detect) |')
+    lines.append('| "check visual regression" | visual-tester | (auto-detect) |')
+    lines.append('| "create design system" | designer \u2192 ui-auditor | (auto-detect) |')
+    lines.append('| "frontend design for X" | mpga-frontend-design | (auto-detect) |')
     lines.append("")
 
     lines.append("## Scope registry")

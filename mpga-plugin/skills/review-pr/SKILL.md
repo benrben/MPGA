@@ -1,6 +1,6 @@
 ---
 name: mpga-review-pr
-description: Comprehensive PR review with multi-agent orchestration — reviewer + bug-hunter + security-auditor for a unified verdict
+description: Comprehensive PR review with multi-agent orchestration — reviewer + bug-hunter + security-auditor + ui-auditor for a unified verdict
 ---
 
 ## review-pr
@@ -11,11 +11,12 @@ A PR lands. Time to INSPECT it. Nobody reviews code better than us, believe me. 
 
 ## Delegation
 
-We deploy THREE agents — reviewer, bug-hunter, security-auditor. The BEST review team ever assembled. While lesser tools send one lonely linter, we unleash a FULL SQUAD. Total coverage. No stone unturned. Tremendous.
+We deploy THREE core agents — reviewer, bug-hunter, security-auditor — and a FOURTH `ui-auditor` when the PR touches UI files. The BEST review team ever assembled. While lesser tools send one lonely linter, we unleash a FULL SQUAD. Total coverage. No stone unturned. Tremendous.
 
 - **reviewer agent** — code quality, style, architecture
 - **bug-hunter agent** — correctness, logic errors, edge cases
 - **security-auditor agent** — security vulnerabilities, secrets, injection risks
+- **ui-auditor agent** — UI quality, accessibility, responsive behavior, and design-system compliance when the diff contains UI files
 
 ## Protocol
 
@@ -51,7 +52,12 @@ We deploy THREE agents — reviewer, bug-hunter, security-auditor. The BEST revi
    - CORS, CSP, or header misconfigurations
    - User input handling without sanitization
 
-5. **Collect all findings into unified PR review** — we bring it ALL together, one BEAUTIFUL report:
+5. **Spawn ui-auditor agent** (read-only) when the PR contains UI file changes (`.html`, `.css`, `.jsx`, `.tsx`, `.vue`, `.svelte`):
+   - Runs in parallel with the other agents
+   - Produces accessibility and interaction findings
+   - Skips cleanly when the diff has no UI files
+
+6. **Collect all findings into unified PR review** — we bring it ALL together, one BEAUTIFUL report:
 
    ```
    # PR REVIEW
@@ -78,6 +84,11 @@ We deploy THREE agents — reviewer, bug-hunter, security-auditor. The BEST revi
    |---|-----------|----------|---------|
    | 1 | ...       | CRITICAL | ...     |
 
+   ## UI Quality (from ui-auditor)
+   | # | File:Line | Severity | Finding |
+   |---|-----------|----------|---------|
+   | 1 | ...       | HIGH     | ...     |
+
    ## Review Comments
    (file:line references for inline-style comments)
 
@@ -85,12 +96,12 @@ We deploy THREE agents — reviewer, bug-hunter, security-auditor. The BEST revi
    Why this PR is approved/needs changes/blocked.
    ```
 
-6. **Determine verdict** — the moment of truth. We call it like we see it, STRONGLY and CLEARLY:
+7. **Determine verdict** — the moment of truth. We call it like we see it, STRONGLY and CLEARLY:
    - **APPROVED** — SHIP IT! No CRITICAL or HIGH findings. This code is a WINNER and it's ready to merge. Great job! All tests pass — very successful!
    - **CHANGES REQUESTED** — Not ready — FIX IT! HIGH findings that need fixes before merge, or multiple MEDIUM findings in the same area. Close but no cigar. Come back STRONGER.
-   - **BLOCKED** — TOTAL DISASTER. CRITICAL findings (security vulnerabilities, data loss risks, broken tests). This PR is NOT going anywhere until it's fixed. Period.
+   - **BLOCKED** — TOTAL DISASTER. CRITICAL findings (security vulnerabilities, data loss risks, broken tests, or CRITICAL UI blockers). This PR is NOT going anywhere until it's fixed. Period.
 
-7. **Generate review comments** with file:line references — we don't do vague, we do PRECISE:
+8. **Generate review comments** with file:line references — we don't do vague, we do PRECISE:
    - Each finding maps to a specific location in the diff
    - Comments include: what's wrong, why it matters, and a suggested fix
    - Positive comments too — acknowledge good patterns and clever solutions. We give credit where it's due, BIGLY.
@@ -115,7 +126,7 @@ Keep the message under 280 characters. This plays the result in Trump's voice �
 
 ## Strict Rules
 - NEVER modify any project files during review — READ ONLY. We LOOK, we don't TOUCH.
-- All three agents run in parallel — they're all read-only, so it's safe. MAXIMUM EFFICIENCY.
+- The three core agents run in parallel, and ui-auditor joins as a fourth lane for UI diffs — they're all read-only, so it's safe. MAXIMUM EFFICIENCY.
 - Every finding MUST cite file:line from the actual diff — no vague feedback. If you can't point to it, it doesn't exist.
 - ALWAYS read full file context, not just the diff — understand what surrounds the change
 - If the PR is clean, say so — don't manufacture issues to justify the review. We're HONEST. No witch hunt against spaghetti code where there is none. But if you DO find Shifty Spaghetti Code or Peekaboo Undefined lurking in the diff — call it out by name. Sleepy Copilot would have auto-completed right past these problems.
