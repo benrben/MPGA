@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import sqlite3
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
@@ -91,12 +92,56 @@ def _now_iso() -> str:
     return datetime.now(UTC).isoformat()
 
 
+def _empty_columns() -> dict[str, list[str]]:
+    return {
+        "backlog": [],
+        "todo": [],
+        "in-progress": [],
+        "testing": [],
+        "review": [],
+        "done": [],
+    }
+
+
 def load_board(board_dir: str) -> BoardState:
     board_path = Path(board_dir) / "board.json"
     if not board_path.exists():
         return create_empty_board()
     raw = json.loads(board_path.read_text(encoding="utf-8"))
     return _normalize_board_state(raw)
+
+
+def load_board_from_db(conn: sqlite3.Connection) -> BoardState:
+    """Load a BoardState from the SQLite database.
+
+    Reads the milestone from the ``board`` key-value table and task IDs from
+    the ``tasks`` table, distributing each task into its ``column_`` bucket.
+    Both tables are optional — missing tables are silently ignored and the
+    corresponding fields fall back to their ``create_empty_board()`` defaults.
+    """
+    milestone: str | None = None
+    try:
+        row = conn.execute(
+            "SELECT value FROM board WHERE key = 'milestone'"
+        ).fetchone()
+        if row is not None:
+            milestone = row[0]
+    except sqlite3.OperationalError:
+        pass
+
+    columns = _empty_columns()
+    try:
+        rows = conn.execute("SELECT id, column_ FROM tasks").fetchall()
+        for task_id, column in rows:
+            if column in columns:
+                columns[column].append(task_id)
+    except sqlite3.OperationalError:
+        pass
+
+    board = create_empty_board()
+    board.milestone = milestone
+    board.columns = columns
+    return board
 
 
 def save_board(board_dir: str, state: BoardState) -> None:
@@ -239,14 +284,7 @@ def recalc_stats(
     )
 
     # Rebuild columns
-    columns: dict[str, list[str]] = {
-        "backlog": [],
-        "todo": [],
-        "in-progress": [],
-        "testing": [],
-        "review": [],
-        "done": [],
-    }
+    columns = _empty_columns()
     for task in tasks:
         if task.column in columns:
             columns[task.column].append(task.id)
