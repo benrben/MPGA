@@ -232,6 +232,47 @@ CREATE TABLE IF NOT EXISTS ctx_events (
     indexed_count INT DEFAULT 0
 );
 
+-- Observations
+CREATE TABLE IF NOT EXISTS observations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id TEXT,
+    scope_id TEXT,
+    title TEXT NOT NULL,
+    type TEXT NOT NULL,
+    narrative TEXT,
+    facts TEXT,
+    concepts TEXT,
+    files_read TEXT,
+    files_modified TEXT,
+    tool_name TEXT,
+    priority INTEGER DEFAULT 2,
+    evidence_links TEXT,
+    data_hash TEXT,
+    created_at TEXT NOT NULL
+);
+
+-- Observation queue
+CREATE TABLE IF NOT EXISTS observation_queue (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id TEXT,
+    tool_name TEXT,
+    tool_input TEXT,
+    tool_output TEXT,
+    created_at TEXT NOT NULL,
+    processed INTEGER DEFAULT 0
+);
+
+-- Indexed external content (web pages, docs, etc.)
+CREATE TABLE IF NOT EXISTS indexed_content (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    url TEXT NOT NULL,
+    title TEXT,
+    content TEXT,
+    content_type TEXT,
+    fetched_at TEXT,
+    content_hash TEXT
+);
+
 -- Schema version tracking
 CREATE TABLE IF NOT EXISTS schema_version (
     version INT PRIMARY KEY,
@@ -280,6 +321,112 @@ CREATE VIRTUAL TABLE IF NOT EXISTS ctx_artifacts_fts USING fts5(
     source, content, summary,
     content=ctx_artifacts, content_rowid=id
 );
+
+CREATE VIRTUAL TABLE IF NOT EXISTS observations_fts USING fts5(
+    title, narrative, facts, concepts,
+    content=observations, content_rowid=id,
+    tokenize=porter
+);
+
+CREATE VIRTUAL TABLE IF NOT EXISTS observations_trigram USING fts5(
+    title, narrative, facts,
+    tokenize="trigram"
+);
+
+CREATE VIRTUAL TABLE IF NOT EXISTS tasks_trigram USING fts5(
+    title, body,
+    tokenize="trigram"
+);
+
+CREATE VIRTUAL TABLE IF NOT EXISTS scopes_trigram USING fts5(
+    name, summary, content,
+    tokenize="trigram"
+);
+
+CREATE VIRTUAL TABLE IF NOT EXISTS evidence_trigram USING fts5(
+    raw, filepath, symbol, description,
+    tokenize="trigram"
+);
+
+CREATE VIRTUAL TABLE IF NOT EXISTS symbols_trigram USING fts5(
+    name, type, filepath,
+    tokenize="trigram"
+);
+
+CREATE VIRTUAL TABLE IF NOT EXISTS decisions_trigram USING fts5(
+    title, content,
+    tokenize="trigram"
+);
+
+CREATE VIRTUAL TABLE IF NOT EXISTS events_trigram USING fts5(
+    event_type, entity_type, action,
+    input_summary, output_summary,
+    tokenize="trigram"
+);
+
+CREATE VIRTUAL TABLE IF NOT EXISTS global_trigram USING fts5(
+    entity_type, entity_id, title, content,
+    tokenize="trigram"
+);
+
+CREATE VIRTUAL TABLE IF NOT EXISTS ctx_artifacts_trigram USING fts5(
+    source, content, summary,
+    tokenize="trigram"
+);
+
+CREATE VIRTUAL TABLE IF NOT EXISTS indexed_content_fts USING fts5(
+    url, title, content,
+    content=indexed_content, content_rowid=id,
+    tokenize=porter
+);
+
+CREATE VIRTUAL TABLE IF NOT EXISTS indexed_content_trigram USING fts5(
+    url, title, content,
+    tokenize="trigram"
+);
+"""
+
+
+_FTS_TRIGGERS = """
+CREATE TRIGGER IF NOT EXISTS observations_ai AFTER INSERT ON observations BEGIN
+    INSERT INTO observations_fts(rowid, title, narrative, facts, concepts)
+    VALUES (new.id, new.title, new.narrative, new.facts, new.concepts);
+END;
+
+CREATE TRIGGER IF NOT EXISTS observations_ad AFTER DELETE ON observations BEGIN
+    INSERT INTO observations_fts(observations_fts, rowid, title, narrative, facts, concepts)
+    VALUES('delete', old.id, old.title, old.narrative, old.facts, old.concepts);
+END;
+
+CREATE TRIGGER IF NOT EXISTS observations_au AFTER UPDATE ON observations BEGIN
+    INSERT INTO observations_fts(observations_fts, rowid, title, narrative, facts, concepts)
+    VALUES('delete', old.id, old.title, old.narrative, old.facts, old.concepts);
+    INSERT INTO observations_fts(rowid, title, narrative, facts, concepts)
+    VALUES (new.id, new.title, new.narrative, new.facts, new.concepts);
+END;
+
+CREATE TRIGGER IF NOT EXISTS observations_trigram_ai AFTER INSERT ON observations BEGIN
+    INSERT INTO observations_trigram(title, narrative, facts)
+    VALUES (new.title, new.narrative, new.facts);
+END;
+
+CREATE TRIGGER IF NOT EXISTS observations_trigram_ad AFTER DELETE ON observations BEGIN
+    DELETE FROM observations_trigram WHERE rowid = (
+        SELECT rowid FROM observations_trigram
+        WHERE title = old.title AND narrative = old.narrative AND facts = old.facts
+        LIMIT 1
+    );
+END;
+
+CREATE TRIGGER IF NOT EXISTS observations_trigram_au AFTER UPDATE ON observations BEGIN
+    DELETE FROM observations_trigram WHERE rowid = (
+        SELECT rowid FROM observations_trigram
+        WHERE title = old.title AND narrative = old.narrative AND facts = old.facts
+        LIMIT 1
+    );
+    INSERT INTO observations_trigram(title, narrative, facts)
+    VALUES (new.title, new.narrative, new.facts);
+END;
 """
 
 
@@ -288,6 +435,7 @@ def create_schema(conn: sqlite3.Connection) -> None:
     # Always run CREATE IF NOT EXISTS to backfill newly added objects safely.
     conn.executescript(_CORE_TABLES)
     conn.executescript(_FTS5_TABLES)
+    conn.executescript(_FTS_TRIGGERS)
 
     conn.execute(
         "INSERT OR IGNORE INTO schema_version (version, applied_at, description) "

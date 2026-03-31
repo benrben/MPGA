@@ -85,6 +85,18 @@ class _ApiHandler(SimpleHTTPRequestHandler):
         finally:
             conn.close()
 
+        if result.get("content_type") == "text/event-stream":
+            body = result["body"].encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "text/event-stream; charset=utf-8")
+            self.send_header("Cache-Control", "no-cache")
+            self.send_header("Connection", "keep-alive")
+            self.send_header("Content-Length", str(len(body)))
+            self._send_security_headers()
+            self.end_headers()
+            self.wfile.write(body)
+            return
+
         status = 200 if "error" not in result else 400
         self._send_json(result, status=status)
 
@@ -136,6 +148,16 @@ class _ApiHandler(SimpleHTTPRequestHandler):
             return _api.handle_stats(conn)
         if handler_name == "health":
             return _api.handle_health(conn)
+        if handler_name == "observations":
+            return _api.handle_observations(conn, query_params)
+        if handler_name == "observation_detail":
+            return _api.handle_observation_detail(conn, path_params["obs_id"])
+        if handler_name == "observations_search":
+            return _api.handle_observations_search(conn, query_params)
+        if handler_name == "observations_timeline":
+            return _api.handle_observations_timeline(conn, query_params)
+        if handler_name == "stream":
+            return _api.handle_stream(conn, query_params)
         return {"error": "unknown handler"}
 
     # ------------------------------------------------------------------
@@ -247,7 +269,16 @@ def serve_cmd(port: int, open_browser: bool, db: str | None) -> None:
     if open_browser:
         _open_url(url)
 
+    from mpga.memory.worker import ObservationWorker
+
+    conn = get_connection(db)
+    worker = ObservationWorker(conn, session_id="serve", batch_size=50, poll_interval=2.0)
+    worker_thread = worker.start()
+    click.echo("Observation worker started (daemon thread)")
+
     try:
         server.serve_forever()
     except KeyboardInterrupt:
+        worker.stop()
+        conn.close()
         click.echo("\nServer stopped.")

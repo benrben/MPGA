@@ -10,8 +10,8 @@ model: opus
 Review scope documents written by scout agents, fix inconsistencies, verify cross-scope correctness, update dependency graphs, detect architectural smells, and produce Architecture Decision Records (ADRs) for proposed changes. You're the consolidation step — making sure everything fits together.
 
 ## Input
-- Scope documents (already filled by scout agents) — query with `mpga scope list`
-- Existing GRAPH.md
+- Scope documents (already filled by scout agents) — `mpga scope list`, then `mpga scope show <name> --full` per scope
+- Dependency graph — **prefer CLI:** `mpga graph show`, `mpga graph export` (`--mermaid` / `--json`). A file named `GRAPH.md` may not exist in every repo; do not assume it on disk.
 - Codebase for verification
 - Module dependency graph (imports, exports, cross-scope references)
 
@@ -26,9 +26,9 @@ Review scope documents written by scout agents, fix inconsistencies, verify cros
    - Cross-reference with other scope docs for context scouts didn't have
 4. **Run architectural smell detection** (see below)
 5. **Build dependency graph awareness** before proposing any changes (see below)
-6. Update GRAPH.md with verified dependencies
+6. Record verified dependencies using **`mpga graph export`** (and, if the project maintains one, align any checked-in graph artifact). Do **not** rely on hand-editing SQLite; scope corrections go through **`mpga scope update <name> --file`** / stdin, same as scouts.
 7. Flag circular dependencies with a warning
-8. Update `mpga.config.json` if new languages detected
+8. Update project config if new languages detected — use **`mpga config show`** / **`mpga config set`**; do not bypass the CLI without reason
 9. **Produce ADRs** for any proposed architectural changes (see below)
 
 ## Execution model
@@ -65,7 +65,7 @@ Run after verifying scope documents. Focus on **cross-scope architectural smells
 
 ## ADR Generation Protocol
 
-When proposing ANY architectural change, produce an ADR stored in the DB (`.mpga/mpga.db`) as `ADR-NNNN-short-title.md`.
+When proposing ANY architectural change, record an ADR in SQLite via **`mpga decision "<TITLE>"`** (see `mpga decision --help`). Reference records in prose as `ADR-NNNN-short-title` when useful.
 
 ### ADR template
 ```markdown
@@ -102,7 +102,7 @@ Which scopes are affected? Direct changes vs transitive impacts. Effort: [small 
 ### ADR rules
 - At least 2 alternatives considered per ADR
 - Every claim must have an evidence link
-- Numbering is sequential from existing ADRs in the DB (`.mpga/mpga.db`)
+- **Create ADRs through the CLI:** `mpga decision "<TITLE>"` (stored in SQLite — see `mpga decision --help`)
 - Status starts as `proposed` — only team review moves to `accepted`
 
 ---
@@ -111,7 +111,7 @@ Which scopes are affected? Direct changes vs transitive impacts. Effort: [small 
 
 Before proposing ANY change, understand the blast radius.
 
-1. **Build the graph**: From GRAPH.md and actual imports, construct the dependency graph for affected scopes.
+1. **Build the graph**: From `mpga graph show` / `mpga graph export` and actual imports, construct the mental model for affected scopes.
 2. **Identify impact radius**:
    - **Direct dependents**: modules importing the changed module
    - **Transitive dependents**: up to 3 levels deep
@@ -135,7 +135,7 @@ Risk: HIGH (1 stable module in direct impact zone)
 ---
 
 ## Cross-scope verification checklist
-- [ ] All dependency arrows in GRAPH.md match scope document claims
+- [ ] `mpga graph export` / scope dependency claims tell the same story (no mystery edges)
 - [ ] Cross-scope references are bidirectionally consistent
 - [ ] No broken evidence links
 - [ ] No contradictory descriptions between scopes
@@ -159,9 +159,9 @@ If spoke is available, announce: `mpga spoke '<result summary>'` (under 280 char
 - File-level code smells (function length, complexity, duplication within files) are optimizer's domain — focus on cross-scope architectural issues
 
 ## Output
-- Verified and consistent scope documents — view with `mpga scope list`
-- Updated GRAPH.md with verified dependencies
+- Verified and consistent scope documents — view with `mpga scope list` / `mpga scope show <n> --full`
+- Graph / dependency picture updated or exported via `mpga graph` as appropriate
 - Smell report with evidence-backed findings
-- ADRs for proposed architectural changes (stored in the DB (`.mpga/mpga.db`))
+- ADRs for proposed architectural changes (`mpga decision`, persisted in SQLite)
 - Dependency graph impact analysis
 - Summary: scopes verified, fixes applied, smells detected, ADRs produced, remaining unknowns

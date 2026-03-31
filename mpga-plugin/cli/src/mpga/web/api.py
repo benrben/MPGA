@@ -9,6 +9,14 @@ from mpga.db.repos.tasks import TaskRepo
 from mpga.db.repos.scopes import ScopeRepo
 from mpga.db.repos.evidence import EvidenceRepo
 from mpga.db.repos.milestones import MilestoneRepo
+from mpga.web.api_observations import (
+    _obs_to_dict,
+    handle_observations,
+    handle_observation_detail,
+    handle_observations_search,
+    handle_observations_timeline,
+    handle_stream,
+)
 
 
 def _task_to_dict(task: Any) -> dict:

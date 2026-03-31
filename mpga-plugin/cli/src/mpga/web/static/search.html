@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Search — MPGA</title>
+  <link rel="stylesheet" href="tokens.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: var(--font-sans);
+      background: var(--color-bg);
+      color: var(--color-ink);
+    }
+
+    .search-header {
+      padding: var(--space-lg) var(--space-xl);
+      border-bottom: 1px solid var(--color-border);
+      background: var(--color-panel);
+    }
+
+    .search-header h1 { margin: 0; font-size: var(--text-xl); }
+
+    .search-bar {
+      max-width: 720px;
+      margin: var(--space-xl) auto 0;
+      padding: 0 var(--space-md);
+      position: relative;
+    }
+
+    .search-input-wrapper {
+      display: flex;
+      align-items: center;
+      background: var(--color-panel);
+      border: 2px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-sm) var(--space-md);
+      transition: border-color 0.15s ease;
+    }
+
+    .search-input-wrapper:focus-within {
+      border-color: var(--color-accent);
+    }
+
+    #search-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: var(--text-base);
+      font-family: var(--font-sans);
+      background: transparent;
+      color: var(--color-ink);
+    }
+
+    .keyboard-hint {
+      font-size: var(--text-xs);
+      color: var(--color-muted);
+      background: var(--color-bg);
+      padding: 2px 6px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--color-border);
+      white-space: nowrap;
+    }
+
+    .search-layout {
+      max-width: 960px;
+      margin: var(--space-lg) auto;
+      padding: 0 var(--space-md);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-lg);
+    }
+
+    @media (max-width: 640px) {
+      .search-layout { grid-template-columns: 1fr; }
+    }
+
+    .search-results {
+      min-height: 200px;
+    }
+
+    .search-results h2 {
+      font-size: var(--text-sm);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-muted);
+      margin: 0 0 var(--space-md);
+    }
+
+    .result-item {
+      background: var(--color-panel);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-md);
+      margin-bottom: var(--space-sm);
+      cursor: pointer;
+      transition: border-color 0.12s ease;
+    }
+
+    .result-item:hover,
+    .result-item.active {
+      border-color: var(--color-accent);
+    }
+
+    .result-title {
+      font-weight: 600;
+      margin-bottom: var(--space-xs);
+    }
+
+    .result-snippet {
+      font-size: var(--text-sm);
+      color: var(--color-muted);
+      line-height: 1.4;
+    }
+
+    .result-detail {
+      background: var(--color-panel);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-lg);
+      min-height: 200px;
+    }
+
+    .result-detail.hidden { display: none; }
+
+    .detail-title {
+      font-size: var(--text-lg);
+      font-weight: 600;
+      margin: 0 0 var(--space-sm);
+    }
+
+    .detail-meta {
+      font-size: var(--text-xs);
+      color: var(--color-muted);
+      margin-bottom: var(--space-md);
+    }
+
+    .detail-body {
+      font-size: var(--text-base);
+      line-height: 1.6;
+    }
+
+    .detail-placeholder {
+      color: var(--color-muted);
+      text-align: center;
+      padding: var(--space-2xl) 0;
+    }
+
+    .empty-results {
+      text-align: center;
+      padding: var(--space-2xl);
+      color: var(--color-muted);
+    }
+  </style>
+</head>
+<body>
+  <header class="search-header">
+    <h1>Search Observations</h1>
+  </header>
+
+  <div class="search-bar">
+    <div class="search-input-wrapper">
+      <input
+        id="search-input"
+        type="search"
+        placeholder="Search observations…"
+        autocomplete="off"
+      >
+      <span class="keyboard-hint">⌘K</span>
+    </div>
+  </div>
+
+  <div class="search-layout">
+    <section class="search-results" id="search-results">
+      <h2>Results</h2>
+      <div id="results-list">
+        <div class="empty-results">Type to search</div>
+      </div>
+    </section>
+
+    <aside class="result-detail hidden" id="result-detail">
+      <div class="detail-placeholder">Select a result to view details</div>
+    </aside>
+  </div>
+
+  <script>
+    (function () {
+      const input = document.getElementById("search-input");
+      const resultsList = document.getElementById("results-list");
+      const detailPanel = document.getElementById("result-detail");
+      let debounceTimer = null;
+
+      document.addEventListener("keydown", function (e) {
+        if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+          e.preventDefault();
+          input.focus();
+        }
+      });
+
+      function showDetail(obs) {
+        detailPanel.classList.remove("hidden");
+        detailPanel.innerHTML = [
+          '<h3 class="detail-title">' + esc(obs.title) + "</h3>",
+          '<div class="detail-meta">' + esc(obs.obs_type) + " &middot; " + esc(obs.created_at) + "</div>",
+          '<div class="detail-body">' + esc(obs.content) + "</div>",
+        ].join("");
+      }
+
+      function esc(str) {
+        const d = document.createElement("div");
+        d.textContent = str || "";
+        return d.innerHTML;
+      }
+
+      function renderResults(observations) {
+        if (!observations.length) {
+          resultsList.innerHTML = '<div class="empty-results">No results found</div>';
+          return;
+        }
+        resultsList.innerHTML = "";
+        for (const obs of observations) {
+          const item = document.createElement("div");
+          item.className = "result-item";
+          item.innerHTML =
+            '<div class="result-title">' + esc(obs.title) + "</div>" +
+            '<div class="result-snippet">' + esc((obs.content || "").slice(0, 120)) + "</div>";
+          item.addEventListener("click", function () {
+            document.querySelectorAll(".result-item.active").forEach(function (el) {
+              el.classList.remove("active");
+            });
+            item.classList.add("active");
+            showDetail(obs);
+          });
+          resultsList.appendChild(item);
+        }
+      }
+
+      async function search(query) {
+        try {
+          const resp = await fetch("/api/observations/search?q=" + encodeURIComponent(query));
+          if (!resp.ok) throw new Error(resp.statusText);
+          const data = await resp.json();
+          renderResults(data.results || data);
+        } catch (err) {
+          resultsList.innerHTML = '<div class="empty-results">Search failed</div>';
+        }
+      }
+
+      input.addEventListener("input", function () {
+        clearTimeout(debounceTimer);
+        const q = input.value.trim();
+        if (!q) {
+          resultsList.innerHTML = '<div class="empty-results">Type to search</div>';
+          detailPanel.classList.add("hidden");
+          return;
+        }
+        debounceTimer = setTimeout(function () { search(q); }, 250);
+      });
+    })();
+  </script>
+</body>
+</html>

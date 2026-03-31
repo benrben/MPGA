@@ -9,7 +9,7 @@ from typing import Literal
 # - 'unknown'    -- unverified placeholder with a description
 # - 'stale'      -- link target could not be found, tagged with a date
 # - 'deprecated' -- link target is explicitly marked as deprecated
-EvidenceLinkType = Literal["valid", "unknown", "stale", "deprecated"]
+EvidenceLinkType = Literal["valid", "unknown", "stale", "deprecated", "observation"]
 
 # Symbol kinds supported by evidence links
 SymbolType = Literal["function", "class", "method", "variable", "type"]
@@ -122,6 +122,8 @@ STALE_SYMBOL_RE = re.compile(
 DEPRECATED_SYMBOL_RE = re.compile(
     r"\[Deprecated\]\s+(\S+?)#(\w+)(?::(\d+))?\s*(?:\u2014\s*(.+))?$"
 )
+
+OBSERVATION_REF_RE = re.compile(r"observation:(\d+)")
 
 
 def _clean_parsed(s: str) -> str:
@@ -251,6 +253,15 @@ def parse_evidence_link(line: str) -> EvidenceLink | None:
             confidence=0.5,
         )
 
+    m = OBSERVATION_REF_RE.search(line)
+    if m:
+        return EvidenceLink(
+            raw=raw,
+            type="observation",
+            description=m.group(1),
+            confidence=1.0,
+        )
+
     return None
 
 
@@ -358,6 +369,16 @@ def parse_evidence_links_on_line(line: str) -> list[EvidenceLink]:
                 end_line=end_line,
                 symbol=symbol,
                 confidence=0.5,
+            ))
+
+    for obs_m in OBSERVATION_REF_RE.finditer(clean):
+        obs_id = obs_m.group(1)
+        if not any(lnk.type == "observation" and lnk.description == obs_id for lnk in results):
+            results.append(EvidenceLink(
+                raw=obs_m.group(0),
+                type="observation",
+                description=obs_id,
+                confidence=1.0,
             ))
 
     return results

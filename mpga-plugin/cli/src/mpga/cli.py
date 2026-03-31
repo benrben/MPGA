@@ -86,6 +86,10 @@ _COMMANDS: dict[str, tuple[str, str]] = {
     "design-system": ("mpga.commands.design_system", "design_system"),
     # Voice
     "spoke":      ("mpga.commands.spoke", "spoke_cmd"),
+    # Memory
+    "memory":     ("mpga.commands.memory", "memory"),
+    # Index
+    "index":      ("mpga.commands.index_cmd", "index_cmd"),
     # Search
     "search":     ("mpga.commands.search", "search_cmd"),
     "ctx":        ("mpga.commands.ctx", "ctx"),

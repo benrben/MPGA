@@ -58,6 +58,27 @@ def _routing_text() -> str:
     return mpga_routing_text()
 
 
+def _hooks_export_markdown() -> str:
+    """Render hooks.json as markdown for Cursor, Codex, and Antigravity installs."""
+    hooks = _hooks_manifest().get("hooks", {})
+    lines = [
+        "\n## MPGA hooks (hooks.json parity)\n\n",
+        "Configure the following where your agent supports hooks, to mirror Claude Code.\n\n",
+    ]
+    for event_name in sorted(hooks.keys()):
+        lines.append(f"### {event_name}\n\n")
+        for block in hooks[event_name]:
+            matcher = block.get("matcher")
+            if matcher is not None:
+                lines.append(f"- **matcher**: `{matcher}`\n")
+            for h in block.get("hooks", []):
+                cmd = h.get("command", "")
+                htype = h.get("type", "command")
+                lines.append(f"  - ({htype}) `{cmd}`\n")
+        lines.append("\n")
+    return "".join(lines)
+
+
 def _detect_platforms(project_root: Path) -> list[str]:
     matches: list[str] = []
     for platform, relpath in (
@@ -94,7 +115,8 @@ def _install_cursor(project_root: Path) -> Path:
         "alwaysApply: true\n"
         "---\n\n"
         "# MPGA Routing\n\n"
-        f"{_routing_text()}",
+        f"{_routing_text()}"
+        f"{_hooks_export_markdown()}",
         encoding="utf-8",
     )
     return path
@@ -104,7 +126,8 @@ def _install_codex(project_root: Path) -> Path:
     agents_dir = project_root / ".codex" / "agents"
     agents_dir.mkdir(parents=True, exist_ok=True)
     path = agents_dir / "mpga-routing.toml"
-    instructions = _routing_text().replace("\\", "\\\\").replace('"""', '\\"\\"\\"')
+    body = _routing_text() + _hooks_export_markdown()
+    instructions = body.replace("\\", "\\\\").replace('"""', '\\"\\"\\"')
     path.write_text(
         'name = "MPGA Routing"\n'
         'description = "Route MPGA reads through CLI commands"\n'
@@ -122,7 +145,10 @@ def _install_antigravity(project_root: Path) -> Path:
     rules_dir = project_root / ".antigravity" / "rules"
     rules_dir.mkdir(parents=True, exist_ok=True)
     path = rules_dir / "mpga-routing.md"
-    path.write_text("# MPGA Routing\n\n" + _routing_text(), encoding="utf-8")
+    path.write_text(
+        "# MPGA Routing\n\n" + _routing_text() + _hooks_export_markdown(),
+        encoding="utf-8",
+    )
     return path
 
 
@@ -203,7 +229,7 @@ def hook_pre_compact() -> None:
     try:
         project_root = _project_root()
         session_row = session_cmd._ensure_active_session(repo, project_root)
-        packet = session_cmd._render_compact_packet(repo, session_row)
+        packet = session_cmd._render_compact_packet(repo, session_row, project_root=project_root)
         repo.log_event(
             session_row.id,
             "compact",
@@ -213,6 +239,90 @@ def hook_pre_compact() -> None:
             full_output=packet[:2000],
         )
         click.echo(packet)
+    finally:
+        _close_conn(conn)
+
+
+@hook.command("capture-user-prompt", help="Capture user decisions and intents as observations")
+def hook_capture_user_prompt() -> None:
+    import sys
+
+    raw = sys.stdin.read()
+    if not raw.strip():
+        return
+
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError:
+        data = {"user_message": raw}
+
+    prompt_text = data.get("user_message", "")
+    if not prompt_text.strip():
+        return
+
+    obs_type = "intent"
+    text_lower = prompt_text.lower()
+    if any(w in text_lower for w in ("decided", "chose", "decision", "choose", "picked")):
+        obs_type = "decision"
+    elif any(w in text_lower for w in ("as a", "role", "persona", "act as", "you are")):
+        obs_type = "role"
+
+    title = prompt_text[:80].strip()
+    if len(prompt_text) > 80:
+        title += "..."
+
+    conn, _ = _open_repo()
+    try:
+        from mpga.db.repos.observations import ObservationRepo, Observation
+        from mpga.core.config import load_config
+
+        skip = set(load_config(_project_root()).memory.skip_tools)
+        obs_repo = ObservationRepo(conn)
+        obs_repo.create(Observation(
+            session_id=data.get("session_id"),
+            title=title,
+            type=obs_type,
+            tool_name="UserPromptSubmit",
+            narrative=prompt_text[:2000],
+        ))
+    finally:
+        _close_conn(conn)
+
+
+@hook.command("capture-observation", help="Capture tool output into observation queue")
+def hook_capture_observation() -> None:
+    import sys
+
+    raw = sys.stdin.read()
+    if not raw.strip():
+        return
+
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError:
+        return
+
+    tool_name = data.get("tool_name", "")
+
+    try:
+        from mpga.core.config import load_config
+        skip_tools = set(load_config(_project_root()).memory.skip_tools)
+    except (ImportError, FileNotFoundError, KeyError):
+        skip_tools = {"TodoRead", "TodoWrite", "ListFiles"}
+    if tool_name in skip_tools:
+        return
+
+    conn, _repo = _open_repo()
+    try:
+        from mpga.db.repos.observations import ObservationRepo, QueueItem
+
+        obs_repo = ObservationRepo(conn)
+        obs_repo.enqueue(QueueItem(
+            session_id=data.get("session_id"),
+            tool_name=tool_name,
+            tool_input=json.dumps(data.get("tool_input", ""))[:2000],
+            tool_output=json.dumps(data.get("tool_output", ""))[:2000],
+        ))
     finally:
         _close_conn(conn)
 

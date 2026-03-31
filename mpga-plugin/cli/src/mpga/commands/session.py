@@ -8,14 +8,14 @@ from __future__ import annotations
 
 import json
 import sqlite3
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import click
 
 from mpga.board.board import load_board, recalc_stats
 from mpga.board.task import load_all_tasks
-from mpga.bridge.compress import compress_session_resume, compress_task
+from mpga.bridge.compress import build_session_resume, compress_task
 from mpga.core.config import find_project_root
 from mpga.core.logger import console, log
 from mpga.db.connection import get_connection
@@ -151,21 +151,26 @@ def _render_resume_summary(repo: SessionRepo, session: Session, limit: int = 10)
             return f"- session start: board snapshot cached\n- snapshot: {snapshot[:350]}"
         return "- session start: no recent events"
 
-    return compress_session_resume(events, n=limit)
+    last = events[-limit:]
+    lines = [f"- {e.get('action', '')}: {e.get('input_summary', '')}" for e in last]
+    return "\n".join(lines)
 
 
-def _render_compact_packet(repo: SessionRepo, session: Session, limit: int = 6) -> str:
+def _render_compact_packet(repo: SessionRepo, session: Session, limit: int = 6, project_root: Path | None = None) -> str:
     """Return a bounded compact-resume packet for hook-time continuity."""
+    from mpga.core.config import load_config
+    budget = load_config(project_root or _project_root()).memory.resume_budget
     events = repo.search_events(session.id, "session OR command OR ctx OR compact", limit=limit)
     if not events:
-        return _render_resume_summary(repo, session, limit=limit)[:700]
-    lines: list[str] = []
-    for event in events:
-        action = event.action or event.event_type
-        summary = event.input_summary or event.output_summary or ""
-        lines.append(f"- {action}: {summary}")
-    payload = "\n".join(lines)
-    return payload[:700]
+        event_part = _render_resume_summary(repo, session, limit=limit)
+    else:
+        event_lines: list[str] = ["### Recent events"]
+        for e in events:
+            event_lines.append(f"- **{e.action or e.event_type}**: {e.input_summary or e.output_summary or ''}")
+        event_part = "\n".join(event_lines)
+    obs = build_session_resume(repo._conn, session.id, budget=budget)
+    obs_section = "\n## Observations\n" + obs if obs else "\n## Observations"
+    return (event_part + obs_section)[:budget]
 
 
 def _is_mpga_managed_path(path: str) -> bool:
@@ -212,6 +217,28 @@ def _session_start_lines(repo: SessionRepo, session: Session) -> list[str]:
     resume = _render_resume_summary(repo, session, limit=5)
     if resume:
         lines.append(resume)
+
+    cutoff = (datetime.now(UTC) - timedelta(hours=24)).isoformat()
+    rows = repo._conn.execute(
+        "SELECT title, priority FROM observations WHERE created_at >= ? ORDER BY priority ASC, created_at DESC",
+        (cutoff,),
+    ).fetchall()
+    try:
+        from mpga.core.config import load_config
+        budget = load_config(_project_root()).memory.resume_budget
+    except (ImportError, FileNotFoundError, KeyError):
+        budget = 2048
+    if not rows:
+        lines.append("No recent observations.")
+    else:
+        lines.append(f"{len(rows)} observations (last 24h):")
+        used = sum(len(l) + 1 for l in lines)
+        for title, pri in rows:
+            entry = f"- [P{pri}] {title}"
+            if used + len(entry) + 1 > budget:
+                lines.append("... (truncated)"); break
+            lines.append(entry); used += len(entry) + 1
+        lines.append("Tip: `mpga memory search <query>` to find, `mpga memory context <id>` for timeline, `mpga memory get <id>` for full details.")
     return lines
 
 

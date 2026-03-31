@@ -65,6 +65,23 @@ class ScopesConfig:
 
 
 @dataclass
+class AiCompressionConfig:
+    enabled: bool = False
+    provider: str = "none"
+    model: str = ""
+
+
+@dataclass
+class MemoryConfig:
+    enabled: bool = True
+    ai_compression: AiCompressionConfig = field(default_factory=AiCompressionConfig)
+    retention_days: int = 30
+    max_observations: int = 1000
+    skip_tools: list[str] = field(default_factory=lambda: ["TodoRead", "TodoWrite", "ListFiles"])
+    resume_budget: int = 2048
+
+
+@dataclass
 class BoardConfig:
     columns: list[str] = field(
         default_factory=lambda: ["backlog", "todo", "in-progress", "testing", "review", "done"]
@@ -94,6 +111,7 @@ class MpgaConfig:
     agents: AgentsConfig = field(default_factory=AgentsConfig)
     scopes: ScopesConfig = field(default_factory=ScopesConfig)
     board: BoardConfig = field(default_factory=BoardConfig)
+    memory: MemoryConfig = field(default_factory=MemoryConfig)
     knowledge_layer: KnowledgeLayerConfig | None = None
 
 
@@ -149,6 +167,11 @@ _CAMEL_TO_SNAKE = {
     "githubSync": "github_sync",
     "knowledgeLayer": "knowledge_layer",
     "keyFileRoles": "key_file_roles",
+    "retentionDays": "retention_days",
+    "maxObservations": "max_observations",
+    "resumeBudget": "resume_budget",
+    "skipTools": "skip_tools",
+    "aiCompression": "ai_compression",
 }
 
 _SNAKE_TO_CAMEL = {v: k for k, v in _CAMEL_TO_SNAKE.items()}
@@ -163,6 +186,8 @@ _SECTION_MAP = {
     "scopes": ScopesConfig,
     "board": BoardConfig,
     "knowledge_layer": KnowledgeLayerConfig,
+    "memory": MemoryConfig,
+    "ai_compression": AiCompressionConfig,
 }
 
 
@@ -189,7 +214,15 @@ def _dict_to_config(raw: dict[str, Any]) -> MpgaConfig:
             section_obj = getattr(cfg, section_name) or cls()
             for k, v in section_data.items():
                 if hasattr(section_obj, k):
-                    setattr(section_obj, k, v)
+                    if isinstance(v, dict) and k in _SECTION_MAP:
+                        nested_cls = _SECTION_MAP[k]
+                        nested_obj = getattr(section_obj, k) or nested_cls()
+                        for nk, nv in v.items():
+                            if hasattr(nested_obj, nk):
+                                setattr(nested_obj, nk, nv)
+                        setattr(section_obj, k, nested_obj)
+                    else:
+                        setattr(section_obj, k, v)
             setattr(cfg, section_name, section_obj)
     return cfg
 

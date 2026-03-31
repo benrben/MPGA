@@ -7,7 +7,6 @@ from mpga.bridge.compress import (
     compress_task,
     compress_scope,
     compress_board_stats,
-    compress_session_resume,
 )
 
 
@@ -138,37 +137,3 @@ def test_compress_board_stats_contains_key_info():
     assert "M002" in result  # milestone
 
 
-# ---------------------------------------------------------------------------
-# compress_session_resume
-# ---------------------------------------------------------------------------
-
-def _make_events(n=5):
-    return [
-        {"action": f"action_{i}", "input_summary": f"did thing {i}"}
-        for i in range(n)
-    ]
-
-
-def test_compress_session_resume_bullet_list():
-    events = _make_events(3)
-    result = compress_session_resume(events)
-    lines = [l for l in result.strip().split("\n") if l.strip()]
-    assert all(l.startswith("-") for l in lines)
-
-
-def test_compress_session_resume_last_n_only():
-    events = _make_events(20)
-    result = compress_session_resume(events, n=5)
-    lines = [l for l in result.strip().split("\n") if l.strip()]
-    assert len(lines) == 5
-
-
-def test_compress_session_resume_default_n():
-    events = _make_events(20)
-    result = compress_session_resume(events)
-    lines = [l for l in result.strip().split("\n") if l.strip()]
-    assert len(lines) <= 10  # default N should be reasonable
-
-
-def test_compress_session_resume_empty():
-    assert compress_session_resume([]) == ""

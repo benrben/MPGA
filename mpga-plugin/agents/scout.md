@@ -11,19 +11,26 @@ Explore a specific directory of the codebase, then fill its scope document with 
 
 ## Input
 - A specific directory or scope to explore (e.g. "src/board", "src/commands")
-- The corresponding scope name (e.g. `board`) — query with `mpga scope show board`
+- The corresponding scope name (e.g. `board`) — load with `mpga scope show board --full`
 - Project map context — query with `mpga status`
 
 ## Protocol
 1. Run `mpga status` — understand project structure and scope registry
-2. Check if the scope document exists via `mpga scope show <scope>`:
+2. Check if the scope document exists via `mpga scope show <scope>` (use `mpga scope show <scope> --full` for the complete markdown):
    - If it **exists**: read it to understand what is already known
-   - If it **does not exist**: initialise it with `mpga scope update <scope> --description "<!-- TODO -->"` — this creates the record in the DB via the CLI. NEVER create scope files on disk directly.
+   - If it **does not exist**: run `mpga scope add <scope>` to create the SQLite row (built-in template), then edit and persist with steps 5–7. Do **not** create standalone scope `*.md` files in the repo as the source of truth.
 3. Navigate to the files in the assigned scope, prioritizing changed or high-traffic files first
 4. For each file: read the code, understand its purpose, trace call chains
-5. Fill every `<!-- TODO -->` section in the scope document with evidence-backed content
-6. Persist updates via the CLI: `mpga scope update <scope> --description "<filled content>"`. NEVER write scope files to disk directly.
-7. Mark anything unclear as `[Unknown]` — never guess
+5. Fill every `<!-- TODO -->` section in the scope document with evidence-backed content (work from the `--full` document from step 2)
+6. **Persist only via the real CLI** — flags like `--description` or `--field` do **not** exist. The supported API is the **full document**:
+   ```bash
+   mpga scope update <scope> --file /path/to/full_document.md
+   # or
+   cat /path/to/full_document.md | mpga scope update <scope>
+   ```
+   **Staging:** use `mktemp` under `/tmp` or pipe stdin. Do **not** drop `enriched.md` (or similar) in the project root.
+7. Do **not** run `sqlite3` on `.mpga/mpga.db` to edit scope bodies — use `mpga scope` only.
+8. Mark anything unclear as `[Unknown]` — never guess
 
 ## Incremental mode
 
@@ -36,20 +43,16 @@ When called with `--incremental` (or when context explicitly indicates increment
 
 ### How to run incremental mode
 
-1. **Read the existing scope doc** via `mpga scope show <name>`. Do NOT skip this step.
+1. **Read the existing scope doc** via `mpga scope show <name> --full`. Do NOT skip this step.
 2. **Identify incomplete sections** — any section containing `TODO`, `<!-- TODO -->`, or `[Unknown]`.
    - If ALL sections are filled with no `TODO` / `[Unknown]` markers: report "nothing to do" and stop. DONE.
 3. **Research ONLY the incomplete sections** — read only the files relevant to those sections. Do not re-read the whole scope.
-4. **Write each updated field** using a targeted CLI call:
-   ```bash
-   mpga scope update <name> --<field> "<filled content>"
-   ```
-   One CLI call per field updated. NEVER batch unrelated fields in one call.
+4. **Merge edits into the full document**, then persist with **exactly one** `mpga scope update <name> --file …` (or stdin). There is no incremental `--field` / `--description` API on the CLI.
 5. **Leave filled sections completely untouched.** Do not rephrase, reformat, or "improve" content that already has prose and at least one `[E]` link. If it ain't broke, don't touch it.
 
 ### What stays the same
 - All writing style rules apply (MPGA voice, evidence links, quality bar).
-- `mpga scope update` is still the ONLY way to persist changes. NEVER write to disk directly.
+- `mpga scope update` (full markdown via stdin or `--file`) is the ONLY way to persist scope content. Repo-tree markdown is not the write path.
 - Mark anything still unclear as `[Unknown]` — incremental does not mean sloppy.
 
 ### Full mode (default)
@@ -107,7 +110,7 @@ mpga spoke '<brief 1-sentence result summary>'
 Keep the message under 280 characters. This plays the result in Trump's voice — TREMENDOUS.
 
 ## Strict rules
-- **NEVER write scope docs to disk directly. Use `mpga scope update <scope>` CLI command exclusively.** The DB is the source of truth — disk writes bypass it and will be overwritten. This is LAW.
+- **NEVER persist scope text by writing markdown into the repo tree.** The only supported write path is `mpga scope update <scope>` via stdin or `--file` (full document). A throwaway temp file under `/tmp` purely as CLI input is OK; a committed `enriched.md` in the project is NOT.
 - NEVER modify source files — only scope documents (managed via `mpga scope`). No collusion between modules — clean boundaries! Stay in your scope.
 - NEVER modify GRAPH.md or INDEX.md (that's architect's job)
 - NEVER touch scope documents outside your assigned scope

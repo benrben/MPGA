@@ -87,6 +87,58 @@ def test_rebuild_global_fts_is_idempotent(conn):
     assert count_first == count_second
 
 
+def test_rebuild_global_fts_includes_observations(conn):
+    now = "2026-01-01T00:00:00"
+    conn.execute(
+        "INSERT INTO observations (title, type, narrative, facts, concepts, created_at) "
+        "VALUES (?, ?, ?, ?, ?, ?)",
+        (
+            "T005 observation title",
+            "tool_output",
+            "Narrative for FTS",
+            "fact one",
+            "concept alpha",
+            now,
+        ),
+    )
+    conn.commit()
+    obs_id = str(conn.execute("SELECT id FROM observations").fetchone()[0])
+
+    rebuild_global_fts(conn)
+
+    row = conn.execute(
+        "SELECT entity_type, entity_id, title FROM global_fts "
+        "WHERE entity_type = 'observation' AND entity_id = ?",
+        (obs_id,),
+    ).fetchone()
+    assert row is not None
+    assert row[0] == "observation"
+    assert row[1] == obs_id
+    assert row[2] == "T005 observation title"
+
+
+def test_rebuild_global_fts_populates_global_trigram(conn):
+    now = "2026-01-01T00:00:00"
+    conn.execute(
+        "INSERT INTO observations (title, type, narrative, created_at) "
+        "VALUES (?, ?, ?, ?)",
+        ("Trigram obs marker", "tool_output", "body for trigram index", now),
+    )
+    conn.commit()
+    obs_id = str(conn.execute("SELECT id FROM observations").fetchone()[0])
+
+    rebuild_global_fts(conn)
+
+    row = conn.execute(
+        "SELECT entity_type, entity_id, title, content FROM global_trigram "
+        "WHERE entity_type = 'observation' AND entity_id = ?",
+        (obs_id,),
+    ).fetchone()
+    assert row is not None
+    assert "Trigram obs marker" in (row[2] or "")
+    assert "trigram" in (row[3] or "").lower()
+
+
 # ---------------------------------------------------------------------------
 # global_search
 # ---------------------------------------------------------------------------
@@ -124,15 +176,18 @@ def test_global_search_returns_multiple_entity_types(conn):
     assert len(types) > 1
 
 
-def test_global_search_bm25_ranking(conn):
+def test_global_search_rank_ordering(conn):
     _seed(conn)
     rebuild_global_fts(conn)
 
     results = global_search(conn, "auth")
-    # BM25 rank from SQLite FTS5 is negative (more relevant = more negative)
-    # Results should be sorted with highest relevance first (most negative rank first)
     ranks = [r.rank for r in results]
-    assert ranks == sorted(ranks)
+    if ranks and ranks[0] > 0:
+        # DualIndexSearch: RRF scores are positive; best match first (descending).
+        assert ranks == sorted(ranks, reverse=True)
+    else:
+        # Porter-only fallback: BM25 is negative (more relevant = more negative).
+        assert ranks == sorted(ranks)
 
 
 def test_global_search_type_filter(conn):
@@ -174,3 +229,31 @@ def test_global_search_empty_db_returns_empty(conn):
     rebuild_global_fts(conn)
     results = global_search(conn, "auth")
     assert results == []
+
+
+def test_global_search_finds_observations(conn):
+    now = "2026-01-01T00:00:00"
+    conn.execute(
+        "INSERT INTO observations (title, type, narrative, facts, concepts, created_at) "
+        "VALUES (?, ?, ?, ?, ?, ?)",
+        (
+            "Global search obs headline",
+            "tool_output",
+            "Unique narrative token quinquatope_xyz",
+            "supporting facts",
+            "related concepts",
+            now,
+        ),
+    )
+    conn.commit()
+
+    rebuild_global_fts(conn)
+
+    by_title = global_search(conn, "headline")
+    assert any(r.entity_type == "observation" for r in by_title)
+
+    by_narrative = global_search(conn, "quinquatope")
+    assert any(
+        r.entity_type == "observation" and "quinquatope" in (r.snippet or "").lower()
+        for r in by_narrative
+    )

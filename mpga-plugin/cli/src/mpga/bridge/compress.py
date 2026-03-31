@@ -6,14 +6,12 @@ Compression rules:
 - Evidence: "{type} {filepath}:{start}-{end} {symbol}" per link
 - Search: "[{rank}] {entity_type}/{entity_id}: {title}\n  {snippet}" per result, max 2KB
 - Board stats: tasks line + progress line (4 logical fields each)
-- Session resume: "- {action}: {input_summary}" per event, last N only
+- Session resume: priority-tiered builder from observations DB
 """
 from __future__ import annotations
 
 from mpga.board.task import Task
 from mpga.db.repos.scopes import Scope
-
-_DEFAULT_RESUME_N = 10
 
 
 def compress_task(task: Task) -> str:
@@ -61,10 +59,76 @@ def compress_board_stats(stats: dict) -> str:
     return f"{line1}\n{line2}"
 
 
-def compress_session_resume(events: list[dict], n: int = _DEFAULT_RESUME_N) -> str:
-    """Return bullet list of last N actions."""
-    if not events:
+_PRIORITY_TIERS = {
+    "decision": 1, "error": 1,
+    "discovery": 2, "pattern": 2,
+    "tool_output": 3,
+    "intent": 4,
+}
+
+
+def build_session_resume(
+    conn: "sqlite3.Connection",
+    session_id: str | None = None,
+    budget: int = 2048,
+) -> str:
+    """Build priority-tiered session resume from observations.
+
+    Budget allocation: P1=50%, P2=35%, P3-P4=15%.
+    Output is structured markdown with tier headers.
+    """
+    import sqlite3
+
+    if session_id is None:
+        rows = conn.execute(
+            "SELECT title, type, priority FROM observations WHERE session_id IS NULL"
+        ).fetchall()
+    else:
+        rows = conn.execute(
+            "SELECT title, type, priority FROM observations WHERE session_id = ?",
+            (session_id,),
+        ).fetchall()
+    if not rows:
         return ""
-    last = events[-n:]
-    lines = [f"- {e.get('action', '')}: {e.get('input_summary', '')}" for e in last]
-    return "\n".join(lines)
+
+    sorted_rows = sorted(rows, key=lambda r: (_PRIORITY_TIERS.get(r[1], r[2]), r[2]))
+
+    tier_buckets: dict[int, list[str]] = {1: [], 2: [], 3: [], 4: []}
+    for title, obs_type, pri in sorted_rows:
+        tier = _PRIORITY_TIERS.get(obs_type, pri)
+        tier_buckets.setdefault(tier, []).append(title)
+
+    tier_budgets = {
+        1: int(budget * 0.50),
+        2: int(budget * 0.35),
+        3: int(budget * 0.075),
+        4: int(budget * 0.075),
+    }
+
+    _TIER_HEADERS = {
+        1: "### Critical (decisions & errors)",
+        2: "### Important (discoveries & patterns)",
+        3: "### Context (tool outputs)",
+        4: "### Background (intents)",
+    }
+
+    sections: list[str] = []
+    for tier in (1, 2, 3, 4):
+        items = tier_buckets.get(tier, [])
+        if not items:
+            continue
+        header = _TIER_HEADERS[tier]
+        tier_budget = tier_budgets[tier]
+        lines: list[str] = [header]
+        used = len(header) + 1
+        for title in items:
+            entry = f"- {title}"
+            cost = len(entry) + 1
+            if used + cost > tier_budget:
+                lines.append("- ...")
+                break
+            lines.append(entry)
+            used += cost
+        sections.append("\n".join(lines))
+
+    return "\n\n".join(sections)
