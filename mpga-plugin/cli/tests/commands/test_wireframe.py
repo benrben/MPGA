@@ -50,7 +50,6 @@ class TestWireframeCommand:
         )
         assert wireframes_dir.is_dir()
         assert (wireframes_dir / "screen-1.html").exists()
-        assert (wireframes_dir / "screen-1.svg").exists()
         assert (wireframes_dir / "screen-1.txt").exists()
         assert "Renderer" in result.output
 
@@ -65,12 +64,12 @@ class TestWireframeCommand:
         assert "wireframe" in result.output
         assert "--screens" in result.output
 
-    def test_escapes_user_content_in_html_and_svg_outputs(
+    def test_escapes_user_content_in_html_output(
         self,
         tmp_path: Path,
         monkeypatch,
     ):
-        """Escapes user-supplied content before writing HTML and SVG artifacts."""
+        """Escapes user-supplied content before writing HTML artifacts."""
         _seed_project(tmp_path)
         monkeypatch.setattr("mpga.commands.wireframe.find_project_root", lambda: tmp_path)
 
@@ -85,9 +84,32 @@ class TestWireframeCommand:
             tmp_path / ".mpga" / "wireframes" / _MILESTONE_ID / "wireframes"
         )
         html_output = (wireframes_dir / "screen-1.html").read_text(encoding="utf-8")
-        svg_output = (wireframes_dir / "screen-1.svg").read_text(encoding="utf-8")
 
         assert payload not in html_output
-        assert payload not in svg_output
         assert "&lt;script&gt;alert(1)&lt;/script&gt;" in html_output
-        assert "&lt;script&gt;alert(1)&lt;/script&gt;" in svg_output
+
+    def test_does_not_write_an_svg_file_when_generating_wireframes(
+        self,
+        tmp_path: Path,
+        monkeypatch,
+    ):
+        """Wireframe CLI must not produce .svg files after SVG generation is removed."""
+        # Arrange
+        _seed_project(tmp_path)
+        monkeypatch.setattr("mpga.commands.wireframe.find_project_root", lambda: tmp_path)
+
+        from mpga.commands.wireframe import wireframe_cmd
+
+        runner = CliRunner()
+
+        # Act
+        result = runner.invoke(wireframe_cmd, ["login page"])
+
+        # Assert
+        assert result.exit_code == 0
+        wireframes_dir = (
+            tmp_path / ".mpga" / "wireframes" / _MILESTONE_ID / "wireframes"
+        )
+        assert not (wireframes_dir / "screen-1.svg").exists(), (
+            "screen-1.svg must not be written — SVG generation should be removed"
+        )

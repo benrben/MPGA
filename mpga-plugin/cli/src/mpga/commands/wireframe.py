@@ -101,22 +101,6 @@ def _render_html(title: str, description: str, css: str, screen_number: int, tot
 """
 
 
-def _render_svg(title: str, description: str, screen_number: int) -> str:
-    safe_title = escape(title, quote=True)
-    safe_description = escape(description, quote=True)
-    return f"""<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-label="{safe_title} wireframe">
-  <rect x="24" y="24" width="1232" height="672" fill="#f8fafc" stroke="#94a3b8" stroke-dasharray="10 8" stroke-width="4"/>
-  <rect x="56" y="56" width="1168" height="96" fill="#e2e8f0" stroke="#94a3b8" stroke-dasharray="8 6"/>
-  <rect x="56" y="184" width="264" height="448" fill="#e5e7eb" stroke="#94a3b8" stroke-dasharray="8 6"/>
-  <rect x="352" y="184" width="872" height="448" fill="#f1f5f9" stroke="#94a3b8" stroke-dasharray="8 6"/>
-  <rect x="392" y="224" width="320" height="180" fill="#dbeafe" stroke="#94a3b8" stroke-dasharray="8 6"/>
-  <text x="88" y="110" font-family="sans-serif" font-size="32" fill="#334155">{safe_title}</text>
-  <text x="392" y="450" font-family="sans-serif" font-size="24" fill="#475569">{safe_description}</text>
-  <text x="392" y="494" font-family="sans-serif" font-size="18" fill="#64748b">Screen {screen_number}</text>
-</svg>
-"""
-
-
 def _render_ascii(title: str, description: str, screen_number: int, total_screens: int) -> str:
     return "\n".join(
         [
@@ -152,11 +136,9 @@ def wireframe_cmd(description: str, screens: int) -> None:
 
     for screen_number in range(1, screens + 1):
         html = _render_html(title, description, css, screen_number, screens)
-        svg = _render_svg(title, description, screen_number)
         ascii_art = _render_ascii(title, description, screen_number, screens)
 
         (wireframes_dir / f"screen-{screen_number}.html").write_text(html, encoding="utf-8")
-        (wireframes_dir / f"screen-{screen_number}.svg").write_text(svg, encoding="utf-8")
         (wireframes_dir / f"screen-{screen_number}.txt").write_text(ascii_art, encoding="utf-8")
 
         if screen_number == 1:
