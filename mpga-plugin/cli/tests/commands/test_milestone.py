@@ -166,22 +166,8 @@ class TestCompleteActiveMilestone:
         assert "Evidence links produced:" in body
         assert "Outcome" in body
 
-    def test_regenerates_board_md(self, tmp_path: Path):
-        """Regenerates BOARD.md after completion."""
-        board_dir = tmp_path / "MPGA" / "board"
-        tasks_dir = board_dir / "tasks"
-        milestone_dir = tmp_path / "MPGA" / "milestones" / "M001-test"
-        tasks_dir.mkdir(parents=True, exist_ok=True)
-        milestone_dir.mkdir(parents=True, exist_ok=True)
-        (board_dir / "board.json").write_text(make_board_json({"milestone": "M001-test"}))
-
-        from mpga.commands.milestone import complete_active_milestone
-
-        complete_active_milestone(str(tmp_path))
-        board_md_path = board_dir / "BOARD.md"
-        assert board_md_path.exists()
-        content = board_md_path.read_text()
-        assert "No active milestone" in content
+    # test_regenerates_board_md removed by T019 — milestone commands no longer write BOARD.md.
+    # The opposite behavior is now enforced by TestT019NoBoardMdWrites.
 
     def test_updates_sqlite_summary_and_status(self, tmp_path: Path):
         """Marks the milestone complete in SQLite and stores the summary."""
@@ -493,3 +479,92 @@ class TestMilestoneComplete:
 
         result = complete_active_milestone(str(tmp_path))
         assert result.ok is False
+
+
+# ---------------------------------------------------------------------------
+# Tests: T019 — Remove BOARD.md writes from milestone commands
+#
+# Coverage checklist for: T019 — Tier 1 — Remove BOARD.md writes
+#
+# Acceptance criteria → Test status
+# ──────────────────────────────────
+# [x] AC1: complete_active_milestone() no longer writes BOARD.md
+#          → it('does not write BOARD.md when completing a milestone')
+# [x] AC2: milestone_new() no longer writes BOARD.md
+#          → it('does not write BOARD.md when creating a new milestone')
+# [ ] AC3: grep for BOARD.md write in milestone.py returns zero results
+#          → structural/static (confirmed by green-dev)
+# [ ] AC4: Milestone commands complete without error
+#          → covered by existing exit_code == 0 tests above
+#
+# Untested branches / edge cases:
+# - [ ] board.json absent: milestone_new() skips board link entirely (no BOARD.md created)
+# - [ ] pre-existing BOARD.md is NOT modified by either command
+#
+# Evidence:
+#   [E] mpga-plugin/cli/src/mpga/commands/milestone.py — BOARD.md writes removed by T019
+#       complete_active_milestone() and milestone_new() no longer write BOARD.md
+# ---------------------------------------------------------------------------
+
+
+class TestT019NoBoardMdWrites:
+    """T019: milestone commands must not write BOARD.md."""
+
+    def test_complete_active_milestone_does_not_write_board_md(self, tmp_path: Path):
+        """complete_active_milestone() must not create or overwrite BOARD.md.
+
+        Evidence: [E] mpga-plugin/cli/src/mpga/commands/milestone.py:99-101
+        Currently FAILS because the production code writes BOARD.md at that site.
+        """
+        # Arrange — board with an active milestone, no BOARD.md present
+        board_dir = tmp_path / "MPGA" / "board"
+        tasks_dir = board_dir / "tasks"
+        tasks_dir.mkdir(parents=True, exist_ok=True)
+        (board_dir / "board.json").write_text(
+            make_board_json({"milestone": "M001-test"})
+        )
+        board_md_path = board_dir / "BOARD.md"
+        assert not board_md_path.exists(), "pre-condition: BOARD.md must be absent"
+
+        # Act
+        from mpga.commands.milestone import complete_active_milestone
+
+        result = complete_active_milestone(str(tmp_path))
+
+        # Assert — command succeeds AND no BOARD.md was created
+        assert result.ok is True
+        assert not board_md_path.exists(), (
+            "complete_active_milestone() must not write BOARD.md"
+        )
+
+    def test_milestone_new_does_not_write_board_md(self, tmp_path: Path, monkeypatch):
+        """milestone_new() must not create or overwrite BOARD.md.
+
+        Evidence: [E] mpga-plugin/cli/src/mpga/commands/milestone.py:211-212
+        Currently FAILS because the production code writes BOARD.md at that site.
+        """
+        # Arrange — minimal project with board.json but NO BOARD.md
+        board_dir = tmp_path / "MPGA" / "board"
+        tasks_dir = board_dir / "tasks"
+        tasks_dir.mkdir(parents=True, exist_ok=True)
+        (board_dir / "board.json").write_text(make_board_json())
+        board_md_path = board_dir / "BOARD.md"
+        assert not board_md_path.exists(), "pre-condition: BOARD.md must be absent"
+
+        monkeypatch.setattr(
+            "mpga.commands.milestone.find_project_root", lambda: str(tmp_path)
+        )
+
+        # Act
+        from click.testing import CliRunner
+
+        from mpga.commands.milestone import milestone_new
+
+        runner = CliRunner()
+        result = runner.invoke(milestone_new, ["No Board Md"])
+
+        # Assert — command exits cleanly AND no BOARD.md was created
+        assert result.exit_code == 0
+        assert not board_md_path.exists(), (
+            "milestone_new() must not write BOARD.md"
+        )

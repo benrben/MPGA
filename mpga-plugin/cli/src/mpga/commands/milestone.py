@@ -16,7 +16,6 @@ from typing import Literal
 import click
 
 from mpga.board.board import load_board, recalc_stats, save_board
-from mpga.board.board_md import render_board_md
 from mpga.core.config import find_project_root
 from mpga.core.logger import console, log
 from mpga.db.connection import get_connection
@@ -69,7 +68,7 @@ CompleteMilestoneResult = CompleteMilestoneOk | CompleteMilestoneFail
 
 
 def complete_active_milestone(project_root: str) -> CompleteMilestoneResult:
-    """Clear ``board.milestone``, save board + BOARD.md, persist summary to DB."""
+    """Clear ``board.milestone``, save board.json, persist summary to DB."""
     board_dir = str(Path(project_root) / "MPGA" / "board")
     tasks_dir = str(Path(board_dir) / "tasks")
     board = load_board(board_dir)
@@ -96,9 +95,6 @@ def complete_active_milestone(project_root: str) -> CompleteMilestoneResult:
 
     board.milestone = None
     save_board(board_dir, board)
-    (Path(board_dir) / "BOARD.md").write_text(
-        render_board_md(board, tasks_dir), encoding="utf-8"
-    )
 
     conn, repo = _open_milestone_repo(project_root)
     try:
@@ -208,9 +204,6 @@ def milestone_new(name: str) -> None:
         board.milestone = milestone_id
         recalc_stats(board, tasks_dir)
         save_board(board_dir, board)
-        (Path(board_dir) / "BOARD.md").write_text(
-            render_board_md(board, tasks_dir), encoding="utf-8"
-        )
 
     log.success(f"Created milestone {mid}: {name}")
     log.dim(f"  ID: {milestone_id}")
