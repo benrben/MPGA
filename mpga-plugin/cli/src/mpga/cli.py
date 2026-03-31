@@ -69,6 +69,8 @@ _COMMANDS: dict[str, tuple[str, str]] = {
     "develop":    ("mpga.commands.develop", "develop"),
     "milestone":  ("mpga.commands.milestone", "milestone"),
     "session":    ("mpga.commands.session", "session"),
+    "hook":       ("mpga.commands.hook", "hook"),
+    "hooks":      ("mpga.commands.hook", "hook"),
     # Configuration & export
     "config":     ("mpga.commands.config_cmd", "config_cmd"),
     "export":     ("mpga.commands.export_cmd", "export_cmd"),
@@ -84,6 +86,11 @@ _COMMANDS: dict[str, tuple[str, str]] = {
     "design-system": ("mpga.commands.design_system", "design_system"),
     # Voice
     "spoke":      ("mpga.commands.spoke", "spoke_cmd"),
+    # Search
+    "search":     ("mpga.commands.search", "search_cmd"),
+    "ctx":        ("mpga.commands.ctx", "ctx"),
+    # API server
+    "serve":      ("mpga.commands.serve", "serve_cmd"),
 }
 
 

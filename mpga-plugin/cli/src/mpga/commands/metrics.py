@@ -7,9 +7,12 @@ from pathlib import Path
 
 import click
 
-from mpga.board.task import Task, load_all_tasks
+from mpga.board.task import Task
 from mpga.core.config import find_project_root
 from mpga.core.logger import log, mini_banner
+from mpga.db.connection import get_connection
+from mpga.db.repos.tasks import TaskRepo
+from mpga.db.schema import create_schema
 
 # ---------------------------------------------------------------------------
 # metrics helpers
@@ -68,25 +71,61 @@ def _compute_metrics(tasks: list[Task]) -> dict:
     }
 
 
+def _load_reporting_tasks(project_root: Path) -> list[Task]:
+    db_path = project_root / ".mpga" / "mpga.db"
+    if not db_path.exists():
+        return []
+
+    conn = get_connection(str(db_path))
+    try:
+        create_schema(conn)
+        db_tasks = TaskRepo(conn).filter()
+    finally:
+        conn.close()
+
+    # Merge evidence fields from markdown task files when available
+    tasks_dir = project_root / "MPGA" / "board" / "tasks"
+    if tasks_dir.is_dir():
+        from mpga.board.task import load_all_tasks
+        md_tasks = load_all_tasks(str(tasks_dir))
+        md_by_id = {t.id: t for t in md_tasks}
+        merged: list[Task] = []
+        for task in db_tasks:
+            if task.id in md_by_id:
+                md = md_by_id[task.id]
+                # Supplement evidence fields from the markdown file
+                task.evidence_expected = md.evidence_expected
+                task.evidence_produced = md.evidence_produced
+            merged.append(task)
+        return merged
+
+    return db_tasks
+
+
 # ---------------------------------------------------------------------------
-# metrics command
+# metrics command group
 # ---------------------------------------------------------------------------
 
+# Canonical metric names exposed by `mpga metrics list`.
+METRIC_NAMES: list[tuple[str, str]] = [
+    ("total", "Total number of tasks on the board"),
+    ("done", "Tasks in the 'done' column"),
+    ("in_progress", "Tasks currently in-progress / testing / review"),
+    ("blocked", "Tasks with status 'blocked'"),
+    ("evidence_coverage", "Evidence links produced vs expected (%)"),
+    ("tdd_adherence", "Done tasks that completed the full TDD cycle (%)"),
+    ("avg_task_time", "Average wall-clock time from start to done"),
+]
 
-@click.command("metrics")
-@click.option("--json", "as_json", is_flag=True, help="Output as JSON")
-def metrics_cmd(as_json: bool) -> None:
-    """Compute and display project metrics."""
-    project_root = find_project_root() or Path.cwd()
-    mpga_dir = Path(project_root) / "MPGA"
 
-    if not mpga_dir.exists():
-        log.error("MPGA not initialized. Run `mpga init` first.")
+def _print_metrics_dashboard(project_root: Path, as_json: bool) -> None:
+    """Shared display logic used by both the bare group and the legacy command."""
+    db_path = project_root / ".mpga" / "mpga.db"
+    if not db_path.exists():
+        log.error("DB not found. Run `mpga sync` first.")
         sys.exit(1)
 
-    board_dir = mpga_dir / "board"
-    tasks_dir = board_dir / "tasks"
-    tasks = load_all_tasks(str(tasks_dir))
+    tasks = _load_reporting_tasks(project_root)
     metrics = _compute_metrics(tasks)
 
     if as_json:
@@ -111,6 +150,29 @@ def metrics_cmd(as_json: bool) -> None:
     log.blank()
 
 
+@click.group("metrics", invoke_without_command=True)
+@click.option("--json", "as_json", is_flag=True, help="Output as JSON")
+@click.pass_context
+def metrics_group(ctx: click.Context, as_json: bool) -> None:
+    """Compute and display project metrics."""
+    if ctx.invoked_subcommand is None:
+        project_root = Path(find_project_root() or Path.cwd())
+        _print_metrics_dashboard(project_root, as_json)
+
+
+# Backward-compatible alias — keeps existing `cli.py` registrations working.
+metrics_cmd = metrics_group
+
+
+@metrics_group.command("list")
+def metrics_list() -> None:
+    """List available metric names and descriptions."""
+    log.header("Available Metrics")
+    for name, description in METRIC_NAMES:
+        log.kv(name, description, indent=2)
+    log.blank()
+
+
 # ---------------------------------------------------------------------------
 # changelog command
 # ---------------------------------------------------------------------------
@@ -120,16 +182,14 @@ def metrics_cmd(as_json: bool) -> None:
 @click.option("--since", default=None, help="Only include tasks completed after this date")
 def changelog_cmd(since: str | None) -> None:
     """Generate changelog from completed tasks."""
-    project_root = find_project_root() or Path.cwd()
-    mpga_dir = Path(project_root) / "MPGA"
+    project_root = Path(find_project_root() or Path.cwd())
 
-    if not mpga_dir.exists():
-        log.error("MPGA not initialized. Run `mpga init` first.")
+    db_path = project_root / ".mpga" / "mpga.db"
+    if not db_path.exists():
+        log.error("DB not found. Run `mpga sync` first.")
         sys.exit(1)
 
-    board_dir = mpga_dir / "board"
-    tasks_dir = board_dir / "tasks"
-    tasks = load_all_tasks(str(tasks_dir))
+    tasks = _load_reporting_tasks(project_root)
 
     done_tasks = [t for t in tasks if t.column == "done"]
 

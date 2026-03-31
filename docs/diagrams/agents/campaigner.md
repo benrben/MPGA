@@ -41,8 +41,8 @@ flowchart TD
 ## Inputs — What We're Looking At
 
 - Project root directory — the whole OPERATION
-- MPGA/INDEX.md (if it exists) — our INTELLIGENCE briefing
-- Existing MPGA/scopes/ (if they exist) — previous GREAT work
+- Project status via `mpga status` (if initialized) — our INTELLIGENCE briefing
+- Existing scope documents via `mpga scope list` (if they exist) — previous GREAT work
 
 ## Outputs — The Rally Report, A MASTERPIECE
 

@@ -24,8 +24,7 @@ Always log the renderer decision:
 `[RENDERER] Using: html (Excalidraw MCP not detected)`
 
 ## Output directory
-Save all work inside:
-`MPGA/milestones/<id>/design/`
+Save all work inside the milestone design directory — query with `mpga milestone show <id>`
 
 Expected structure:
 - `wireframes/`
@@ -57,6 +56,6 @@ Expected structure:
 - Sanitize filenames before writing artifacts.
 
 ## Output
-- Approved wireframes, prototypes, or component specs in `MPGA/milestones/<id>/design/`
+- Approved wireframes, prototypes, or component specs in the milestone design directory (`mpga milestone show <id>`)
 - Renderer log line showing which fallback tier was used
 - Accessibility notes for each artifact

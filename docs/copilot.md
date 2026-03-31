@@ -21,19 +21,19 @@ Or create `.github/copilot-instructions.md` manually:
 # Project context (powered by MPGA)
 
 This project uses MPGA for evidence-backed context engineering.
-The knowledge layer is in the `MPGA/` directory.
+The knowledge layer lives in the DB (`.mpga/mpga.db`) — query it with CLI commands.
 
 ## Before suggesting code
 
-1. Check `MPGA/INDEX.md` for project conventions and scope registry
-2. Find the relevant scope in `MPGA/scopes/<name>.md`
+1. Run `mpga status` for project conventions and scope registry
+2. Find the relevant scope via `mpga scope show <name>`
 3. Evidence format: `[E] filepath:startLine-endLine :: symbolName()`
 
 ## Key conventions
-<!-- paste content from MPGA/INDEX.md ## Conventions section -->
+<!-- run `mpga status` and paste the Conventions section -->
 
 ## Key files
-<!-- paste content from MPGA/INDEX.md ## Key files section -->
+<!-- run `mpga status` and paste the Key files section -->
 ```
 
 ## Copilot Chat with scope context
@@ -41,12 +41,12 @@ The knowledge layer is in the `MPGA/` directory.
 In Copilot Chat, use `#file` to load scope docs explicitly:
 
 ```
-#file:MPGA/scopes/auth.md
+#output of: mpga scope show auth
 How does token refresh work? Should I add rotation?
 ```
 
 ```
-#file:MPGA/INDEX.md #file:MPGA/scopes/payments.md
+#output of: mpga status  #output of: mpga scope show payments
 Plan a refactor of the payment flow to support multi-currency
 ```
 
@@ -58,7 +58,7 @@ Add scope docs to Copilot's preferred context files:
 // .vscode/settings.json
 {
   "github.copilot.chat.codeGeneration.instructions": [
-    { "file": "MPGA/INDEX.md" }
+    { "file": ".mpga/mpga.db" }  // use `mpga status` to read project context
   ]
 }
 ```
@@ -74,9 +74,9 @@ cp AGENTS.md .github/copilot-instructions.md
 
 ## Copilot Workspaces
 
-If using Copilot Workspaces, the `MPGA/` directory is automatically indexed. Reference scope docs in your task description:
+If using Copilot Workspaces, reference scope data via CLI commands in your task description:
 
 ```
-Referring to MPGA/scopes/auth.md, implement JWT refresh token rotation.
-The acceptance criteria are in MPGA/milestones/M003-auth/PLAN.md.
+Based on `mpga scope show auth`, implement JWT refresh token rotation.
+The acceptance criteria are in `mpga milestone show M003-auth`.
 ```

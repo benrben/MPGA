@@ -7,54 +7,31 @@ on:
     branches: [main]
 
 jobs:
-  build-and-test:
-    name: Build, Test & Lint
+  test:
+    name: Test Python CLI
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        node-version: [20, 22]
+        python-version: ["3.11", "3.12"]
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-          cache-dependency-path: mpga-plugin/cli/package-lock.json
+          python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
-        run: npm ci
-        working-directory: mpga-plugin/cli
-
-      - name: Security audit
-        run: npm audit --audit-level=high
-        working-directory: mpga-plugin/cli
-        continue-on-error: true
-
-      - name: Type check
-        run: npm run typecheck
+        run: pip install -e ".[dev]"
         working-directory: mpga-plugin/cli
 
       - name: Lint
-        run: npm run lint
-        working-directory: mpga-plugin/cli
-
-      - name: Format check
-        run: npm run format:check
+        run: ruff check src/ tests/
         working-directory: mpga-plugin/cli
 
       - name: Test
-        run: npm test
-        working-directory: mpga-plugin/cli
-
-      - name: Build
-        run: npm run build
-        working-directory: mpga-plugin/cli
-
-      - name: Verify CLI runs
-        run: node bin/mpga.js --version
+        run: python -m pytest tests/ -v --tb=short
         working-directory: mpga-plugin/cli

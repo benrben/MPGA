@@ -8,9 +8,13 @@ from pathlib import Path
 
 import click
 
-from mpga.board.task import load_all_tasks
 from mpga.core.config import find_project_root
 from mpga.core.logger import log
+from mpga.db.connection import get_connection
+from mpga.db.repos.decisions import DecisionRepo
+from mpga.db.repos.scopes import ScopeRepo
+from mpga.db.repos.tasks import TaskRepo
+from mpga.db.schema import create_schema
 
 # ---------------------------------------------------------------------------
 # pr command
@@ -21,10 +25,10 @@ from mpga.core.logger import log
 def pr_cmd() -> None:
     """Generate PR description from current branch changes."""
     project_root = find_project_root() or Path.cwd()
-    mpga_dir = Path(project_root) / "MPGA"
 
-    if not mpga_dir.exists():
-        log.error("MPGA not initialized. Run `mpga init` first.")
+    db_path = Path(project_root) / ".mpga" / "mpga.db"
+    if not db_path.exists():
+        log.error("DB not found. Run `mpga sync` first.")
         sys.exit(1)
 
     # Gather git info
@@ -68,34 +72,35 @@ def pr_cmd() -> None:
             text=True,
             check=True,
         ).stdout.strip()
-    except Exception:
-        log.error("Failed to read git information. Ensure you are in a git repository.")
+    except (OSError, subprocess.CalledProcessError) as e:
+        log.error(f"Failed to read git information. Ensure you are in a git repository. ({e})")
         sys.exit(1)
 
-    # Load tasks for evidence links
-    tasks_dir = mpga_dir / "board" / "tasks"
-    tasks = load_all_tasks(str(tasks_dir))
-    done_tasks = [t for t in tasks if t.column == "done"]
-    evidence_links: list[str] = []
-    for t in done_tasks:
-        evidence_links.extend(t.evidence_produced)
+    conn = get_connection(str(db_path))
+    try:
+        create_schema(conn)
+        db_tasks = TaskRepo(conn).filter()
+        done_tasks = [t for t in db_tasks if t.column == "done"]
+        evidence_links: list[str] = []
+        for t in done_tasks:
+            evidence_links.extend(t.evidence_produced)
 
-    # Detect affected scopes by cross-referencing with changed files
-    scopes_dir = mpga_dir / "scopes"
-    scopes: list[str] = []
-    changed_file_list = [f for f in changed_files.split("\n") if f.strip()] if changed_files else []
-    if scopes_dir.exists():
-        scope_files = [f for f in scopes_dir.iterdir() if f.suffix == ".md"]
-        for sf in scope_files:
-            scope_name = sf.stem
-            scope_content = sf.read_text(encoding="utf-8")
-            scope_path_segments = scope_name.replace("src-", "src/").split("-")
+        # Detect affected scopes from DB by cross-referencing with changed files
+        changed_file_list = [f for f in changed_files.split("\n") if f.strip()] if changed_files else []
+        scopes: list[str] = []
+        db_scopes = ScopeRepo(conn).list_all()
+        for scope_row in db_scopes:
+            scope_path_segments = scope_row.id.replace("src-", "src/").split("-")
             is_affected = any(
-                any(seg in file for seg in scope_path_segments) or scope_content.find(file) != -1
+                any(seg in file for seg in scope_path_segments)
                 for file in changed_file_list
             )
             if is_affected:
-                scopes.append(scope_name)
+                scopes.append(scope_row.id)
+
+        decisions = DecisionRepo(conn).list_all()
+    finally:
+        conn.close()
 
     # Build PR description markdown
     lines: list[str] = []
@@ -136,6 +141,13 @@ def pr_cmd() -> None:
             lines.append(f"- {link}")
         lines.append("")
 
+    if decisions:
+        lines.append("### Decisions")
+        lines.append("")
+        for decision in decisions[-5:]:
+            lines.append(f"- {decision.id}: {decision.title}")
+        lines.append("")
+
     click.echo("\n".join(lines))
 
 
@@ -151,7 +163,8 @@ def decision_cmd(title: str) -> None:
     project_root = find_project_root() or Path.cwd()
     mpga_dir = Path(project_root) / "MPGA"
 
-    if not mpga_dir.exists():
+    db_exists = (Path(project_root) / ".mpga" / "mpga.db").exists()
+    if not mpga_dir.exists() and not db_exists:
         log.error("MPGA not initialized. Run `mpga init` first.")
         sys.exit(1)
 
@@ -206,4 +219,12 @@ Proposed
 """
 
     filepath.write_text(content, encoding="utf-8")
+
+    db_path = Path(project_root) / ".mpga" / "mpga.db"
+    conn = get_connection(str(db_path))
+    try:
+        create_schema(conn)
+        DecisionRepo(conn).create(filepath.stem, title, content)
+    finally:
+        conn.close()
     log.success(f"ADR created: {filepath}")

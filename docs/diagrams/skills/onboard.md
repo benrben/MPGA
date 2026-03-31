@@ -4,7 +4,7 @@
 
 ```mermaid
 flowchart TD
-    A[New developer arrives — very, very special] --> B[Read MPGA/INDEX.md — Evidence First]
+    A[New developer arrives — very, very special] --> B[Run mpga status — Evidence First]
     B --> C["Present project identity:\nType, size, key languages — the BASICS"]
     C --> D["Walk through scope registry:\nPurpose, key files, responsibilities\nfor EVERY scope — THOROUGH"]
     D --> E[Read and present GRAPH.md\nShow the BEAUTIFUL dependency map]
@@ -32,9 +32,9 @@ flowchart TD
 ```
 
 ## Inputs — The Foundation
-- MPGA/INDEX.md (scope registry and project identity) — the MASTER list
-- MPGA/GRAPH.md (dependency graph) — the CONNECTION map
-- Scope documents in MPGA/scopes/ — the DETAILED intel
+- Project status via `mpga status` (scope registry and project identity) — the MASTER list
+- Dependency graph via `mpga graph show` — the CONNECTION map
+- Scope documents via `mpga scope list` — the DETAILED intel
 - Active milestone and board state — what's IN PLAY
 
 ## Outputs — You'll Know EVERYTHING

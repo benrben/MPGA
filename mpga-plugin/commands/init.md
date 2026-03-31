@@ -13,11 +13,11 @@ Initialize MPGA in the current project and build the knowledge layer. Has a beau
 ## After initialization
 
 The user will have:
-- `MPGA/INDEX.md` — project map
-- `MPGA/GRAPH.md` — dependency graph
-- `MPGA/scopes/*.md` — one scope per top-level directory
-- `MPGA/board/board.json` — empty task board
-- `MPGA/mpga.config.json` — configuration — Tremendous setup, enjoy!
+- Project map — view with `mpga status`
+- Dependency graph — view with `mpga graph show`
+- Scope docs — one per top-level directory, view with `mpga scope list`
+- Empty task board — view with `mpga board show`
+- Configuration stored in the DB (`.mpga/mpga.db`) — Tremendous setup, enjoy!
 
 ## Usage
 ```

@@ -11,7 +11,7 @@ from click.testing import CliRunner
 
 def setup_board(tmp_path: Path) -> Path:
     """Set up a minimal board structure and return the board dir."""
-    board_dir = tmp_path / "MPGA" / "board"
+    board_dir = tmp_path / ".mpga" / "board"
     tasks_dir = board_dir / "tasks"
     tasks_dir.mkdir(parents=True, exist_ok=True)
     return board_dir

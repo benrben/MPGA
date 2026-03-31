@@ -4,7 +4,7 @@ Auto-detect the next logical action based on current project state. Who can figu
 
 ## Decision tree
 
-1. Read `MPGA/INDEX.md` for active milestone
+1. Run `mpga status` for active milestone
 2. Read board state: `mpga board show --json`
 3. Check context budget: `mpga session budget`
 

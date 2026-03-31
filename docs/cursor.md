@@ -27,7 +27,7 @@ project-root/
 │   │   ├── mpga-sync-project/SKILL.md
 │   │   ├── mpga-plan/SKILL.md
 │   │   ├── mpga-develop/SKILL.md
-│   │   └── ...                     # all 11 skills
+│   │   └── ...                     # all skills
 │   └── agents/
 │       ├── mpga-campaigner.md      # readonly: true, is_background: true
 │       ├── mpga-green-dev.md
@@ -39,7 +39,7 @@ project-root/
 │       ├── mpga-researcher.md
 │       ├── mpga-reviewer.md
 │       └── mpga-verifier.md
-└── MPGA/
+└── .mpga/mpga.db   ← knowledge layer DB
 ```
 
 ## Rules (always-on context)
@@ -48,18 +48,18 @@ Four MDC files in `.cursor/rules/`. Cursor injects the `alwaysApply: true` files
 
 | File | alwaysApply | Content |
 |------|-------------|---------|
-| `mpga-project.mdc` | true | Project identity, read-before-coding protocol, `@MPGA/INDEX.md` reference |
+| `mpga-project.mdc` | true | Project identity, read-before-coding protocol, `mpga status` reference |
 | `mpga-evidence.mdc` | true | Evidence link format and verification commands |
 | `mpga-tdd.mdc` | true | TDD enforcement — test first, implement second |
-| `mpga-scopes.mdc` | false | Maps each scope to `@MPGA/scopes/<name>.md` — surfaced when relevant |
+| `mpga-scopes.mdc` | false | Maps each scope via `mpga scope show <name>` — surfaced when relevant |
 
 ## Skills
 
-11 MPGA skills in `.cursor/skills/mpga-*/SKILL.md`. Same format as Claude Code — Cursor's Agent Skills support was added alongside the plugin system. Invoke with slash commands in Cursor chat (e.g. `/mpga-sync-project`, `/mpga-plan`).
+All MPGA skills in `.cursor/skills/mpga-*/SKILL.md`. Same format as Claude Code — Cursor's Agent Skills support was added alongside the plugin system. Invoke with slash commands in Cursor chat (e.g. `/mpga-sync-project`, `/mpga-plan`).
 
 ## Subagents
 
-10 MPGA agents in `.cursor/agents/mpga-*.md`. Cursor agent format uses YAML frontmatter:
+All MPGA agents in `.cursor/agents/mpga-*.md`. Cursor agent format uses YAML frontmatter:
 
 ```markdown
 ---
@@ -108,16 +108,16 @@ Or in CI:
 
 ## Cursor-specific tips
 
-### Use `@MPGA/INDEX.md` in chat
+### Reference scope docs in chat
 
 ```
-@MPGA/INDEX.md @MPGA/scopes/auth.md
+@mpga status  @mpga scope show auth
 How does token refresh work?
 ```
 
-### Make sure MPGA/ is indexed
+### No special indexing needed
 
-The `mpga-scopes.mdc` file references `@MPGA/...` paths. Make sure `MPGA/` is **not** in `.cursorignore`.
+Scope data is served from the DB (`.mpga/mpga.db`) via CLI commands — no directory to add to `.cursorignore`.
 
 ## Windsurf
 

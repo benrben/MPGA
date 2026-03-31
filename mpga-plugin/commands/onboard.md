@@ -4,7 +4,7 @@ Guided codebase tour from INDEX.md outward for new developers or new sessions. V
 
 ## Steps
 
-1. Read `MPGA/INDEX.md` — present project identity
+1. Run `mpga status` — present project identity
 2. Explain project type, size, and key languages
 3. Walk through the scope registry
 4. Highlight the dependency graph from GRAPH.md

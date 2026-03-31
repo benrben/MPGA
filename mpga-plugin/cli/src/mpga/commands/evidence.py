@@ -9,8 +9,12 @@ import click
 
 from mpga.core.config import find_project_root, load_config
 from mpga.core.logger import console, log, progress_bar
-from mpga.evidence.drift import heal_scope_file, run_drift_check
-from mpga.evidence.parser import format_evidence_link
+from mpga.db.connection import get_connection
+from mpga.db.repos.evidence import EvidenceRepo
+from mpga.db.repos.scopes import ScopeRepo
+from mpga.db.schema import create_schema
+from mpga.evidence.drift import apply_healed_items_to_db, heal_scope_file, run_drift_check
+from mpga.evidence.parser import evidence_stats, format_evidence_link, parse_evidence_link, parse_evidence_links
 
 # Evidence health percentage at or above which status is considered good.
 EVIDENCE_HEALTH_GOOD_PCT = 80
@@ -112,11 +116,10 @@ def evidence_heal(auto: bool, scope: str | None) -> None:
                 log.dim(f"    {item.link.filepath}: lines {item.link.start_line}-{item.link.end_line} → {item.new_start}-{item.new_end}")
             if not click.confirm(f"Apply {len(scope_report.healed_items)} heal(s) to {scope_report.scope}?"):
                 continue
-        result = heal_scope_file(scope_report)
-        if result.healed > 0:
-            Path(scope_report.scope_path).write_text(result.content, encoding="utf-8")
-            log.success(f"{scope_report.scope}: healed {result.healed} link(s)")
-            total_healed += result.healed
+        healed = apply_healed_items_to_db(str(project_root), scope_report)
+        if healed > 0:
+            log.success(f"{scope_report.scope}: healed {healed} link(s)")
+            total_healed += healed
 
     stale_count = sum(r.stale_links for r in report.scopes)
     if total_healed > 0:
@@ -163,24 +166,44 @@ def evidence_coverage(min_pct: str) -> None:
 @click.argument("scope_name")
 @click.argument("link")
 def evidence_add(scope_name: str, link: str) -> None:
-    """Manually add an evidence link to a scope document."""
+    """Manually add an evidence link to a scope (DB only)."""
     project_root = find_project_root() or Path.cwd()
-    scope_path = project_root / "MPGA" / "scopes" / f"{scope_name}.md"
 
-    if not scope_path.exists():
-        log.error(f"Scope '{scope_name}' not found.")
+    evidence_link = link if link.startswith("[") else f"[E] {link}"
+    parsed_link = parse_evidence_link(evidence_link)
+
+    db_path = project_root / ".mpga" / "mpga.db"
+    if not db_path.exists():
+        log.error("No DB found. Run `mpga sync` first.")
         sys.exit(1)
 
-    content = scope_path.read_text(encoding="utf-8")
-    evidence_link = link if link.startswith("[") else f"[E] {link}"
+    conn = get_connection(str(db_path))
+    try:
+        create_schema(conn)
+        scope_repo = ScopeRepo(conn)
+        scope_row = scope_repo.get(scope_name)
+        if scope_row is None:
+            log.error(f"Scope '{scope_name}' not found.")
+            sys.exit(1)
 
-    # Insert before the Known unknowns section
-    if "## Known unknowns" in content:
-        updated = content.replace(
-            "## Known unknowns", f"{evidence_link}\n\n## Known unknowns"
-        )
-    else:
-        updated = content + "\n" + evidence_link + "\n"
+        if parsed_link is not None:
+            EvidenceRepo(conn).create(parsed_link, scope_name, None)
 
-    scope_path.write_text(updated, encoding="utf-8")
+        # Append link to in-DB content and update stats
+        existing_content = scope_row.content or ""
+        if "## Known unknowns" in existing_content:
+            updated = existing_content.replace(
+                "## Known unknowns", f"{evidence_link}\n\n## Known unknowns"
+            )
+        else:
+            updated = existing_content + "\n" + evidence_link + "\n"
+
+        stats = evidence_stats(parse_evidence_links(updated))
+        scope_row.content = updated
+        scope_row.evidence_total = stats.total
+        scope_row.evidence_valid = stats.valid
+        scope_repo.update(scope_row)
+    finally:
+        conn.close()
+
     log.success(f"Added evidence link to scope '{scope_name}': {evidence_link}")

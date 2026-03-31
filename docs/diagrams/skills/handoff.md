@@ -24,7 +24,7 @@ flowchart TD
 - Active task and TDD stage information
 
 ## Outputs — A PERFECT Handoff Package
-- Structured handoff document saved to MPGA/sessions/ — ORGANIZED
+- Structured handoff document saved via `mpga session handoff` (output to stdout) — ORGANIZED
 - Session log entry — we keep RECORDS
 - Copy-pasteable handoff template for new session — READY to go
 - Resume instructions with exact next action — NO confusion

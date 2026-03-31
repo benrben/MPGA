@@ -9,7 +9,7 @@ flowchart TD
     B --> C[Tests pass — NON-NEGOTIABLE\npytest]
     B --> D[Ruff passes — zero errors\nruff check .]
     B --> E[Evidence drift clean — VERIFIED\nmpga drift --quick]
-    B --> F["No uncommitted scope changes\ngit diff -- MPGA/scopes/ — LOCKED"]
+    B --> F["No uncommitted DB changes\ngit diff -- .mpga/ — LOCKED"]
 
     C --> H{All checks pass?}
     D --> H

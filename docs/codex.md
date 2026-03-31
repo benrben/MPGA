@@ -21,14 +21,14 @@ project-root/
 ├── src/
 │   └── auth/
 │       └── AGENTS.md                 # Subdirectory: scope-specific overrides
-├── MPGA/
-│   └── AGENTS.md                     # MPGA layer navigation guide
+├── .mpga/mpga.db                     # knowledge layer DB
+│   # (AGENTS.md generated from DB via `mpga export --codex`)
 ├── .codex/
 │   ├── skills/
 │   │   ├── mpga-sync-project/SKILL.md
 │   │   ├── mpga-plan/SKILL.md
 │   │   ├── mpga-develop/SKILL.md
-│   │   └── ...                       # all 11 skills
+│   │   └── ...                       # all skills
 │   └── agents/
 │       ├── mpga-campaigner.toml
 │       ├── mpga-green-dev.toml
@@ -40,19 +40,19 @@ project-root/
 │       ├── mpga-researcher.toml
 │       ├── mpga-reviewer.toml
 │       └── mpga-verifier.toml
-└── MPGA/
+└── .mpga/mpga.db   ← knowledge layer DB
 ```
 
 ## AGENTS.md files
 
 ### Root `AGENTS.md`
-Primary constitution. Contains the read-before-coding protocol, evidence link format, TDD rules, verification commands, and the full `MPGA/INDEX.md` content. Codex reads AGENTS.md files before doing any work, building an instruction chain from global scope down to the current working directory.
+Primary constitution. Contains the read-before-coding protocol, evidence link format, TDD rules, verification commands, and a summary generated from `mpga status`. Codex reads AGENTS.md files before doing any work, building an instruction chain from global scope down to the current working directory.
 
-### `MPGA/AGENTS.md`
+### `AGENTS.md` (knowledge layer navigation guide)
 Navigation guide for the knowledge layer — explains the tier structure, file purposes, and evidence link format. Helps agents understand what they're reading.
 
 ### `src/<module>/AGENTS.md` (per scope)
-Scope-specific overrides. Generated for each scope in `MPGA/scopes/`. When an agent is working inside `src/auth/`, it reads the local `AGENTS.md` and gets directed to `MPGA/scopes/auth.md` for full evidence.
+Scope-specific overrides. Generated for each scope via `mpga export --codex`. When an agent is working inside `src/auth/`, it reads the local `AGENTS.md` and runs `mpga scope show auth` for full evidence.
 
 ## Agents (TOML format)
 
@@ -68,7 +68,7 @@ developer_instructions = """
 Role: Explore codebase and build evidence. READ ONLY.
 
 Protocol:
-1. Read MPGA/INDEX.md — understand project structure and scope registry
+1. Run `mpga status` — understand project structure and scope registry
 2. Find relevant scope documents
 3. Navigate to files referenced in scopes
 4. Document findings as evidence links [E] filepath:line :: symbol()
@@ -85,7 +85,7 @@ Strict rules:
 
 ## Skills
 
-11 MPGA skills in `.codex/skills/mpga-*/SKILL.md`. Codex loads skills on demand when the conversation matches the skill's trigger description.
+All MPGA skills in `.codex/skills/mpga-*/SKILL.md`. Codex loads skills on demand when the conversation matches the skill's trigger description.
 
 ## Global config (user-level)
 
@@ -95,8 +95,8 @@ bash path/to/mpga-plugin/bin/mpga.sh export --codex --global
 
 Writes:
 - `~/.codex/AGENTS.md` — global MPGA methodology
-- `~/.codex/skills/mpga-*/` — 11 skills
-- `~/.codex/agents/mpga-*.toml` — 10 agents
+- `~/.codex/skills/mpga-*/` — all skills
+- `~/.codex/agents/mpga-*.toml` — all agents
 
 ## Gemini CLI
 
@@ -132,5 +132,5 @@ bash path/to/mpga-plugin/bin/mpga.sh export --all
 ## Tip: load scope docs manually
 
 ```bash
-cat MPGA/scopes/auth.md | codex "Given this context, add refresh token rotation"
+mpga scope show auth | codex "Given this context, add refresh token rotation"
 ```

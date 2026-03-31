@@ -11,9 +11,10 @@ from http.server import HTTPServer
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-import numpy as np
 import pytest
-import scipy.io.wavfile
+
+np = pytest.importorskip("numpy")
+wavfile = pytest.importorskip("scipy.io.wavfile")
 
 # ---------------------------------------------------------------------------
 # Register mpga_spoke_server at module import time (pytest_configure in test
@@ -48,7 +49,7 @@ def _make_wav_bytes(sample_rate: int = 22050) -> bytes:
     """Return minimal valid WAV bytes for mocking."""
     audio = np.zeros(sample_rate, dtype=np.float32)
     buf = io.BytesIO()
-    scipy.io.wavfile.write(buf, sample_rate, audio)
+    wavfile.write(buf, sample_rate, audio)
     return buf.getvalue()
 
 
@@ -193,5 +194,4 @@ class TestSpeakEndpoint:
         assert status == 200
         # Should be WAV data (starts with RIFF header)
         assert body[:4] == b"RIFF"
-
 

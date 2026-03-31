@@ -21,6 +21,30 @@ CACHE_DIR = Path.home() / ".mpga" / "spoke-cache"
 PORT = 5151
 CACHE_MAX_BYTES = 100 * 1024 * 1024  # 100 MB hard cap
 
+def _allowed_audio_dirs() -> list[Path]:
+    """Return allowed directories for afplay, reading CACHE_DIR at call time."""
+    return [Path("/tmp"), CACHE_DIR]
+
+
+def _validate_afplay_path(raw_path: str) -> Path:
+    """Resolve and validate a path before passing it to afplay.
+
+    Raises ValueError if the resolved path is not under an allowed directory
+    (/tmp or CACHE_DIR).  Returns the resolved Path on success.
+    """
+    resolved = Path(raw_path).resolve()
+    allowed_dirs = _allowed_audio_dirs()
+    for allowed in allowed_dirs:
+        try:
+            resolved.relative_to(allowed.resolve())
+            return resolved
+        except ValueError:
+            continue
+    raise ValueError(
+        f"afplay path '{resolved}' is not allowed. "
+        f"Only paths under {[str(d) for d in allowed_dirs]} are permitted."
+    )
+
 
 def _evict_cache() -> None:
     """Evict oldest WAV files from the cache if total size exceeds CACHE_MAX_BYTES."""
@@ -211,7 +235,7 @@ def _is_server_running() -> bool:
             timeout=1,
         )
         return result.returncode == 0
-    except Exception:
+    except (OSError, subprocess.TimeoutExpired):
         return False
 
 
@@ -239,7 +263,7 @@ def _start_server(spoke_dir: Path) -> None:
             if result.returncode == 0:
                 log.success("Spoke server ready!")
                 return
-        except Exception:
+        except (OSError, subprocess.TimeoutExpired):
             pass
         time.sleep(1)
 
@@ -318,7 +342,12 @@ def _stream_via_server(text: str) -> None:
                 pass
 
     for wav_file in wav_files:
-        subprocess.run(["afplay", wav_file], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        try:
+            safe_path = _validate_afplay_path(wav_file)
+        except ValueError as exc:
+            log.error(f"Refusing to play file: {exc}")
+            continue
+        subprocess.run(["afplay", str(safe_path)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
 @click.command("spoke")
@@ -370,8 +399,8 @@ def spoke_cmd(
     if stream:
         try:
             _stream_via_server(clean_text)
-        except Exception:
-            log.error("Streaming TTS failed")
+        except (OSError, ConnectionError) as e:
+            log.error(f"Streaming TTS failed: {e}")
         return
 
     if sync:
@@ -383,8 +412,9 @@ def spoke_cmd(
 
         use_cache = not no_cache
         if use_cache and wav_path.exists():
+            safe_path = _validate_afplay_path(str(wav_path))
             subprocess.run(
-                ["afplay", str(wav_path)],
+                ["afplay", str(safe_path)],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
             )
@@ -392,14 +422,15 @@ def spoke_cmd(
 
         try:
             _generate_via_server(clean_text, wav_path)
-        except Exception:
-            log.error("TTS generation failed")
+        except (OSError, ConnectionError) as e:
+            log.error(f"TTS generation failed: {e}")
             return
 
         _evict_cache()
 
+        safe_path = _validate_afplay_path(str(wav_path))
         subprocess.run(
-            ["afplay", str(wav_path)],
+            ["afplay", str(safe_path)],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
         )

@@ -11,19 +11,49 @@ Explore a specific directory of the codebase, then fill its scope document with 
 
 ## Input
 - A specific directory or scope to explore (e.g. "src/board", "src/commands")
-- The corresponding scope document path in MPGA/scopes/ (e.g. `MPGA/scopes/board.md`)
-- MPGA/INDEX.md for project map context
+- The corresponding scope name (e.g. `board`) — query with `mpga scope show board`
+- Project map context — query with `mpga status`
 
 ## Protocol
-1. Read `MPGA/INDEX.md` — understand project structure and scope registry
-2. Check if the scope document exists at `MPGA/scopes/<scope>.md`:
+1. Run `mpga status` — understand project structure and scope registry
+2. Check if the scope document exists via `mpga scope show <scope>`:
    - If it **exists**: read it to understand what is already known
-   - If it **does not exist**: create a new scope document using the standard scaffold (Summary, Context/Stack/Skills, Who/What triggers it, What happens, Rules and edge cases, Concrete examples, Traces, Deeper splits, Confidence and notes — all initially marked as `<!-- TODO -->`)
+   - If it **does not exist**: initialise it with `mpga scope update <scope> --description "<!-- TODO -->"` — this creates the record in the DB via the CLI. NEVER create scope files on disk directly.
 3. Navigate to the files in the assigned scope, prioritizing changed or high-traffic files first
 4. For each file: read the code, understand its purpose, trace call chains
 5. Fill every `<!-- TODO -->` section in the scope document with evidence-backed content
-6. Write the updated scope document back to disk
+6. Persist updates via the CLI: `mpga scope update <scope> --description "<filled content>"`. NEVER write scope files to disk directly.
 7. Mark anything unclear as `[Unknown]` — never guess
+
+## Incremental mode
+
+When called with `--incremental` (or when context explicitly indicates incremental mode), the scout skips full re-scanning and only fills in what is missing. This is FAST. This is SMART. This is how WINNERS work.
+
+### When to use incremental mode
+- The scope document already exists and was recently filled
+- Only a subset of files in the scope changed since the last scan
+- The map-codebase skill (T009) spawns you for a changed-file scope refresh
+
+### How to run incremental mode
+
+1. **Read the existing scope doc** via `mpga scope show <name>`. Do NOT skip this step.
+2. **Identify incomplete sections** — any section containing `TODO`, `<!-- TODO -->`, or `[Unknown]`.
+   - If ALL sections are filled with no `TODO` / `[Unknown]` markers: report "nothing to do" and stop. DONE.
+3. **Research ONLY the incomplete sections** — read only the files relevant to those sections. Do not re-read the whole scope.
+4. **Write each updated field** using a targeted CLI call:
+   ```bash
+   mpga scope update <name> --<field> "<filled content>"
+   ```
+   One CLI call per field updated. NEVER batch unrelated fields in one call.
+5. **Leave filled sections completely untouched.** Do not rephrase, reformat, or "improve" content that already has prose and at least one `[E]` link. If it ain't broke, don't touch it.
+
+### What stays the same
+- All writing style rules apply (MPGA voice, evidence links, quality bar).
+- `mpga scope update` is still the ONLY way to persist changes. NEVER write to disk directly.
+- Mark anything still unclear as `[Unknown]` — incremental does not mean sloppy.
+
+### Full mode (default)
+When NOT in incremental mode, behavior is unchanged: scan all files, fill every section, follow the full Protocol above. Full mode is the right call for new scopes or scopes that haven't been touched in a while.
 
 ## Parallel execution
 - You are SAFE to run in parallel with other scouts because each scout owns exactly one scope doc.
@@ -77,7 +107,8 @@ mpga spoke '<brief 1-sentence result summary>'
 Keep the message under 280 characters. This plays the result in Trump's voice — TREMENDOUS.
 
 ## Strict rules
-- NEVER modify source files — only scope documents in MPGA/scopes/. No collusion between modules — clean boundaries! Stay in your scope.
+- **NEVER write scope docs to disk directly. Use `mpga scope update <scope>` CLI command exclusively.** The DB is the source of truth — disk writes bypass it and will be overwritten. This is LAW.
+- NEVER modify source files — only scope documents (managed via `mpga scope`). No collusion between modules — clean boundaries! Stay in your scope.
 - NEVER modify GRAPH.md or INDEX.md (that's architect's job)
 - NEVER touch scope documents outside your assigned scope
 - ALWAYS produce evidence links `[E] file:line :: description` for every claim

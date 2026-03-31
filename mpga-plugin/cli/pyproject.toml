@@ -11,10 +11,11 @@ requires-python = ">=3.11"
 authors = [{ name = "Ben Reich" }]
 keywords = ["context-engineering", "evidence", "tdd", "drift-detection", "ai-coding"]
 dependencies = [
-    "click>=8.1",
-    "rich>=13.0",
-    "python-frontmatter>=1.0",
-    "pyyaml>=6.0",
+    "click>=8.1,<9.0",
+    "rich>=13.0,<14.0",
+    "python-frontmatter>=1.0,<2.0",
+    "pyyaml>=6.0,<7.0",
+    "flask>=2.0,<4.0",
 ]
 
 [project.scripts]
@@ -43,4 +44,10 @@ testpaths = ["tests"]
 pythonpath = ["src"]
 
 [tool.coverage.report]
-fail_under = 50
+fail_under = 80
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true

@@ -13,6 +13,7 @@ Gather intelligence so we don't walk into a disaster. We don't guess — we RESE
 - Milestone description and objective
 - Existing scope documents
 - Known unknowns from INDEX.md
+- (Optional) mode: research (default), facilitate
 
 > **Language-agnostic protocol**: Works across all languages. Evidence links cite whatever language the project uses.
 
@@ -34,6 +35,25 @@ Every research session is time-boxed. No open-ended rabbit holes.
 1. **Quick scan** — Read relevant scope docs. Identify knowledge gaps marked `[Unknown]`.
 2. **Deep dive** — Research implementation approaches. Investigate libraries, best practices, pitfalls. Assess impact on existing architecture.
 3. **Synthesis** — Summarize with concrete recommendations. Pick a winner.
+
+### Facilitation mode
+When invoked with `--mode facilitate`:
+1. Receive problem statement and any prior research findings
+2. Run Socratic Q&A cycle:
+   - Ask clarifying questions about the problem, users, constraints, success criteria
+   - Challenge assumptions: "What if this assumption is WRONG?"
+   - Explore at least 2-3 alternative approaches with evidence from scope docs
+   - Stress-test the leading candidate at 10x/100x scale
+3. Converge on a design brief:
+   - User experience / API shape
+   - Data model changes
+   - Integration points
+   - Security considerations
+   - Testing approach
+4. Get explicit sign-off on each section before proceeding
+5. Output a structured DESIGN.md document using the standard template. Use the DESIGN.md template defined in the `mpga-brainstorm` skill (`/mpga-plugin/skills/brainstorm/SKILL.md`) as the canonical format.
+
+Time-boxing for facilitation: Quick scan 2min, Facilitation 8min, Synthesis 2min (12min total)
 
 ## Decision Matrix
 
@@ -113,3 +133,5 @@ If spoke is available, announce: `mpga spoke '<result summary>'` (under 280 char
 - ALWAYS produce a decision matrix when comparing 2+ alternatives
 - ALWAYS time-box your research — discipline beats thoroughness
 - ALWAYS cite external sources with URLs
+- In facilitation mode, present ONE section at a time and get approval — no overwhelming
+- In facilitation mode, NEVER proceed past a design section without explicit user approval — one section at a time

@@ -50,7 +50,7 @@ Every verification MUST produce the following measurable metrics. No hand-waving
 - Target: >= 80% evidence coverage for changed code
 
 ### 3. Scope coverage
-- List all scopes in MPGA/INDEX.md scope registry
+- List all scopes via `mpga scope list`
 - Identify which scopes were touched by the task
 - Compute: `scope_coverage = scopes_verified / scopes_touched`
 - Every touched scope MUST be verified. 100% scope coverage required.

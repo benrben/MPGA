@@ -50,13 +50,12 @@ class TestCodexProjectLevel:
         """Creates root AGENTS.md with project content."""
         setup_mocks(monkeypatch)
         project_root = tmp_path / "my-project"
-        mpga_dir = project_root / "MPGA"
-        mpga_dir.mkdir(parents=True, exist_ok=True)
+        project_root.mkdir(parents=True, exist_ok=True)
 
         from mpga.commands.export.codex import export_codex
 
         index_content = "## File registry\n- src/index.ts\n"
-        export_codex(str(project_root), str(mpga_dir), index_content, "my-project", None, False)
+        export_codex(str(project_root), index_content, "my-project", None, False)
 
         agents_md = project_root / "AGENTS.md"
         assert agents_md.exists()
@@ -66,76 +65,15 @@ class TestCodexProjectLevel:
         assert "TDD protocol" in content
         assert index_content in content
 
-    def test_creates_mpga_agents_md(self, tmp_path: Path, monkeypatch):
-        """Creates MPGA/AGENTS.md navigation guide."""
-        setup_mocks(monkeypatch)
-        project_root = tmp_path / "my-project"
-        mpga_dir = project_root / "MPGA"
-        mpga_dir.mkdir(parents=True, exist_ok=True)
-
-        from mpga.commands.export.codex import export_codex
-
-        export_codex(str(project_root), str(mpga_dir), "", "my-project", None, False)
-
-        mpga_agents = mpga_dir / "AGENTS.md"
-        assert mpga_agents.exists()
-        content = mpga_agents.read_text()
-        assert "MPGA Knowledge Layer" in content
-        assert "Tier 1" in content
-        assert "Tier 2" in content
-        assert "INDEX.md" in content
-        assert "GRAPH.md" in content
-
-    def test_generates_subdir_agents_md(self, tmp_path: Path, monkeypatch):
-        """Generates subdirectory AGENTS.md files for scopes with matching src dirs."""
-        setup_mocks(monkeypatch)
-        project_root = tmp_path / "my-project"
-        mpga_dir = project_root / "MPGA"
-        scopes_dir = mpga_dir / "scopes"
-        scopes_dir.mkdir(parents=True, exist_ok=True)
-        (scopes_dir / "core.md").write_text(
-            "# Core\n[E] src/core/index.ts:1-10 :: main()\n[E] src/core/util.ts:5-20 :: helper()\n"
-        )
-
-        src_core_dir = project_root / "src" / "core"
-        src_core_dir.mkdir(parents=True, exist_ok=True)
-
-        from mpga.commands.export.codex import export_codex
-
-        export_codex(str(project_root), str(mpga_dir), "", "my-project", None, False)
-
-        subdir_agents = src_core_dir / "AGENTS.md"
-        assert subdir_agents.exists()
-        content = subdir_agents.read_text()
-        assert "core Module" in content
-        assert "MPGA/scopes/core.md" in content
-        assert "[E] src/core/index.ts:1-10 :: main()" in content
-
-    def test_skips_subdir_when_src_missing(self, tmp_path: Path, monkeypatch):
-        """Skips subdirectory AGENTS.md when matching src dir does not exist."""
-        setup_mocks(monkeypatch)
-        project_root = tmp_path / "my-project"
-        mpga_dir = project_root / "MPGA"
-        scopes_dir = mpga_dir / "scopes"
-        scopes_dir.mkdir(parents=True, exist_ok=True)
-        (scopes_dir / "missing.md").write_text("# Missing\n")
-
-        from mpga.commands.export.codex import export_codex
-
-        export_codex(str(project_root), str(mpga_dir), "", "my-project", None, False)
-
-        assert not (project_root / "src" / "missing" / "AGENTS.md").exists()
-
     def test_copies_skills_to(self, tmp_path: Path, monkeypatch):
         """Calls copySkillsTo with correct arguments."""
         mock_copy, _ = setup_mocks(monkeypatch)
         project_root = tmp_path / "my-project"
-        mpga_dir = project_root / "MPGA"
-        mpga_dir.mkdir(parents=True, exist_ok=True)
+        project_root.mkdir(parents=True, exist_ok=True)
 
         from mpga.commands.export.codex import export_codex
 
-        export_codex(str(project_root), str(mpga_dir), "", "my-project", "/some/plugin", False)
+        export_codex(str(project_root), "", "my-project", "/some/plugin", False)
 
         expected_skills_dir = str(project_root / ".codex" / "skills")
         mock_copy.assert_called_once_with(
@@ -149,12 +87,11 @@ class TestCodexProjectLevel:
         """Creates .codex/agents/ with TOML files for each agent."""
         setup_mocks(monkeypatch)
         project_root = tmp_path / "my-project"
-        mpga_dir = project_root / "MPGA"
-        mpga_dir.mkdir(parents=True, exist_ok=True)
+        project_root.mkdir(parents=True, exist_ok=True)
 
         from mpga.commands.export.codex import export_codex
 
-        export_codex(str(project_root), str(mpga_dir), "", "my-project", "/some/plugin", False)
+        export_codex(str(project_root), "", "my-project", "/some/plugin", False)
 
         agents_dir = project_root / ".codex" / "agents"
         assert agents_dir.exists()
@@ -172,12 +109,11 @@ class TestCodexProjectLevel:
         """TOML agent files escape double quotes in description."""
         setup_mocks(monkeypatch)
         project_root = tmp_path / "my-project"
-        mpga_dir = project_root / "MPGA"
-        mpga_dir.mkdir(parents=True, exist_ok=True)
+        project_root.mkdir(parents=True, exist_ok=True)
 
         from mpga.commands.export.codex import export_codex
 
-        export_codex(str(project_root), str(mpga_dir), "", "my-project", None, False)
+        export_codex(str(project_root), "", "my-project", None, False)
 
         toml_path = project_root / ".codex" / "agents" / "mpga-readonly-agent.toml"
         content = toml_path.read_text()
@@ -198,7 +134,7 @@ class TestCodexGlobalExport:
 
         from mpga.commands.export.codex import export_codex
 
-        export_codex("/unused", "/unused/MPGA", "", "proj", None, True)
+        export_codex("/unused", "", "proj", None, True)
 
         codex_dir = tmp_path / ".codex"
         assert codex_dir.exists()
@@ -210,7 +146,7 @@ class TestCodexGlobalExport:
 
         from mpga.commands.export.codex import export_codex
 
-        export_codex("/unused", "/unused/MPGA", "", "proj", None, True)
+        export_codex("/unused", "", "proj", None, True)
 
         agents_md = tmp_path / ".codex" / "AGENTS.md"
         assert agents_md.exists()
@@ -228,7 +164,7 @@ class TestCodexGlobalExport:
 
         # Should not throw on HOME lookup — may fail on path creation, which is fine
         try:
-            export_codex("/unused", "/unused/MPGA", "", "proj", None, True)
+            export_codex("/unused", "", "proj", None, True)
         except (FileNotFoundError, PermissionError, OSError):
             pass
 
@@ -244,15 +180,14 @@ class TestCodexContentVerification:
         """Root AGENTS.md contains verification commands section."""
         setup_mocks(monkeypatch)
         project_root = tmp_path / "proj"
-        mpga_dir = project_root / "MPGA"
-        mpga_dir.mkdir(parents=True, exist_ok=True)
+        project_root.mkdir(parents=True, exist_ok=True)
 
         from mpga.commands.export.codex import export_codex
 
-        export_codex(str(project_root), str(mpga_dir), "", "proj", "/plugin", False)
+        export_codex(str(project_root), "", "proj", "/plugin", False)
 
         content = (project_root / "AGENTS.md").read_text()
-        assert "npm test" in content
+        assert "see project README for the test command" in content
         assert "./.mpga-runtime/bin/mpga.sh evidence verify" in content
         assert "./.mpga-runtime/bin/mpga.sh board show" in content
 
@@ -260,37 +195,14 @@ class TestCodexContentVerification:
         """Root AGENTS.md contains timestamp."""
         setup_mocks(monkeypatch)
         project_root = tmp_path / "proj"
-        mpga_dir = project_root / "MPGA"
-        mpga_dir.mkdir(parents=True, exist_ok=True)
+        project_root.mkdir(parents=True, exist_ok=True)
 
         from mpga.commands.export.codex import export_codex
 
-        export_codex(str(project_root), str(mpga_dir), "", "proj", None, False)
+        export_codex(str(project_root), "", "proj", None, False)
 
         content = (project_root / "AGENTS.md").read_text()
         assert "Generated by MPGA" in content
-
-    def test_subdir_agents_md_limits_evidence(self, tmp_path: Path, monkeypatch):
-        """Subdirectory AGENTS.md limits evidence links to 5."""
-        setup_mocks(monkeypatch)
-        project_root = tmp_path / "proj"
-        mpga_dir = project_root / "MPGA"
-        scopes_dir = mpga_dir / "scopes"
-        scopes_dir.mkdir(parents=True, exist_ok=True)
-
-        links = [f"[E] src/big/file{i}.ts:1-10 :: fn{i}()" for i in range(8)]
-        (scopes_dir / "big.md").write_text("# Big\n" + "\n".join(links) + "\n")
-
-        src_big_dir = project_root / "src" / "big"
-        src_big_dir.mkdir(parents=True, exist_ok=True)
-
-        from mpga.commands.export.codex import export_codex
-
-        export_codex(str(project_root), str(mpga_dir), "", "proj", None, False)
-
-        content = (src_big_dir / "AGENTS.md").read_text()
-        evidence_lines = [ln for ln in content.split("\n") if "[E]" in ln]
-        assert len(evidence_lines) <= 5
 
 
 # ---------------------------------------------------------------------------

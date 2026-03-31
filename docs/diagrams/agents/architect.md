@@ -34,7 +34,7 @@ flowchart TD
 
 ## Inputs — What We're Working With
 
-- Scope documents in MPGA/scopes/ — filled by our FANTASTIC scout agents
+- Scope documents (filled by our FANTASTIC scout agents) — view with `mpga scope list`
 - Existing GRAPH.md — the map of GREATNESS
 - Codebase for verification — the REAL source of truth
 - Module dependency graph — imports, exports, cross-scope references, the WHOLE deal
@@ -44,5 +44,5 @@ flowchart TD
 - Verified and consistent scope documents — PERFECT, like my buildings
 - Updated GRAPH.md with verified dependencies — nobody builds graphs like us
 - Smell report with evidence-backed findings and severity ratings — Evidence First, we tell it like it IS
-- ADRs for any proposed architectural changes (in MPGA/adrs/) — TREMENDOUS decisions
+- ADRs for any proposed architectural changes (stored in the DB (`.mpga/mpga.db`)) — TREMENDOUS decisions
 - Dependency graph impact analysis for all proposed changes — we think BIGLY

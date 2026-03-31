@@ -3,130 +3,122 @@ name: mpga-handoff
 description: Export current session state for a fresh context window
 ---
 
+## Orchestration Contract
+
+This skill is a PURE ORCHESTRATOR. It coordinates agents but never performs work directly.
+
+- NEVER run git commands (rev-parse, log, status, stash list, etc.)
+- NEVER read board state directly
+- NEVER compose or assemble handoff documents inline
+- NEVER write files or save session data directly
+- ALL state capture and document generation is delegated to the `recorder` agent
+- The skill MAY run read-only `mpga` CLI queries for pre-flight checks (e.g. `mpga session budget`)
+
+---
+
 ## handoff
 
 **Trigger:** Context window getting full or user requests handoff.
 
 ## Protocol
 
-1. Check context budget:
-   ```
-   mpga session budget
-   ```
+### 1. Pre-flight: Check context budget
 
-2. Capture git state:
-   ```bash
-   # Current branch
-   git rev-parse --abbrev-ref HEAD
-   # Last commit hash + message
-   git log -1 --oneline
-   # Dirty files (staged + unstaged + untracked)
-   git status --short
-   # Stash count
-   git stash list | wc -l
-   ```
+```
+mpga session budget
+```
 
-3. Capture task state from the board:
-   ```
-   mpga board show
-   ```
-   Identify: current task ID, TDD stage (red/green/blue), what tests pass, what tests fail.
+This is a read-only CLI query to determine urgency. If budget is critically low, note this when spawning recorder so it prioritizes speed.
 
-4. Compose the structured handoff document using the **Handoff Template** below. Fill in every section — no blanks, no shortcuts.
+### 2. Spawn the `recorder` agent
 
-5. Save handoff document:
-   ```
-   mpga session handoff --accomplished "<summary>"
-   ```
+Delegate ALL capture and document generation to `recorder`. Provide:
 
-6. Log the session:
-   ```
-   mpga session log "<brief description of work done>"
-   ```
+- **Session context**: any relevant focus area the user specified (e.g. "scope:auth", "board tasks only")
+- **Urgency**: whether context budget is critical
+- **Output expectations**: recorder should produce a self-contained handoff document matching the Expected Output Format below
 
-7. Output the completed handoff template as a fenced markdown block so the user can copy-paste it into a new session.
+The recorder will:
+- Capture git state (branch, last commit, dirty files, stash count)
+- Capture board state (in-progress tasks, blocked tasks, milestone progress)
+- Determine TDD stages for in-progress tasks
+- Extract decisions made and blockers encountered
+- Generate the complete handoff document
+- Save via `mpga session handoff --accomplished "<summary>"`
+- Log via `mpga session log "<description>"`
+- Return the completed handoff document
 
-8. Tell the user:
-   - The handoff file location
-   - How to resume: load handoff + INDEX.md + relevant scopes
-   - What the next action is — exactly what to do next.
+### 3. Present the completed handoff
+
+Once recorder returns the handoff document:
+
+- Output the completed handoff document as a fenced markdown block so the user can copy-paste it into a new session.
+- Tell the user:
+  - The handoff file location
+  - How to resume (see Resume Instructions below)
+  - What the next action is — exactly what to do next
 
 ---
 
-## Handoff Template
+## Expected Output Format
 
-Output this template with all placeholders filled in. Every section is mandatory.
+The recorder agent should produce a document covering ALL of these sections. Every section is mandatory. This is the reference format — recorder has its own built-in template but the output must include at minimum:
 
-````markdown
-# Session Handoff — {{DATE}}
+- **Git State**: branch, last commit (hash + message), dirty file count and list, stash count
+- **Active Milestone**: ID, title, progress (X/Y tasks)
+- **In-Progress Tasks**: task ID, title, scope, TDD stage (red/green/blue), test pass/fail counts, notes
+- **Blocked Tasks**: task ID, title, blocker description, duration, urgency
+- **Decisions Made**: each decision with rationale and evidence links [E]
+- **Outstanding Questions**: each question with context
+- **Unresolved Blockers**: carry-forward blockers with impact and suggested next steps
+- **Resumption Guide**: numbered steps for the next session to pick up immediately
+- **Next Steps**: numbered list where the FIRST item is the immediate next action
+
+---
+
+## Handoff Document Template
+
+The recorder agent should populate placeholders using the hints below:
+
+```markdown
+# Handoff — {{DATE}} <!-- hint: ISO date from `date +%Y-%m-%d` -->
 
 ## Git State
-| Field | Value |
-|-------|-------|
-| **Branch** | `{{BRANCH}}` |
-| **Last commit** | `{{SHORT_HASH}} {{COMMIT_MSG}}` |
-| **Dirty files** | {{DIRTY_COUNT}} files (see list below) |
-| **Stash count** | {{STASH_COUNT}} |
+- Branch: {{BRANCH}} <!-- hint: from `git rev-parse --abbrev-ref HEAD` -->
+- Last commit: {{SHORT_HASH}} {{COMMIT_MSG}} <!-- hint: from `git log -1 --format='%h %s'` -->
+- Dirty files: {{DIRTY_COUNT}} <!-- hint: count of lines from `git status --porcelain` -->
+- Stash count: {{STASH_COUNT}} <!-- hint: from `git stash list | wc -l` -->
 
-### Dirty file list
+### Git status (short)
+{{GIT_STATUS_SHORT_OUTPUT}} <!-- hint: output of `git status --short` -->
+
+## Active Task
+- Task: {{TASK_ID}} — {{TASK_TITLE}} <!-- hint: e.g. T042 — Refactor auth module -->
+
+## Work Summary
+{{WORK_SUMMARY}} <!-- hint: 2-3 sentences describing what was accomplished this session -->
+
+## Decisions
+{{DECISIONS}} <!-- hint: bullet list of decisions made with rationale, e.g. "- Chose SQLite over Postgres for simplicity" -->
+
+## Blockers
+{{BLOCKERS}} <!-- hint: bullet list of unresolved blockers, or "(none)" if clear -->
+
+## Next Action
+{{IMMEDIATE_NEXT_ACTION}} <!-- hint: the single most important thing to do next, e.g. "Run test suite and fix remaining 2 failures" -->
 ```
-{{GIT_STATUS_SHORT_OUTPUT}}
-```
-
-## Task State
-| Field | Value |
-|-------|-------|
-| **Current task** | `{{TASK_ID}}` — {{TASK_TITLE}} |
-| **TDD stage** | {{red / green / blue / n/a}} |
-| **Passing tests** | {{LIST_OR_COUNT}} |
-| **Failing tests** | {{LIST_OR_COUNT_OR_NONE}} |
-| **Milestone** | {{MILESTONE_ID_OR_NONE}} |
-
-## Context Summary
-
-### What was being worked on
-<!-- 2-4 sentences describing the current focus area -->
-{{WORK_SUMMARY}}
-
-### Key decisions made
-<!-- Bullet list of decisions WITH rationale -->
-{{DECISIONS}}
-
-### Blockers encountered
-<!-- Bullet list, or "None" if clear -->
-{{BLOCKERS}}
-
-## Next Steps
-<!-- Numbered list — the FIRST item is what the next session should do IMMEDIATELY -->
-1. {{IMMEDIATE_NEXT_ACTION}}
-2. {{FOLLOW_UP_ACTION}}
-3. {{FURTHER_ACTION}}
-
-## Open Questions
-<!-- Anything unresolved that needs human input. "None" if clear. -->
-{{OPEN_QUESTIONS}}
 
 ---
 
-### Resume instructions
-```
-To resume in a new session:
-1. Paste this entire handoff document into the new session
-2. Load index: cat MPGA/INDEX.md
-3. Load relevant scope: cat MPGA/scopes/<scope>.md
-4. Run: /mpga:next
-```
-````
+## Resume Instructions
 
----
-
-## Resume Instructions to Provide to User
+Provide these to the user after presenting the handoff:
 
 ```
 To resume in a new session:
-1. Load context: cat MPGA/sessions/<date>-handoff.md
-2. Load index: cat MPGA/INDEX.md
-3. Load relevant scope: cat MPGA/scopes/<scope>.md
+1. Load context: `mpga session handoff` (output to stdout)
+2. View project status: `mpga status`
+3. Load relevant scope: `mpga scope show <scope>`
 4. Run: /mpga:next
 ```
 
@@ -142,11 +134,11 @@ Keep the message under 280 characters.
 
 ## Strict Rules
 
-- NEVER lose track of in-progress tasks — include them in handoff.
-- ALWAYS include the exact next action — no ambiguity.
-- If there's a task in progress, capture its TDD stage — red, green, or blue.
-- ALWAYS capture git state — branch, commit, dirty files, stash count. No exceptions.
-- ALWAYS output the full handoff template — every section filled. No placeholders left as-is.
-- The handoff document must be SELF-CONTAINED: a new session should be able to resume without you.
-- If tests are failing, include the exact test names and failure messages.
-- If there are open questions, be specific about what decision is needed and who can answer.
+- NEVER run git commands — recorder handles all git state capture.
+- NEVER compose or assemble the handoff document — recorder generates it.
+- NEVER write files or save session data — recorder handles all writes via `mpga session handoff` and `mpga session log`.
+- NEVER lose track of in-progress tasks — ensure recorder captures them.
+- ALWAYS verify the returned handoff document has every section filled before presenting to user.
+- ALWAYS include the exact next action in user-facing output — no ambiguity.
+- The handoff document must be SELF-CONTAINED: a new session should be able to resume without prior context.
+- If recorder marks anything as `[Unknown]`, surface that to the user explicitly.

@@ -5,7 +5,11 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 
-from mpga.evidence.parser import EvidenceLink, parse_evidence_links
+from mpga.db.connection import get_connection
+from mpga.db.repos.evidence import EvidenceRepo
+from mpga.db.repos.scopes import Scope, ScopeRepo
+from mpga.db.schema import create_schema
+from mpga.evidence.parser import EvidenceLink, format_evidence_link
 from mpga.evidence.resolver import verify_all_links
 
 
@@ -76,6 +80,78 @@ class DriftReport:
     ci_threshold: int
 
 
+def _load_db_scopes(
+    project_root: str,
+    scope_filter: str | None,
+) -> list[Scope] | None:
+    db_path = Path(project_root) / ".mpga" / "mpga.db"
+    if not db_path.exists():
+        return None
+
+    conn = get_connection(str(db_path))
+    try:
+        create_schema(conn)
+        repo = ScopeRepo(conn)
+        if scope_filter:
+            scope_row = repo.get(scope_filter)
+            return [scope_row] if scope_row is not None else []
+        return repo.list_all()
+    finally:
+        conn.close()
+
+
+def _build_scope_report(
+    *,
+    scope_name: str,
+    scope_path: str,
+    links: list[EvidenceLink],
+    project_root: str,
+) -> ScopeDriftReport:
+    results = verify_all_links(links, project_root)
+
+    valid = sum(1 for r in results if r.resolved.status == "valid")
+    healed = sum(1 for r in results if r.resolved.status == "healed")
+    stale = sum(1 for r in results if r.resolved.status == "stale")
+    total = len(results)
+    health_pct = 100 if total == 0 else round(((valid + healed) / total) * 100)
+
+    stale_items: list[StaleDriftItem] = []
+    for r in results:
+        if r.resolved.status != "stale":
+            continue
+        if not r.link.filepath:
+            reason = "No filepath in evidence link"
+        else:
+            full_path = Path(project_root) / r.link.filepath
+            if not full_path.exists():
+                reason = f"File not found: {r.link.filepath}"
+            else:
+                reason = "Symbol not found in file"
+        stale_items.append(StaleDriftItem(link=r.link, reason=reason))
+
+    healed_items: list[HealedDriftItem] = [
+        HealedDriftItem(
+            link=r.link,
+            new_start=r.resolved.start_line or 0,
+            new_end=r.resolved.end_line or 0,
+        )
+        for r in results
+        if r.resolved.status == "healed"
+    ]
+
+    return ScopeDriftReport(
+        scope=scope_name,
+        scope_path=scope_path,
+        total_links=total,
+        valid_links=valid,
+        healed_links=healed,
+        stale_links=stale,
+        health_pct=health_pct,
+        stale_items=stale_items,
+        healed_items=healed_items,
+    )
+
+
 def run_drift_check(
     project_root: str,
     ci_threshold: int,
@@ -94,84 +170,33 @@ def run_drift_check(
         A :class:`DriftReport` containing per-scope results and aggregate
         health metrics.
     """
-    mpga_dir = Path(project_root) / "MPGA"
-    scopes_dir = mpga_dir / "scopes"
-
     now = datetime.now(UTC).isoformat()
     reports: list[ScopeDriftReport] = []
+    db_scopes = _load_db_scopes(project_root, scope_filter)
+    if db_scopes is None:
+        raise RuntimeError("No scope data in DB. Run `mpga sync` first.")
 
-    if not scopes_dir.exists():
-        return DriftReport(
-            timestamp=now,
-            project_root=project_root,
-            scopes=[],
-            overall_health_pct=100,
-            total_links=0,
-            valid_links=0,
-            ci_pass=True,
-            ci_threshold=ci_threshold,
-        )
-
-    scope_files = sorted(
-        f.name
-        for f in scopes_dir.iterdir()
-        if f.suffix == ".md"
-        and (not scope_filter or f.name == f"{scope_filter}.md")
-    )
-
-    for scope_file in scope_files:
-        scope_name = scope_file.removesuffix(".md")
-        scope_path = scopes_dir / scope_file
-        content = scope_path.read_text(encoding="utf-8")
-        links = [
-            lnk
-            for lnk in parse_evidence_links(content)
-            if lnk.type in ("valid", "stale")
-        ]
-
-        results = verify_all_links(links, project_root)
-
-        valid = sum(1 for r in results if r.resolved.status == "valid")
-        healed = sum(1 for r in results if r.resolved.status == "healed")
-        stale = sum(1 for r in results if r.resolved.status == "stale")
-        total = len(results)
-        health_pct = 100 if total == 0 else round(((valid + healed) / total) * 100)
-
-        stale_items: list[StaleDriftItem] = []
-        for r in results:
-            if r.resolved.status != "stale":
-                continue
-            if not r.link.filepath:
-                reason = "No filepath in evidence link"
-            else:
-                full_path = Path(project_root) / r.link.filepath
-                if not full_path.exists():
-                    reason = f"File not found: {r.link.filepath}"
-                else:
-                    reason = "Symbol not found in file"
-            stale_items.append(StaleDriftItem(link=r.link, reason=reason))
-
-        healed_items: list[HealedDriftItem] = [
-            HealedDriftItem(
-                link=r.link,
-                new_start=r.resolved.start_line or 0,
-                new_end=r.resolved.end_line or 0,
-            )
-            for r in results
-            if r.resolved.status == "healed"
-        ]
-
-        reports.append(ScopeDriftReport(
-            scope=scope_name,
-            scope_path=str(scope_path),
-            total_links=total,
-            valid_links=valid,
-            healed_links=healed,
-            stale_links=stale,
-            health_pct=health_pct,
-            stale_items=stale_items,
-            healed_items=healed_items,
-        ))
+    if db_scopes:
+        conn = get_connection(str(Path(project_root) / ".mpga" / "mpga.db"))
+        try:
+            create_schema(conn)
+            evidence_repo = EvidenceRepo(conn)
+            for scope_row in db_scopes:
+                links = [
+                    link
+                    for link in evidence_repo.find(scope_id=scope_row.id)
+                    if link.type in ("valid", "stale")
+                ]
+                reports.append(
+                    _build_scope_report(
+                        scope_name=scope_row.id,
+                        scope_path=str(Path(project_root) / "MPGA" / "scopes" / f"{scope_row.id}.md"),
+                        links=links,
+                        project_root=project_root,
+                    )
+                )
+        finally:
+            conn.close()
 
     total_links = sum(r.total_links for r in reports)
     valid_links = sum(r.valid_links + r.healed_links for r in reports)
@@ -189,6 +214,42 @@ def run_drift_check(
         ci_pass=overall_health_pct >= ci_threshold,
         ci_threshold=ci_threshold,
     )
+
+
+def apply_healed_items_to_db(project_root: str, report: ScopeDriftReport) -> int:
+    db_path = Path(project_root) / ".mpga" / "mpga.db"
+    if not db_path.exists():
+        return 0
+
+    conn = get_connection(str(db_path))
+    try:
+        create_schema(conn)
+        repo = EvidenceRepo(conn)
+        healed = 0
+        for item in report.healed_items:
+            updated_link = EvidenceLink(
+                raw=item.link.raw,
+                type="valid",
+                confidence=item.link.confidence,
+                filepath=item.link.filepath,
+                start_line=item.new_start,
+                end_line=item.new_end if item.link.end_line is not None or not item.link.symbol else None,
+                symbol=item.link.symbol,
+                symbol_type=item.link.symbol_type,
+                description=item.link.description,
+                stale_date=None,
+                last_verified=datetime.now(UTC).isoformat(),
+            )
+            updated_link.raw = format_evidence_link(updated_link)
+            repo.update_resolution(
+                scope_id=report.scope,
+                original_raw=item.link.raw,
+                updated_link=updated_link,
+            )
+            healed += 1
+        return healed
+    finally:
+        conn.close()
 
 
 @dataclass

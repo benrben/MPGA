@@ -72,7 +72,7 @@ def acquire_board_lock(
                 encoding="utf-8",
             )
             return True
-        except Exception:
+        except (json.JSONDecodeError, OSError):
             # Corrupted lock file -- override it
             lock_path.write_text(
                 json.dumps({"pid": content.pid, "timestamp": content.timestamp}),
@@ -101,7 +101,7 @@ def acquire_board_lock(
                 encoding="utf-8",
             )
             return True
-        except Exception:
+        except (json.JSONDecodeError, OSError):
             lock_path.write_text(
                 json.dumps({"pid": content.pid, "timestamp": content.timestamp}),
                 encoding="utf-8",

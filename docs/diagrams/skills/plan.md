@@ -13,7 +13,7 @@ flowchart TD
     D -->|New| E
     E --> F
 
-    F --> G["Read MPGA/INDEX.md\n+ relevant scope docs — the INTEL"]
+    F --> G["Run mpga status\n+ mpga scope show — the INTEL"]
     G --> H{Research needed?\nconfig.agents.researchBeforePlan}
     H -->|Yes| I["Spawn researcher + scout agents\nin PARALLEL — maximum speed"]
     H -->|No| J[Break work into tasks — PRECISION]
@@ -42,7 +42,7 @@ flowchart TD
 
 ## Inputs — The Raw Vision
 - Goal description or existing milestone — YOUR ambition
-- MPGA/INDEX.md and relevant scope documents
+- Project status via `mpga status` and relevant scope documents via `mpga scope show`
 - Optional researcher/scout evidence gathering — EXTRA intel
 
 ## Outputs — A WINNING Strategy

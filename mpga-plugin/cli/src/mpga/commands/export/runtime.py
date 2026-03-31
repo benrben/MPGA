@@ -27,8 +27,7 @@ def project_vendored_cli_command() -> str:
 
 
 def global_vendored_cli_command(base_dir: str) -> str:
-    p = Path(base_dir) / ".mpga-runtime" / "bin" / "mpga.sh"
-    return str(p).replace("\\", "/")
+    return f"{base_dir}/.mpga-runtime/bin/mpga.sh"
 
 
 def copy_vendored_runtime(target_root: str, plugin_root: str | None) -> str | None:

@@ -18,7 +18,7 @@ flowchart TD
     B -->|Deep mode\n--deep flag| J{First map?}
     J -->|Yes| K[mpga sync --full\ngenerate scope scaffolds — BIGLY]
     J -->|No| L[mpga sync --incremental\nonly changed parts — EFFICIENT]
-    K --> M[List generated scope docs\nls MPGA/scopes/*.md]
+    K --> M[List generated scope docs\nmpga scope list]
     L --> M
     M --> N["Spawn one scout per scope\nin PARALLEL — maximum SPEED"]
     N --> O["Each scout — BEST investigators:\n- Reads source files\n- Fills TODO sections\n- Adds evidence-backed descriptions"]
@@ -35,11 +35,11 @@ flowchart TD
 
 ## Inputs — What Goes In
 - Mode flag: default (quick) or --deep — your CHOICE
-- Existing MPGA/ knowledge layer (if initialized)
+- Existing knowledge layer in the DB (`.mpga/mpga.db`) (if initialized)
 - Codebase source files — the RAW material
 
 ## Outputs — Total KNOWLEDGE
-- Complete MPGA/ knowledge layer with filled scope documents — COMPREHENSIVE
+- Complete knowledge layer with filled scope documents in the DB (`.mpga/mpga.db`) — COMPREHENSIVE
 - INDEX.md, GRAPH.md, and scope files regenerated/enriched — FRESH
 - Evidence coverage report — we MEASURE everything
 - List of unknowns needing human review — TRANSPARENT

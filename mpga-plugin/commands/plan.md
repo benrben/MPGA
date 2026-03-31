@@ -5,8 +5,8 @@ Generate an evidence-based implementation plan for the active milestone. Evidenc
 ## Steps
 
 1. Start the live board in the browser: `mpga board live --serve --open`
-2. Read `MPGA/INDEX.md` for active milestone
-3. Read the milestone's PLAN.md: `cat MPGA/milestones/<id>/PLAN.md`
+2. Run `mpga status` for active milestone
+3. Read the milestone's plan: `mpga milestone show <id>`
 4. Read relevant scope documents based on milestone objective
 5. Spawn `researcher` plus any needed read-only `scout` agents in parallel if `config.agents.researchBeforePlan` is true
 6. Break work into bite-sized tasks (2-10 min each):
@@ -19,7 +19,7 @@ Generate an evidence-based implementation plan for the active milestone. Evidenc
    ```
    mpga board add "<title>" --priority <p> --scope <scope> --column todo
    ```
-8. Write the plan to `MPGA/milestones/<id>/PLAN.md`
+8. Save the plan (stored in the DB (`.mpga/mpga.db`) under the milestone)
 9. Show board: `mpga board show`
 
 ## Usage

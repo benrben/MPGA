@@ -9,7 +9,7 @@ from __future__ import annotations
 import re
 import sys
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Literal
 
@@ -19,66 +19,33 @@ from mpga.board.board import load_board, recalc_stats, save_board
 from mpga.board.board_md import render_board_md
 from mpga.core.config import find_project_root
 from mpga.core.logger import console, log
-
-# ---------------------------------------------------------------------------
-# Data types
-# ---------------------------------------------------------------------------
-
-
-@dataclass
-class MilestoneInfo:
-    id: str
-    name: str
-    dir_path: str
-    status: Literal["active", "complete", "planned"]
-    created: str
-
+from mpga.db.connection import get_connection
+from mpga.db.repos.milestones import Milestone, MilestoneRepo
+from mpga.db.schema import create_schema
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
 
 
-def _get_milestones_dir(project_root: str) -> str:
-    return str(Path(project_root) / "MPGA" / "milestones")
-
-
-def _list_milestones(milestones_dir: str) -> list[MilestoneInfo]:
-    p = Path(milestones_dir)
-    if not p.exists():
-        return []
-    results: list[MilestoneInfo] = []
-    for d in sorted(p.iterdir()):
-        if not d.is_dir():
-            continue
-        if not re.match(r"^M\d+", d.name):
-            continue
-        m = re.match(r"^(M\d+)-(.+)", d.name)
-        summary_path = d / "SUMMARY.md"
-        results.append(
-            MilestoneInfo(
-                id=m.group(1) if m else d.name,
-                name=m.group(2).replace("-", " ") if m else d.name,
-                dir_path=str(d),
-                status="complete" if summary_path.exists() else "active",
-                created=datetime.fromtimestamp(d.stat().st_birthtime, tz=UTC).strftime("%Y-%m-%d")
-                if hasattr(d.stat(), "st_birthtime")
-                else datetime.fromtimestamp(d.stat().st_ctime, tz=UTC).strftime("%Y-%m-%d"),
-            )
-        )
-    return results
-
-
-def _next_milestone_id(milestones_dir: str) -> str:
-    existing = _list_milestones(milestones_dir)
+def _next_milestone_id(repo: MilestoneRepo) -> str:
+    existing = repo.list_all()
     nums: list[int] = []
     for m in existing:
         try:
-            nums.append(int(m.id.replace("M", "")))
-        except ValueError:
+            # IDs are like "M001-slug" or "M001"
+            raw = m.id.split("-")[0]
+            nums.append(int(raw.replace("M", "")))
+        except (ValueError, IndexError):
             pass
     max_num = max(nums) if nums else 0
     return f"M{str(max_num + 1).zfill(3)}"
+
+
+def _open_milestone_repo(project_root: str) -> tuple[object, MilestoneRepo]:
+    conn = get_connection(str(Path(project_root) / ".mpga" / "mpga.db"))
+    create_schema(conn)
+    return conn, MilestoneRepo(conn)
 
 
 # ---------------------------------------------------------------------------
@@ -102,7 +69,7 @@ CompleteMilestoneResult = CompleteMilestoneOk | CompleteMilestoneFail
 
 
 def complete_active_milestone(project_root: str) -> CompleteMilestoneResult:
-    """Write SUMMARY, clear ``board.milestone``, save board + BOARD.md."""
+    """Clear ``board.milestone``, save board + BOARD.md, persist summary to DB."""
     board_dir = str(Path(project_root) / "MPGA" / "board")
     tasks_dir = str(Path(board_dir) / "tasks")
     board = load_board(board_dir)
@@ -111,11 +78,10 @@ def complete_active_milestone(project_root: str) -> CompleteMilestoneResult:
         return CompleteMilestoneFail(ok=False, error="no_active_milestone")
 
     milestone_slug = board.milestone
-    milestone_dir = Path(project_root) / "MPGA" / "milestones" / milestone_slug
-    today = datetime.now(UTC).strftime("%Y-%m-%d")
+    today = date.today().isoformat()
 
     recalc_stats(board, tasks_dir)
-    (milestone_dir / "SUMMARY.md").write_text(
+    summary_content = (
         f"# {milestone_slug} — Summary\n"
         "\n"
         f"## Completed: {today}\n"
@@ -125,8 +91,7 @@ def complete_active_milestone(project_root: str) -> CompleteMilestoneResult:
         f"- Evidence links produced: {board.stats.evidence_produced}\n"
         "\n"
         "## Outcome\n"
-        "(describe what was delivered)\n",
-        encoding="utf-8",
+        "(describe what was delivered)\n"
     )
 
     board.milestone = None
@@ -134,6 +99,28 @@ def complete_active_milestone(project_root: str) -> CompleteMilestoneResult:
     (Path(board_dir) / "BOARD.md").write_text(
         render_board_md(board, tasks_dir), encoding="utf-8"
     )
+
+    conn, repo = _open_milestone_repo(project_root)
+    try:
+        milestone = repo.get(milestone_slug)
+        if milestone is None:
+            repo.create(
+                Milestone(
+                    id=milestone_slug,
+                    name=milestone_slug,
+                    status="completed",
+                    summary=summary_content,
+                    completed_at=datetime.now(UTC).isoformat(),
+                )
+            )
+        else:
+            milestone.status = "completed"
+            milestone.summary = summary_content
+            milestone.completed_at = datetime.now(UTC).isoformat()
+            repo.update(milestone)
+        conn.commit()
+    finally:
+        conn.close()
 
     return CompleteMilestoneOk(ok=True, milestone_slug=milestone_slug)
 
@@ -155,57 +142,62 @@ def milestone() -> None:
 @click.argument("name")
 def milestone_new(name: str) -> None:
     project_root = find_project_root() or str(Path.cwd())
-    milestones_dir = _get_milestones_dir(project_root)
-    Path(milestones_dir).mkdir(parents=True, exist_ok=True)
 
-    mid = _next_milestone_id(milestones_dir)
-    slug = re.sub(r"[^a-z0-9]+", "-", name.lower())
-    slug = re.sub(r"^-|-$", "", slug)
-    dir_name = f"{mid}-{slug}"
-    dir_path = Path(milestones_dir) / dir_name
+    conn, repo = _open_milestone_repo(project_root)
+    try:
+        mid = _next_milestone_id(repo)
+        slug = re.sub(r"[^a-z0-9]+", "-", name.lower())
+        slug = re.sub(r"^-|-$", "", slug)
+        milestone_id = f"{mid}-{slug}"
 
-    dir_path.mkdir()
+        today = datetime.now(UTC).isoformat().split("T")[0]
 
-    now = datetime.now(UTC).isoformat()
-    today = now.split("T")[0]
+        plan_content = (
+            f"# {mid}: {name} — Plan\n"
+            "\n"
+            "## Objective\n"
+            "(describe what this milestone achieves)\n"
+            "\n"
+            "## Tasks\n"
+            "(run `/mpga:plan` to generate evidence-based tasks)\n"
+            "\n"
+            "## Acceptance criteria\n"
+            "- [ ] (define criteria)\n"
+            "\n"
+            "## Created\n"
+            f"{today}\n"
+        )
 
-    # PLAN.md
-    (dir_path / "PLAN.md").write_text(
-        f"# {mid}: {name} — Plan\n"
-        "\n"
-        "## Objective\n"
-        "(describe what this milestone achieves)\n"
-        "\n"
-        "## Tasks\n"
-        "(run `/mpga:plan` to generate evidence-based tasks)\n"
-        "\n"
-        "## Acceptance criteria\n"
-        "- [ ] (define criteria)\n"
-        "\n"
-        "## Created\n"
-        f"{today}\n",
-        encoding="utf-8",
-    )
+        context_content = (
+            f"# {mid}: {name} — Context\n"
+            "\n"
+            "## Background\n"
+            "(why this milestone, what problem it solves)\n"
+            "\n"
+            "## Constraints\n"
+            "- (list constraints)\n"
+            "\n"
+            "## Dependencies\n"
+            "- (list external dependencies)\n"
+            "\n"
+            "## Decisions\n"
+            "| Decision | Rationale | Date |\n"
+            "|----------|-----------|------|\n"
+            "| | | |\n"
+        )
 
-    # CONTEXT.md
-    (dir_path / "CONTEXT.md").write_text(
-        f"# {mid}: {name} — Context\n"
-        "\n"
-        "## Background\n"
-        "(why this milestone, what problem it solves)\n"
-        "\n"
-        "## Constraints\n"
-        "- (list constraints)\n"
-        "\n"
-        "## Dependencies\n"
-        "- (list external dependencies)\n"
-        "\n"
-        "## Decisions\n"
-        "| Decision | Rationale | Date |\n"
-        "|----------|-----------|------|\n"
-        "| | | |\n",
-        encoding="utf-8",
-    )
+        repo.create(
+            Milestone(
+                id=milestone_id,
+                name=name,
+                status="active",
+                plan=plan_content,
+                context=context_content,
+            )
+        )
+        conn.commit()
+    finally:
+        conn.close()
 
     # Link milestone to board
     board_dir = str(Path(project_root) / "MPGA" / "board")
@@ -213,7 +205,7 @@ def milestone_new(name: str) -> None:
     board_json_path = Path(board_dir) / "board.json"
     if board_json_path.exists():
         board = load_board(board_dir)
-        board.milestone = dir_name
+        board.milestone = milestone_id
         recalc_stats(board, tasks_dir)
         save_board(board_dir, board)
         (Path(board_dir) / "BOARD.md").write_text(
@@ -221,10 +213,9 @@ def milestone_new(name: str) -> None:
         )
 
     log.success(f"Created milestone {mid}: {name}")
-    log.dim(f"  Directory: MPGA/milestones/{dir_name}/")
+    log.dim(f"  ID: {milestone_id}")
     log.dim("")
     log.dim("Next steps:")
-    log.dim(f"  Edit MPGA/milestones/{dir_name}/PLAN.md")
     log.dim("  Run /mpga:plan to generate tasks")
 
 
@@ -234,18 +225,26 @@ def milestone_new(name: str) -> None:
 @milestone.command("list", help="List all milestones")
 def milestone_list() -> None:
     project_root = find_project_root() or str(Path.cwd())
-    milestones_dir = _get_milestones_dir(project_root)
-    milestones = _list_milestones(milestones_dir)
+    conn, repo = _open_milestone_repo(project_root)
+    try:
+        db_milestones = repo.list_all()
+    finally:
+        conn.close()
 
-    if not milestones:
+    if not db_milestones:
         log.info('No milestones yet. Run `mpga milestone new "<name>"` to create one.')
         return
 
     log.header("Milestones")
     rows: list[list[str]] = [["ID", "Name", "Status", "Created"]]
-    for m in milestones:
-        status_label = "\u2705 complete" if m.status == "complete" else "\U0001f504 active"
-        rows.append([m.id, m.name, status_label, m.created])
+    for milestone in db_milestones:
+        status_label = (
+            "\u2705 complete"
+            if milestone.status.startswith("complete")
+            else "\U0001f504 active"
+        )
+        created = milestone.created_at.split("T")[0] if milestone.created_at else "?"
+        rows.append([milestone.id, milestone.name, status_label, created])
     log.table(rows)
 
 
@@ -292,5 +291,5 @@ def milestone_complete() -> None:
     slug = result.milestone_slug  # type: ignore[union-attr]
 
     log.success(f"Milestone '{slug}' marked complete.")
-    log.dim(f"  Summary saved to MPGA/milestones/{slug}/SUMMARY.md")
+    log.dim("  Summary stored in DB (mpga milestone list to verify)")
     log.dim("  Run `mpga board archive` to archive done tasks.")

@@ -20,7 +20,7 @@ on:
   pull_request:
     paths:
       - 'src/**'
-      - 'MPGA/**'
+      - '.mpga/**'
 
 jobs:
   evidence:
@@ -64,7 +64,7 @@ mpga-evidence:
   rules:
     - changes:
         - src/**/*
-        - MPGA/**/*
+        - .mpga/**/*
 ```
 
 ## Bitbucket Pipelines
@@ -123,7 +123,7 @@ repos:
 
 ## Thresholds
 
-Configure in `MPGA/mpga.config.json`:
+Configure in the DB (`.mpga/mpga.db`) — or override at call time via flags:
 
 ```json
 {
@@ -177,5 +177,5 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: sync MPGA knowledge layer [skip ci]"
-          file_pattern: "MPGA/**"
+          file_pattern: ".mpga/**"
 ```

@@ -3,6 +3,12 @@ name: mpga-ask
 description: Answer "how does X work?" questions using scope docs and evidence links — the SMARTEST way to understand code
 ---
 
+## Orchestration Contract
+This skill is a **pure orchestrator**. It MUST NOT:
+- Read files directly (delegates to scout agents)
+- Write any files
+- Run CLI commands other than `mpga` board/status/scope list queries
+
 ## ask
 
 Evidence-backed answers. Evidence First — always.
@@ -11,15 +17,15 @@ Evidence-backed answers. Evidence First — always.
 
 ## The Winning Protocol
 
-1. Read `MPGA/INDEX.md` for scope registry — find the SMALLEST relevant scopes first. Precision, people. We don't do sloppy.
-2. Read relevant scope document(s) — the answers are in there.
-3. Answer the question using evidence links as citations — evidence, not guessing.
+1. Run `mpga scope list` — find the SMALLEST relevant scopes first. Precision, people. We don't do sloppy.
+2. Spawn one read-only `scout` agent per relevant scope in PARALLEL to gather evidence — never read files directly.
+3. Assemble the answer from scout outputs using evidence links as citations — evidence, not guessing.
 4. If the answer is incomplete — and sometimes, very rarely, it happens:
    - Spawn one read-only `scout` per missing scope in PARALLEL.
    - Ask each scout for evidence, traces, and unknowns only for its assigned scope.
    - Merge the findings into one answer.
-5. If the answer is already in scope docs, do NOT rescan the whole codebase.
-6. NEVER modify any files — read-only.
+5. If the answer is already covered by scout outputs, do NOT rescan the whole codebase.
+6. NEVER modify any files — read-only. NEVER read files directly — delegates to scouts.
 
 ## Confidence Scoring — We Rate EVERYTHING, Total Transparency
 
@@ -39,7 +45,7 @@ If the overall answer confidence is LOW, say so upfront: "This answer has LOW co
 Every claim MUST cite the specific source — no citations, no credibility. It's very simple:
 
 - For code: `[E] src/module/file.ts:42-67 :: functionName() — <what it does>`
-- For scope docs: `[E] MPGA/scopes/<scope>.md — <what it says>`
+- For scope docs: `[E] scope:<scope> — <what it says>` (view with `mpga scope show <scope>`)
 - For config files: `[E] path/to/config.json:key.path — <what it configures>`
 - If no source exists: `[Unknown] <claim> — not documented, needs investigation`
 

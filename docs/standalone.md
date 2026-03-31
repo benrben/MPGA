@@ -129,33 +129,33 @@ mpga graph export --json
 
 ## Reading the knowledge layer
 
-The `MPGA/` directory is plain markdown — readable by humans and any AI tool:
+The knowledge layer lives in the DB (`.mpga/mpga.db`) — query it with CLI commands:
 
 ```bash
 # What is this project?
-cat MPGA/INDEX.md
+mpga status
 
 # How does auth work?
-cat MPGA/scopes/auth.md
+mpga scope show auth
 
 # What are we building now?
-cat MPGA/board/BOARD.md
+mpga board show
 
 # What happened in the last session?
-cat MPGA/sessions/$(ls MPGA/sessions/ | tail -1)
+mpga session handoff
 ```
 
 ## Git integration
 
-Commit the `MPGA/` directory with your code:
+Commit the `.mpga/` directory with your code:
 
 ```gitignore
-# .gitignore — do NOT ignore MPGA/
-# The knowledge layer is part of the project
+# .gitignore — do NOT ignore .mpga/
+# The knowledge layer DB is part of the project
 ```
 
 ```bash
-git add MPGA/
+git add .mpga/mpga.db
 git commit -m "chore: update MPGA knowledge layer"
 ```
 

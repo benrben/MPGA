@@ -2,34 +2,17 @@ from __future__ import annotations
 
 from html import escape
 import os
-import re
 from pathlib import Path
 
 import click
 
+from mpga.commands._shared import _current_milestone
 from mpga.core.config import find_project_root
 from mpga.core.logger import log
 
 
-def _current_milestone(project_root: Path) -> str:
-    index_path = project_root / "MPGA" / "INDEX.md"
-    if index_path.exists():
-        content = index_path.read_text(encoding="utf-8")
-        match = re.search(r"## Active milestone\n(?:- )?([^\n]+)", content)
-        if match:
-            return match.group(1).strip()
-
-    milestones_dir = project_root / "MPGA" / "milestones"
-    if milestones_dir.exists():
-        names = sorted(path.name for path in milestones_dir.iterdir() if path.is_dir())
-        if names:
-            return names[-1]
-
-    return "M000-design-sandbox"
-
-
 def _design_root(project_root: Path, milestone: str) -> Path:
-    design_root = project_root / "MPGA" / "milestones" / milestone / "design"
+    design_root = project_root / ".mpga" / "wireframes" / milestone
     for folder in ("wireframes", "prototypes", "components", "screenshots"):
         (design_root / folder).mkdir(parents=True, exist_ok=True)
     return design_root

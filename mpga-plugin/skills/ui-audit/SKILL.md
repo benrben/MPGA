@@ -7,6 +7,14 @@ description: Run a focused UI quality audit after builds, during review, or as a
 
 **Trigger:** After a build, during review, or as a standalone audit when UI quality needs a hard check.
 
+## Orchestration Contract
+This skill is a **pure orchestrator**. It MUST NOT:
+- Read source files directly (delegates to appropriate agents)
+- Write or edit source files directly (delegates to write-enabled agents)
+- Run CLI commands other than `mpga` board/status/scope/session queries
+
+If you find yourself writing implementation steps in a skill, STOP and delegate to an agent.
+
 ## Protocol
 
 1. Identify the changed UI files or artifact paths.
@@ -18,15 +26,16 @@ description: Run a focused UI quality audit after builds, during review, or as a
 ## Standalone usage
 `/mpga:ui-audit [path] [--full]`
 
-## Rules
-- Use the `ui-auditor` agent for execution.
-- Prefer changed UI files first, then full-repo UI review if needed.
-- Keep the audit read-only and evidence-backed.
+## Strict Rules
+- ALWAYS use the `ui-auditor` agent for execution — NEVER inspect UI files directly.
+- ALWAYS prefer changed UI files first, then full-repo UI review if needed.
+- NEVER modify source files — the audit is READ ONLY and evidence-backed.
+- ALWAYS group findings by severity and auto-create board tasks for CRITICAL/HIGH issues.
 
 ## Voice announcement
 If spoke is available:
 ```bash
-mpga spoke 'UI audit complete. Findings ranked and ready for action.'
+mpga spoke '<brief 1-sentence result summary>'
 ```
 
 ## Output

@@ -60,7 +60,6 @@ class TestCursorProjectLevel:
 
         export_cursor(
             project_root=str(tmp_path),
-            mpga_dir=str(tmp_path / "MPGA"),
             index_content="# INDEX\n\n## Active milestone\nM001-alpha\n",
             project_name="test-project",
             plugin_root="/fake/plugin",
@@ -76,7 +75,6 @@ class TestCursorProjectLevel:
 
         export_cursor(
             project_root=str(tmp_path),
-            mpga_dir=str(tmp_path / "MPGA"),
             index_content="# INDEX\n\n## Active milestone\nM001-alpha\n",
             project_name="test-project",
             plugin_root="/fake/plugin",
@@ -94,7 +92,6 @@ class TestCursorProjectLevel:
 
         export_cursor(
             project_root=str(tmp_path),
-            mpga_dir=str(tmp_path / "MPGA"),
             index_content="# INDEX\n\n## Active milestone\nM001-alpha\n",
             project_name="test-project",
             plugin_root="/fake/plugin",
@@ -105,7 +102,6 @@ class TestCursorProjectLevel:
         assert "alwaysApply: true" in content
         assert "MPGA Project Context" in content
         assert "M001-alpha" in content
-        assert "@MPGA/INDEX.md" in content
 
     def test_evidence_mdc_content(self, tmp_path: Path, monkeypatch):
         """Generates mpga-evidence.mdc with evidence protocol."""
@@ -114,7 +110,6 @@ class TestCursorProjectLevel:
 
         export_cursor(
             project_root=str(tmp_path),
-            mpga_dir=str(tmp_path / "MPGA"),
             index_content="# INDEX\n",
             project_name="test-project",
             plugin_root="/fake/plugin",
@@ -135,7 +130,6 @@ class TestCursorProjectLevel:
 
         export_cursor(
             project_root=str(tmp_path),
-            mpga_dir=str(tmp_path / "MPGA"),
             index_content="# INDEX\n",
             project_name="test-project",
             plugin_root="/fake/plugin",
@@ -146,14 +140,13 @@ class TestCursorProjectLevel:
         assert "TDD Protocol (mandatory)" in content
         assert "WRITE FAILING TEST FIRST" in content
 
-    def test_scopes_mdc_no_scopes_fallback(self, tmp_path: Path, monkeypatch):
-        """Generates mpga-scopes.mdc with 'no scopes' fallback when dir missing."""
+    def test_scopes_mdc_content(self, tmp_path: Path, monkeypatch):
+        """Generates mpga-scopes.mdc with scope lookup instructions."""
         setup_mocks(monkeypatch)
         from mpga.commands.export.cursor import export_cursor
 
         export_cursor(
             project_root=str(tmp_path),
-            mpga_dir=str(tmp_path / "MPGA"),
             index_content="# INDEX\n",
             project_name="test-project",
             plugin_root="/fake/plugin",
@@ -162,32 +155,8 @@ class TestCursorProjectLevel:
 
         content = (tmp_path / ".cursor" / "rules" / "mpga-scopes.mdc").read_text()
         assert "MPGA Scope Lookup" in content
-        assert "no scopes yet" in content
-
-    def test_scopes_mdc_lists_existing(self, tmp_path: Path, monkeypatch):
-        """Generates mpga-scopes.mdc listing existing scope files."""
-        setup_mocks(monkeypatch)
-        scopes_dir = tmp_path / "MPGA" / "scopes"
-        scopes_dir.mkdir(parents=True, exist_ok=True)
-        (scopes_dir / "core.md").write_text("# Core\n")
-        (scopes_dir / "board.md").write_text("# Board\n")
-
-        from mpga.commands.export.cursor import export_cursor
-
-        export_cursor(
-            project_root=str(tmp_path),
-            mpga_dir=str(tmp_path / "MPGA"),
-            index_content="# INDEX\n",
-            project_name="test-project",
-            plugin_root="/fake/plugin",
-            is_global=False,
-        )
-
-        content = (tmp_path / ".cursor" / "rules" / "mpga-scopes.mdc").read_text()
-        assert "core" in content
-        assert "board" in content
-        assert "@MPGA/scopes/core.md" in content
-        assert "@MPGA/scopes/board.md" in content
+        assert "scope list" in content
+        assert "scope show" in content
 
     def test_copies_skills(self, tmp_path: Path, monkeypatch):
         """Copies skills to .cursor/skills/."""
@@ -196,7 +165,6 @@ class TestCursorProjectLevel:
 
         export_cursor(
             project_root=str(tmp_path),
-            mpga_dir=str(tmp_path / "MPGA"),
             index_content="# INDEX\n",
             project_name="test-project",
             plugin_root="/fake/plugin",
@@ -217,7 +185,6 @@ class TestCursorProjectLevel:
 
         export_cursor(
             project_root=str(tmp_path),
-            mpga_dir=str(tmp_path / "MPGA"),
             index_content="# INDEX\n",
             project_name="test-project",
             plugin_root="/fake/plugin",
@@ -242,7 +209,6 @@ class TestCursorProjectLevel:
 
         export_cursor(
             project_root=str(tmp_path),
-            mpga_dir=str(tmp_path / "MPGA"),
             index_content="# INDEX\n",
             project_name="test-project",
             plugin_root="/fake/plugin",
@@ -270,7 +236,6 @@ class TestCursorGlobalExport:
 
         export_cursor(
             project_root="/fake/project",
-            mpga_dir="/fake/project/MPGA",
             index_content="# INDEX\n",
             project_name="test-project",
             plugin_root="/fake/plugin",
@@ -294,7 +259,6 @@ class TestCursorGlobalExport:
 
         export_cursor(
             project_root=str(project_root),
-            mpga_dir=str(project_root / "MPGA"),
             index_content="# INDEX\n",
             project_name="test-project",
             plugin_root="/fake/plugin",
@@ -318,7 +282,6 @@ class TestCursorEdgeCases:
 
         export_cursor(
             project_root=str(tmp_path),
-            mpga_dir=str(tmp_path / "MPGA"),
             index_content="# INDEX\n\n## Scopes\n- core\n",
             project_name="test-project",
             plugin_root="/fake/plugin",
@@ -335,7 +298,6 @@ class TestCursorEdgeCases:
 
         export_cursor(
             project_root=str(tmp_path),
-            mpga_dir=str(tmp_path / "MPGA"),
             index_content="# INDEX\n",
             project_name="test-project",
             plugin_root=None,
@@ -345,28 +307,3 @@ class TestCursorEdgeCases:
         mock_copy.assert_called_once()
         assert mock_copy.call_args[0][1] is None
         assert mock_copy.call_args[0][3] == "mpga"
-
-    def test_scopes_mdc_filters_non_md(self, tmp_path: Path, monkeypatch):
-        """Scopes mdc filters non-.md files."""
-        setup_mocks(monkeypatch)
-        scopes_dir = tmp_path / "MPGA" / "scopes"
-        scopes_dir.mkdir(parents=True, exist_ok=True)
-        (scopes_dir / "core.md").write_text("# Core\n")
-        (scopes_dir / "README.txt").write_text("readme\n")
-        (scopes_dir / ".DS_Store").write_text("")
-
-        from mpga.commands.export.cursor import export_cursor
-
-        export_cursor(
-            project_root=str(tmp_path),
-            mpga_dir=str(tmp_path / "MPGA"),
-            index_content="# INDEX\n",
-            project_name="test-project",
-            plugin_root="/fake/plugin",
-            is_global=False,
-        )
-
-        content = (tmp_path / ".cursor" / "rules" / "mpga-scopes.mdc").read_text()
-        assert "core" in content
-        assert "README.txt" not in content
-        assert ".DS_Store" not in content

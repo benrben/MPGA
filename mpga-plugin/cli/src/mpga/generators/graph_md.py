@@ -105,7 +105,7 @@ def build_graph(
 
         try:
             content = full_path.read_text(encoding="utf-8")
-        except Exception:
+        except OSError:
             continue
 
         file_imports = _extract_imports(file.filepath, content, root)

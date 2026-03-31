@@ -197,7 +197,10 @@ def _extract_symbols_ast_python(content: str) -> list[SymbolLocation]:
         def visit_AsyncFunctionDef(self, node: _ast.AsyncFunctionDef) -> None:
             self._visit_func(node)
 
-    _Visitor().visit(tree)
+    try:
+        _Visitor().visit(tree)
+    except RecursionError:
+        pass  # return whatever was collected before hitting the limit
     return results
 
 

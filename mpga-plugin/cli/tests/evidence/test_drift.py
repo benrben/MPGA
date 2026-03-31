@@ -1,7 +1,13 @@
 """Tests for mpga.evidence.drift -- converted from drift.test.ts."""
 
+import pytest
 from pathlib import Path
 
+from mpga.db.connection import get_connection
+from mpga.db.repos.evidence import EvidenceRepo
+from mpga.db.repos.scopes import Scope, ScopeRepo
+from mpga.db.repos.symbols import SymbolRepo
+from mpga.db.schema import create_schema
 from mpga.evidence.drift import HealedDriftItem, ScopeDriftReport, heal_scope_file, run_drift_check
 from mpga.evidence.parser import EvidenceLink
 
@@ -14,29 +20,38 @@ def _write_file(base: Path, relative_path: str, content: str) -> Path:
     return full
 
 
+def _setup_db(tmp_path: Path) -> tuple:
+    """Create .mpga/mpga.db with schema, return (conn, scope_repo, evidence_repo)."""
+    db_path = tmp_path / ".mpga" / "mpga.db"
+    conn = get_connection(str(db_path))
+    create_schema(conn)
+    return conn, ScopeRepo(conn), EvidenceRepo(conn)
+
+
+def _insert_scope(scope_repo: ScopeRepo, scope_id: str, content: str = "") -> None:
+    scope_repo.create(Scope(id=scope_id, name=scope_id, summary="", content=content))
+
+
+def _insert_evidence(evidence_repo: EvidenceRepo, scope_id: str, link: EvidenceLink) -> None:
+    evidence_repo.create(link, scope_id, None)
+
+
 # ---------------------------------------------------------------------------
 # run_drift_check
 # ---------------------------------------------------------------------------
 
 
 class TestRunDriftCheck:
-    def test_returns_100_health_when_scopes_dir_does_not_exist(self, tmp_path: Path):
-        report = run_drift_check(str(tmp_path), 80)
-        assert report.overall_health_pct == 100
-        assert report.scopes == []
-        assert report.total_links == 0
-        assert report.valid_links == 0
-        assert report.ci_pass is True
-        assert report.ci_threshold == 80
-        assert report.project_root == str(tmp_path)
-        assert report.timestamp
+    def test_raises_when_no_db_exists(self, tmp_path: Path):
+        """When no DB exists at all, run_drift_check raises RuntimeError."""
+        with pytest.raises(RuntimeError, match="No scope data in DB"):
+            run_drift_check(str(tmp_path), 80)
 
     def test_returns_100_health_when_scope_has_no_evidence_links(self, tmp_path: Path):
-        _write_file(
-            tmp_path,
-            "MPGA/scopes/empty.md",
-            "# Empty Scope\n\nThis scope has no evidence links at all.\n",
-        )
+        conn, scope_repo, _ = _setup_db(tmp_path)
+        _insert_scope(scope_repo, "empty", "# Empty Scope\n\nThis scope has no evidence links at all.\n")
+        conn.close()
+
         report = run_drift_check(str(tmp_path), 80)
         assert report.overall_health_pct == 100
         assert len(report.scopes) == 1
@@ -48,11 +63,23 @@ class TestRunDriftCheck:
 
     def test_reports_valid_links_when_files_and_symbols_exist(self, tmp_path: Path):
         _write_file(tmp_path, "src/foo.ts", "export function myFunction() {\n  return 42;\n}\n")
-        _write_file(
-            tmp_path,
-            "MPGA/scopes/core.md",
-            "# Core Scope\n\n[E] src/foo.ts:1-3 :: myFunction\n",
+        conn, scope_repo, evidence_repo = _setup_db(tmp_path)
+        _insert_scope(scope_repo, "core", "# Core Scope\n\n[E] src/foo.ts:1-3 :: myFunction\n")
+        _insert_evidence(
+            evidence_repo,
+            "core",
+            EvidenceLink(
+                raw="[E] src/foo.ts:1-3 :: myFunction",
+                type="valid",
+                filepath="src/foo.ts",
+                start_line=1,
+                end_line=3,
+                symbol="myFunction",
+                confidence=1.0,
+            ),
         )
+        conn.close()
+
         report = run_drift_check(str(tmp_path), 80)
         assert len(report.scopes) == 1
         scope = report.scopes[0]
@@ -68,7 +95,20 @@ class TestRunDriftCheck:
 
     def test_reports_valid_for_file_only_evidence_link(self, tmp_path: Path):
         _write_file(tmp_path, "src/bar.ts", "export const x = 1;\n")
-        _write_file(tmp_path, "MPGA/scopes/misc.md", "# Misc\n\n[E] src/bar.ts\n")
+        conn, scope_repo, evidence_repo = _setup_db(tmp_path)
+        _insert_scope(scope_repo, "misc", "# Misc\n\n[E] src/bar.ts\n")
+        _insert_evidence(
+            evidence_repo,
+            "misc",
+            EvidenceLink(
+                raw="[E] src/bar.ts",
+                type="valid",
+                filepath="src/bar.ts",
+                confidence=1.0,
+            ),
+        )
+        conn.close()
+
         report = run_drift_check(str(tmp_path), 80)
         scope = report.scopes[0]
         assert scope.total_links == 1
@@ -77,11 +117,23 @@ class TestRunDriftCheck:
         assert scope.health_pct == 100
 
     def test_reports_stale_links_when_files_are_missing(self, tmp_path: Path):
-        _write_file(
-            tmp_path,
-            "MPGA/scopes/broken.md",
-            "# Broken Scope\n\n[E] src/nonexistent.ts:1-10 :: missingFunc\n",
+        conn, scope_repo, evidence_repo = _setup_db(tmp_path)
+        _insert_scope(scope_repo, "broken", "# Broken Scope\n\n[E] src/nonexistent.ts:1-10 :: missingFunc\n")
+        _insert_evidence(
+            evidence_repo,
+            "broken",
+            EvidenceLink(
+                raw="[E] src/nonexistent.ts:1-10 :: missingFunc",
+                type="valid",
+                filepath="src/nonexistent.ts",
+                start_line=1,
+                end_line=10,
+                symbol="missingFunc",
+                confidence=1.0,
+            ),
         )
+        conn.close()
+
         report = run_drift_check(str(tmp_path), 80)
         assert len(report.scopes) == 1
         scope = report.scopes[0]
@@ -97,11 +149,23 @@ class TestRunDriftCheck:
 
     def test_reports_stale_when_file_exists_but_symbol_not_found(self, tmp_path: Path):
         _write_file(tmp_path, "src/exists.ts", "export const unrelated = true;\n")
-        _write_file(
-            tmp_path,
-            "MPGA/scopes/sym.md",
-            "# Sym\n\n[E] src/exists.ts:1-5 :: noSuchSymbol\n",
+        conn, scope_repo, evidence_repo = _setup_db(tmp_path)
+        _insert_scope(scope_repo, "sym", "# Sym\n\n[E] src/exists.ts:1-5 :: noSuchSymbol\n")
+        _insert_evidence(
+            evidence_repo,
+            "sym",
+            EvidenceLink(
+                raw="[E] src/exists.ts:1-5 :: noSuchSymbol",
+                type="valid",
+                filepath="src/exists.ts",
+                start_line=1,
+                end_line=5,
+                symbol="noSuchSymbol",
+                confidence=1.0,
+            ),
         )
+        conn.close()
+
         report = run_drift_check(str(tmp_path), 80)
         scope = report.scopes[0]
         assert scope.stale_links == 1
@@ -114,11 +178,23 @@ class TestRunDriftCheck:
             "src/moved.ts",
             "// some header\n// another line\nexport function movedFunc() {\n  return 1;\n}\n",
         )
-        _write_file(
-            tmp_path,
-            "MPGA/scopes/heal.md",
-            "# Heal\n\n[E] src/moved.ts:1-3 :: movedFunc\n",
+        conn, scope_repo, evidence_repo = _setup_db(tmp_path)
+        _insert_scope(scope_repo, "heal", "# Heal\n\n[E] src/moved.ts:1-3 :: movedFunc\n")
+        _insert_evidence(
+            evidence_repo,
+            "heal",
+            EvidenceLink(
+                raw="[E] src/moved.ts:1-3 :: movedFunc",
+                type="valid",
+                filepath="src/moved.ts",
+                start_line=1,
+                end_line=3,
+                symbol="movedFunc",
+                confidence=1.0,
+            ),
         )
+        conn.close()
+
         report = run_drift_check(str(tmp_path), 80)
         scope = report.scopes[0]
         assert scope.total_links == 1
@@ -129,18 +205,56 @@ class TestRunDriftCheck:
     def test_scope_filter_limits_to_a_single_scope(self, tmp_path: Path):
         _write_file(tmp_path, "src/a.ts", "export function funcA() {}\n")
         _write_file(tmp_path, "src/b.ts", "export function funcB() {}\n")
-        _write_file(
-            tmp_path, "MPGA/scopes/alpha.md", "# Alpha\n\n[E] src/a.ts:1-1 :: funcA\n"
+        conn, scope_repo, evidence_repo = _setup_db(tmp_path)
+        _insert_scope(scope_repo, "alpha", "# Alpha\n\n[E] src/a.ts:1-1 :: funcA\n")
+        _insert_evidence(
+            evidence_repo,
+            "alpha",
+            EvidenceLink(
+                raw="[E] src/a.ts:1-1 :: funcA",
+                type="valid",
+                filepath="src/a.ts",
+                start_line=1,
+                end_line=1,
+                symbol="funcA",
+                confidence=1.0,
+            ),
         )
-        _write_file(
-            tmp_path, "MPGA/scopes/beta.md", "# Beta\n\n[E] src/b.ts:1-1 :: funcB\n"
+        _insert_scope(scope_repo, "beta", "# Beta\n\n[E] src/b.ts:1-1 :: funcB\n")
+        _insert_evidence(
+            evidence_repo,
+            "beta",
+            EvidenceLink(
+                raw="[E] src/b.ts:1-1 :: funcB",
+                type="valid",
+                filepath="src/b.ts",
+                start_line=1,
+                end_line=1,
+                symbol="funcB",
+                confidence=1.0,
+            ),
         )
+        conn.close()
+
         report = run_drift_check(str(tmp_path), 80, "alpha")
         assert len(report.scopes) == 1
         assert report.scopes[0].scope == "alpha"
 
     def test_scope_filter_returns_empty_scopes_when_filter_matches_nothing(self, tmp_path: Path):
-        _write_file(tmp_path, "MPGA/scopes/alpha.md", "# Alpha\n\n[E] src/a.ts\n")
+        conn, scope_repo, evidence_repo = _setup_db(tmp_path)
+        _insert_scope(scope_repo, "alpha", "# Alpha\n\n[E] src/a.ts\n")
+        _insert_evidence(
+            evidence_repo,
+            "alpha",
+            EvidenceLink(
+                raw="[E] src/a.ts",
+                type="valid",
+                filepath="src/a.ts",
+                confidence=1.0,
+            ),
+        )
+        conn.close()
+
         report = run_drift_check(str(tmp_path), 80, "nonexistent")
         assert len(report.scopes) == 0
         assert report.overall_health_pct == 100
@@ -148,57 +262,189 @@ class TestRunDriftCheck:
 
     def test_ci_pass_is_true_when_health_gte_threshold(self, tmp_path: Path):
         _write_file(tmp_path, "src/ok.ts", "export function okFunc() {}\n")
-        _write_file(
-            tmp_path, "MPGA/scopes/pass.md", "# Pass\n\n[E] src/ok.ts:1-1 :: okFunc\n"
+        conn, scope_repo, evidence_repo = _setup_db(tmp_path)
+        _insert_scope(scope_repo, "pass", "# Pass\n\n[E] src/ok.ts:1-1 :: okFunc\n")
+        _insert_evidence(
+            evidence_repo,
+            "pass",
+            EvidenceLink(
+                raw="[E] src/ok.ts:1-1 :: okFunc",
+                type="valid",
+                filepath="src/ok.ts",
+                start_line=1,
+                end_line=1,
+                symbol="okFunc",
+                confidence=1.0,
+            ),
         )
+        conn.close()
+
         report = run_drift_check(str(tmp_path), 100)
         assert report.ci_pass is True
 
     def test_ci_pass_is_false_when_health_lt_threshold(self, tmp_path: Path):
-        _write_file(
-            tmp_path,
-            "MPGA/scopes/fail.md",
-            "# Fail\n\n[E] src/missing.ts:1-10 :: gone\n",
+        conn, scope_repo, evidence_repo = _setup_db(tmp_path)
+        _insert_scope(scope_repo, "fail", "# Fail\n\n[E] src/missing.ts:1-10 :: gone\n")
+        _insert_evidence(
+            evidence_repo,
+            "fail",
+            EvidenceLink(
+                raw="[E] src/missing.ts:1-10 :: gone",
+                type="valid",
+                filepath="src/missing.ts",
+                start_line=1,
+                end_line=10,
+                symbol="gone",
+                confidence=1.0,
+            ),
         )
+        conn.close()
+
         report = run_drift_check(str(tmp_path), 50)
         assert report.overall_health_pct == 0
         assert report.ci_pass is False
 
     def test_computes_overall_health_pct_across_multiple_scopes(self, tmp_path: Path):
         _write_file(tmp_path, "src/good.ts", "export function goodFunc() {}\n")
-        _write_file(
-            tmp_path,
-            "MPGA/scopes/good.md",
-            "# Good\n\n[E] src/good.ts:1-1 :: goodFunc\n",
+        conn, scope_repo, evidence_repo = _setup_db(tmp_path)
+        _insert_scope(scope_repo, "good", "# Good\n\n[E] src/good.ts:1-1 :: goodFunc\n")
+        _insert_evidence(
+            evidence_repo,
+            "good",
+            EvidenceLink(
+                raw="[E] src/good.ts:1-1 :: goodFunc",
+                type="valid",
+                filepath="src/good.ts",
+                start_line=1,
+                end_line=1,
+                symbol="goodFunc",
+                confidence=1.0,
+            ),
         )
-        _write_file(
-            tmp_path,
-            "MPGA/scopes/bad.md",
-            "# Bad\n\n[E] src/nope.ts:1-5 :: nope\n",
+        _insert_scope(scope_repo, "bad", "# Bad\n\n[E] src/nope.ts:1-5 :: nope\n")
+        _insert_evidence(
+            evidence_repo,
+            "bad",
+            EvidenceLink(
+                raw="[E] src/nope.ts:1-5 :: nope",
+                type="valid",
+                filepath="src/nope.ts",
+                start_line=1,
+                end_line=5,
+                symbol="nope",
+                confidence=1.0,
+            ),
         )
+        conn.close()
+
         report = run_drift_check(str(tmp_path), 40)
         assert report.total_links == 2
         assert report.overall_health_pct == 50
         assert report.ci_pass is True  # 50 >= 40
 
-    def test_ignores_non_md_files_in_scopes_directory(self, tmp_path: Path):
-        _write_file(tmp_path, "MPGA/scopes/data.json", '{"not": "a scope"}')
-        _write_file(tmp_path, "MPGA/scopes/readme.txt", "not a scope")
+    def test_scope_with_no_evidence_links_in_db_is_handled_correctly(self, tmp_path: Path):
+        """Scopes with no evidence rows in DB should show 0 links and 100% health."""
+        conn, scope_repo, _ = _setup_db(tmp_path)
+        # Insert scope with no associated evidence rows
+        _insert_scope(scope_repo, "empty_scope", "# No Evidence\n\nNo links here.\n")
+        conn.close()
+
         report = run_drift_check(str(tmp_path), 80)
-        assert len(report.scopes) == 0
+        assert len(report.scopes) == 1
+        assert report.scopes[0].total_links == 0
+        assert report.scopes[0].health_pct == 100
         assert report.total_links == 0
 
     def test_filters_out_unknown_and_deprecated_link_types(self, tmp_path: Path):
-        _write_file(
-            tmp_path,
-            "MPGA/scopes/mixed.md",
+        _write_file(tmp_path, "src/valid.ts", "export const v = 1;\n")
+        conn, scope_repo, evidence_repo = _setup_db(tmp_path)
+        _insert_scope(
+            scope_repo,
+            "mixed",
             "# Mixed\n[E] src/valid.ts\n[Unknown] some unknown thing\n[Deprecated] src/old.ts:1-5\n",
         )
-        _write_file(tmp_path, "src/valid.ts", "export const v = 1;\n")
+        # Only insert valid-typed link; unknown/deprecated are filtered by run_drift_check
+        _insert_evidence(
+            evidence_repo,
+            "mixed",
+            EvidenceLink(
+                raw="[E] src/valid.ts",
+                type="valid",
+                filepath="src/valid.ts",
+                confidence=1.0,
+            ),
+        )
+        _insert_evidence(
+            evidence_repo,
+            "mixed",
+            EvidenceLink(
+                raw="[Unknown] some unknown thing",
+                type="unknown",
+                confidence=0.5,
+            ),
+        )
+        _insert_evidence(
+            evidence_repo,
+            "mixed",
+            EvidenceLink(
+                raw="[Deprecated] src/old.ts:1-5",
+                type="deprecated",
+                filepath="src/old.ts",
+                start_line=1,
+                end_line=5,
+                confidence=1.0,
+            ),
+        )
+        conn.close()
+
         report = run_drift_check(str(tmp_path), 80)
         scope = report.scopes[0]
         assert scope.total_links == 1
         assert scope.valid_links == 1
+
+    def test_reads_db_scopes_and_symbols_when_scope_files_are_missing(self, tmp_path: Path):
+        _write_file(
+            tmp_path,
+            "src/db.ts",
+            "// header\n// moved\nexport function dbFunc() {\n  return 1;\n}\n",
+        )
+        conn = get_connection(str(tmp_path / ".mpga" / "mpga.db"))
+        create_schema(conn)
+        conn.execute(
+            "INSERT INTO file_info (filepath, language, lines, size, content_hash, last_scanned) VALUES (?, ?, ?, ?, ?, datetime('now'))",
+            ("src/db.ts", "typescript", 5, 64, "hash",),
+        )
+        ScopeRepo(conn).create(
+            Scope(id="core", name="core", summary="db scope", content="# Scope: core")
+        )
+        EvidenceRepo(conn).create(
+            EvidenceLink(
+                raw="[E] src/db.ts:1-2 :: dbFunc()",
+                type="valid",
+                filepath="src/db.ts",
+                start_line=1,
+                end_line=2,
+                symbol="dbFunc",
+                confidence=1.0,
+            ),
+            "core",
+            None,
+        )
+        SymbolRepo(conn).create(
+            filepath="src/db.ts",
+            name="dbFunc",
+            type="function",
+            start_line=3,
+            end_line=5,
+        )
+        conn.close()
+
+        report = run_drift_check(str(tmp_path), 80)
+        assert len(report.scopes) == 1
+        scope = report.scopes[0]
+        assert scope.scope == "core"
+        assert scope.healed_links == 1
+        assert scope.stale_links == 0
 
 
 # ---------------------------------------------------------------------------

@@ -32,3 +32,25 @@ class TestExportClaude:
             "claude",
             "./.mpga-runtime/bin/mpga.sh",
         )
+
+    def test_exports_hook_configuration_into_settings(self, tmp_path: Path):
+        plugin_root = tmp_path / "plugin"
+        (plugin_root / "hooks").mkdir(parents=True)
+        (plugin_root / "hooks" / "hooks.json").write_text(
+            '{"hooks":{"SessionStart":[{"hooks":[{"type":"command","command":"${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh session start"}]}]}}',
+            encoding="utf-8",
+        )
+        (plugin_root / "agents").mkdir(parents=True)
+
+        from mpga.commands.export.claude import _deploy_claude_plugin
+
+        _deploy_claude_plugin(
+            str(tmp_path / ".claude"),
+            str(plugin_root),
+            str(tmp_path),
+            False,
+        )
+
+        settings = (tmp_path / ".claude" / "settings.json").read_text(encoding="utf-8")
+        assert "SessionStart" in settings
+        assert "./.mpga-runtime/bin/mpga.sh session start" in settings

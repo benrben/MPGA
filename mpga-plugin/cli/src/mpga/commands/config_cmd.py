@@ -39,9 +39,12 @@ def _flatten_config(obj: Any, prefix: str = "") -> list[tuple[str, Any]]:
     return result
 
 
-@click.group("config")
-def config_cmd() -> None:
+@click.group("config", invoke_without_command=True)
+@click.pass_context
+def config_cmd(ctx: click.Context) -> None:
     """View and update MPGA configuration."""
+    if ctx.invoked_subcommand is None:
+        click.echo(ctx.get_help())
 
 
 @config_cmd.command("show")
@@ -71,9 +74,9 @@ def config_set(key: str, value: str) -> None:
     project_root = find_project_root() or Path.cwd()
     config = load_config(project_root)
 
-    config_path = Path(project_root) / "mpga.config.json"
+    config_path = Path(project_root) / ".mpga" / "mpga.config.json"
     if not config_path.exists():
-        config_path = Path(project_root) / "MPGA" / "mpga.config.json"
+        config_path = Path(project_root) / "mpga.config.json"
 
     if not config_path.exists():
         log.error("No mpga.config.json found. Run `mpga init` first.")

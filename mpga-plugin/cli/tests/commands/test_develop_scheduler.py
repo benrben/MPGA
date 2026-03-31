@@ -21,7 +21,7 @@ from mpga.commands.develop_scheduler import (
 
 def setup_board(tmp_path: Path):
     """Set up minimal board structure, return (board_dir, tasks_dir)."""
-    board_dir = tmp_path / "MPGA" / "board"
+    board_dir = tmp_path / ".mpga" / "board"
     tasks_dir = board_dir / "tasks"
     tasks_dir.mkdir(parents=True, exist_ok=True)
     return board_dir, tasks_dir
@@ -185,6 +185,62 @@ class TestDevelopScheduler:
             if lane and "src/shared.ts" in lane.files:
                 assert lane.status != "running"
         assert len(scheduled_ids) == 0
+
+    def test_persist_lane_transition_updates_sqlite_lanes_runs_and_locks(self, tmp_path: Path):
+        """persistLaneTransition mirrors lane/run/lock state into SQLite."""
+        board_dir, tasks_dir = setup_board(tmp_path)
+
+        from mpga.board.board import create_empty_board, save_board
+        from mpga.commands.board_handlers import _refresh_sqlite_board_mirror
+        from mpga.db.connection import get_connection
+        from mpga.db.schema import create_schema
+
+        board = create_empty_board()
+        save_board(str(board_dir), board)
+        task = add_task(board, str(tasks_dir), AddTaskOptions(title="SQLite lane", column="in-progress"))
+        save_board(str(board_dir), board)
+
+        conn = get_connection(str(tmp_path / ".mpga" / "mpga.db"))
+        create_schema(conn)
+        conn.close()
+        _refresh_sqlite_board_mirror(str(board_dir), str(tasks_dir))
+
+        persist_lane_transition(
+            str(board_dir),
+            str(tasks_dir),
+            PersistLaneTransitionOptions(
+                task_id=task.id,
+                lane_id=f"{task.id}-lane-1",
+                status="running",
+                agent="mpga-red-dev",
+                files=["src/a.ts"],
+                scope="src-board",
+            ),
+        )
+
+        conn = get_connection(str(tmp_path / ".mpga" / "mpga.db"))
+        try:
+            lane = conn.execute(
+                "SELECT status, scope, current_agent FROM lanes WHERE id = ?",
+                (f"{task.id}-lane-1",),
+            ).fetchone()
+            run = conn.execute(
+                "SELECT status, agent FROM runs WHERE id = ?",
+                (f"{task.id}-lane-1:{task.id}",),
+            ).fetchone()
+            file_lock = conn.execute(
+                "SELECT task_id FROM file_locks WHERE filepath = 'src/a.ts'"
+            ).fetchone()
+            scope_lock = conn.execute(
+                "SELECT task_id FROM scope_locks WHERE scope = 'src-board'"
+            ).fetchone()
+        finally:
+            conn.close()
+
+        assert lane == ("running", "src-board", "mpga-red-dev")
+        assert run == ("running", "mpga-red-dev")
+        assert file_lock == (task.id,)
+        assert scope_lock == (task.id,)
 
 
 # ---------------------------------------------------------------------------

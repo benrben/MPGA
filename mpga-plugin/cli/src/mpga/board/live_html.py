@@ -115,7 +115,7 @@ def _read_embedded_snapshot(board_dir: str) -> BoardLiveSnapshot | None:
             active_runs=active_runs,
             recent_events=recent_events,
         )
-    except Exception:
+    except (OSError, ValueError, KeyError):
         return None
 
 

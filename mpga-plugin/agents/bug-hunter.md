@@ -65,7 +65,7 @@ Find bugs by comparing implementation against specifications and acceptance crit
 
 #### BUGs (confirmed spec deviations)
 [BUG] src/users/validate.ts:18 — Spec requires email format validation (criterion #2) but code only checks for non-empty string.
-  - Spec: [E] MPGA/board/BOARD.md:T042 :: "validate email format per RFC 5322"
+  - Spec: [E] task T042 via `mpga board show` :: "validate email format per RFC 5322"
   - Code: [E] src/users/validate.ts:18 :: `if (!email) throw` — checks presence only, not format
   - Impact: Invalid emails accepted into the system
 

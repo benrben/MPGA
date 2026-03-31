@@ -180,7 +180,7 @@ def parse_task_file(filepath: str) -> Task | None:
             time_estimate=data.get("time_estimate", "5min"),
             body=content.strip(),
         )
-    except Exception:
+    except (OSError, ValueError, KeyError):
         return None
 
 

@@ -1,13 +1,12 @@
 from __future__ import annotations
 
 import json
-import re
 import sys
+import time
 from pathlib import Path
 
 import click
 
-from mpga.board.board import load_board, recalc_stats
 from mpga.core.config import find_project_root, load_config
 from mpga.core.logger import (
     grade_color,
@@ -16,6 +15,10 @@ from mpga.core.logger import (
     progress_bar,
     status_badge,
 )
+from mpga.db.connection import get_connection
+from mpga.db.repos.scopes import ScopeRepo
+from mpga.db.repos.tasks import TaskRepo
+from mpga.db.schema import create_schema
 from mpga.evidence.drift import run_drift_check
 
 # Evidence health percentage at or above which status is considered good.
@@ -24,6 +27,49 @@ EVIDENCE_HEALTH_GOOD_PCT = 80
 GRADE_A_THRESHOLD = 95
 # Multiplier applied to CI threshold to determine the C grade cutoff.
 GRADE_C_MULTIPLIER = 0.7
+# TTL for the file-based link-validation cache (seconds).  5 minutes = 300 s.
+HEALTH_CACHE_TTL_SECONDS = 300
+
+
+def _summarize_tasks(tasks) -> dict[str, int]:
+    total = len(tasks)
+    done = sum(1 for task in tasks if task.column == "done")
+    in_flight = sum(1 for task in tasks if task.column in ("in-progress", "testing", "review"))
+    blocked = sum(1 for task in tasks if task.status == "blocked")
+    progress_pct = round((done / total) * 100) if total else 0
+    return {
+        "total": total,
+        "done": done,
+        "in_flight": in_flight,
+        "blocked": blocked,
+        "progress_pct": progress_pct,
+    }
+
+
+def _load_sqlite_health(project_root: Path) -> dict[str, object] | None:
+    project_root = Path(project_root)
+    db_path = project_root / ".mpga" / "mpga.db"
+    if not db_path.exists():
+        return None
+
+    conn = get_connection(str(db_path))
+    try:
+        create_schema(conn)
+        tasks = TaskRepo(conn).filter()
+        scopes = ScopeRepo(conn).list_all()
+        if not tasks and not scopes:
+            return None
+
+        board_stats = _summarize_tasks(tasks) if tasks else None
+        last_scanned = conn.execute("SELECT MAX(last_scanned) FROM file_info").fetchone()
+        last_sync = last_scanned[0] if last_scanned and last_scanned[0] else "never"
+        return {
+            "board": board_stats,
+            "scopes": len(scopes),
+            "last_sync": last_sync,
+        }
+    finally:
+        conn.close()
 
 
 def _compute_grade(health_pct: int, threshold: int) -> str:
@@ -36,15 +82,44 @@ def _compute_grade(health_pct: int, threshold: int) -> str:
     return "D"
 
 
-def _get_last_sync(mpga_dir: Path) -> str:
-    index_path = mpga_dir / "INDEX.md"
-    if not index_path.exists():
-        return "never"
-    content = index_path.read_text(encoding="utf-8")
-    m = re.search(r"\*\*Last sync:\*\* (.+)", content)
-    if m and "run" not in m.group(1):
-        return m.group(1).strip()
-    return "never"
+# ---------------------------------------------------------------------------
+# Cache helpers — avoid re-scanning all evidence links on every run
+# ---------------------------------------------------------------------------
+
+def _cache_path(project_root: Path) -> Path:
+    return project_root / ".mpga" / "health_cache.json"
+
+
+def _read_cache(project_root: Path) -> dict | None:
+    """Return cached drift data if the cache exists and is within TTL, else None."""
+    path = _cache_path(project_root)
+    if not path.exists():
+        return None
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        age = time.time() - float(data.get("timestamp", 0))
+        if age < HEALTH_CACHE_TTL_SECONDS:
+            return data
+    except (json.JSONDecodeError, ValueError, OSError):
+        pass
+    return None
+
+
+def _write_cache(project_root: Path, drift_report) -> None:
+    """Persist drift data to the file-based cache with a current timestamp."""
+    path = _cache_path(project_root)
+    payload = {
+        "timestamp": time.time(),
+        "overall_health_pct": drift_report.overall_health_pct,
+        "valid_links": drift_report.valid_links,
+        "total_links": drift_report.total_links,
+        "ci_pass": drift_report.ci_pass,
+        "scopes": [],  # raw scope objects are not JSON-serialisable; omit for now
+    }
+    try:
+        path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    except (OSError, ValueError):
+        pass  # cache write failure is non-fatal
 
 
 @click.command("health")
@@ -52,37 +127,42 @@ def _get_last_sync(mpga_dir: Path) -> str:
 @click.option("--json", "as_json", is_flag=True, help="Machine-readable output")
 def health_cmd(verbose: bool, as_json: bool) -> None:
     """Overall project health report."""
-    project_root = find_project_root() or Path.cwd()
-    mpga_dir = Path(project_root) / "MPGA"
+    project_root = Path(find_project_root() or Path.cwd())
     config = load_config(project_root)
 
-    if not mpga_dir.exists():
-        log.error("MPGA not initialized. Run `mpga init` first.")
+    db_exists = (Path(project_root) / ".mpga" / "mpga.db").exists()
+    if not db_exists:
+        log.error("No MPGA database found. Run `mpga init` first.")
         sys.exit(1)
 
-    # Gather evidence health
-    drift_report = run_drift_check(str(project_root), config.drift.ci_threshold)
+    sqlite_health = _load_sqlite_health(project_root)
+
+    # Gather evidence health — use file-based cache when still fresh
+    cached = _read_cache(project_root)
+    if cached is not None:
+        # Re-hydrate a lightweight stand-in from the cache so the rest of the
+        # function can treat it identically to a real DriftReport.
+        from types import SimpleNamespace
+        drift_report = SimpleNamespace(
+            overall_health_pct=cached["overall_health_pct"],
+            valid_links=cached["valid_links"],
+            total_links=cached["total_links"],
+            ci_pass=cached["ci_pass"],
+            scopes=cached.get("scopes", []),
+        )
+    else:
+        drift_report = run_drift_check(str(project_root), config.drift.ci_threshold)
+        _write_cache(project_root, drift_report)
 
     # Gather board health
-    board_dir = mpga_dir / "board"
-    tasks_dir = board_dir / "tasks"
     board_stats: dict | None = None
-    if (board_dir / "board.json").exists():
-        board = load_board(str(board_dir))
-        recalc_stats(board, str(tasks_dir))
-        board_stats = {
-            "total": board.stats.total,
-            "done": board.stats.done,
-            "in_flight": board.stats.in_flight,
-            "blocked": board.stats.blocked,
-            "progress_pct": board.stats.progress_pct,
-        }
+    if sqlite_health and sqlite_health["board"]:
+        board_stats = sqlite_health["board"]  # type: ignore[assignment]
 
     # Gather scope count
-    scopes_dir = mpga_dir / "scopes"
     scope_count = 0
-    if scopes_dir.exists():
-        scope_count = len([f for f in scopes_dir.iterdir() if f.suffix == ".md"])
+    if sqlite_health and sqlite_health["scopes"] is not None:
+        scope_count = int(sqlite_health["scopes"])
 
     overall_grade = _compute_grade(drift_report.overall_health_pct, config.drift.ci_threshold)
 
@@ -94,7 +174,7 @@ def health_cmd(verbose: bool, as_json: bool) -> None:
         "ciPass": drift_report.ci_pass,
         "scopes": scope_count,
         "board": board_stats,
-        "lastSync": _get_last_sync(mpga_dir),
+        "lastSync": str(sqlite_health["last_sync"]) if sqlite_health else "never",
         "overallGrade": overall_grade,
     }
 

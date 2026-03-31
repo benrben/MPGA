@@ -96,7 +96,7 @@ class TestCompleteActiveMilestone:
         assert raw["milestone"] is None
 
     def test_writes_summary_md(self, tmp_path: Path):
-        """Writes SUMMARY.md under the milestone directory."""
+        """Stores summary content in the DB summary column."""
         board_dir = tmp_path / "MPGA" / "board"
         tasks_dir = board_dir / "tasks"
         milestone_dir = tmp_path / "MPGA" / "milestones" / "M001-test"
@@ -105,13 +105,22 @@ class TestCompleteActiveMilestone:
         (board_dir / "board.json").write_text(make_board_json({"milestone": "M001-test"}))
 
         from mpga.commands.milestone import complete_active_milestone
+        from mpga.db.connection import get_connection
+        from mpga.db.schema import create_schema
 
         result = complete_active_milestone(str(tmp_path))
         assert result.ok is True
 
-        summary_path = milestone_dir / "SUMMARY.md"
-        assert summary_path.exists()
-        body = summary_path.read_text()
+        conn = get_connection(str(tmp_path / ".mpga" / "mpga.db"))
+        try:
+            row = conn.execute(
+                "SELECT summary FROM milestones WHERE id = 'M001-test'"
+            ).fetchone()
+        finally:
+            conn.close()
+
+        assert row is not None
+        body = row[0]
         assert "M001-test" in body
         assert "Tasks completed:" in body
 
@@ -129,7 +138,7 @@ class TestCompleteActiveMilestone:
         assert result.error == "no_active_milestone"
 
     def test_summary_includes_date_and_stats(self, tmp_path: Path):
-        """Writes SUMMARY.md with today date and stats."""
+        """DB summary column includes today date and stats."""
         board_dir = tmp_path / "MPGA" / "board"
         tasks_dir = board_dir / "tasks"
         milestone_dir = tmp_path / "MPGA" / "milestones" / "M001-test"
@@ -138,9 +147,20 @@ class TestCompleteActiveMilestone:
         (board_dir / "board.json").write_text(make_board_json({"milestone": "M001-test"}))
 
         from mpga.commands.milestone import complete_active_milestone
+        from mpga.db.connection import get_connection
 
         complete_active_milestone(str(tmp_path))
-        body = (milestone_dir / "SUMMARY.md").read_text()
+
+        conn = get_connection(str(tmp_path / ".mpga" / "mpga.db"))
+        try:
+            row = conn.execute(
+                "SELECT summary FROM milestones WHERE id = 'M001-test'"
+            ).fetchone()
+        finally:
+            conn.close()
+
+        assert row is not None
+        body = row[0]
         today = date.today().isoformat()
         assert f"Completed: {today}" in body
         assert "Evidence links produced:" in body
@@ -163,6 +183,40 @@ class TestCompleteActiveMilestone:
         content = board_md_path.read_text()
         assert "No active milestone" in content
 
+    def test_updates_sqlite_summary_and_status(self, tmp_path: Path):
+        """Marks the milestone complete in SQLite and stores the summary."""
+        board_dir = tmp_path / "MPGA" / "board"
+        tasks_dir = board_dir / "tasks"
+        milestone_dir = tmp_path / "MPGA" / "milestones" / "M001-test"
+        tasks_dir.mkdir(parents=True, exist_ok=True)
+        milestone_dir.mkdir(parents=True, exist_ok=True)
+        (board_dir / "board.json").write_text(make_board_json({"milestone": "M001-test"}))
+
+        from mpga.commands.milestone import complete_active_milestone
+        from mpga.db.connection import get_connection
+        from mpga.db.repos.milestones import Milestone, MilestoneRepo
+        from mpga.db.schema import create_schema
+
+        conn = get_connection(str(tmp_path / ".mpga" / "mpga.db"))
+        create_schema(conn)
+        MilestoneRepo(conn).create(Milestone(id="M001-test", name="Test milestone"))
+        conn.close()
+
+        result = complete_active_milestone(str(tmp_path))
+        assert result.ok is True
+
+        conn = get_connection(str(tmp_path / ".mpga" / "mpga.db"))
+        try:
+            row = conn.execute(
+                "SELECT status, summary FROM milestones WHERE id = 'M001-test'"
+            ).fetchone()
+        finally:
+            conn.close()
+
+        assert row is not None
+        assert row[0] == "completed"
+        assert "Tasks completed:" in row[1]
+
 
 # ---------------------------------------------------------------------------
 # Tests: milestone new
@@ -171,62 +225,65 @@ class TestCompleteActiveMilestone:
 class TestMilestoneNew:
     """registerMilestone -- milestone new."""
 
-    def test_creates_milestone_dir_with_slug(self, tmp_path: Path, monkeypatch):
-        """Creates milestone directory with slugified name."""
-        seed_project(tmp_path)
-        monkeypatch.setattr("mpga.commands.milestone.find_project_root", lambda: str(tmp_path))
-
-        from mpga.commands.milestone import milestone_new
-
-        runner = CliRunner()
-        result = runner.invoke(milestone_new, ["My Cool Feature"])
-        assert result.exit_code == 0
-
-        milestones_dir = tmp_path / "MPGA" / "milestones"
-        dirs = list(milestones_dir.iterdir())
-        milestone_dir = next((d for d in dirs if d.name.startswith("M001")), None)
-        assert milestone_dir is not None
-        assert milestone_dir.name == "M001-my-cool-feature"
-
     def test_creates_plan_md(self, tmp_path: Path, monkeypatch):
-        """Creates PLAN.md with milestone name and template."""
+        """Stores plan content in DB plan column."""
         seed_project(tmp_path)
         monkeypatch.setattr("mpga.commands.milestone.find_project_root", lambda: str(tmp_path))
 
         from mpga.commands.milestone import milestone_new
+        from mpga.db.connection import get_connection
+        from mpga.db.schema import create_schema
+
+        conn = get_connection(str(tmp_path / ".mpga" / "mpga.db"))
+        create_schema(conn)
+        conn.close()
 
         runner = CliRunner()
         result = runner.invoke(milestone_new, ["Auth Refactor"])
         assert result.exit_code == 0
 
-        milestones_dir = tmp_path / "MPGA" / "milestones"
-        milestone_dir = next(d for d in milestones_dir.iterdir() if d.name.startswith("M001"))
+        conn = get_connection(str(tmp_path / ".mpga" / "mpga.db"))
+        try:
+            row = conn.execute(
+                "SELECT plan FROM milestones WHERE id = 'M001-auth-refactor'"
+            ).fetchone()
+        finally:
+            conn.close()
 
-        plan_path = milestone_dir / "PLAN.md"
-        assert plan_path.exists()
-        content = plan_path.read_text()
+        assert row is not None
+        content = row[0]
         assert "Auth Refactor" in content
         assert "Objective" in content
         assert "Tasks" in content
         assert "Acceptance criteria" in content
 
     def test_creates_context_md(self, tmp_path: Path, monkeypatch):
-        """Creates CONTEXT.md with milestone name and template."""
+        """Stores context content in DB context column."""
         seed_project(tmp_path)
         monkeypatch.setattr("mpga.commands.milestone.find_project_root", lambda: str(tmp_path))
 
         from mpga.commands.milestone import milestone_new
+        from mpga.db.connection import get_connection
+        from mpga.db.schema import create_schema
+
+        conn = get_connection(str(tmp_path / ".mpga" / "mpga.db"))
+        create_schema(conn)
+        conn.close()
 
         runner = CliRunner()
         result = runner.invoke(milestone_new, ["Data Pipeline"])
         assert result.exit_code == 0
 
-        milestones_dir = tmp_path / "MPGA" / "milestones"
-        milestone_dir = next(d for d in milestones_dir.iterdir() if d.name.startswith("M001"))
+        conn = get_connection(str(tmp_path / ".mpga" / "mpga.db"))
+        try:
+            row = conn.execute(
+                "SELECT context FROM milestones WHERE id = 'M001-data-pipeline'"
+            ).fetchone()
+        finally:
+            conn.close()
 
-        context_path = milestone_dir / "CONTEXT.md"
-        assert context_path.exists()
-        content = context_path.read_text()
+        assert row is not None
+        content = row[0]
         assert "Data Pipeline" in content
         assert "Background" in content
         assert "Constraints" in content
@@ -249,24 +306,63 @@ class TestMilestoneNew:
         board = load_board(str(board_dir))
         assert board.milestone == "M001-test-link"
 
+    def test_creates_sqlite_milestone_row(self, tmp_path: Path, monkeypatch):
+        """Creates a milestone row in SQLite when the DB is available."""
+        seed_project(tmp_path)
+        monkeypatch.setattr("mpga.commands.milestone.find_project_root", lambda: str(tmp_path))
+
+        from mpga.commands.milestone import milestone_new
+        from mpga.db.connection import get_connection
+        from mpga.db.schema import create_schema
+
+        conn = get_connection(str(tmp_path / ".mpga" / "mpga.db"))
+        create_schema(conn)
+        conn.close()
+
+        runner = CliRunner()
+        result = runner.invoke(milestone_new, ["SQLite milestone"])
+        assert result.exit_code == 0
+
+        conn = get_connection(str(tmp_path / ".mpga" / "mpga.db"))
+        try:
+            row = conn.execute(
+                "SELECT id, name, status FROM milestones WHERE id = 'M001-sqlite-milestone'"
+            ).fetchone()
+        finally:
+            conn.close()
+
+        assert row == ("M001-sqlite-milestone", "SQLite milestone", "active")
+
     def test_increments_milestone_ids(self, tmp_path: Path, monkeypatch):
         """Increments milestone IDs for subsequent milestones."""
         seed_project(tmp_path)
         monkeypatch.setattr("mpga.commands.milestone.find_project_root", lambda: str(tmp_path))
 
-        milestones_dir = tmp_path / "MPGA" / "milestones"
-        (milestones_dir / "M001-first").mkdir(parents=True, exist_ok=True)
-
         from mpga.commands.milestone import milestone_new
+        from mpga.db.connection import get_connection
+        from mpga.db.repos.milestones import Milestone, MilestoneRepo
+        from mpga.db.schema import create_schema
+
+        conn = get_connection(str(tmp_path / ".mpga" / "mpga.db"))
+        create_schema(conn)
+        MilestoneRepo(conn).create(Milestone(id="M001-first", name="First"))
+        conn.close()
 
         runner = CliRunner()
         result = runner.invoke(milestone_new, ["Second"])
         assert result.exit_code == 0
 
-        dirs = sorted([d.name for d in milestones_dir.iterdir()])
-        assert "M001-first" in dirs
-        second_dir = next((d for d in dirs if d.startswith("M002")), None)
-        assert second_dir == "M002-second"
+        conn = get_connection(str(tmp_path / ".mpga" / "mpga.db"))
+        try:
+            rows = conn.execute(
+                "SELECT id FROM milestones ORDER BY id"
+            ).fetchall()
+        finally:
+            conn.close()
+
+        ids = [r[0] for r in rows]
+        assert "M001-first" in ids
+        assert "M002-second" in ids
 
 
 # ---------------------------------------------------------------------------
@@ -363,18 +459,27 @@ class TestMilestoneComplete:
     """registerMilestone -- milestone complete."""
 
     def test_completes_active_milestone(self, tmp_path: Path, monkeypatch):
-        """Completes an active milestone and shows success message."""
+        """Completes an active milestone and stores summary in DB."""
         seed_project(tmp_path, milestone="M001-finish-me", milestones=["M001-finish-me"])
         monkeypatch.setattr("mpga.commands.milestone.find_project_root", lambda: str(tmp_path))
 
         from mpga.board.board import load_board
         from mpga.commands.milestone import complete_active_milestone
+        from mpga.db.connection import get_connection
 
         result = complete_active_milestone(str(tmp_path))
         assert result.ok is True
 
-        summary_path = tmp_path / "MPGA" / "milestones" / "M001-finish-me" / "SUMMARY.md"
-        assert summary_path.exists()
+        conn = get_connection(str(tmp_path / ".mpga" / "mpga.db"))
+        try:
+            row = conn.execute(
+                "SELECT summary FROM milestones WHERE id = 'M001-finish-me'"
+            ).fetchone()
+        finally:
+            conn.close()
+
+        assert row is not None
+        assert "Tasks completed:" in row[0]
 
         board = load_board(str(tmp_path / "MPGA" / "board"))
         assert board.milestone is None

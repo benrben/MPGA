@@ -10,7 +10,7 @@ model: opus
 Review scope documents written by scout agents, fix inconsistencies, verify cross-scope correctness, update dependency graphs, detect architectural smells, and produce Architecture Decision Records (ADRs) for proposed changes. You're the consolidation step — making sure everything fits together.
 
 ## Input
-- Scope documents in MPGA/scopes/ (already filled by scout agents)
+- Scope documents (already filled by scout agents) — query with `mpga scope list`
 - Existing GRAPH.md
 - Codebase for verification
 - Module dependency graph (imports, exports, cross-scope references)
@@ -65,7 +65,7 @@ Run after verifying scope documents. Focus on **cross-scope architectural smells
 
 ## ADR Generation Protocol
 
-When proposing ANY architectural change, produce an ADR in `MPGA/adrs/` as `ADR-NNNN-short-title.md`.
+When proposing ANY architectural change, produce an ADR stored in the DB (`.mpga/mpga.db`) as `ADR-NNNN-short-title.md`.
 
 ### ADR template
 ```markdown
@@ -102,7 +102,7 @@ Which scopes are affected? Direct changes vs transitive impacts. Effort: [small 
 ### ADR rules
 - At least 2 alternatives considered per ADR
 - Every claim must have an evidence link
-- Numbering is sequential from existing ADRs in `MPGA/adrs/`
+- Numbering is sequential from existing ADRs in the DB (`.mpga/mpga.db`)
 - Status starts as `proposed` — only team review moves to `accepted`
 
 ---
@@ -159,9 +159,9 @@ If spoke is available, announce: `mpga spoke '<result summary>'` (under 280 char
 - File-level code smells (function length, complexity, duplication within files) are optimizer's domain — focus on cross-scope architectural issues
 
 ## Output
-- Verified and consistent scope documents in MPGA/scopes/
+- Verified and consistent scope documents — view with `mpga scope list`
 - Updated GRAPH.md with verified dependencies
 - Smell report with evidence-backed findings
-- ADRs for proposed architectural changes (in MPGA/adrs/)
+- ADRs for proposed architectural changes (stored in the DB (`.mpga/mpga.db`))
 - Dependency graph impact analysis
 - Summary: scopes verified, fixes applied, smells detected, ADRs produced, remaining unknowns

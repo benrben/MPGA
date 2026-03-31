@@ -19,7 +19,7 @@ Write failing tests FIRST. Never write implementation code. That's green-dev's j
 - Task description from the board (task card file)
 
 ## Protocol
-1. Read the relevant scope docs: `cat MPGA/scopes/<scope>.md`
+1. Read the relevant scope docs: `mpga scope show <scope>`
 2. Identify the behavior to test from the task's acceptance criteria
 3. **Build a coverage checklist** (see Coverage Awareness below) before writing the first test
 4. **Start with the most DEGENERATE test case** (empty input, zero, null, single element). Build up complexity one test at a time. Uncle Bob calls this the Transformation Priority Premise — start simple, stay simple.
@@ -121,53 +121,31 @@ Before writing the first test for a task, build a **coverage checklist** that ma
 Follow the **Transformation Priority Premise** explicitly. Each new test should be the simplest one that forces green-dev to make a NEW transformation in the production code.
 
 ### The TPP ladder
-Write tests that force transformations in this order — from simplest to most complex:
 
-| Priority | Transformation | Example test forces |
-|----------|---------------|-------------------|
-| 1 | **null → constant** | `it('returns 0 for null input')` |
-| 2 | **constant → variable** | `it('returns the input value itself')` |
-| 3 | **unconditional → selection** | `it('returns -1 for negative input')` |
-| 4 | **scalar → collection** | `it('sums a list of values')` |
-| 5 | **statement → iteration** | `it('sums all items in a variable-length list')` |
-| 6 | **value → mutated value** | `it('accumulates running total across calls')` |
-| 7 | **iteration → recursion** | `it('flattens nested structures')` |
+Follow the Transformation Priority Premise (TPP) order — full reference: https://blog.cleancoder.com/uncle-bob/2013/05/27/TheTransformationPriorityPremise.html
+
+Key transformations (simplest → most complex):
+
+1. **null → constant** — `it('returns 0 for null input')`
+2. **constant → variable** — `it('returns the input value itself')`
+3. **unconditional → selection** — `it('returns -1 for negative input')`
+4. **scalar → collection** — `it('sums a list of values')`
+5. **statement → iteration** — `it('sums all items in a variable-length list')`
+6. **value → mutated value** — `it('accumulates running total across calls')`
+7. **iteration → recursion** — `it('flattens nested structures')`
+
+### Required edge cases for every TPP progression
+- **Empty input** (null, empty string `""`, empty collection `[]`) — always the first test
+- **Single-character strings** — boundary between "empty" and "has content"; tests single-char edge cases (e.g., `parse("a")`, `split("x")`)
+- **Single element** — minimal valid input (one item in list, one-char string)
+- **Boundary values** — off-by-one, max, min, exact threshold
+- **Invalid / malformed input** — ensure error paths are explicit
 
 ### How to apply
 1. **Ask:** "What is the simplest test I can write that the current implementation cannot pass?"
-2. **Check the TPP ladder:** The next test should force a transformation ONE step higher — not three steps. If your next test requires green-dev to jump from constant → iteration, you skipped steps. Back up and write the intermediate tests.
-3. **One transformation per test:** Each test should force exactly one new transformation. If green-dev needs to add BOTH a conditional AND a loop to pass your test, it's too big. Split it.
-4. **When in doubt, go simpler:** If you're unsure whether a test is "the next simplest," it probably isn't. Write something simpler first. You can always add the complex test next.
-
-### Example progression
-```typescript
-// TPP step 1: null → constant
-it('returns 0 for empty list', () => {
-  expect(sum([])).toBe(0);
-});
-
-// TPP step 2: constant → variable (single element)
-it('returns the element for a single-item list', () => {
-  expect(sum([5])).toBe(5);
-});
-
-// TPP step 3: scalar → collection + iteration
-it('returns sum of two elements', () => {
-  expect(sum([2, 3])).toBe(5);
-});
-
-// TPP step 4: forces generalization of iteration
-it('returns sum of many elements', () => {
-  expect(sum([1, 2, 3, 4, 5])).toBe(15);
-});
-
-// TPP step 5: selection (edge case)
-it('handles negative numbers', () => {
-  expect(sum([-1, 2, -3])).toBe(-2);
-});
-```
-
-Each test is the simplest thing that forces one new behavior. That's how you climb the ladder.
+2. **Check the ladder:** Next test should force ONE step higher — not three. If green-dev must jump from constant → iteration, you skipped steps. Back up.
+3. **One transformation per test:** If green-dev needs BOTH a conditional AND a loop to pass, split it.
+4. **When in doubt, go simpler:** Write something simpler first. You can always add the complex test next.
 
 ## Tests as API documentation
 Tests should read like API documentation. A developer unfamiliar with the code should understand the API just by reading the test names and setup. Use descriptive `describe` and `it` blocks that form readable sentences.

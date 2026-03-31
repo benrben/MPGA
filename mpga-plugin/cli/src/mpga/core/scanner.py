@@ -38,6 +38,28 @@ SOURCE_EXTENSIONS = {
 
 SHALLOW_SCAN_MAX_DEPTH = 12
 
+# Directories that are always excluded from scanning regardless of user config.
+# These contain generated/installed files that inflate metrics and slow down sync.
+DEFAULT_EXCLUDE_DIRS: frozenset[str] = frozenset({
+    ".venv",
+    "venv",
+    ".env",
+    ".mpga-runtime",
+    "__pycache__",
+    "node_modules",
+    ".git",
+    ".tox",
+    ".mypy_cache",
+    ".pytest_cache",
+    ".ruff_cache",
+    "dist",
+    "build",
+    "eggs",
+    ".eggs",
+    "htmlcov",
+    ".coverage",
+})
+
 ENTRY_PATTERNS = [
     "src/index.*",
     "src/main.*",
@@ -77,7 +99,7 @@ def count_lines(filepath: str | Path) -> int:
     try:
         content = Path(filepath).read_text(encoding="utf-8", errors="replace")
         return content.count("\n") + (1 if content and not content.endswith("\n") else 0)
-    except Exception:
+    except OSError:
         return 0
 
 
@@ -109,10 +131,11 @@ def scan(project_root: str | Path, ignore: list[str], deep: bool = False) -> Sca
             dirnames.clear()
             continue
 
-        # Prune ignored directories
+        # Prune ignored directories — always skip DEFAULT_EXCLUDE_DIRS plus user ignore list
         dirnames[:] = [
             d for d in dirnames
-            if not d.startswith(".") and not _should_ignore(str(rel_dir / d), ignore)
+            if d not in DEFAULT_EXCLUDE_DIRS
+            and not _should_ignore(str(rel_dir / d), ignore)
         ]
 
         for filename in filenames:
@@ -166,9 +189,51 @@ def scan(project_root: str | Path, ignore: list[str], deep: bool = False) -> Sca
     )
 
 
-def detect_project_type(result: ScanResult) -> str:
+def _is_cli_project(result: ScanResult, project_root: str | Path | None = None) -> bool:
+    """Return True when the project has CLI markers (pyproject.toml scripts, cli.py, Click/Typer)."""
+    def has_file(pattern: str) -> bool:
+        return any(pattern in f.filepath for f in result.files)
+
+    # 1. pyproject.toml [project.scripts] — strongest CLI signal
+    if project_root is not None:
+        pyproject = Path(project_root) / "pyproject.toml"
+        if pyproject.exists():
+            content = pyproject.read_text(encoding="utf-8", errors="replace")
+            if "[project.scripts]" in content:
+                return True
+
+    # 2. Presence of a cli.py file
+    if has_file("cli.py"):
+        return True
+
+    # 3. Click or Typer imports in any source file
+    for file_info in result.files:
+        if file_info.language != "python":
+            continue
+        if project_root is not None:
+            abs_path = Path(project_root) / file_info.filepath
+        else:
+            abs_path = Path(file_info.filepath)
+        try:
+            source = abs_path.read_text(encoding="utf-8", errors="replace")
+            if "import click" in source or "from click" in source or "import typer" in source:
+                return True
+        except OSError:
+            continue
+
+    return False
+
+
+def detect_project_type(result: ScanResult, project_root: str | Path | None = None) -> str:
+    """Detect the project type from the scan result.
+
+    CLI markers (pyproject.toml [project.scripts], cli.py, Click/Typer imports)
+    take priority over web-framework detection to avoid false FastAPI/Flask labels
+    on projects that happen to have a small web server alongside their main CLI.
+    """
     langs = result.languages
-    def has_file(pattern):
+
+    def has_file(pattern: str) -> bool:
         return any(pattern in f.filepath for f in result.files)
 
     if "typescript" in langs and has_file("next.config"):
@@ -179,14 +244,19 @@ def detect_project_type(result: ScanResult) -> str:
         return "Node.js API"
     if "typescript" in langs:
         return "TypeScript"
-    if "python" in langs and has_file("django"):
-        return "Django"
-    if "python" in langs and has_file("fastapi"):
-        return "FastAPI"
-    if "python" in langs and has_file("flask"):
-        return "Flask"
+
     if "python" in langs:
+        # CLI check must happen before framework detection
+        if _is_cli_project(result, project_root):
+            return "CLI"
+        if has_file("django"):
+            return "Django"
+        if has_file("fastapi"):
+            return "FastAPI"
+        if has_file("flask"):
+            return "Flask"
         return "Python"
+
     if "go" in langs:
         return "Go"
     if "rust" in langs:

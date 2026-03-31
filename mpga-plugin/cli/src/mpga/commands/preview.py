@@ -4,11 +4,11 @@ import time
 from functools import partial
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
-import re
 from urllib.parse import unquote
 
 import click
 
+from mpga.commands._shared import _current_milestone
 from mpga.commands.board_live_server import open_board_live_url
 from mpga.core.config import find_project_root
 from mpga.core.logger import log
@@ -21,23 +21,6 @@ _CONTENT_TYPES: dict[str, str] = {
     ".svg": "image/svg+xml",
 }
 _ALLOWED_HOSTS = {"127.0.0.1", "localhost"}
-
-
-def _current_milestone(project_root: Path) -> str:
-    index_path = project_root / "MPGA" / "INDEX.md"
-    if index_path.exists():
-        content = index_path.read_text(encoding="utf-8")
-        match = re.search(r"## Active milestone\n(?:- )?([^\n]+)", content)
-        if match:
-            return match.group(1).strip()
-
-    milestones_dir = project_root / "MPGA" / "milestones"
-    if milestones_dir.exists():
-        names = sorted(path.name for path in milestones_dir.iterdir() if path.is_dir())
-        if names:
-            return names[-1]
-
-    return "M000-design-sandbox"
 
 
 class _PreviewHandler(SimpleHTTPRequestHandler):

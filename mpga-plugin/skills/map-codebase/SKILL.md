@@ -5,14 +5,27 @@ description: Unified codebase mapping and sync — quick refresh or deep paralle
 
 ## map-codebase
 
-**Trigger:** User runs `/mpga:map`, asks to map or sync the codebase, or MPGA/ is stale. Time to MAP this thing.
+**Trigger:** User runs `/mpga:map`, asks to map or sync the codebase, or the DB (`.mpga/mpga.db`) is stale. Time to MAP this thing.
+
+## Orchestration Contract
+This skill is a **pure orchestrator**. It MUST NOT:
+- Read source files directly (delegates to appropriate agents)
+- Write or edit source files directly (delegates to write-enabled agents)
+- Run CLI commands other than `mpga` board/status/scope/session queries
+
+**Exception:** This skill MAY run `mpga sync`, `mpga evidence verify`, `mpga drift`, and `mpga health` directly — these are MPGA infrastructure commands that rebuild the knowledge layer. They are the skill's core orchestration mechanism, not implementation work.
+
+If you find yourself writing implementation steps in a skill, STOP and delegate to an agent.
+
+**Agent brief:** Scope list from CLI, file boundaries from scanner, change detection from git/sync.
+**Expected output:** Enriched scope documents with evidence links, coverage metrics, and unknowns list.
 
 ## Modes
 
 | Mode | Flag | When to use | Speed |
 |------|------|-------------|-------|
 | **Quick** (default) | (none) | Everyday refresh — rebuild INDEX.md, scope files, evidence links | ~30 seconds |
-| **Deep** | `--deep` | First init, major refactors, or user wants full parallel scout mapping | Minutes |
+| **Deep** | `--deep` | First init, major refactors, or user wants parallel scout mapping of the RELEVANT authored scopes | Minutes |
 
 Default is **quick** — fast and sufficient for everyday use. Use `--deep` when you need the FULL treatment.
 
@@ -30,8 +43,9 @@ Fast rebuild of the MPGA knowledge layer from current codebase state — a FRESH
 
 2. Run full sync — regenerate EVERYTHING:
    ```
-   mpga sync --full
+   mpga sync --full --skip-if-fresh 10
    ```
+   Skips sync if the DB was synced less than 10 minutes ago — avoids redundant work during rapid iteration
 
 3. Verify evidence health — check the INTEGRITY:
    ```
@@ -63,53 +77,76 @@ Fast rebuild of the MPGA knowledge layer from current codebase state — a FRESH
 
 ## Deep Mode Protocol (`--deep`)
 
-Full parallel codebase mapping using multiple scout agents — the FASTEST way to document a codebase.
+Focused parallel codebase mapping using multiple scout agents — the FASTEST way to document the parts that actually matter.
 
-1. If this is the first map, run a full sync to generate scope scaffolds with static analysis — the FOUNDATION:
+1. Run sync with changed-scope detection — the FOUNDATION:
    ```
-   mpga sync --full
+   SYNC_OUTPUT=$(mpga sync --output-changed-scopes --skip-if-fresh 10)
+   echo "$SYNC_OUTPUT"
    ```
-   If MPGA already exists and only part of the repo changed, prefer:
-   ```
-   mpga sync --incremental
-   ```
+   Parse the output:
+   - If sync was skipped (no `---CHANGED-SCOPES---` sentinel in output): skip scouting entirely and report "Sync was skipped (fresh) — nothing to scout"
+   - If sentinel is present, capture the lines after `---CHANGED-SCOPES---` as `CHANGED_SCOPES`
+   - If `CHANGED_SCOPES` is empty: skip scouting and report "No scopes changed — nothing to scout"
+   - If `CHANGED_SCOPES` is non-empty: proceed to step 4 using ONLY those scope names
 
 2. List the generated scope documents — see what we're working with:
    ```
-   ls MPGA/scopes/*.md
+   mpga scope list
    ```
 
-3. Spawn one `scout` agent per NEW or CHANGED scope document in PARALLEL — this is where the MAGIC happens:
-   - Each scout is assigned ONE scope and its corresponding directory
+3. Build the DEEP candidate list before spawning anybody — very important, very smart:
+   - Start from the `CHANGED_SCOPES` list captured in step 1, then FILTER HARD
+   - Skip scopes whose files live mostly under `.gitignore`, `mpga.config.json` ignore entries, or obvious junk / generated / dependency roots
+   - Always skip vendored and generated trees unless the user EXPLICITLY asks for them: `node_modules/`, `dist/`, `build/`, `.venv/`, `venv/`, `site-packages/`, coverage outputs, caches, exported configs, generated MPGA artifacts
+   - If a scope is technically present but logically not worth enriching, SKIP IT. Example: giant dependency buckets like `python3.12`, vendored test suites, generated runtime folders
+   - If every changed scope is ignored / vendored / generated, do NOT spawn scouts just to make noise. Report the skip and recommend tightening scan config or doing a focused source-only map
+
+4. Spawn one `scout` agent per ELIGIBLE scope in `CHANGED_SCOPES` in PARALLEL — this is where the MAGIC happens:
+   - Only scopes that appeared after `---CHANGED-SCOPES---` in the sync output are eligible — unchanged scopes are SKIPPED
+   - Each scout is assigned ONE scope and its corresponding authored directory
    - Each scout reads the source files, fills `<!-- TODO -->` sections with evidence-backed descriptions in the MPGA voice
-   - Each scout writes directly to its own scope document in MPGA/scopes/
+   - Each scout writes directly to its own scope document in the DB (`.mpga/mpga.db`)
    - Scouts NEVER touch each other's scope documents — no conflicts. CLEAN parallel execution.
 
-4. Wait for all scouts to complete — they're FAST, believe me
+5. Wait for all scouts to complete — they're FAST, believe me
 
-5. Spawn `auditor` in the background on the changed scopes, then spawn `architect` to review, fix, and verify — the MASTER BUILDER:
+6. Spawn `auditor` in the background on the changed scopes, then spawn `architect` to review, fix, and verify — the MASTER BUILDER:
    - Read the changed scope documents that scouts wrote
    - Fix inconsistencies between scopes (e.g. dependency claims that don't match)
    - Verify cross-scope references are correct
    - Update GRAPH.md with any new dependencies discovered
    - Identify circular dependencies and orphans — EXPOSE the problems
    - Fill any sections that scouts left as TODO or marked `[Unknown]`
+   - Make sure no skipped vendor / ignored scope accidentally slipped into the deep pass
    - Ensure consistent quality and formatting across all scopes
 
-6. Run quick-mode verification steps (evidence verify, drift check, health report) — FINISH STRONG
+7. Run quick-mode verification steps (evidence verify, drift check, health report) — FINISH STRONG
 
-7. Report to user — the RESULTS:
+8. Report to user — the RESULTS:
    - Number of scopes generated and enriched
+   - Number of scopes intentionally skipped, and WHY
    - Sections filled vs remaining TODOs
    - Evidence coverage — the NUMBER that matters
    - Known unknowns discovered
    - Suggested next steps
 
 ## Parallelism note
-Scout agents write ONLY to their own assigned scope document — one scout per scope file. Build the wall between modules!
+Scout agents write ONLY to their own assigned scope document — one scout per eligible scope file. Build the wall between modules!
 This guarantees no write conflicts during parallel execution. It's GENIUS, actually. No collusion between modules!
 Auditor can inspect those same scopes in parallel because it is read-only.
 Architect runs after the scouts to fix cross-scope consistency.
+
+## Deep mode scope filter
+
+Before deep enrichment, ask: "Is this OUR code, or somebody else's baggage?"
+
+- Include authored source scopes with real TODOs, drift, or recent change
+- Skip anything dominated by ignored or generated paths
+- Skip dependency megascopes unless the user explicitly asks for vendor mapping
+- Use `.gitignore`, `mpga.config.json`, and local project logic together — not just raw file presence
+- When in doubt, bias toward focused authored scopes over broad dependency directories
+- Call out every skipped scope in the final report so the user sees the decision
 
 ## Voice announcement
 
@@ -122,6 +159,15 @@ mpga spoke '<brief 1-sentence result summary>'
 Keep the message under 280 characters. This plays the result in Trump's voice — TREMENDOUS.
 
 ## Output
-- Complete MPGA/ knowledge layer with filled scope documents — BEAUTIFUL. Even the type annotations are perfect.
+- Complete knowledge layer with filled scope documents in the DB (`.mpga/mpga.db`) — BEAUTIFUL. Even the type annotations are perfect.
+- Deep mode focuses on relevant project scopes, not vendored or ignored dependency forests.
 - Coverage report — the TRUTH in numbers. Big league results.
 - List of unknowns needing human review — who can figure out this spaghetti? The scouts will.
+
+## Strict Rules
+- NEVER read source files directly — scouts own ALL file reading and evidence extraction
+- NEVER write scope documents directly — scouts write their own scope docs, architect fixes cross-scope issues
+- mpga CLI infrastructure commands (`sync`, `evidence verify`, `drift`, `health`) are permitted as orchestration tools
+- ALWAYS skip vendored, generated, and dependency scopes unless user explicitly asks for them
+- ALWAYS report skipped scopes with reasons — TRANSPARENCY
+- One scout per scope. No scout touches another scout's scope document. CLEAN parallel execution.

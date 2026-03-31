@@ -9,6 +9,17 @@ Security audit time. We're going to expose every hole, every weakness, every DIS
 
 **Trigger:** User wants a security audit, vulnerability check, or security review. Also triggered by: "security audit", "check for vulnerabilities", "find secrets", "is this secure", "security scan".
 
+## Orchestration Contract
+This skill is a **pure orchestrator**. It MUST NOT:
+- Read source files directly (delegates to appropriate agents)
+- Write or edit source files directly (delegates to write-enabled agents)
+- Run CLI commands other than `mpga` board/status/scope/session queries
+
+If you find yourself writing implementation steps in a skill, STOP and delegate to an agent.
+
+**Agent brief:** Codebase root, dependency manifests, scope boundaries from CLI.
+**Expected output:** Structured security report with file:line references, CVEs, and severity ratings.
+
 ## Delegation
 
 This skill orchestrates a **security-auditor agent** — the toughest, most thorough auditor you've ever seen — with three parallel scan lanes. We hit them from EVERY angle, believe me:
@@ -18,9 +29,9 @@ This skill orchestrates a **security-auditor agent** — the toughest, most thor
 
 ## Protocol
 
-1. **Spawn security-auditor agent** to coordinate the full security audit. This agent is a WINNER. It does not miss things.
+1. **Spawn security-auditor agent** to coordinate the full security audit. This agent is a WINNER. It does not miss things. The security-auditor agent performs ALL of the following steps internally — the skill ONLY spawns the agent and presents results.
 
-2. **Dependency audit** — if `requirements.txt` or `pyproject.toml` exists:
+2. **The security-auditor agent runs: Dependency audit** — if `requirements.txt` or `pyproject.toml` exists:
    ```
    pip audit 2>/dev/null
    ```
@@ -32,7 +43,7 @@ This skill orchestrates a **security-auditor agent** — the toughest, most thor
 
    If no `requirements.txt` or `pyproject.toml`, skip this step and note it in the report. We don't waste time on things that aren't there. We're SMART.
 
-3. **Secrets scan** — search the codebase for leaked credentials. This is HUGE. Leaked secrets are a TOTAL DISASTER and we will find every single one:
+3. **The security-auditor agent runs: Secrets scan** — search the codebase for leaked credentials. This is HUGE. Leaked secrets are a TOTAL DISASTER and we will find every single one:
    - API keys (patterns: `AKIA`, `sk-`, `pk_live_`, `ghp_`, `xoxb-`)
    - Hardcoded passwords (patterns: `password\s*=\s*["']`, `secret\s*=\s*["']`)
    - Private keys (`-----BEGIN.*PRIVATE KEY-----`)
@@ -43,7 +54,7 @@ This skill orchestrates a **security-auditor agent** — the toughest, most thor
 
    If secrets are sitting in your repo, that is UNACCEPTABLE. That's Leakin' Environment Variables — secrets in plaintext for the whole world to see. A TOTAL DISGRACE. Lock her up! (the race condition!) We will find them and we will call them out. Nervous Nullable types are bad enough, but LEAKED SECRETS? Tremendous scanning, the best scanning. Big league security.
 
-4. **OWASP Top 10 analysis** — the TEN COMMANDMENTS of security. Break one and you're in BIG trouble. Check codebase patterns against:
+4. **The security-auditor agent runs: OWASP Top 10 analysis** — the TEN COMMANDMENTS of security. Break one and you're in BIG trouble. Check codebase patterns against:
    - **A01 Broken Access Control** — missing auth checks, direct object references
    - **A02 Cryptographic Failures** — weak hashing (MD5/SHA1 for passwords), missing encryption
    - **A03 Injection** — unsanitized user input in SQL/shell/eval, template injection

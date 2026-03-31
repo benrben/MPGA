@@ -45,7 +45,7 @@ flowchart TD
 
 ## Inputs — The Investigation Begins
 - Entire codebase (read-only scan) — we see EVERYTHING
-- MPGA/INDEX.md and scope docs (if initialized)
+- `mpga status` and scope docs via `mpga scope list` (if initialized)
 - Git state and CI configuration
 
 ## Outputs — The RALLY Results

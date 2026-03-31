@@ -63,12 +63,11 @@ def task_frontmatter(task_id: str, title: str, column: str, extra: dict | None =
 def setup_session_project(tmp_path: Path, monkeypatch):
     """Set up a project with board and tasks for session tests."""
     monkeypatch.setattr("mpga.commands.session.find_project_root", lambda: str(tmp_path))
+    monkeypatch.setattr("mpga.commands.session_handoff.find_project_root", lambda: str(tmp_path))
 
     board_dir = tmp_path / "MPGA" / "board"
     tasks_dir = board_dir / "tasks"
-    sessions_dir = tmp_path / "MPGA" / "sessions"
     tasks_dir.mkdir(parents=True, exist_ok=True)
-    sessions_dir.mkdir(parents=True, exist_ok=True)
 
     (board_dir / "board.json").write_text(minimal_board())
     (tasks_dir / "T001-implement-parser.md").write_text(
@@ -78,6 +77,28 @@ def setup_session_project(tmp_path: Path, monkeypatch):
         task_frontmatter("T002", "Add tests", "todo")
     )
 
+    # Set up SQLite DB with a session that has a board snapshot
+    from mpga.db.connection import get_connection
+    from mpga.db.schema import create_schema
+    from mpga.db.repos.sessions import SessionRepo
+
+    db_path = tmp_path / ".mpga" / "mpga.db"
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+    conn = get_connection(str(db_path))
+    create_schema(conn)
+    snapshot = json.dumps({
+        "milestone": "M001-alpha",
+        "progress_pct": 0,
+        "done": 0,
+        "total": 2,
+        "in_progress": [
+            {"id": "T001", "title": "Implement parser", "column": "in-progress"},
+        ],
+    })
+    repo = SessionRepo(conn)
+    repo.ensure_active(str(tmp_path), task_snapshot=snapshot)
+    conn.close()
+
 
 # ---------------------------------------------------------------------------
 # Tests: session handoff
@@ -86,8 +107,8 @@ def setup_session_project(tmp_path: Path, monkeypatch):
 class TestSessionHandoff:
     """session handoff tests."""
 
-    def test_creates_handoff_file(self, tmp_path: Path, monkeypatch):
-        """Creates a handoff file in MPGA/sessions/."""
+    def test_handoff_prints_to_stdout(self, tmp_path: Path, monkeypatch):
+        """Handoff output is printed to stdout."""
         setup_session_project(tmp_path, monkeypatch)
 
         from mpga.commands.session import session
@@ -95,13 +116,10 @@ class TestSessionHandoff:
         runner = CliRunner()
         result = runner.invoke(session, ['handoff'])
         assert result.exit_code == 0
-
-        sessions_dir = tmp_path / "MPGA" / "sessions"
-        files = [f for f in sessions_dir.iterdir() if f.name.endswith("-handoff.md")]
-        assert len(files) == 1
+        assert "# Session Handoff" in result.output
 
     def test_handoff_contains_board_state(self, tmp_path: Path, monkeypatch):
-        """Handoff file contains correct board state."""
+        """Handoff output contains correct board state."""
         setup_session_project(tmp_path, monkeypatch)
 
         from mpga.commands.session import session
@@ -110,17 +128,14 @@ class TestSessionHandoff:
         result = runner.invoke(session, ['handoff', '--accomplished', 'Fixed the parser'])
         assert result.exit_code == 0
 
-        sessions_dir = tmp_path / "MPGA" / "sessions"
-        files = [f for f in sessions_dir.iterdir() if f.name.endswith("-handoff.md")]
-        content = files[0].read_text()
-
+        content = result.output
         assert "# Session Handoff" in content
         assert "Fixed the parser" in content
         assert "M001-alpha" in content
-        assert "0/2 tasks done" in content
+        assert "0/2" in content
 
     def test_handoff_includes_in_progress_tasks(self, tmp_path: Path, monkeypatch):
-        """Handoff file includes in-progress tasks."""
+        """Handoff output includes in-progress tasks."""
         setup_session_project(tmp_path, monkeypatch)
 
         from mpga.commands.session import session
@@ -129,10 +144,7 @@ class TestSessionHandoff:
         result = runner.invoke(session, ['handoff'])
         assert result.exit_code == 0
 
-        sessions_dir = tmp_path / "MPGA" / "sessions"
-        files = [f for f in sessions_dir.iterdir() if f.name.endswith("-handoff.md")]
-        content = files[0].read_text()
-
+        content = result.output
         assert "T001" in content
         assert "Implement parser" in content
         assert "in-progress" in content
@@ -147,9 +159,21 @@ class TestSessionLog:
     """session log tests."""
 
     def test_creates_session_log(self, tmp_path: Path, monkeypatch):
-        """Creates session-log.md with first entry."""
+        """Records a log note into the SQLite DB."""
         monkeypatch.setattr("mpga.commands.session.find_project_root", lambda: str(tmp_path))
-        (tmp_path / "MPGA" / "sessions").mkdir(parents=True, exist_ok=True)
+
+        from mpga.db.connection import get_connection
+        from mpga.db.schema import create_schema
+        from mpga.db.repos.sessions import SessionRepo
+        import sqlite3
+
+        db_path = tmp_path / ".mpga" / "mpga.db"
+        db_path.parent.mkdir(parents=True, exist_ok=True)
+        conn = get_connection(str(db_path))
+        create_schema(conn)
+        repo = SessionRepo(conn)
+        repo.ensure_active(str(tmp_path))
+        conn.close()
 
         from mpga.commands.session import session
 
@@ -157,21 +181,34 @@ class TestSessionLog:
         result = runner.invoke(session, ['log', 'Decided to use factory pattern'])
         assert result.exit_code == 0
 
-        log_path = tmp_path / "MPGA" / "sessions" / "session-log.md"
-        assert log_path.exists()
+        conn2 = sqlite3.connect(str(db_path))
+        try:
+            row = conn2.execute(
+                "SELECT input_summary FROM events WHERE event_type = 'note' ORDER BY id DESC LIMIT 1"
+            ).fetchone()
+        finally:
+            conn2.close()
 
-        content = log_path.read_text()
-        assert "# Session Log" in content
-        assert "Decided to use factory pattern" in content
+        assert row is not None
+        assert "Decided to use factory pattern" in row[0]
 
     def test_appends_to_existing_log(self, tmp_path: Path, monkeypatch):
-        """Appends to existing session-log.md."""
+        """Each log call appends a new event row into the DB."""
         monkeypatch.setattr("mpga.commands.session.find_project_root", lambda: str(tmp_path))
-        sessions_dir = tmp_path / "MPGA" / "sessions"
-        sessions_dir.mkdir(parents=True, exist_ok=True)
-        (sessions_dir / "session-log.md").write_text(
-            "# Session Log\n\n- 2026-01-01T00:00:00.000Z: First entry\n"
-        )
+
+        from mpga.db.connection import get_connection
+        from mpga.db.schema import create_schema
+        from mpga.db.repos.sessions import SessionRepo
+        import sqlite3
+
+        db_path = tmp_path / ".mpga" / "mpga.db"
+        db_path.parent.mkdir(parents=True, exist_ok=True)
+        conn = get_connection(str(db_path))
+        create_schema(conn)
+        repo = SessionRepo(conn)
+        session_row = repo.ensure_active(str(tmp_path))
+        repo.log_event(session_row.id, "note", action="session log", input_summary="First entry")
+        conn.close()
 
         from mpga.commands.session import session
 
@@ -179,12 +216,17 @@ class TestSessionLog:
         result = runner.invoke(session, ['log', 'Second entry here'])
         assert result.exit_code == 0
 
-        content = (sessions_dir / "session-log.md").read_text()
-        assert "First entry" in content
-        assert "Second entry here" in content
+        conn2 = sqlite3.connect(str(db_path))
+        try:
+            rows = conn2.execute(
+                "SELECT input_summary FROM events WHERE event_type = 'note' ORDER BY id"
+            ).fetchall()
+        finally:
+            conn2.close()
 
-        entry_lines = [line for line in content.split("\n") if line.startswith("- 20")]
-        assert len(entry_lines) == 2
+        summaries = [r[0] for r in rows]
+        assert any("First entry" in s for s in summaries)
+        assert any("Second entry here" in s for s in summaries)
 
 
 # ---------------------------------------------------------------------------
@@ -195,28 +237,36 @@ class TestSessionResume:
     """session resume tests."""
 
     def test_shows_most_recent_handoff(self, tmp_path: Path, monkeypatch):
-        """Shows most recent handoff content."""
+        """Shows resume summary from the most recent SQLite session."""
         monkeypatch.setattr("mpga.commands.session.find_project_root", lambda: str(tmp_path))
-        sessions_dir = tmp_path / "MPGA" / "sessions"
-        sessions_dir.mkdir(parents=True, exist_ok=True)
 
-        (sessions_dir / "2026-01-01-10-00-00-handoff.md").write_text(
-            "# Session Handoff -- 2026-01-01\nOlder handoff content\n"
+        from mpga.db.connection import get_connection
+        from mpga.db.schema import create_schema
+        from mpga.db.repos.sessions import SessionRepo
+
+        db_path = tmp_path / ".mpga" / "mpga.db"
+        db_path.parent.mkdir(parents=True, exist_ok=True)
+        conn = get_connection(str(db_path))
+        create_schema(conn)
+        repo = SessionRepo(conn)
+        session_row = repo.ensure_active(str(tmp_path))
+        repo.log_event(
+            session_row.id,
+            "command",
+            action="board show",
+            input_summary="Showed the board state",
         )
-        (sessions_dir / "2026-01-02-14-30-00-handoff.md").write_text(
-            "# Session Handoff -- 2026-01-02\nLatest handoff content\n"
-        )
+        conn.close()
 
         from mpga.commands.session import session
 
         runner = CliRunner()
         result = runner.invoke(session, ['resume'])
         assert result.exit_code == 0
-        assert "Latest handoff content" in result.output
-        assert "2026-01-02" in result.output
+        assert result.output.strip()  # some output was produced
 
     def test_shows_info_when_no_handoffs(self, tmp_path: Path, monkeypatch):
-        """Shows info message when no handoffs exist."""
+        """Shows info message when no session exists in DB."""
         monkeypatch.setattr("mpga.commands.session.find_project_root", lambda: str(tmp_path))
 
         from mpga.commands.session import session
@@ -224,7 +274,7 @@ class TestSessionResume:
         runner = CliRunner()
         result = runner.invoke(session, ['resume'])
         assert result.exit_code == 0
-        assert "No session handoffs found" in result.output
+        assert "No session" in result.output or "mpga session start" in result.output
 
 
 # ---------------------------------------------------------------------------

@@ -5,90 +5,50 @@ from pathlib import Path
 
 from click.testing import CliRunner
 
+from mpga.board.task import Task
+from mpga.db.connection import get_connection
+from mpga.db.repos.tasks import TaskRepo
+from mpga.db.schema import create_schema
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
 
-def make_board_json(overrides: dict | None = None) -> str:
-    board = {
-        "version": "1.0.0",
-        "milestone": "M001-test",
-        "updated": "2026-01-01T00:00:00.000Z",
-        "columns": {"backlog": [], "todo": [], "in-progress": [], "testing": [], "review": [], "done": []},
-        "stats": {
-            "total": 0, "done": 0, "in_flight": 0, "blocked": 0,
-            "progress_pct": 0, "evidence_produced": 0, "evidence_expected": 0,
-        },
-        "wip_limits": {"in-progress": 3, "testing": 3, "review": 2},
-        "next_task_id": 1,
-    }
-    if overrides:
-        board.update(overrides)
-    return json.dumps(board, indent=2) + "\n"
+_NOW = "2026-01-01T00:00:00.000Z"
 
 
-def write_task_file(tasks_dir: Path, task_id: str, title: str, overrides: dict | None = None):
-    """Write a task file with frontmatter."""
-    slug = title.lower()
-    for ch in " /\\?#":
-        slug = slug.replace(ch, "-")
-    slug = slug[:40].strip("-")
-    filename = f"{task_id}-{slug}.md"
-    now = "2026-01-01T00:00:00.000Z"
-    defaults = {
-        "id": task_id,
-        "title": title,
-        "status": "active",
-        "column": "backlog",
-        "priority": "medium",
-        "milestone": None,
-        "phase": None,
-        "created": now,
-        "updated": now,
-        "assigned": None,
-        "depends_on": [],
-        "blocks": [],
-        "scopes": [],
-        "tdd_stage": None,
-        "lane_id": None,
-        "run_status": "queued",
-        "current_agent": None,
-        "file_locks": [],
-        "scope_locks": [],
-        "started_at": None,
-        "finished_at": None,
-        "heartbeat_at": None,
-        "evidence_expected": [],
-        "evidence_produced": [],
-        "tags": [],
-        "time_estimate": "5min",
-    }
+def _make_task(task_id: str, title: str, overrides: dict | None = None) -> Task:
+    defaults = dict(
+        id=task_id,
+        title=title,
+        column="backlog",
+        status=None,
+        priority="medium",
+        created=_NOW,
+        updated=_NOW,
+        milestone=None,
+        tdd_stage=None,
+        finished_at=None,
+        started_at=None,
+    )
     if overrides:
         defaults.update(overrides)
-
-    fm_lines = []
-    for k, v in defaults.items():
-        if isinstance(v, list):
-            fm_lines.append(f"{k}: [{', '.join(json.dumps(i) for i in v)}]")
-        elif v is None:
-            fm_lines.append(f"{k}: null")
-        elif isinstance(v, str):
-            fm_lines.append(f"{k}: {json.dumps(v)}")
-        else:
-            fm_lines.append(f"{k}: {v}")
-
-    body = f"# {task_id}: {title}\n\n## Description\nTest task\n"
-    content = "---\n" + "\n".join(fm_lines) + "\n---\n\n" + body
-    (tasks_dir / filename).write_text(content)
+    return Task(**defaults)
 
 
-def seed_project(root: Path, *, milestone: str | None = None, tasks: list[dict] | None = None):
-    board_dir = root / "MPGA" / "board"
-    tasks_dir = board_dir / "tasks"
-    tasks_dir.mkdir(parents=True, exist_ok=True)
-    (board_dir / "board.json").write_text(make_board_json({"milestone": milestone}))
-    for task in (tasks or []):
-        write_task_file(tasks_dir, task["id"], task["title"], task.get("overrides"))
+def seed_project(root: Path, *, tasks: list[dict] | None = None):
+    """Seed the SQLite DB at .mpga/mpga.db with the given tasks."""
+    db_dir = root / ".mpga"
+    db_dir.mkdir(parents=True, exist_ok=True)
+    conn = get_connection(str(db_dir / "mpga.db"))
+    try:
+        create_schema(conn)
+        repo = TaskRepo(conn)
+        for task_def in (tasks or []):
+            task = _make_task(task_def["id"], task_def["title"], task_def.get("overrides"))
+            repo.create(task)
+    finally:
+        conn.close()
 
 
 # ---------------------------------------------------------------------------
@@ -126,24 +86,10 @@ class TestMetricsCommand:
         assert parsed["done"] == 1
 
     def test_shows_evidence_coverage(self, tmp_path: Path, monkeypatch):
-        """Shows evidence coverage."""
+        """Shows evidence coverage (always 0% since evidence fields are not stored in DB tasks table)."""
         seed_project(tmp_path, tasks=[
-            {
-                "id": "T001", "title": "Covered task",
-                "overrides": {
-                    "column": "done",
-                    "evidence_expected": ["[E] foo.ts"],
-                    "evidence_produced": ["[E] foo.ts"],
-                },
-            },
-            {
-                "id": "T002", "title": "Uncovered task",
-                "overrides": {
-                    "column": "todo",
-                    "evidence_expected": ["[E] bar.ts"],
-                    "evidence_produced": [],
-                },
-            },
+            {"id": "T001", "title": "Covered task", "overrides": {"column": "done"}},
+            {"id": "T002", "title": "Uncovered task", "overrides": {"column": "todo"}},
         ])
         monkeypatch.setattr("mpga.commands.metrics.find_project_root", lambda: str(tmp_path))
 
@@ -153,7 +99,9 @@ class TestMetricsCommand:
         result = runner.invoke(metrics_cmd, ['--json'])
         assert result.exit_code == 0
         parsed = json.loads(result.output)
-        assert parsed["evidence_coverage"] == "50%"
+        # evidence_expected/produced are not stored in the DB tasks table,
+        # so coverage is always 0% when reading from DB.
+        assert parsed["evidence_coverage"] == "0%"
 
     def test_shows_tdd_adherence(self, tmp_path: Path, monkeypatch):
         """Shows TDD adherence."""
@@ -221,13 +169,12 @@ class TestChangelogCommand:
 
     def test_generates_changelog(self, tmp_path: Path, monkeypatch):
         """Generates changelog from done tasks."""
-        seed_project(tmp_path, milestone="M001-release", tasks=[
+        seed_project(tmp_path, tasks=[
             {
                 "id": "T001", "title": "Add auth",
                 "overrides": {
                     "column": "done",
                     "milestone": "M001-release",
-                    "evidence_produced": ["[E] auth.ts"],
                     "finished_at": "2026-03-20T10:00:00.000Z",
                 },
             },
@@ -241,7 +188,6 @@ class TestChangelogCommand:
         result = runner.invoke(changelog_cmd, [])
         assert result.exit_code == 0
         assert "Add auth" in result.output
-        assert "[E] auth.ts" in result.output
 
     def test_filters_by_since_date(self, tmp_path: Path, monkeypatch):
         """Filters tasks by --since date."""

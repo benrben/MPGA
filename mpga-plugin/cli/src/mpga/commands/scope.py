@@ -1,9 +1,9 @@
 """Scope document management commands."""
 from __future__ import annotations
 
+import json
 import re
 import sys
-import time
 from datetime import date
 from pathlib import Path
 
@@ -17,28 +17,16 @@ from mpga.db.repos.scopes import Scope, ScopeRepo
 from mpga.db.schema import create_schema
 from mpga.evidence.parser import evidence_stats, parse_evidence_links
 
-# Number of characters of context to show before a search match in excerpts.
-EXCERPT_CONTEXT_CHARS = 50
-# Maximum length of a search result excerpt in characters.
-EXCERPT_MAX_LENGTH = 200
 # Maximum number of scope search results to display.
 MAX_SEARCH_RESULTS = 3
 # Number of matched paragraphs to show for `scope show --query`.
 MAX_SCOPE_QUERY_PARAGRAPHS = 1
 
 
-def _get_scopes_dir(project_root: Path) -> Path:
-    return project_root / "MPGA" / "scopes"
-
-
 def _get_scope_repo(project_root: Path) -> tuple[object, ScopeRepo]:
     conn = get_connection(str(project_root / ".mpga" / "mpga.db"))
     create_schema(conn)
     return conn, ScopeRepo(conn)
-
-
-def _read_scope_file(scope_path: Path) -> str:
-    return scope_path.read_text(encoding="utf-8")
 
 
 def _extract_scope_summary(content: str) -> str:
@@ -117,7 +105,6 @@ def scope() -> None:
 def scope_list() -> None:
     """Show all scopes with health status."""
     project_root = find_project_root() or Path.cwd()
-    scopes_dir = _get_scopes_dir(project_root)
 
     conn, repo = _get_scope_repo(project_root)
     try:
@@ -125,43 +112,18 @@ def scope_list() -> None:
     finally:
         conn.close()
 
-    if db_scopes:
-        log.header("Scopes")
-        rows: list[list[str]] = [["Scope", "Health", "Evidence", "Last verified"]]
-        for scope_row in db_scopes:
-            verified = scope_row.last_verified or "?"
-            rows.append([
-                scope_row.id,
-                scope_row.status,
-                f"{scope_row.evidence_valid}/{scope_row.evidence_total}",
-                verified,
-            ])
-        log.table(rows)
-        return
-
-    if not scopes_dir.exists():
+    if not db_scopes:
         log.error("No scopes found. Run `mpga sync` first.")
-        return
-
-    files = sorted(f.name for f in scopes_dir.iterdir() if f.suffix == ".md")
-    if not files:
-        log.info("No scopes found. Run `mpga sync` to generate them.")
         return
 
     log.header("Scopes")
     rows: list[list[str]] = [["Scope", "Health", "Evidence", "Last verified"]]
-    for file in files:
-        content = (scopes_dir / file).read_text(encoding="utf-8")
-        links = parse_evidence_links(content)
-        stats = evidence_stats(links)
-        health_match = re.search(r"\*\*Health:\*\* (.+)", content)
-        health = health_match.group(1) if health_match else "? unknown"
-        verified_match = re.search(r"\*\*Last verified:\*\* (.+)", content)
-        verified = verified_match.group(1) if verified_match else "?"
+    for scope_row in db_scopes:
+        verified = scope_row.last_verified or "?"
         rows.append([
-            file.removesuffix(".md"),
-            health,
-            f"{stats.valid}/{stats.total}",
+            scope_row.id,
+            scope_row.status,
+            f"{scope_row.evidence_valid}/{scope_row.evidence_total}",
             verified,
         ])
     log.table(rows)
@@ -171,13 +133,13 @@ def scope_list() -> None:
 @click.argument("name")
 @click.option("--full", is_flag=True, help="Show the complete scope document.")
 @click.option("--query", "query_text", help="Show only snippets that match this search.")
-def scope_show(name: str, full: bool, query_text: str | None) -> None:
+@click.option("--json", "as_json", is_flag=True, help="Output scope metadata as JSON.")
+def scope_show(name: str, full: bool, query_text: str | None, as_json: bool = False) -> None:
     """Display a scope with evidence status."""
     if full and query_text:
         raise click.UsageError("Use either --full or --query, not both.")
 
     project_root = find_project_root() or Path.cwd()
-    scope_path = _get_scopes_dir(project_root) / f"{name}.md"
 
     conn, repo = _get_scope_repo(project_root)
     try:
@@ -190,21 +152,26 @@ def scope_show(name: str, full: bool, query_text: str | None) -> None:
     finally:
         conn.close()
 
-    if scope_row is None and not scope_path.exists():
+    if scope_row is None:
         log.error(f"Scope '{name}' not found. Run `mpga scope list` to see available scopes.")
         sys.exit(1)
+
+    if as_json:
+        payload = {
+            "name": scope_row.name,
+            "description": scope_row.summary or "",
+            "health": scope_row.status,
+            "evidence_count": scope_row.evidence_total,
+        }
+        click.echo(json.dumps(payload))
+        return
 
     if query_text:
         if not query_matches:
             log.info(f'No matches for "{query_text}" in scope "{name}"')
             return
 
-        if scope_row and scope_row.content:
-            content = scope_row.content
-        elif scope_path.exists():
-            content = _read_scope_file(scope_path)
-        else:
-            content = ""
+        content = scope_row.content or ""
 
         matches = _matching_scope_paragraphs(content, query_text)
 
@@ -223,11 +190,11 @@ def scope_show(name: str, full: bool, query_text: str | None) -> None:
             log.dim(f"  ...{snippet}...")
         return
 
-    if scope_row is None:
-        content = _read_scope_file(scope_path)
-        scope_row = _scope_from_content(name, content)
-    else:
-        content = scope_row.content or (_read_scope_file(scope_path) if scope_path.exists() else "")
+    if scope_row.content is None:
+        log.error("Scope content missing from DB. Run `mpga sync` to rebuild.")
+        sys.exit(1)
+
+    content = scope_row.content
 
     if full:
         console.print(content)
@@ -242,13 +209,6 @@ def scope_show(name: str, full: bool, query_text: str | None) -> None:
 def scope_add(name: str) -> None:
     """Create a new empty scope document."""
     project_root = find_project_root() or Path.cwd()
-    scopes_dir = _get_scopes_dir(project_root)
-    scopes_dir.mkdir(parents=True, exist_ok=True)
-
-    scope_path = scopes_dir / f"{name}.md"
-    if scope_path.exists():
-        log.error(f"Scope '{name}' already exists.")
-        sys.exit(1)
 
     now = date.today().isoformat()
     template = f"""# Scope: {name}
@@ -315,10 +275,12 @@ def scope_add(name: str) -> None:
 ## Change history
 - {now}: Created manually
 """
-    scope_path.write_text(template, encoding="utf-8")
-
     conn, repo = _get_scope_repo(project_root)
     try:
+        existing = repo.get(name)
+        if existing is not None:
+            log.error(f"Scope '{name}' already exists.")
+            sys.exit(1)
         repo.create(
             Scope(
                 id=name,
@@ -330,34 +292,63 @@ def scope_add(name: str) -> None:
         )
     finally:
         conn.close()
-    log.success(f"Created MPGA/scopes/{name}.md")
+    log.success(f"Created scope '{name}' in DB")
 
 
 @scope.command("remove")
 @click.argument("name")
 def scope_remove(name: str) -> None:
-    """Archive a scope document."""
+    """Remove a scope from the DB."""
     project_root = find_project_root() or Path.cwd()
-    scope_path = _get_scopes_dir(project_root) / f"{name}.md"
-
-    if not scope_path.exists():
-        log.error(f"Scope '{name}' not found.")
-        sys.exit(1)
-
-    archive_dir = project_root / "MPGA" / "milestones" / "_archived-scopes"
-    archive_dir.mkdir(parents=True, exist_ok=True)
-    timestamp_ms = int(time.time() * 1000)
-    archive_path = archive_dir / f"{name}-{timestamp_ms}.md"
-    scope_path.rename(archive_path)
 
     conn, repo = _get_scope_repo(project_root)
     try:
+        existing = repo.get(name)
+        if existing is None:
+            log.error(f"Scope '{name}' not found.")
+            sys.exit(1)
         repo.delete(name)
     finally:
         conn.close()
 
-    rel_archive = archive_path.relative_to(project_root)
-    log.success(f"Archived scope '{name}' to {rel_archive}")
+    log.success(f"Removed scope '{name}'")
+
+
+@scope.command("update")
+@click.argument("name")
+@click.option("--file", "-f", type=click.File("r"), default="-", help="Read content from file (default: stdin).")
+def scope_update(name: str, file: object) -> None:
+    """Update a scope's content from a markdown file or stdin.
+
+    Usage:
+        cat enriched_scope.md | mpga scope update <name>
+        mpga scope update <name> --file enriched_scope.md
+    """
+    project_root = find_project_root() or Path.cwd()
+
+    # Read content from stdin or file
+    content = file.read()  # type: ignore
+    if not content.strip():
+        log.error("No content provided. Pipe markdown via stdin or use --file.")
+        sys.exit(1)
+
+    conn, repo = _get_scope_repo(project_root)
+    try:
+        existing = repo.get(name)
+        if existing is None:
+            log.error(f"Scope '{name}' not found. Create it first with `mpga scope add {name}`.")
+            sys.exit(1)
+
+        # Parse content to extract metadata
+        scope_obj = _scope_from_content(name, content)
+
+        # Update in database
+        repo.update(scope_obj)
+
+    finally:
+        conn.close()
+
+    log.success(f"Updated scope '{name}' ({scope_obj.evidence_valid}/{scope_obj.evidence_total} evidence links verified)")
 
 
 @scope.command("query")
@@ -365,11 +356,6 @@ def scope_remove(name: str) -> None:
 def scope_query(question: str) -> None:
     """Search scopes for an answer."""
     project_root = find_project_root() or Path.cwd()
-    scopes_dir = _get_scopes_dir(project_root)
-
-    if not scopes_dir.exists():
-        log.error("No scopes found. Run `mpga sync` first.")
-        return
 
     conn, repo = _get_scope_repo(project_root)
     try:
@@ -377,44 +363,12 @@ def scope_query(question: str) -> None:
     finally:
         conn.close()
 
-    if db_matches:
-        log.header(f'Scope search: "{question}"')
-        for scope_row, snippet in db_matches:
-            console.print("")
-            log.bold(f"  {scope_row.id}")
-            log.dim(f"  ...{snippet}...")
-        return
-
-    files = sorted(f.name for f in scopes_dir.iterdir() if f.suffix == ".md")
-    terms = question.lower().split()
-    matches: list[dict[str, object]] = []
-
-    for file in files:
-        content = (scopes_dir / file).read_text(encoding="utf-8")
-        lower = content.lower()
-        score = 0
-        for term in terms:
-            score += len(re.findall(re.escape(term), lower))
-
-        if score > 0:
-            line_idx = lower.find(terms[0])
-            start = max(0, line_idx - EXCERPT_CONTEXT_CHARS)
-            excerpt = content[start : start + EXCERPT_MAX_LENGTH].replace("\n", " ")
-            matches.append({
-                "name": file.removesuffix(".md"),
-                "score": score,
-                "excerpt": excerpt,
-            })
-
-    matches.sort(key=lambda m: m["score"], reverse=True)  # type: ignore[arg-type]
-
-    if not matches:
-        log.info(f'No scopes matched "{question}"')
-        log.dim("Tip: Run `mpga sync` to generate more detailed scope docs.")
+    if not db_matches:
+        log.error("No scopes found. Run `mpga sync` first.")
         return
 
     log.header(f'Scope search: "{question}"')
-    for m in matches[:MAX_SEARCH_RESULTS]:
+    for scope_row, snippet in db_matches:
         console.print("")
-        log.bold(f"  {m['name']}  (score: {m['score']})")
-        log.dim(f"  ...{m['excerpt']}...")
+        log.bold(f"  {scope_row.id}")
+        log.dim(f"  ...{snippet}...")

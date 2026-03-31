@@ -23,8 +23,8 @@ Export current session state for a fresh context window. Ready for peace — zer
 ## Resume instructions
 ```
 To resume in a new session:
-1. Load context: cat MPGA/sessions/<date>-handoff.md
-2. Load index: cat MPGA/INDEX.md
-3. Load relevant scope: cat MPGA/scopes/<scope>.md
+1. Load context: `mpga session handoff` (output to stdout)
+2. View project status: `mpga status`
+3. Load relevant scope: `mpga scope show <scope>`
 4. Resume from "Next action" in the handoff doc — Covfefe
 ```

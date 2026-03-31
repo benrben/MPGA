@@ -299,3 +299,76 @@ class TestEvidenceStats:
 
     def test_returns_100_percent_for_empty_links(self):
         assert evidence_stats([]).health_pct == 100
+
+
+# ---------------------------------------------------------------------------
+# HTML comment filtering in parse_evidence_links
+# ---------------------------------------------------------------------------
+
+
+class TestHtmlCommentFiltering:
+    def test_link_inside_single_line_comment_is_ignored(self):
+        """[E] inside <!-- --> on a single line must NOT be returned."""
+        content = "<!-- [E] src/foo.ts:1-10 -->"
+        links = parse_evidence_links(content)
+        assert links == [], f"Expected no links but got {links}"
+
+    def test_link_outside_comment_is_found(self):
+        """[E] outside any HTML comment must still be returned."""
+        content = "[E] src/foo.ts:1-10"
+        links = parse_evidence_links(content)
+        assert len(links) == 1
+        assert links[0].filepath == "src/foo.ts"
+
+    def test_link_before_comment_is_found_link_inside_is_ignored(self):
+        """Only the link before the comment open should be returned."""
+        content = "[E] src/real.ts:5-10 <!-- [E] src/fake.ts:1-2 -->"
+        links = parse_evidence_links(content)
+        assert len(links) == 1
+        assert links[0].filepath == "src/real.ts"
+
+    def test_multiline_comment_links_all_ignored(self):
+        """All [E] links within a multi-line HTML comment are ignored."""
+        content = (
+            "<!--\n"
+            "[E] src/a.ts:1-5\n"
+            "[E] src/b.ts:6-10\n"
+            "-->"
+        )
+        links = parse_evidence_links(content)
+        assert links == [], f"Expected no links but got {links}"
+
+    def test_link_after_multiline_comment_is_found(self):
+        """A link that appears after a closing --> is still parsed."""
+        content = (
+            "<!--\n"
+            "[E] src/commented.ts:1-5\n"
+            "-->\n"
+            "[E] src/active.ts:20-30"
+        )
+        links = parse_evidence_links(content)
+        assert len(links) == 1
+        assert links[0].filepath == "src/active.ts"
+
+    def test_link_straddling_comment_open_is_ignored(self):
+        """A line that is inside the comment region is skipped even without a
+        closing --> on the same line (multi-line comment scenario)."""
+        content = (
+            "<!-- start of comment\n"
+            "[E] src/inside.ts:1-5\n"
+            "[E] src/also_inside.ts:6-10 -->"
+        )
+        links = parse_evidence_links(content)
+        assert links == [], f"Expected no links but got {links}"
+
+    def test_mixed_commented_and_active_links(self):
+        """Only active (uncommented) links appear in results."""
+        content = (
+            "[E] src/active1.ts:1-5\n"
+            "<!-- [E] src/hidden.ts:10-20 -->\n"
+            "[E] src/active2.ts:30-40"
+        )
+        links = parse_evidence_links(content)
+        assert len(links) == 2
+        filepaths = {lnk.filepath for lnk in links}
+        assert filepaths == {"src/active1.ts", "src/active2.ts"}

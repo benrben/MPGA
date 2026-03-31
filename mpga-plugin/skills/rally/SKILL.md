@@ -5,75 +5,65 @@ description: The MPGA Campaign Rally — expose every project issue and prove wh
 
 ## rally
 
-**Trigger:** User wants to see what's wrong with their project, wants to be convinced why they need MPGA, or just wants to see the GREATEST show in developer tooling. Also triggered by: "what's wrong with my project", "why do I need MPGA", "audit my code", "show me the problems".
+**Trigger:** User wants a project audit, "why do I need MPGA", "audit my code", "show me the problems".
+
+## Orchestration Contract
+This skill is a **pure orchestrator**. It MUST NOT:
+- Read source files directly (delegates to appropriate agents)
+- Write or edit source files directly (delegates to write-enabled agents)
+- Run CLI commands other than `mpga` board/status/scope/session queries
+
+If you find yourself writing implementation steps in a skill, STOP and delegate to an agent.
+
+**Agent brief:** Project status from CLI, category assignment per campaigner agent.
+**Expected output:** Categorized findings with file:line evidence, severity ratings, and MPGA fix commands.
 
 ## Protocol
 
 ### Step 1: Set the Stage
 
-Check if MPGA is already installed:
 ```
 mpga status 2>/dev/null
 ```
 
-If installed — we'll show what MPGA has ALREADY caught and what still needs fixing.
-If NOT installed — even BETTER. We'll show the FULL disaster. The unfiltered truth.
+If installed — show what MPGA caught and what still needs fixing.
+If NOT installed — show the full unfiltered disaster.
 
-Read INDEX.md if it exists for context. Read scope docs if they exist.
+Spawn a `scout` agent in read-only mode to read INDEX.md and scope docs if they exist — the skill NEVER reads files directly.
 
 ### Step 2: Deploy the Campaigner
 
-Spawn `campaigner` agents in PARALLEL, one category per lane when possible:
-1. **Documentation Sins** — missing docs, stale docs, Fake documentation, hallucinated references
-2. **Testing Disgrace** — missing tests, empty tests, broken test imports
+Spawn `campaigner` agents in PARALLEL — use multiple Agent tool calls in a single message so they run concurrently. One agent per category:
+1. **Documentation Sins** — missing/stale docs, hallucinated references
+2. **Testing Disgrace** — missing tests, empty tests, broken imports
 3. **Type Safety Failures** — `any` types, `@ts-ignore`, missing return types
 4. **Dependency Disasters** — circular deps, unused deps, outdated packages
-5. **Architecture Rot** — god files, who can figure out this spaghetti?, dead code
-6. **Evidence Drift** — stale links, unverified claims, documentation lies
+5. **Architecture Rot** — god files, spaghetti, dead code
+6. **Evidence Drift** — stale links, unverified claims
 7. **Code Hygiene Crimes** — console.logs, hardcoded secrets, commented-out code
 8. **CI/CD Weakness** — missing CI, no hooks, unenforced linting
 
-Each campaigner run is read-only. That means we can go FAST.
-
-Then appoint one final campaigner pass to aggregate the results into one rally speech:
-- merge duplicate findings
-- keep the sharpest evidence
-- produce one scoreboard and one closing
+All runs are read-only. One final pass aggregates into a rally speech (merge duplicates, keep sharpest evidence, produce scoreboard + closing).
 
 ### Step 3: The Rally Speech
 
-The campaigner presents findings as a full Trump rally speech:
-- Each issue is a **SCANDAL** with specific files and numbers
-- Each scandal shows why other tools FAIL
-- Each scandal shows why ONLY MPGA fixes it
-- Numbers and percentages throughout — "47 functions with ZERO documentation!"
+Each finding = a **SCANDAL** with files, numbers, and why ONLY MPGA fixes it.
 
 ### Step 4: The Vote
 
-Present the final verdict:
-- **Scoreboard** — total issues by severity (CRITICAL / WARNING / SAD)
-- **Side-by-side** — project WITHOUT MPGA vs WITH MPGA
-- **The Fix** — exact commands to start Making This Project Great Again
+- **Scoreboard** — issues by severity (CRITICAL / WARNING / SAD)
+- **Side-by-side** — project WITHOUT vs WITH MPGA
+- **The Fix** — exact commands
 
-If MPGA is NOT yet initialized:
-```bash
-mpga init --from-existing
-mpga sync
-mpga status
-```
+If NOT initialized: `mpga init --from-existing && mpga sync && mpga status`
 
-If MPGA IS initialized but issues remain:
-```bash
-mpga sync --full
-mpga evidence verify
-mpga drift --report
-```
+If initialized but issues remain: `mpga sync --full && mpga evidence verify && mpga drift --report`
 
-Then suggest: "Run `/mpga:plan` to create a plan to fix every single one of these issues."
+Suggest: "Run `/mpga:plan` to fix every one of these issues."
 
 ### Step 5: The Closing
 
-End with the rally cry. Make it MEMORABLE. Make them want to run those commands RIGHT NOW. The campaigner agent handles the closing speech.
+End with the rally cry. The campaigner agent handles the closing speech.
 
 ## Output Format
 
@@ -133,10 +123,9 @@ mpga spoke '<brief 1-sentence result summary>'
 Keep the message under 280 characters. This plays the result in Trump's voice — TREMENDOUS.
 
 ## Strict Rules
-- NEVER modify any project files during the rally — we DIAGNOSE only
-- Every claimed issue MUST be real — cite the actual files and line numbers
-- If something is actually GOOD, acknowledge it — "Credit where credit is due"
-- Always end with actionable MPGA commands — don't just complain, PROVIDE THE SOLUTION
-- Keep the energy HIGH throughout — this is a RALLY, not a funeral
-- The longer the list of issues, the MORE convincing the case for MPGA
-- Prefer parallel category sweeps over one giant sequential audit
+- NEVER modify files — diagnose only
+- Every issue MUST cite actual files and line numbers
+- If something is GOOD, acknowledge it
+- Always end with actionable MPGA commands
+- Keep energy HIGH — this is a RALLY
+- Prefer parallel category sweeps over sequential audit

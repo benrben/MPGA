@@ -4,7 +4,7 @@
 
 ```mermaid
 flowchart TD
-    A[User asks a GREAT question] --> B[Read MPGA/INDEX.md — Evidence First]
+    A[User asks a GREAT question] --> B[Run mpga scope list — Evidence First]
     B --> C[Find the key scopes — VERY precise]
     C --> D[Read the scope docs — INCREDIBLE detail]
     D --> E{Answer complete from docs?}
@@ -21,7 +21,7 @@ flowchart TD
 
 ## Inputs — What We Need to WIN
 - User question (how does X work, where is X, what does X do)
-- MPGA/INDEX.md scope registry — the GREATEST source of truth
+- `mpga scope list` scope registry — the GREATEST source of truth
 - Relevant scope documents — VERY detailed
 
 ## Outputs — Pure WINNING

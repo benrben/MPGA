@@ -10,6 +10,17 @@ description: Orchestrate the TDD cycle for a task (red → green → blue → re
 > This is the canonical TDD execution protocol. The `/mpga:execute` command
 > delegates here — use `/mpga:develop` for all TDD cycle work.
 
+## Orchestration Contract
+This skill is a **pure orchestrator**. It MUST NOT:
+- Read source files directly (delegates to appropriate agents)
+- Write or edit source files directly (delegates to write-enabled agents)
+- Run CLI commands other than `mpga` board/status/scope/session queries
+
+If you find yourself writing implementation steps in a skill, STOP and delegate to an agent.
+
+**Agent brief:** Task context from board, scope docs from CLI, acceptance criteria from milestone.
+**Expected output:** Structured verdict (PASS/FAIL) with file:line references.
+
 ## Protocol
 
 For each task in `todo` column (or a specified task):
@@ -27,8 +38,8 @@ For each task in `todo` column (or a specified task):
    Claim the scope-local write lane too. One writer per scope. ALWAYS.
 
 2. **Load context** — know what we're building:
-   - Read task card: `cat MPGA/board/tasks/<task-file>.md`
-   - Read relevant scope docs: `cat MPGA/scopes/<scope>.md`
+   - Read task card: `mpga board show <task-id>`
+   - Read relevant scope docs: `mpga scope show <scope>`
    - Each TDD task runs in a focused context with only relevant scopes loaded.
    - If another task is already writing to that scope, pick a different ready task.
 

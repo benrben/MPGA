@@ -34,29 +34,24 @@ class TestAntigravityProjectLevel:
     def test_creates_gemini_md(self, tmp_path: Path, monkeypatch):
         """Creates GEMINI.md at project root."""
         setup_mocks(monkeypatch)
-        mpga_dir = tmp_path / "MPGA"
-        mpga_dir.mkdir(parents=True, exist_ok=True)
 
         from mpga.commands.export.antigravity import export_antigravity
 
-        export_antigravity(str(tmp_path), str(mpga_dir), default_index_content(), "test-project", "/fake/plugin", False, {})  # noqa: E501
+        export_antigravity(str(tmp_path), default_index_content(), "test-project", "/fake/plugin", False, {})
 
         gemini_path = tmp_path / "GEMINI.md"
         assert gemini_path.exists()
         content = gemini_path.read_text()
         assert "MPGA-Managed Project Context" in content
         assert "./.mpga-runtime/bin/mpga.sh sync" in content
-        assert "MPGA/INDEX.md" in content
 
     def test_gemini_md_includes_milestone(self, tmp_path: Path, monkeypatch):
         """GEMINI.md includes the active milestone from INDEX content."""
         setup_mocks(monkeypatch)
-        mpga_dir = tmp_path / "MPGA"
-        mpga_dir.mkdir(parents=True, exist_ok=True)
 
         from mpga.commands.export.antigravity import export_antigravity
 
-        export_antigravity(str(tmp_path), str(mpga_dir), default_index_content("M002-beta"), "test-project", "/fake/plugin", False, {})  # noqa: E501
+        export_antigravity(str(tmp_path), default_index_content("M002-beta"), "test-project", "/fake/plugin", False, {})
 
         content = (tmp_path / "GEMINI.md").read_text()
         assert "M002-beta" in content
@@ -64,12 +59,10 @@ class TestAntigravityProjectLevel:
     def test_gemini_md_fallback_no_milestone(self, tmp_path: Path, monkeypatch):
         """GEMINI.md falls back to (none) when no milestone section exists."""
         setup_mocks(monkeypatch)
-        mpga_dir = tmp_path / "MPGA"
-        mpga_dir.mkdir(parents=True, exist_ok=True)
 
         from mpga.commands.export.antigravity import export_antigravity
 
-        export_antigravity(str(tmp_path), str(mpga_dir), "# Project: test-project\n\n## Identity\n- stuff\n", "test-project", "/fake/plugin", False, {})  # noqa: E501
+        export_antigravity(str(tmp_path), "# Project: test-project\n\n## Identity\n- stuff\n", "test-project", "/fake/plugin", False, {})
 
         content = (tmp_path / "GEMINI.md").read_text()
         assert "(none)" in content
@@ -77,12 +70,10 @@ class TestAntigravityProjectLevel:
     def test_calls_copy_skills_to(self, tmp_path: Path, monkeypatch):
         """Calls copySkillsTo for .agent/skills/."""
         mock_copy = setup_mocks(monkeypatch)
-        mpga_dir = tmp_path / "MPGA"
-        mpga_dir.mkdir(parents=True, exist_ok=True)
 
         from mpga.commands.export.antigravity import export_antigravity
 
-        export_antigravity(str(tmp_path), str(mpga_dir), default_index_content(), "test-project", "/fake/plugin", False, {})  # noqa: E501
+        export_antigravity(str(tmp_path), default_index_content(), "test-project", "/fake/plugin", False, {})
 
         mock_copy.assert_called_once_with(
             str(tmp_path / ".agent" / "skills"),
@@ -94,12 +85,10 @@ class TestAntigravityProjectLevel:
     def test_creates_rules_files(self, tmp_path: Path, monkeypatch):
         """Creates .antigravity/rules/ with 3 rule files."""
         setup_mocks(monkeypatch)
-        mpga_dir = tmp_path / "MPGA"
-        mpga_dir.mkdir(parents=True, exist_ok=True)
 
         from mpga.commands.export.antigravity import export_antigravity
 
-        export_antigravity(str(tmp_path), str(mpga_dir), default_index_content(), "test-project", "/fake/plugin", False, {})  # noqa: E501
+        export_antigravity(str(tmp_path), default_index_content(), "test-project", "/fake/plugin", False, {})
 
         rules_dir = tmp_path / ".antigravity" / "rules"
         assert rules_dir.exists()
@@ -112,12 +101,10 @@ class TestAntigravityProjectLevel:
     def test_context_rule_content(self, tmp_path: Path, monkeypatch):
         """mpga-context.md contains milestone and evidence protocol."""
         setup_mocks(monkeypatch)
-        mpga_dir = tmp_path / "MPGA"
-        mpga_dir.mkdir(parents=True, exist_ok=True)
 
         from mpga.commands.export.antigravity import export_antigravity
 
-        export_antigravity(str(tmp_path), str(mpga_dir), default_index_content(), "test-project", "/fake/plugin", False, {})  # noqa: E501
+        export_antigravity(str(tmp_path), default_index_content(), "test-project", "/fake/plugin", False, {})
 
         content = (tmp_path / ".antigravity" / "rules" / "mpga-context.md").read_text()
         assert "MPGA Project Context" in content
@@ -129,12 +116,10 @@ class TestAntigravityProjectLevel:
     def test_evidence_rule_content(self, tmp_path: Path, monkeypatch):
         """mpga-evidence.md contains evidence link format."""
         setup_mocks(monkeypatch)
-        mpga_dir = tmp_path / "MPGA"
-        mpga_dir.mkdir(parents=True, exist_ok=True)
 
         from mpga.commands.export.antigravity import export_antigravity
 
-        export_antigravity(str(tmp_path), str(mpga_dir), default_index_content(), "test-project", "/fake/plugin", False, {})  # noqa: E501
+        export_antigravity(str(tmp_path), default_index_content(), "test-project", "/fake/plugin", False, {})
 
         content = (tmp_path / ".antigravity" / "rules" / "mpga-evidence.md").read_text()
         assert "MPGA Evidence Protocol" in content
@@ -145,12 +130,10 @@ class TestAntigravityProjectLevel:
     def test_tdd_rule_content(self, tmp_path: Path, monkeypatch):
         """mpga-tdd.md contains TDD protocol steps."""
         setup_mocks(monkeypatch)
-        mpga_dir = tmp_path / "MPGA"
-        mpga_dir.mkdir(parents=True, exist_ok=True)
 
         from mpga.commands.export.antigravity import export_antigravity
 
-        export_antigravity(str(tmp_path), str(mpga_dir), default_index_content(), "test-project", "/fake/plugin", False, {})  # noqa: E501
+        export_antigravity(str(tmp_path), default_index_content(), "test-project", "/fake/plugin", False, {})
 
         content = (tmp_path / ".antigravity" / "rules" / "mpga-tdd.md").read_text()
         assert "RED" in content
@@ -163,12 +146,10 @@ class TestAntigravityProjectLevel:
     def test_creates_workflow_files(self, tmp_path: Path, monkeypatch):
         """Creates .agents/workflows/ with 3 workflow files."""
         setup_mocks(monkeypatch)
-        mpga_dir = tmp_path / "MPGA"
-        mpga_dir.mkdir(parents=True, exist_ok=True)
 
         from mpga.commands.export.antigravity import export_antigravity
 
-        export_antigravity(str(tmp_path), str(mpga_dir), default_index_content(), "test-project", "/fake/plugin", False, {})  # noqa: E501
+        export_antigravity(str(tmp_path), default_index_content(), "test-project", "/fake/plugin", False, {})
 
         workflows_dir = tmp_path / ".agents" / "workflows"
         assert workflows_dir.exists()
@@ -181,12 +162,10 @@ class TestAntigravityProjectLevel:
     def test_workflow_content(self, tmp_path: Path, monkeypatch):
         """Workflow files contain expected headings."""
         setup_mocks(monkeypatch)
-        mpga_dir = tmp_path / "MPGA"
-        mpga_dir.mkdir(parents=True, exist_ok=True)
 
         from mpga.commands.export.antigravity import export_antigravity
 
-        export_antigravity(str(tmp_path), str(mpga_dir), default_index_content(), "test-project", "/fake/plugin", False, {})  # noqa: E501
+        export_antigravity(str(tmp_path), default_index_content(), "test-project", "/fake/plugin", False, {})
 
         workflows_dir = tmp_path / ".agents" / "workflows"
 
@@ -209,57 +188,22 @@ class TestAntigravityProjectLevel:
     def test_no_knowledge_when_not_requested(self, tmp_path: Path, monkeypatch):
         """Does not seed knowledge items when opts.knowledge is false."""
         setup_mocks(monkeypatch)
-        mpga_dir = tmp_path / "MPGA"
-        scopes_dir = mpga_dir / "scopes"
-        scopes_dir.mkdir(parents=True, exist_ok=True)
-        (scopes_dir / "core.md").write_text("# Scope: core\n[E] src/core.ts:1-10 :: main()\n")
 
         from mpga.commands.export.antigravity import export_antigravity
 
-        export_antigravity(str(tmp_path), str(mpga_dir), default_index_content(), "test-project", "/fake/plugin", False, {})  # noqa: E501
+        export_antigravity(str(tmp_path), default_index_content(), "test-project", "/fake/plugin", False, {})
 
         ki_dir = tmp_path / ".antigravity" / "knowledge"
-        assert not (ki_dir / "mpga-core.md").exists()
+        assert not ki_dir.exists()
 
-    def test_seeds_knowledge_from_scopes(self, tmp_path: Path, monkeypatch):
-        """Seeds knowledge items from scopes when opts.knowledge is true."""
+    def test_knowledge_opt_does_not_create_files(self, tmp_path: Path, monkeypatch):
+        """Knowledge file seeding from scopes was removed; opts.knowledge is a no-op."""
         setup_mocks(monkeypatch)
-        mpga_dir = tmp_path / "MPGA"
-        scopes_dir = mpga_dir / "scopes"
-        scopes_dir.mkdir(parents=True, exist_ok=True)
-        (scopes_dir / "core.md").write_text(
-            "# Scope: core\n[E] src/core.ts:1-10 :: main()\n[E] src/core.ts:20-30 :: init()\n"
-        )
-        (scopes_dir / "utils.md").write_text("# Scope: utils\n")
 
         from mpga.commands.export.antigravity import export_antigravity
 
-        export_antigravity(str(tmp_path), str(mpga_dir), default_index_content(), "test-project", "/fake/plugin", False, {"knowledge": True})  # noqa: E501
-
-        ki_dir = tmp_path / ".antigravity" / "knowledge"
-        assert ki_dir.exists()
-        ki_files = [f.name for f in ki_dir.iterdir()]
-        assert "mpga-core.md" in ki_files
-        assert "mpga-utils.md" in ki_files
-
-        core_content = (ki_dir / "mpga-core.md").read_text()
-        assert "Knowledge: core module" in core_content
-        assert "[E] src/core.ts:1-10 :: main()" in core_content
-        assert "[E] src/core.ts:20-30 :: init()" in core_content
-
-        utils_content = (ki_dir / "mpga-utils.md").read_text()
-        assert "Knowledge: utils module" in utils_content
-        assert "run `mpga sync` to populate" in utils_content
-
-    def test_no_knowledge_when_scopes_missing(self, tmp_path: Path, monkeypatch):
-        """Does not seed knowledge when scopes directory is missing."""
-        setup_mocks(monkeypatch)
-        mpga_dir = tmp_path / "MPGA"
-        mpga_dir.mkdir(parents=True, exist_ok=True)
-
-        from mpga.commands.export.antigravity import export_antigravity
-
-        export_antigravity(str(tmp_path), str(mpga_dir), default_index_content(), "test-project", "/fake/plugin", False, {"knowledge": True})  # noqa: E501
+        # knowledge=True is accepted but no longer creates knowledge files
+        export_antigravity(str(tmp_path), default_index_content(), "test-project", "/fake/plugin", False, {"knowledge": True})
 
         ki_dir = tmp_path / ".antigravity" / "knowledge"
         assert not ki_dir.exists()
@@ -279,7 +223,7 @@ class TestAntigravityGlobalExport:
 
         from mpga.commands.export.antigravity import export_antigravity
 
-        export_antigravity("/unused", "/unused/MPGA", "", "test", "/fake/plugin", True, {})
+        export_antigravity("/unused", "", "test", "/fake/plugin", True, {})
 
         mock_copy.assert_called_once()
         call_args = mock_copy.call_args[0]
@@ -294,13 +238,12 @@ class TestAntigravityGlobalExport:
 
         from mpga.commands.export.antigravity import export_antigravity
 
-        export_antigravity("/unused", "/unused/MPGA", "", "test", "/fake/plugin", True, {})
+        export_antigravity("/unused", "", "test", "/fake/plugin", True, {})
 
         global_rule = tmp_path / ".antigravity" / "rules" / "mpga-global.md"
         assert global_rule.exists()
         content = global_rule.read_text()
         assert "MPGA Global Methodology" in content
-        assert "MPGA/ directory" in content
         assert "evidence links" in content
         assert "TDD" in content
 
@@ -311,7 +254,7 @@ class TestAntigravityGlobalExport:
 
         from mpga.commands.export.antigravity import export_antigravity
 
-        export_antigravity("/unused", "/unused/MPGA", "", "test", "/fake/plugin", True, {})
+        export_antigravity("/unused", "", "test", "/fake/plugin", True, {})
 
         content = (tmp_path / ".antigravity" / "rules" / "mpga-global.md").read_text()
         assert "Always do" in content
@@ -328,7 +271,7 @@ class TestAntigravityGlobalExport:
 
         from mpga.commands.export.antigravity import export_antigravity
 
-        export_antigravity(str(project_root), str(project_root / "MPGA"), "", "test", "/fake/plugin", True, {})
+        export_antigravity(str(project_root), "", "test", "/fake/plugin", True, {})
 
         assert not (project_root / "GEMINI.md").exists()
         assert not (project_root / ".antigravity" / "rules").exists()

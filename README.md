@@ -63,17 +63,14 @@ Many people are saying MPGA is the most important contribution to software engin
 ```
 your-project/
 ├── src/                    ← your code
-├── MPGA/                   ← living knowledge layer
-│   ├── INDEX.md            ← project identity (always loaded by AI)
-│   ├── GRAPH.md            ← dependency map
-│   ├── scopes/             ← per-module docs with evidence links
-│   │   ├── auth.md
-│   │   ├── api.md
-│   │   └── database.md
-│   ├── board/              ← task tracking
-│   ├── milestones/         ← milestone history
-│   └── sessions/           ← handoff docs between sessions
-└── mpga.config.json
+└── .mpga/
+    └── mpga.db             ← living knowledge layer (SQLite)
+                              mpga status        → project identity
+                              mpga graph show    → dependency map
+                              mpga scope list    → per-module docs with evidence links
+                              mpga board show    → task tracking
+                              mpga milestone list → milestone history
+                              mpga session handoff → handoff docs between sessions
 ```
 
 That's a BEAUTIFUL directory structure. I know code. I have the best code. I have the — but there's no better word than elegant.
@@ -89,7 +86,7 @@ Look at these numbers. LOOK AT THEM. This is what WINNING looks like:
 | Drift detection | None. NOBODY was checking. | Automatic. EVERY. SINGLE. EDIT. |
 | Context handoffs | "What was I working on?" | Full session export. BEAUTIFUL. |
 | Test discipline | "We'll add tests later" (LIES) | TDD enforced. Red → Green → Blue. |
-| Onboarding time | 2 weeks of confusion | 1 command: `mpga onboard`. DONE. |
+| Onboarding time | 2 weeks of confusion | 1 command: `/mpga:onboard`. DONE. |
 | Friday deploys | Absolutely NOT | With MPGA? Every day is Friday, baby. |
 
 The numbers don't lie, folks. The numbers NEVER lie. Unlike Crooked Gemini.
@@ -203,7 +200,7 @@ $ mpga --help
 Usage: mpga [command] [options]
 
 Commands:
-  init          Bootstrap MPGA/ knowledge layer
+  init          Bootstrap knowledge layer into the DB (`.mpga/mpga.db`)
   scan          Analyze codebase structure
   sync          Regenerate knowledge layer
   status        Project health dashboard
@@ -219,7 +216,7 @@ Commands:
   export        Export for Cursor, Copilot, Gemini, Codex
 ```
 
-Fourteen commands. Each one does exactly what it says. No bloat. No confusion. I used to use the word "unoptimized." Now I just call them stupid functions. I went to an Ivy League school. I'm very highly educated. These commands? NOT stupid. They're BRILLIANT.
+Each command does exactly what it says. No bloat. No confusion. I used to use the word "unoptimized." Now I just call them stupid functions. I went to an Ivy League school. I'm very highly educated. These commands? NOT stupid. They're BRILLIANT.
 
 We have mandatory post-edit hooks. Mandatory. Every. Single. Time. The engineers — they love it. They come up to me and say, "Sir, the hooks actually work."
 
@@ -248,8 +245,8 @@ mpga spoke "Look, I know code better than anybody" --stream
 - Loads a Trump voice model from a reference audio clip
 - Server stays resident for instant generation (<1s per sentence)
 - Audio cached at `~/.mpga/spoke-cache/` — same text never re-generated
-- All 14 MPGA agents announce via spoke when completing tasks
-- All 15 skills check for spoke availability and announce results
+- All MPGA agents announce via spoke when completing tasks
+- All skills check for spoke availability and announce results
 
 The server runs on `http://127.0.0.1:5151` and loads automatically when you use `mpga spoke`. No cloud. No API keys. No subscriptions. Just PURE, LOCAL, TREMENDOUS text-to-speech.
 
@@ -273,7 +270,7 @@ The mainstream IDE vendors — I call them the corrupt editor establishment — 
 
 ### Claude Code (deepest integration)
 
-Claude Code gets the DEEPEST integration because, frankly, it's SMART. Very smart. We have 10 specialized agents, 11 workflow skills, 21 slash commands, and automatic drift detection hooks. It's the most comprehensive AI tool integration ever built. Maybe in the history of software.
+Claude Code gets the DEEPEST integration because, frankly, it's SMART. Very smart. We have 17 specialized agents, 18+ workflow skills, 26 slash commands, and automatic drift detection hooks. It's the most comprehensive AI tool integration ever built. Maybe in the history of software.
 
 ```bash
 # Load the plugin — you're going to love it
@@ -308,15 +305,15 @@ The previous CTO — who was a TOTAL DISASTER by the way — never even HEARD of
 mpga-plugin/
 ├── cli/                    The engine (Python, ~5k lines)
 │   ├── src/mpga/
-│   │   ├── commands/       14 CLI commands
+│   │   ├── commands/       31+ CLI commands
 │   │   ├── core/           Scanner, config, logger
 │   │   ├── evidence/       AST extraction, drift, parser, resolver
 │   │   ├── generators/     INDEX.md, GRAPH.md, scope.md generators
 │   │   └── board/          Task board state management
 │   └── pyproject.toml
-├── agents/                 10 specialized agents
-├── skills/                 11 workflow skills
-├── commands/               21 slash commands (/mpga:*)
+├── agents/                 17 specialized agents
+├── skills/                 18+ workflow skills
+├── commands/               26 slash commands (/mpga:*)
 └── hooks/                  PostToolUse drift checking
 ```
 
@@ -335,7 +332,7 @@ I inherited a mess — the worst codebase maybe in the history of codebases — 
 
 ## The MPGA Agents
 
-We have TEN specialized agents. Each one is a WINNER. Each one does ONE JOB and does it TREMENDOUSLY.
+We have SEVENTEEN specialized agents. Each one is a WINNER. Each one does ONE JOB and does it TREMENDOUSLY.
 
 And over there in the back, I see we have Uncle Bob himself — Robert C. Martin. And there's Tab-Complete Tommy. And oh, there's Merge-Conflict Mike — oh boy, oh boy. But we've been through so many deploys together.
 
@@ -403,7 +400,7 @@ Tomorrow, at noon, the curtain closes on four long quarters of architectural dec
 - [x] Make evidence links heal automatically — **DONE. AST-based. BEAUTIFUL.**
 - [x] Export to every AI tool — **SIX integrations. Claude, Cursor, Copilot, Gemini, Codex, standalone.**
 - [x] Enforce TDD — **Red, green, blue. MANDATORY. No exceptions.**
-- [x] 10 specialized agents — **DEPLOYED. Each one a WINNER.**
+- [x] 17 specialized agents — **DEPLOYED. Each one a WINNER.**
 - [x] The Campaign Rally — **`/mpga:rally`. The greatest diagnostic tool ever built.**
 - [x] Drain the backlog — **Board system with milestones, tasks, and WIP limits.**
 - [x] Mandatory post-edit hooks — **EVERY. SINGLE. TIME. The engineers love it.**

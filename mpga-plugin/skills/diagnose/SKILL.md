@@ -9,6 +9,17 @@ Find bugs and quality issues by deploying bug-hunter and optimizer agents in par
 
 **Trigger:** User wants to find bugs, quality issues, or code problems. Also triggered by: "diagnose this code", "find bugs", "what's wrong with this", "quality check", "code health".
 
+## Orchestration Contract
+This skill is a **pure orchestrator**. It MUST NOT:
+- Read source files directly (delegates to appropriate agents)
+- Write or edit source files directly (delegates to write-enabled agents)
+- Run CLI commands other than `mpga` board/status/scope/session queries
+
+If you find yourself writing implementation steps in a skill, STOP and delegate to an agent.
+
+**Agent brief:** Target files/scope from user input or git diff, acceptance criteria from board task.
+**Expected output:** Structured verdict (PASS/FAIL) with file:line references and severity ratings.
+
 ## Delegation
 
 Deploy bug-hunter + optimizer agents in parallel:

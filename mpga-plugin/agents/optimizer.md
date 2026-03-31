@@ -55,11 +55,15 @@ Apply the concrete, measurable rules from Sandi Metz. These are guidelines, not 
 - **Controllers: 1 instance variable** — in MVC, controllers should instantiate ONE service/resource. Multiple instance vars = the controller is doing too much. (Adapt this rule for non-MVC: entry-point functions should orchestrate ONE primary operation.)
 - **Only pass 1 dependency to a function** — if a function needs 3 collaborators injected, it's orchestrating too much.
 
+## Additional smell catalog
+
+- **Brittle path arithmetic** (string slicing/indexing on file paths instead of `pathlib.Path`) — flag as **HIGH** priority smell. Using `path[:-3]`, `path.split("/")[-1]`, or manual string joins to manipulate paths is fragile, OS-dependent, and error-prone. Replace with `pathlib.Path` operations: `.stem`, `.suffix`, `.parent`, `.name`, `/ "subdir"`.
+
 ## Severity ratings
 
 | Severity | When to use |
 |----------|-------------|
-| **HIGH** | God files, circular imports, deep nesting (>5 levels), exact code duplication across 3+ locations |
+| **HIGH** | God files, circular imports, deep nesting (>5 levels), exact code duplication across 3+ locations, brittle path arithmetic |
 | **MEDIUM** | Long functions, deep nesting (4-5 levels), structural duplication, Metz rule violations |
 | **LOW** | Minor naming issues, slightly long classes, single-location duplication, style inconsistencies |
 

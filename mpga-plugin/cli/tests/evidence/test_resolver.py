@@ -167,6 +167,41 @@ class TestResolveEvidence:
         assert result.confidence == 0.9
         assert result.start_line == 1
 
+    def test_uses_sqlite_symbol_index_when_available(self, tmp_path: Path, monkeypatch):
+        source = "export function compute(x: number) {\n  return x * x;\n}\n"
+        _write_file(tmp_path, "src/compute.ts", source)
+
+        from mpga.db.connection import get_connection
+        from mpga.db.repos.file_info import FileInfoRepo
+        from mpga.db.repos.symbols import SymbolRepo
+        from mpga.db.schema import create_schema
+
+        conn = get_connection(str(tmp_path / ".mpga" / "mpga.db"))
+        create_schema(conn)
+        FileInfoRepo(conn).upsert("src/compute.ts", language="typescript", lines=3, size=len(source))
+        SymbolRepo(conn).create(
+            "src/compute.ts",
+            "compute",
+            type="function",
+            start_line=1,
+            end_line=3,
+        )
+        conn.close()
+
+        monkeypatch.setattr(
+            "mpga.evidence.resolver.find_symbol",
+            lambda *_args, **_kwargs: (_ for _ in ()).throw(AssertionError("AST lookup should not run")),
+        )
+
+        link = _make_link(
+            filepath="src/compute.ts",
+            symbol="compute",
+        )
+        result = resolve_evidence(link, str(tmp_path))
+        assert result.status == "valid"
+        assert result.confidence == 0.9
+        assert result.start_line == 1
+
 
 # ---------------------------------------------------------------------------
 # verify_all_links

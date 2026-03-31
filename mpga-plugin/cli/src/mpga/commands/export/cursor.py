@@ -27,7 +27,6 @@ from .runtime import (
 
 def export_cursor(
     project_root: str,
-    mpga_dir: str,
     index_content: str,
     project_name: str,
     plugin_root: str | None,
@@ -64,7 +63,7 @@ def export_cursor(
             _generate_cursor_tdd_mdc(), encoding="utf-8"
         )
         (rules_dir / "mpga-scopes.mdc").write_text(
-            _generate_cursor_scopes_mdc(mpga_dir), encoding="utf-8"
+            _generate_cursor_scopes_mdc(cli_command), encoding="utf-8"
         )
         log.success("Generated .cursor/rules/ (4 MDC files)")
         # Skills
@@ -121,9 +120,9 @@ alwaysApply: true
 This project uses MPGA for evidence-backed context engineering.
 
 ## Before writing ANY code
-1. Read MPGA/INDEX.md for the project map and scope registry
-2. Find the relevant scope doc in MPGA/scopes/ for the area you're working in
-3. Check MPGA/board/BOARD.md for current task assignments
+1. Run `{cli_command} status` for the project map and scope registry
+2. Run `{cli_command} scope list` to see all scopes, then `{cli_command} scope show <name>` for the area you're working in
+3. Run `{cli_command} board show` for current task assignments
 
 ## Evidence rules
 - Every claim about how code works MUST cite a file:line evidence link
@@ -131,11 +130,13 @@ This project uses MPGA for evidence-backed context engineering.
 - If you cannot find evidence \u2192 mark as [Unknown]
 - Never guess \u2014 look it up or mark it unknown
 
-## Key files
-@MPGA/INDEX.md
-
 ## Active milestone
 {milestone}
+
+## Routing rules
+- `/api/*` is the JSON API surface
+- Non-API app routes should render the MPGA SPA shell
+- Use `{cli_command} serve` for local verification
 
 Generated: {now}
 """
@@ -159,8 +160,8 @@ alwaysApply: true
 ```
 
 ## When to use
-- Before touching code: read the relevant scope doc in MPGA/scopes/
-- After changing code: check if evidence links in the scope doc still resolve
+- Before touching code: run `{cli_command} scope show <name>` for the relevant scope
+- After changing code: check if evidence links in the scope still resolve
 - When in doubt: mark [Unknown]
 
 ## Verification
@@ -185,7 +186,7 @@ alwaysApply: true
 2. Run test \u2014 confirm it FAILS (red)
 3. Write MINIMAL implementation to pass (green)
 4. Refactor without changing behavior (blue)
-5. Update evidence links in the relevant MPGA/scopes/*.md file
+5. Update evidence links in the relevant scope (run `mpga scope show <name>` to review)
 6. Keep one writer per scope; parallelize read-only scouts and auditors instead
 
 If you find yourself writing implementation code without a test:
@@ -193,17 +194,7 @@ STOP. Delete it. Write the test first.
 """
 
 
-def _scope_lines(mpga_dir: str) -> str:
-    """Return a markdown bullet list of known scopes, or a fallback hint."""
-    scopes_dir = Path(mpga_dir) / "scopes"
-    if scopes_dir.exists():
-        scopes = [f.stem for f in sorted(scopes_dir.iterdir()) if f.suffix == ".md"]
-        if scopes:
-            return "\n".join(f"- {s} \u2192 @MPGA/scopes/{s}.md" for s in scopes)
-    return "- (no scopes yet \u2014 run `mpga sync` to generate)"
-
-
-def _generate_cursor_scopes_mdc(mpga_dir: str) -> str:
+def _generate_cursor_scopes_mdc(cli_command: str) -> str:
     return f"""---
 description: "Load MPGA scope documents when working on specific features.
   Use when the user asks about a specific feature area or module."
@@ -213,9 +204,10 @@ alwaysApply: false
 
 # MPGA Scope Lookup
 
-When working on a specific feature, load the relevant scope document:
+When working on a specific feature, load the relevant scope:
 
-{_scope_lines(mpga_dir)}
+- Run `{cli_command} scope list` to see all registered scopes
+- Run `{cli_command} scope show <name>` to load the evidence-backed scope document
 
 Each scope doc contains:
 - Evidence links proving how the feature actually works
@@ -228,13 +220,13 @@ Always check the scope BEFORE making changes.
 
 
 def _generate_cursor_global(cli_command: str) -> str:
-    return f"""When you see an MPGA/ directory in any project:
-- Read MPGA/INDEX.md before starting any task
+    return f"""When working in an MPGA-managed project:
+- Run `{cli_command} status` before starting any task
 - Use evidence links [E] format: [E] file:line :: symbol()
 - Mark unknowns as [Unknown] \u2014 never guess
 - Follow TDD: test first, implement second, refactor third
-- Check MPGA/board/BOARD.md for task assignments
+- Run `{cli_command} board show` for task assignments
 - After modifying code, consider if evidence links need updating
-- Prefer reading scope docs over scanning entire directories
+- Run `{cli_command} scope show <name>` to load scope docs instead of scanning directories
 - Run `{cli_command} drift --quick` after modifying files
 - Run `{cli_command} evidence verify` to check evidence health"""

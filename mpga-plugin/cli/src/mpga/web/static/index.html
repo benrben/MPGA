@@ -1,0 +1,1748 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MPGA Console</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
+  <style>
+    :root {
+      --bg-0: #f7f9fc;
+      --bg-1: #eaf1fb;
+      --panel: #ffffff;
+      --ink: #12223a;
+      --muted: #5b6b80;
+      --line: #d7e0ec;
+      --brand: #0f5ad8;
+      --brand-soft: #e7f0ff;
+      --ok: #146c43;
+      --warn: #b85a1e;
+      --shadow: 0 16px 38px rgba(18, 34, 58, 0.1);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: "Avenir Next", "Trebuchet MS", "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 10% 0%, rgba(15, 90, 216, 0.15), transparent 36%),
+        radial-gradient(circle at 90% 10%, rgba(20, 108, 67, 0.08), transparent 32%),
+        linear-gradient(180deg, var(--bg-0), var(--bg-1));
+      min-height: 100vh;
+    }
+
+    .shell {
+      display: grid;
+      grid-template-columns: 248px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    aside {
+      padding: 24px 18px;
+      border-right: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(8px);
+    }
+
+    .brand {
+      margin: 0;
+      font-size: 1.8rem;
+      letter-spacing: 0.04em;
+    }
+
+    .tagline {
+      margin: 10px 0 20px;
+      color: var(--muted);
+      line-height: 1.4;
+      font-size: 0.9rem;
+    }
+
+    nav {
+      display: grid;
+      gap: 6px;
+    }
+
+    nav a {
+      display: block;
+      padding: 9px 11px;
+      border-radius: 10px;
+      text-decoration: none;
+      color: var(--ink);
+      font-weight: 600;
+      border: 1px solid transparent;
+      transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
+    }
+
+    nav a:hover {
+      transform: translateX(3px);
+      border-color: var(--line);
+      background: #f6faff;
+    }
+
+    nav a.active {
+      background: var(--brand-soft);
+      border-color: #c9ddff;
+      color: #0b4fca;
+    }
+
+    main {
+      padding: 22px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .hero,
+    .panel {
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+
+    .eyebrow {
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--brand);
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .hero h2 {
+      margin: 0;
+      font-size: 1.45rem;
+    }
+
+    .meta {
+      margin-top: 8px;
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 0.96rem;
+    }
+
+    .toolbar {
+      margin-top: 14px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .toolbar input,
+    .toolbar select,
+    .toolbar button {
+      font: inherit;
+      padding: 10px 12px;
+      border-radius: 10px;
+    }
+
+    .toolbar input {
+      min-width: 280px;
+      border: 1px solid var(--line);
+      color: var(--ink);
+      background: #ffffff;
+    }
+
+    .toolbar select {
+      border: 1px solid var(--line);
+      color: var(--ink);
+      background: #ffffff;
+    }
+
+    .toolbar button {
+      border: none;
+      background: linear-gradient(135deg, var(--brand), #2d77ec);
+      color: #ffffff;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      background: #fbfdff;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 1.45rem;
+      margin-bottom: 4px;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .section-head h3 {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+
+    .pill {
+      border: 1px solid var(--line);
+      background: #f2f7ff;
+      color: #1a4aa8;
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .table-wrap {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: auto;
+      background: #ffffff;
+    }
+
+    .kanban {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(260px, 1fr);
+      gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .kanban-col {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #f8fbff;
+      min-height: 180px;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    .kanban-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding: 10px;
+      border-bottom: 1px solid #e8eef7;
+      font-weight: 700;
+      font-size: 0.88rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #2d4f80;
+    }
+
+    .kanban-list {
+      padding: 10px;
+      display: grid;
+      gap: 8px;
+      align-content: start;
+    }
+
+    .kanban-card {
+      border: 1px solid #dfe8f5;
+      border-radius: 10px;
+      background: #ffffff;
+      padding: 10px;
+      box-shadow: 0 4px 12px rgba(18, 34, 58, 0.06);
+      cursor: pointer;
+      transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
+    }
+
+    .kanban-card:hover {
+      transform: translateY(-1px);
+      border-color: #c9daf6;
+      box-shadow: 0 8px 18px rgba(18, 34, 58, 0.1);
+    }
+
+    .kanban-card h4 {
+      margin: 0 0 6px;
+      font-size: 0.93rem;
+      line-height: 1.35;
+      color: #132743;
+    }
+
+    .kanban-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .chip {
+      border: 1px solid #d5e2f6;
+      background: #eef5ff;
+      color: #244b80;
+      border-radius: 999px;
+      padding: 3px 8px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 720px;
+      font-size: 0.92rem;
+    }
+
+    th,
+    td {
+      text-align: left;
+      border-bottom: 1px solid #edf2f8;
+      padding: 10px 11px;
+      vertical-align: top;
+    }
+
+    tr.row-clickable {
+      cursor: pointer;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      background: #f4f8fe;
+      z-index: 1;
+      font-size: 0.79rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #33507c;
+    }
+
+    tbody tr:hover { background: #f8fbff; }
+
+    .status-ok { color: var(--ok); font-weight: 700; }
+    .status-warn { color: var(--warn); font-weight: 700; }
+
+    .empty {
+      margin: 10px 0 0;
+      color: var(--muted);
+      padding: 10px;
+      border: 1px dashed var(--line);
+      border-radius: 10px;
+      background: #fcfdff;
+    }
+
+    .modal.hidden {
+      display: none;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(7, 17, 34, 0.45);
+      display: grid;
+      place-items: center;
+      padding: 16px;
+      z-index: 20;
+    }
+
+    .modal-body {
+      width: min(760px, 100%);
+      max-height: 86vh;
+      overflow: auto;
+      background: #ffffff;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      box-shadow: 0 24px 60px rgba(7, 17, 34, 0.28);
+      padding: 16px;
+    }
+
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .modal-head h3 {
+      margin: 0;
+      font-size: 1.1rem;
+      color: #102846;
+    }
+
+    .ghost-btn {
+      border: 1px solid var(--line);
+      background: #f6f9ff;
+      color: #254a7e;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .scope-list {
+      margin-top: 14px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .scope-link-actions {
+      margin-top: 10px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .scope-link-actions select {
+      flex: 1;
+      min-width: 260px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+    }
+
+    .scope-item {
+      border: 1px solid #deebff;
+      background: #f3f8ff;
+      color: #204675;
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .detail-grid {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 8px;
+    }
+
+    .detail-kv {
+      border: 1px solid #e8eef7;
+      border-radius: 10px;
+      background: #fbfdff;
+      padding: 8px;
+    }
+
+    .detail-kv strong {
+      display: block;
+      color: #35567f;
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 3px;
+    }
+
+    .modal-content-block {
+      margin-top: 12px;
+      border: 1px solid #dfe8f5;
+      border-radius: 10px;
+      background: #f9fbff;
+      padding: 10px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 0.82rem;
+      color: #153357;
+      max-height: 34vh;
+      overflow: auto;
+    }
+
+    .prose {
+      font-size: 0.92rem;
+      line-height: 1.6;
+      color: var(--ink);
+    }
+
+    .prose h1, .prose h2, .prose h3, .prose h4 {
+      margin: 12px 0 6px;
+      line-height: 1.3;
+    }
+
+    .prose p { margin: 0 0 8px; }
+
+    .prose ul, .prose ol {
+      margin: 0 0 8px;
+      padding-left: 20px;
+    }
+
+    .prose code {
+      background: #f0f4fa;
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.84em;
+    }
+
+    .prose pre {
+      background: #f0f4fa;
+      border-radius: 8px;
+      padding: 10px 12px;
+      overflow: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.84rem;
+      margin: 0 0 8px;
+    }
+
+    .prose pre code {
+      background: none;
+      padding: 0;
+    }
+
+    .prose blockquote {
+      border-left: 3px solid var(--brand);
+      margin: 0 0 8px;
+      padding: 4px 12px;
+      color: var(--muted);
+    }
+
+    .prose a { color: var(--brand); }
+
+    .prose table {
+      min-width: 0;
+      font-size: 0.88rem;
+    }
+
+    .prose {
+      line-height: 1.6;
+      font-size: 0.92rem;
+      color: var(--ink);
+    }
+    .prose h1, .prose h2, .prose h3, .prose h4 {
+      margin: 0.8em 0 0.4em;
+      line-height: 1.25;
+      color: #102846;
+    }
+    .prose h1 { font-size: 1.3rem; }
+    .prose h2 { font-size: 1.1rem; }
+    .prose h3 { font-size: 1rem; }
+    .prose p { margin: 0.5em 0; }
+    .prose ul, .prose ol { padding-left: 1.4em; margin: 0.4em 0; }
+    .prose li { margin: 0.2em 0; }
+    .prose code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+      font-size: 0.82em;
+      background: #eef2f9;
+      border-radius: 4px;
+      padding: 1px 4px;
+      color: #1a3a5c;
+    }
+    .prose pre {
+      background: #f0f4fb;
+      border: 1px solid #d7e0ec;
+      border-radius: 8px;
+      padding: 10px;
+      overflow: auto;
+      font-size: 0.82rem;
+    }
+    .prose pre code { background: none; padding: 0; }
+    .prose blockquote {
+      border-left: 3px solid var(--brand);
+      margin: 0.6em 0;
+      padding: 4px 10px;
+      color: var(--muted);
+    }
+    .prose strong { font-weight: 700; }
+    .prose a { color: var(--brand); }
+    .prose hr { border: none; border-top: 1px solid var(--line); margin: 1em 0; }
+
+    @media (max-width: 940px) {
+      .shell { grid-template-columns: 1fr; }
+      aside { border-right: none; border-bottom: 1px solid var(--line); }
+      .toolbar input { min-width: 0; width: 100%; }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
+</head>
+<body>
+  <div class="shell">
+    <aside>
+      <h1 class="brand">MPGA</h1>
+      <p class="tagline">Local project console for tasks, milestones, scopes, search, and evidence.</p>
+      <nav id="nav"></nav>
+    </aside>
+
+    <main>
+      <section class="hero">
+        <div class="eyebrow" id="route-label">Dashboard</div>
+        <h2 id="page-title">Project Dashboard</h2>
+        <p id="page-copy" class="meta">Loading current state from local MPGA API.</p>
+        <div class="toolbar">
+          <input id="search-box" type="search" placeholder="Search tasks, scopes, evidence">
+          <button id="search-button" type="button">Search</button>
+          <input id="filter-box" type="search" placeholder="Filter current view">
+          <select id="filter-field">
+            <option value="__all">All fields</option>
+          </select>
+          <button id="clear-filter-button" type="button">Clear Filter</button>
+        </div>
+      </section>
+
+      <section class="stats" id="stats-grid"></section>
+
+      <section class="panel">
+        <div class="section-head">
+          <h3 id="section-title">Live Data</h3>
+          <span class="pill" id="result-count">0 rows</span>
+        </div>
+        <p class="meta" id="section-copy">Directly from SQLite-backed API endpoints.</p>
+        <div id="content"></div>
+      </section>
+    </main>
+  </div>
+
+  <div id="task-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="task-modal-title">
+    <div class="modal-body">
+      <div class="modal-head">
+        <div>
+          <h3 id="task-modal-title">Task</h3>
+          <p id="task-modal-subtitle" class="meta">Task details</p>
+        </div>
+        <button id="task-modal-close" class="ghost-btn" type="button">Close</button>
+      </div>
+      <div class="detail-grid" id="task-modal-details"></div>
+      <h4 id="task-modal-content-title" style="margin:14px 0 8px;">Content</h4>
+      <div id="task-modal-content" class="modal-content-block prose"></div>
+      <h4 id="task-modal-list-title" style="margin:14px 0 8px;">Scopes</h4>
+      <div id="task-modal-scopes" class="scope-list"></div>
+      <div id="scope-link-actions" class="scope-link-actions hidden">
+        <select id="scope-link-task-select">
+          <option value="">Select task to link</option>
+        </select>
+        <button id="scope-link-task-button" class="ghost-btn" type="button">Link Task To Scope</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const routes = [
+      ["dashboard", "Dashboard", () => loadDashboard()],
+      ["board", "Board", () => loadBoard()],
+      ["tasks", "Tasks", () => loadTasks()],
+      ["scopes", "Scopes", () => loadScopes()],
+      ["search", "Search", () => runSearch()],
+      ["evidence", "Evidence", () => loadEvidence()],
+      ["milestones", "Milestones", () => loadMilestones()],
+      ["sessions", "Sessions", () => loadSessions()],
+      ["graph", "Graph", () => loadGraph()],
+      ["design-system", "Design System", () => loadDesignSystem()],
+      ["decisions", "Decisions", () => loadDecisions()],
+      ["develop", "Develop", () => loadDevelop()],
+      ["metrics", "Metrics", () => loadStatsOnly("Metrics", "High-level progress and evidence metrics from SQLite.")],
+      ["health", "Health", () => loadHealth()],
+    ];
+
+    const nav = document.getElementById("nav");
+    const statsGrid = document.getElementById("stats-grid");
+    const content = document.getElementById("content");
+    const routeLabel = document.getElementById("route-label");
+    const pageTitle = document.getElementById("page-title");
+    const pageCopy = document.getElementById("page-copy");
+    const sectionTitle = document.getElementById("section-title");
+    const sectionCopy = document.getElementById("section-copy");
+    const resultCount = document.getElementById("result-count");
+    const searchBox = document.getElementById("search-box");
+    const searchButton = document.getElementById("search-button");
+    const filterBox = document.getElementById("filter-box");
+    const filterField = document.getElementById("filter-field");
+    const clearFilterButton = document.getElementById("clear-filter-button");
+    const taskModal = document.getElementById("task-modal");
+    const taskModalClose = document.getElementById("task-modal-close");
+    const taskModalTitle = document.getElementById("task-modal-title");
+    const taskModalSubtitle = document.getElementById("task-modal-subtitle");
+    const taskModalDetails = document.getElementById("task-modal-details");
+    const taskModalContentTitle = document.getElementById("task-modal-content-title");
+    const taskModalContent = document.getElementById("task-modal-content");
+    const taskModalListTitle = document.getElementById("task-modal-list-title");
+    const taskModalScopes = document.getElementById("task-modal-scopes");
+    const scopeLinkActions = document.getElementById("scope-link-actions");
+    const scopeLinkTaskSelect = document.getElementById("scope-link-task-select");
+    const scopeLinkTaskButton = document.getElementById("scope-link-task-button");
+
+    let activeRows = [];
+    let activeColumns = [];
+    let activeFilterOptions = [{ value: "__all", label: "All fields" }];
+    let activeRowClick = null;
+    let activeRenderer = "table";
+    let lastRoute = "";
+    let currentScopeContext = null;
+
+    function renderMarkdown(text) {
+      if (!text || text === "-") return text || "";
+      const raw = typeof marked !== "undefined"
+        ? marked.parse(String(text))
+        : String(text).replace(/\n/g, "<br>");
+      return typeof DOMPurify !== "undefined"
+        ? DOMPurify.sanitize(raw)
+        : raw;
+    }
+
+    function stripMarkdown(text) {
+      if (!text) return text;
+      return String(text)
+        .replace(/^#{1,6}\s+/gm, "")
+        .replace(/\*\*(.+?)\*\*/g, "$1")
+        .replace(/\*(.+?)\*/g, "$1")
+        .replace(/__(.+?)__/g, "$1")
+        .replace(/_(.+?)_/g, "$1")
+        .replace(/`(.+?)`/g, "$1")
+        .replace(/\[(.+?)\]\(.+?\)/g, "$1")
+        .replace(/^\s*[-*+]\s+/gm, "")
+        .replace(/^\s*\d+\.\s+/gm, "")
+        .replace(/^\s*>\s*/gm, "")
+        .trim();
+    }
+
+    function renderMarkdown(text) {
+      if (!text || text === "-") return "";
+      const dirty = marked.parse(String(text));
+      return DOMPurify.sanitize(dirty);
+    }
+
+    function stripMarkdown(text) {
+      if (!text || text === "-") return text;
+      return String(text)
+        .replace(/#{1,6}\s+/g, "")
+        .replace(/\*\*(.+?)\*\*/g, "$1")
+        .replace(/\*(.+?)\*/g, "$1")
+        .replace(/__(.+?)__/g, "$1")
+        .replace(/_(.+?)_/g, "$1")
+        .replace(/`{1,3}([^`]+)`{1,3}/g, "$1")
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+        .replace(/^[-*+]\s+/gm, "")
+        .replace(/^\d+\.\s+/gm, "")
+        .replace(/^>\s+/gm, "")
+        .replace(/[-*_]{3,}/g, "")
+        .trim();
+    }
+
+    function safe(value) {
+      if (value === null || value === undefined || value === "") {
+        return "-";
+      }
+      if (Array.isArray(value)) {
+        return value.join(", ");
+      }
+      return String(value);
+    }
+
+    function normalizeScopes(value) {
+      if (Array.isArray(value)) {
+        return value.map((item) => safe(item)).filter((item) => item !== "-");
+      }
+      if (!value) {
+        return [];
+      }
+      if (typeof value === "string") {
+        const raw = value.trim();
+        if (!raw) {
+          return [];
+        }
+        if (raw.startsWith("[") && raw.endsWith("]")) {
+          try {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) {
+              return parsed.map((item) => safe(item)).filter((item) => item !== "-");
+            }
+          } catch (_error) {
+          }
+        }
+        return raw.split(",").map((part) => part.trim()).filter(Boolean);
+      }
+      return [safe(value)];
+    }
+
+    function renderDetailItem(label, value) {
+      const card = document.createElement("div");
+      card.className = "detail-kv";
+      const key = document.createElement("strong");
+      key.textContent = label;
+      const val = document.createElement("span");
+      val.textContent = safe(value);
+      card.appendChild(key);
+      card.appendChild(val);
+      return card;
+    }
+
+    function renderModalDetails(items) {
+      taskModalDetails.innerHTML = "";
+      items.forEach(([label, value]) => {
+        taskModalDetails.appendChild(renderDetailItem(label, value));
+      });
+    }
+
+    function renderModalList(title, items, emptyText) {
+      taskModalListTitle.textContent = title;
+      taskModalScopes.innerHTML = "";
+      if (!items.length) {
+        const item = document.createElement("div");
+        item.className = "scope-item";
+        item.textContent = emptyText;
+        taskModalScopes.appendChild(item);
+      } else {
+        items.forEach((entry) => {
+          const item = document.createElement("div");
+          item.className = "scope-item";
+          item.textContent = entry;
+          taskModalScopes.appendChild(item);
+        });
+      }
+    }
+
+    function renderModalContent(title, contentValue, emptyText) {
+      taskModalContentTitle.textContent = title;
+      const text = safe(contentValue);
+      if (text === "-") {
+        taskModalContent.textContent = emptyText;
+      } else {
+        taskModalContent.innerHTML = renderMarkdown(text);
+      }
+    }
+
+    function setScopeLinkControls(visible, options) {
+      if (!visible) {
+        currentScopeContext = null;
+        scopeLinkActions.classList.add("hidden");
+        scopeLinkTaskSelect.innerHTML = "<option value=\"\">Select task to link</option>";
+        return;
+      }
+
+      scopeLinkActions.classList.remove("hidden");
+      scopeLinkTaskSelect.innerHTML = "";
+      const placeholder = document.createElement("option");
+      placeholder.value = "";
+      placeholder.textContent = options.length ? "Select task to link" : "All tasks already linked";
+      scopeLinkTaskSelect.appendChild(placeholder);
+      options.forEach((task) => {
+        const option = document.createElement("option");
+        option.value = task.id;
+        option.textContent = `${safe(task.id)} ${safe(task.title)}`;
+        scopeLinkTaskSelect.appendChild(option);
+      });
+      scopeLinkTaskSelect.value = "";
+    }
+
+    function openTaskModal(task) {
+      setScopeLinkControls(false, []);
+      taskModalTitle.textContent = `${safe(task.id)} ${safe(task.title)}`;
+      taskModalSubtitle.textContent = "Task details";
+      renderModalDetails([
+        ["Column", task.column],
+        ["Priority", task.priority],
+        ["Status", task.status],
+        ["Milestone", task.milestone],
+      ]);
+      renderModalContent("Task Body", task.body, "No task body provided.");
+      renderModalList(
+        "Scopes",
+        normalizeScopes(task.scopes),
+        "No scopes linked to this task."
+      );
+      taskModal.classList.remove("hidden");
+    }
+
+    async function openScopeModal(scope, allTasks, noTasksMessage) {
+      let fullScope = scope;
+      try {
+        const detail = await api("/api/scopes/" + encodeURIComponent(scope.id));
+        if (detail && detail.scope) {
+          fullScope = detail.scope;
+        }
+      } catch (_error) {
+      }
+
+      let linkedTasks = [];
+      try {
+        const linked = await api("/api/scope-tasks/" + encodeURIComponent(scope.id));
+        linkedTasks = linked.tasks || [];
+      } catch (_error) {
+      }
+
+      taskModalTitle.textContent = `${safe(scope.id)} ${safe(scope.name)}`;
+      taskModalSubtitle.textContent = "Scope details";
+      renderModalDetails([
+        ["Status", fullScope.status],
+        ["Summary", fullScope.summary],
+        ["Evidence", `${safe(fullScope.evidence_valid)}/${safe(fullScope.evidence_total)}`],
+        ["Last Verified", fullScope.last_verified],
+        ["Updated", fullScope.updated_at],
+      ]);
+      renderModalContent("Full Scope Content", fullScope.content, "No full scope content stored.");
+      renderModalList(
+        "Tasks In This Scope",
+        linkedTasks.map((task) => `${safe(task.id)} ${safe(task.title)}`),
+        noTasksMessage || "No tasks currently linked to this scope."
+      );
+
+      const linkedSet = new Set(linkedTasks.map((task) => safe(task.id)));
+      const candidates = (allTasks || []).filter((task) => !linkedSet.has(safe(task.id)));
+      setScopeLinkControls(true, candidates);
+      currentScopeContext = {
+        scope,
+        allTasks: allTasks || [],
+        noTasksMessage: noTasksMessage || "No tasks currently linked to this scope.",
+      };
+
+      taskModal.classList.remove("hidden");
+    }
+
+    function openMilestoneModal(milestone, linkedTasks) {
+      setScopeLinkControls(false, []);
+      taskModalTitle.textContent = `${safe(milestone.id)} ${safe(milestone.name)}`;
+      taskModalSubtitle.textContent = "Milestone details";
+      const milestoneNotes = milestone.summary || milestone.design || milestone.plan || milestone.context;
+      renderModalDetails([
+        ["Status", milestone.status],
+        ["Summary", milestone.summary || milestone.design || milestone.plan || milestone.context],
+        ["Created", milestone.created_at],
+        ["Completed", milestone.completed_at],
+      ]);
+      renderModalContent("Milestone Notes", milestoneNotes, "No milestone notes.");
+      renderModalList(
+        "Tasks In This Milestone",
+        linkedTasks.map((task) => `${safe(task.id)} ${safe(task.title)}`),
+        "No tasks currently linked to this milestone."
+      );
+      taskModal.classList.remove("hidden");
+    }
+
+    function closeTaskModal() {
+      setScopeLinkControls(false, []);
+      taskModal.classList.add("hidden");
+    }
+
+    function makeNav() {
+      routes.forEach(([key, label]) => {
+        const link = document.createElement("a");
+        link.href = "/" + key;
+        link.textContent = label;
+        link.dataset.route = key;
+        link.addEventListener("click", (event) => {
+          event.preventDefault();
+          history.pushState({}, "", "/" + key);
+          render();
+        });
+        nav.appendChild(link);
+      });
+    }
+
+    function setPage(title, copy) {
+      routeLabel.textContent = title;
+      pageTitle.textContent = title;
+      pageCopy.textContent = copy;
+      sectionTitle.textContent = title;
+      sectionCopy.textContent = copy;
+    }
+
+    function setActive(route) {
+      nav.querySelectorAll("a").forEach((link) => {
+        link.classList.toggle("active", link.dataset.route === route);
+      });
+    }
+
+    async function api(path) {
+      const response = await fetch(path, { headers: { "Accept": "application/json" } });
+      if (!response.ok) {
+        throw new Error("API " + response.status + " for " + path);
+      }
+      return await response.json();
+    }
+
+    async function apiPost(path, payload) {
+      const response = await fetch(path, {
+        method: "POST",
+        headers: {
+          "Accept": "application/json",
+          "Content-Type": "application/json; charset=utf-8",
+        },
+        body: JSON.stringify(payload || {}),
+      });
+      const json = await response.json();
+      if (!response.ok || json.error) {
+        throw new Error(json.error || ("API " + response.status + " for " + path));
+      }
+      return json;
+    }
+
+    function renderStats(items) {
+      statsGrid.innerHTML = "";
+      items.forEach(([label, value]) => {
+        const card = document.createElement("div");
+        card.className = "stat";
+
+        const strong = document.createElement("strong");
+        strong.textContent = safe(value);
+        const span = document.createElement("span");
+        span.textContent = label;
+
+        card.appendChild(strong);
+        card.appendChild(span);
+        statsGrid.appendChild(card);
+      });
+    }
+
+    function setCount(count) {
+      resultCount.textContent = count + " row" + (count === 1 ? "" : "s");
+    }
+
+    function setFilterOptions(options) {
+      const previousValue = filterField.value || "__all";
+      activeFilterOptions = [{ value: "__all", label: "All fields" }, ...(options || [])];
+      filterField.innerHTML = "";
+      activeFilterOptions.forEach((opt) => {
+        const option = document.createElement("option");
+        option.value = opt.value;
+        option.textContent = opt.label;
+        filterField.appendChild(option);
+      });
+      const hasPrevious = activeFilterOptions.some((opt) => opt.value === previousValue);
+      filterField.value = hasPrevious ? previousValue : "__all";
+    }
+
+    function rowMatchesFilter(row, query, field) {
+      if (!query) {
+        return true;
+      }
+      const q = query.toLowerCase();
+      if (field === "__all") {
+        return Object.values(row).some((value) => safe(value).toLowerCase().includes(q));
+      }
+      return safe(row[field]).toLowerCase().includes(q);
+    }
+
+    function getFilteredRows(rows) {
+      const query = filterBox.value.trim();
+      const field = filterField.value || "__all";
+      return rows.filter((row) => rowMatchesFilter(row, query, field));
+    }
+
+    function renderActiveTable() {
+      if (activeRenderer === "kanban") {
+        renderKanban(activeRows, activeFilterOptions);
+        return;
+      }
+      if (!activeColumns.length) {
+        return;
+      }
+      renderTable(activeRows, activeColumns, activeFilterOptions, activeRowClick);
+    }
+
+    function renderEmpty(message) {
+      content.innerHTML = "";
+      const p = document.createElement("p");
+      p.className = "empty";
+      p.textContent = message;
+      content.appendChild(p);
+      setCount(0);
+    }
+
+    function renderTextBlock(title, body) {
+      activeRows = [];
+      activeColumns = [];
+      setFilterOptions([]);
+      content.innerHTML = "";
+      const wrap = document.createElement("div");
+      wrap.className = "table-wrap";
+      const inner = document.createElement("div");
+      inner.style.padding = "12px";
+
+      const h = document.createElement("h4");
+      h.style.margin = "0 0 8px";
+      h.textContent = title;
+
+      const p = document.createElement("p");
+      p.className = "meta";
+      p.style.margin = "0";
+      p.textContent = stripMarkdown(body);
+
+      inner.appendChild(h);
+      inner.appendChild(p);
+      wrap.appendChild(inner);
+      content.appendChild(wrap);
+      setCount(1);
+    }
+
+    function renderTable(rows, columns, filterOptions, onRowClick) {
+      activeRenderer = "table";
+      activeRows = rows || [];
+      activeColumns = columns || [];
+      setFilterOptions(filterOptions || []);
+      activeRowClick = onRowClick || null;
+      content.innerHTML = "";
+      const filteredRows = getFilteredRows(activeRows);
+      if (!filteredRows.length) {
+        renderEmpty("No records found.");
+        return;
+      }
+
+      const wrap = document.createElement("div");
+      wrap.className = "table-wrap";
+
+      const table = document.createElement("table");
+      const thead = document.createElement("thead");
+      const headRow = document.createElement("tr");
+      columns.forEach((col) => {
+        const th = document.createElement("th");
+        th.textContent = col.label;
+        headRow.appendChild(th);
+      });
+      thead.appendChild(headRow);
+
+      const tbody = document.createElement("tbody");
+      filteredRows.forEach((row) => {
+        const tr = document.createElement("tr");
+        if (activeRowClick) {
+          tr.className = "row-clickable";
+          tr.addEventListener("click", () => activeRowClick(row));
+        }
+        columns.forEach((col) => {
+          const td = document.createElement("td");
+          const value = stripMarkdown(safe(col.value(row)));
+          td.textContent = value;
+          if (col.className) {
+            td.classList.add(col.className(value));
+          }
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+
+      table.appendChild(thead);
+      table.appendChild(tbody);
+      wrap.appendChild(table);
+      content.appendChild(wrap);
+      setCount(filteredRows.length);
+    }
+
+    function renderKanban(rows, filterOptions) {
+      activeRenderer = "kanban";
+      activeRows = rows || [];
+      activeColumns = [];
+      setFilterOptions(filterOptions || []);
+      content.innerHTML = "";
+
+      const filteredRows = getFilteredRows(activeRows);
+      if (!filteredRows.length) {
+        renderEmpty("No tasks found for this filter.");
+        return;
+      }
+
+      const byColumn = {};
+      filteredRows.forEach((row) => {
+        const col = safe(row.column);
+        if (!byColumn[col]) {
+          byColumn[col] = [];
+        }
+        byColumn[col].push(row);
+      });
+
+      const order = ["backlog", "todo", "in-progress", "testing", "review", "done"];
+      const known = order.filter((name) => byColumn[name]);
+      const extra = Object.keys(byColumn).filter((name) => !order.includes(name)).sort();
+      const columns = [...known, ...extra];
+
+      const board = document.createElement("div");
+      board.className = "kanban";
+
+      columns.forEach((columnName) => {
+        const col = document.createElement("section");
+        col.className = "kanban-col";
+
+        const head = document.createElement("div");
+        head.className = "kanban-head";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = columnName;
+        const countSpan = document.createElement("span");
+        countSpan.textContent = String(byColumn[columnName].length);
+        head.appendChild(nameSpan);
+        head.appendChild(countSpan);
+
+        const list = document.createElement("div");
+        list.className = "kanban-list";
+
+        sortById(byColumn[columnName]).forEach((task) => {
+          const card = document.createElement("article");
+          card.className = "kanban-card";
+
+          const title = document.createElement("h4");
+          title.textContent = `${safe(task.id)} ${safe(task.title)}`;
+          card.appendChild(title);
+
+          const meta = document.createElement("div");
+          meta.className = "kanban-meta";
+          if (task.priority) {
+            const chip = document.createElement("span");
+            chip.className = "chip";
+            chip.textContent = `P: ${safe(task.priority)}`;
+            meta.appendChild(chip);
+          }
+          if (task.status) {
+            const chip = document.createElement("span");
+            chip.className = "chip";
+            chip.textContent = `S: ${safe(task.status)}`;
+            meta.appendChild(chip);
+          }
+          if (task.milestone) {
+            const chip = document.createElement("span");
+            chip.className = "chip";
+            chip.textContent = `M: ${safe(task.milestone)}`;
+            meta.appendChild(chip);
+          }
+          card.appendChild(meta);
+          card.addEventListener("click", () => openTaskModal(task));
+          list.appendChild(card);
+        });
+
+        col.appendChild(head);
+        col.appendChild(list);
+        board.appendChild(col);
+      });
+
+      content.appendChild(board);
+      setCount(filteredRows.length);
+    }
+
+    function sortById(items) {
+      return items.slice().sort((a, b) => safe(a.id).localeCompare(safe(b.id), undefined, { numeric: true }));
+    }
+
+    async function loadDashboard() {
+      setPage("Dashboard", "Project summary across board, evidence, scopes, and health.");
+      const [stats, health, board] = await Promise.all([
+        api("/api/stats"),
+        api("/api/health"),
+        api("/api/board"),
+      ]);
+
+      const totalTasks = stats.tasks ? stats.tasks.total : 0;
+      const totalScopes = stats.scopes ? stats.scopes.total : 0;
+      const totalEvidence = stats.evidence ? stats.evidence.total : 0;
+      const evidencePct = stats.evidence ? stats.evidence.health_pct + "%" : "0%";
+
+      renderStats([
+        ["Tasks", totalTasks],
+        ["Scopes", totalScopes],
+        ["Evidence", totalEvidence],
+        ["Evidence Health", evidencePct],
+        ["API", health.status || "unknown"],
+      ]);
+
+      const rows = Object.entries(board.board || {}).map(([column, tasks]) => ({
+        column,
+        tasks: tasks.length,
+      }));
+
+      renderTable(rows, [
+        { label: "Column", value: (row) => row.column },
+        { label: "Task Count", value: (row) => row.tasks },
+      ], [
+        { value: "column", label: "Column" },
+      ]);
+    }
+
+    async function loadBoard() {
+      setPage("Board", "Kanban board grouped by task column.");
+      const board = await api("/api/board");
+      const rows = [];
+      Object.entries(board.board || {}).forEach(([column, tasks]) => {
+        tasks.forEach((task) => {
+          rows.push({
+            column,
+            id: task.id,
+            title: task.title,
+            priority: task.priority,
+            status: task.status,
+            milestone: task.milestone,
+            scopes: task.scopes,
+          });
+        });
+      });
+      const ordered = sortById(rows);
+
+      renderStats([
+        ["Rows", ordered.length],
+        ["Columns", Object.keys(board.board || {}).length],
+      ]);
+
+      renderKanban(ordered, [
+        { value: "id", label: "Task ID" },
+        { value: "title", label: "Title" },
+        { value: "column", label: "Column" },
+        { value: "priority", label: "Priority" },
+        { value: "status", label: "Status" },
+        { value: "milestone", label: "Milestone" },
+        { value: "scopes", label: "Scopes" },
+      ]);
+    }
+
+    async function loadTasks() {
+      setPage("Tasks", "Full task list from SQLite.");
+      const result = await api("/api/tasks");
+      const tasks = sortById(result.tasks || []);
+
+      renderStats([
+        ["Tasks", tasks.length],
+        ["In Progress", tasks.filter((t) => t.column === "in-progress").length],
+        ["Done", tasks.filter((t) => t.column === "done").length],
+      ]);
+
+      renderTable(tasks, [
+        { label: "ID", value: (t) => t.id },
+        { label: "Title", value: (t) => t.title },
+        { label: "Column", value: (t) => t.column },
+        { label: "Priority", value: (t) => t.priority },
+        { label: "Status", value: (t) => t.status },
+        { label: "Milestone", value: (t) => t.milestone },
+        { label: "Updated", value: (t) => t.updated },
+      ], [
+        { value: "id", label: "Task ID" },
+        { value: "title", label: "Title" },
+        { value: "column", label: "Column" },
+        { value: "priority", label: "Priority" },
+        { value: "status", label: "Status" },
+        { value: "milestone", label: "Milestone" },
+      ], (task) => openTaskModal(task));
+    }
+
+    async function loadScopes() {
+      setPage("Scopes", "All scopes mirrored from markdown and evidence stats.");
+      const [result, taskResult] = await Promise.all([api("/api/scopes"), api("/api/tasks")]);
+      const scopes = sortById(result.scopes || []);
+      const allTasks = taskResult.tasks || [];
+      const hasAnyScopeTaskLinks = allTasks.some((task) => normalizeScopes(task.scopes).length > 0);
+
+      renderStats([
+        ["Scopes", scopes.length],
+        ["Fresh", scopes.filter((s) => s.status === "fresh").length],
+        ["Stale", scopes.filter((s) => s.status === "stale").length],
+      ]);
+
+      renderTable(scopes, [
+        { label: "ID", value: (s) => s.id },
+        { label: "Name", value: (s) => s.name },
+        { label: "Status", value: (s) => s.status },
+        { label: "Summary", value: (s) => s.summary },
+        { label: "Evidence", value: (s) => `${safe(s.evidence_valid)}/${safe(s.evidence_total)}` },
+        { label: "Updated", value: (s) => s.updated_at },
+      ], [
+        { value: "id", label: "Scope ID" },
+        { value: "name", label: "Name" },
+        { value: "status", label: "Status" },
+        { value: "summary", label: "Summary" },
+      ], async (scope) => {
+        const noTasksMessage = hasAnyScopeTaskLinks
+          ? "No tasks currently linked to this scope."
+          : "No scope-task links exist in this DB yet (task_scopes is empty).";
+        await openScopeModal(scope, allTasks, noTasksMessage);
+      });
+    }
+
+    async function loadEvidence() {
+      setPage("Evidence", "All evidence links in the current database.");
+      const result = await api("/api/evidence");
+      const evidence = result.evidence || [];
+
+      renderStats([
+        ["Evidence Links", evidence.length],
+        ["Valid", evidence.filter((e) => e.type === "valid").length],
+        ["Stale", evidence.filter((e) => e.type === "stale").length],
+      ]);
+
+      renderTable(evidence, [
+        { label: "Type", value: (e) => e.type },
+        { label: "File", value: (e) => e.filepath || e.raw },
+        { label: "Line", value: (e) => e.start_line || "-" },
+        { label: "Symbol", value: (e) => e.symbol },
+        { label: "Description", value: (e) => e.description },
+      ], [
+        { value: "type", label: "Type" },
+        { value: "filepath", label: "File" },
+        { value: "symbol", label: "Symbol" },
+        { value: "description", label: "Description" },
+      ]);
+    }
+
+    async function loadMilestones() {
+      setPage("Milestones", "Milestone records from SQLite.");
+      const [result, taskResult] = await Promise.all([api("/api/milestones"), api("/api/tasks")]);
+      const milestones = sortById(result.milestones || []);
+      const allTasks = taskResult.tasks || [];
+
+      renderStats([
+        ["Milestones", milestones.length],
+        ["Active", milestones.filter((m) => m.status !== "done").length],
+        ["Done", milestones.filter((m) => m.status === "done").length],
+      ]);
+
+      renderTable(milestones, [
+        { label: "ID", value: (m) => m.id },
+        { label: "Name", value: (m) => m.name },
+        { label: "Status", value: (m) => m.status },
+        { label: "Summary", value: (m) => m.summary || m.design || m.plan || m.context },
+        { label: "Created", value: (m) => m.created_at },
+        { label: "Completed", value: (m) => m.completed_at },
+      ], [
+        { value: "id", label: "Milestone ID" },
+        { value: "name", label: "Name" },
+        { value: "status", label: "Status" },
+        { value: "summary", label: "Summary" },
+      ], (milestone) => {
+        const linkedTasks = allTasks.filter((task) => safe(task.milestone) === safe(milestone.id));
+        openMilestoneModal(milestone, linkedTasks);
+      });
+    }
+
+    async function loadSessions() {
+      setPage("Sessions", "Session tracking and handoff history.");
+      const result = await api("/api/sessions");
+      const sessions = result.sessions || [];
+
+      renderStats([
+        ["Sessions", sessions.length],
+        ["Active", sessions.filter((s) => safe(s.status) === "active").length],
+        ["Closed", sessions.filter((s) => safe(s.status) !== "active").length],
+      ]);
+
+      renderTable(sessions, [
+        { label: "ID", value: (s) => s.id },
+        { label: "Status", value: (s) => s.status },
+        { label: "Model", value: (s) => s.model },
+        { label: "Started", value: (s) => s.started_at },
+        { label: "Ended", value: (s) => s.ended_at },
+        { label: "Project Root", value: (s) => s.project_root },
+      ], [
+        { value: "id", label: "Session ID" },
+        { value: "status", label: "Status" },
+        { value: "model", label: "Model" },
+        { value: "project_root", label: "Project Root" },
+      ]);
+    }
+
+    async function loadGraph() {
+      setPage("Graph", "Dependency graph across scopes and files.");
+      const result = await api("/api/graph");
+      const edges = result.edges || [];
+      const types = result.types || {};
+
+      renderStats([
+        ["Nodes", result.nodes_total || 0],
+        ["Edges", result.edges_total || 0],
+        ["Types", Object.keys(types).length],
+      ]);
+
+      renderTable(edges, [
+        { label: "Source", value: (e) => e.source },
+        { label: "Target", value: (e) => e.target },
+        { label: "Type", value: (e) => e.type },
+      ], [
+        { value: "source", label: "Source" },
+        { value: "target", label: "Target" },
+        { value: "type", label: "Type" },
+      ]);
+    }
+
+    async function loadDesignSystem() {
+      setPage("Design System", "Design tokens and component catalog data.");
+      const result = await api("/api/design-system");
+      const tokens = result.tokens || [];
+      const categories = result.categories || {};
+
+      renderStats([
+        ["Tokens", tokens.length],
+        ["Categories", Object.keys(categories).length],
+        ["With Source", tokens.filter((t) => safe(t.source_file) !== "-").length],
+      ]);
+
+      renderTable(tokens, [
+        { label: "Category", value: (t) => t.category },
+        { label: "Name", value: (t) => t.name },
+        { label: "Value", value: (t) => t.value },
+        { label: "Source File", value: (t) => t.source_file },
+      ], [
+        { value: "category", label: "Category" },
+        { value: "name", label: "Name" },
+        { value: "source_file", label: "Source" },
+      ]);
+    }
+
+    async function loadDecisions() {
+      setPage("Decisions", "Architectural decision records.");
+      const result = await api("/api/decisions");
+      const decisions = result.decisions || [];
+
+      renderStats([
+        ["Decisions", decisions.length],
+        ["Accepted", decisions.filter((d) => safe(d.status) === "accepted").length],
+        ["Other", decisions.filter((d) => safe(d.status) !== "accepted").length],
+      ]);
+
+      renderTable(decisions, [
+        { label: "ID", value: (d) => d.id },
+        { label: "Title", value: (d) => d.title },
+        { label: "Status", value: (d) => d.status },
+        { label: "Created", value: (d) => d.created_at },
+      ], [
+        { value: "id", label: "Decision ID" },
+        { value: "title", label: "Title" },
+        { value: "status", label: "Status" },
+      ]);
+    }
+
+    async function loadDevelop() {
+      setPage("Develop", "TDD cycle orchestration, lanes, runs, and in-flight tasks.");
+      const result = await api("/api/develop");
+      const lanes = result.lanes || [];
+      const runs = result.runs || [];
+      const inFlight = result.in_flight_tasks || [];
+
+      renderStats([
+        ["Lanes", lanes.length],
+        ["Runs", runs.length],
+        ["In Flight Tasks", inFlight.length],
+      ]);
+
+      const rows = [
+        ...inFlight.map((t) => ({
+          kind: "task",
+          id: t.id,
+          status: t.status,
+          lane: t.lane_id,
+          agent: t.current_agent,
+          note: t.title,
+        })),
+        ...lanes.map((l) => ({
+          kind: "lane",
+          id: l.id,
+          status: l.status,
+          lane: l.scope,
+          agent: l.current_agent,
+          note: l.updated_at,
+        })),
+        ...runs.slice(0, 100).map((r) => ({
+          kind: "run",
+          id: r.id,
+          status: r.status,
+          lane: r.lane_id,
+          agent: r.agent,
+          note: r.task_id,
+        })),
+      ];
+
+      renderTable(rows, [
+        { label: "Type", value: (r) => r.kind },
+        { label: "ID", value: (r) => r.id },
+        { label: "Status", value: (r) => r.status },
+        { label: "Lane/Scope", value: (r) => r.lane },
+        { label: "Agent", value: (r) => r.agent },
+        { label: "Details", value: (r) => r.note },
+      ], [
+        { value: "kind", label: "Type" },
+        { value: "id", label: "ID" },
+        { value: "status", label: "Status" },
+        { value: "lane", label: "Lane/Scope" },
+        { value: "agent", label: "Agent" },
+      ]);
+    }
+
+    async function loadHealth() {
+      setPage("Health", "API health and summary stats.");
+      const [health, stats] = await Promise.all([api("/api/health"), api("/api/stats")]);
+
+      renderStats([
+        ["API", health.status || "unknown"],
+        ["Tasks", stats.tasks ? stats.tasks.total : 0],
+        ["Scopes", stats.scopes ? stats.scopes.total : 0],
+        ["Evidence", stats.evidence ? stats.evidence.total : 0],
+      ]);
+
+      renderTextBlock(
+        "Health Check",
+        health.detail || "Database connection is healthy and serving data."
+      );
+    }
+
+    async function loadStatsOnly(title, copy) {
+      setPage(title, copy);
+      const stats = await api("/api/stats");
+      renderStats([
+        ["Tasks", stats.tasks ? stats.tasks.total : 0],
+        ["Scopes", stats.scopes ? stats.scopes.total : 0],
+        ["Evidence Total", stats.evidence ? stats.evidence.total : 0],
+        ["Evidence Health", stats.evidence ? stats.evidence.health_pct + "%" : "0%"],
+      ]);
+
+      renderTable([
+        { key: "tasks.total", value: stats.tasks ? stats.tasks.total : 0 },
+        { key: "scopes.total", value: stats.scopes ? stats.scopes.total : 0 },
+        { key: "evidence.total", value: stats.evidence ? stats.evidence.total : 0 },
+        { key: "evidence.valid", value: stats.evidence ? stats.evidence.valid : 0 },
+        { key: "evidence.stale", value: stats.evidence ? stats.evidence.stale : 0 },
+      ], [
+        { label: "Metric", value: (row) => row.key },
+        { label: "Value", value: (row) => row.value },
+      ], [
+        { value: "key", label: "Metric" },
+      ]);
+    }
+
+    async function runSearch(forceType) {
+      const query = searchBox.value.trim();
+      const effectiveQuery = forceType ? (query || forceType) : query;
+
+      setPage("Search", "Searches tasks and scopes in the SQLite full-text index.");
+      if (!effectiveQuery) {
+        renderStats([]);
+        renderEmpty("Enter a query, then press Search.");
+        return;
+      }
+
+      const result = await api("/api/search?q=" + encodeURIComponent(effectiveQuery));
+      const rows = [
+        ...(result.tasks || []).map((item) => ({
+          kind: "task",
+          id: item.id,
+          title: item.title,
+          body: item.body,
+          status: item.status,
+        })),
+        ...(result.scopes || []).map((item) => ({
+          kind: "scope",
+          id: item.id,
+          title: item.name,
+          body: item.summary,
+          status: item.status,
+        })),
+      ];
+
+      renderStats([
+        ["Task Hits", (result.tasks || []).length],
+        ["Scope Hits", (result.scopes || []).length],
+      ]);
+
+      renderTable(rows, [
+        { label: "Type", value: (row) => row.kind },
+        { label: "ID", value: (row) => row.id },
+        { label: "Title", value: (row) => row.title },
+        { label: "Status", value: (row) => row.status },
+        { label: "Preview", value: (row) => row.body },
+      ], [
+        { value: "kind", label: "Type" },
+        { value: "id", label: "ID" },
+        { value: "title", label: "Title" },
+        { value: "status", label: "Status" },
+      ]);
+    }
+
+    function currentRoute() {
+      const path = location.pathname.replace(/^\/+/, "") || "dashboard";
+      return routes.some(([key]) => key === path) ? path : "dashboard";
+    }
+
+    async function render() {
+      const route = currentRoute();
+      setActive(route);
+      closeTaskModal();
+      if (route !== lastRoute) {
+        filterBox.value = "";
+        filterField.value = "__all";
+        lastRoute = route;
+      }
+      const entry = routes.find(([key]) => key === route);
+      if (!entry) {
+        return;
+      }
+      try {
+        await entry[2]();
+      } catch (error) {
+        renderStats([]);
+        renderEmpty("Could not load this view. Check that the server is using the correct MPGA database.");
+      }
+    }
+
+    searchButton.addEventListener("click", () => {
+      history.pushState({}, "", "/search");
+      render();
+    });
+
+    searchBox.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        history.pushState({}, "", "/search");
+        render();
+      }
+    });
+
+    filterBox.addEventListener("input", () => {
+      renderActiveTable();
+    });
+
+    filterField.addEventListener("change", () => {
+      renderActiveTable();
+    });
+
+    clearFilterButton.addEventListener("click", () => {
+      filterBox.value = "";
+      filterField.value = "__all";
+      renderActiveTable();
+    });
+
+    scopeLinkTaskButton.addEventListener("click", async () => {
+      if (!currentScopeContext) {
+        return;
+      }
+      const taskId = (scopeLinkTaskSelect.value || "").trim();
+      if (!taskId) {
+        return;
+      }
+      try {
+        await apiPost("/api/task-scopes/link", {
+          task_id: taskId,
+          scope_id: currentScopeContext.scope.id,
+        });
+        await openScopeModal(
+          currentScopeContext.scope,
+          currentScopeContext.allTasks,
+          currentScopeContext.noTasksMessage
+        );
+      } catch (_error) {
+        renderModalList(
+          "Tasks In This Scope",
+          [],
+          "Could not link task to scope. Check server logs and try again."
+        );
+      }
+    });
+
+    taskModalClose.addEventListener("click", closeTaskModal);
+    taskModal.addEventListener("click", (event) => {
+      if (event.target === taskModal) {
+        closeTaskModal();
+      }
+    });
+
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        closeTaskModal();
+      }
+    });
+
+    window.addEventListener("popstate", render);
+
+    makeNav();
+    render();
+  </script>
+</body>
+</html>

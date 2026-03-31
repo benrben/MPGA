@@ -29,7 +29,7 @@ The CLI is bundled — it builds automatically on first use. No separate install
 ```
 
 This runs:
-1. `mpga init --from-existing` — creates `MPGA/` directory structure
+1. `mpga init --from-existing` — initializes the DB (`.mpga/mpga.db`) and populates the knowledge layer
 2. `mpga sync` — scans codebase, generates INDEX.md, GRAPH.md, and scope docs
 3. `mpga health` — shows initial health report
 
@@ -41,10 +41,10 @@ The plugin provides agents, commands, and hooks:
 
 ```
 mpga-plugin/
-├── agents/           # 10 agents: campaigner, red-dev, green-dev, blue-dev, scout, ...
-├── commands/         # 21 /mpga:* commands
+├── agents/           # 17 agents: campaigner, red-dev, green-dev, blue-dev, scout, ...
+├── commands/         # 26 /mpga:* commands
 ├── hooks/            # PostToolUse drift check (triggers mpga drift --quick)
-└── skills/           # 11 skill definitions (source of truth)
+└── skills/           # 18+ skill definitions (source of truth)
 ```
 
 ### Per-project export
@@ -57,7 +57,7 @@ This generates:
 
 ```
 project-root/
-├── CLAUDE.md                 # Project context (generated from MPGA/INDEX.md)
+├── CLAUDE.md                 # Project context (generated from `mpga export --claude`)
 └── .claude/
     ├── skills/
     │   ├── mpga-sync-project/SKILL.md
@@ -71,8 +71,8 @@ project-root/
     │   ├── mpga-ship/SKILL.md
     │   ├── mpga-handoff/SKILL.md
     │   └── mpga-map-codebase/SKILL.md
-    ├── agents/               # 10 exported agent specs
-    ├── commands/             # 21 exported /mpga:* command specs
+    ├── agents/               # all exported agent specs
+    ├── commands/             # all exported /mpga:* command specs
     └── settings.json         # drift hook configuration
 ```
 
@@ -82,7 +82,7 @@ project-root/
 mpga export --claude --global
 ```
 
-- Copies all 11 skills to `~/.claude/skills/mpga-*/`
+- Copies all skills to `~/.claude/skills/mpga-*/`
 - Prints the MPGA global rules section to append to `~/.claude/CLAUDE.md`
 
 ## Daily workflow
@@ -143,10 +143,10 @@ See [workflow.md](workflow.md).
 
 ## Hooks
 
-After every `Write` or `Edit` tool call, the plugin automatically runs:
+After every `Write` or `Edit` tool call, the PostToolUse hook automatically runs:
 
 ```bash
-${CLAUDE_PLUGIN_ROOT}/bin/mpga.sh drift --quick
+mpga drift --quick
 ```
 
 If stale evidence links are detected, you'll see a warning. Run `mpga evidence heal` to auto-fix.
@@ -162,7 +162,7 @@ If stale evidence links are detected, you'll see a warning. Run `mpga evidence h
 | `/mpga:drift` | Full drift report |
 | `/mpga:map` | Parallel scope mapping |
 | `/mpga:plan` | Generate task plan from milestone |
-| `/mpga:execute [task-id]` | Run TDD cycle |
+| `/mpga:execute [task-id]` | Run TDD cycle (→ redirects to `/mpga:develop`) |
 | `/mpga:verify` | Full verification pass |
 | `/mpga:ship` | Commit + update evidence + archive |
 | `/mpga:quick "<task>"` | Ad-hoc fix |

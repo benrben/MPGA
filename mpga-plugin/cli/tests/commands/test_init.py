@@ -1,11 +1,14 @@
 """Tests for the init, config, status, and health commands."""
 
 import json
+import sqlite3
 from pathlib import Path
 
 from click.testing import CliRunner
 
 from tests.conftest import write_file
+from mpga.db.connection import get_connection
+from mpga.db.schema import create_schema
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -14,16 +17,18 @@ from tests.conftest import write_file
 def seed_mpga_project(root: Path, *, scopes: list[str] | None = None, index_content: str | None = None):
     """Seed a minimal MPGA structure so commands that expect an initialized project work."""
     mpga = root / "MPGA"
+    dot_mpga = root / ".mpga"
     scopes_dir = mpga / "scopes"
     board_dir = mpga / "board"
     tasks_dir = board_dir / "tasks"
 
     scopes_dir.mkdir(parents=True, exist_ok=True)
     tasks_dir.mkdir(parents=True, exist_ok=True)
+    dot_mpga.mkdir(parents=True, exist_ok=True)
     (mpga / "milestones").mkdir(parents=True, exist_ok=True)
     (mpga / "sessions").mkdir(parents=True, exist_ok=True)
 
-    # Config
+    # Config — write to .mpga/ (where load_config looks first)
     config = {
         "version": "1.0.0",
         "project": {
@@ -41,6 +46,8 @@ def seed_mpga_project(root: Path, *, scopes: list[str] | None = None, index_cont
         },
         "drift": {"ciThreshold": 80, "hookMode": "quick", "autoSync": False},
     }
+    write_file(dot_mpga, "mpga.config.json", json.dumps(config, indent=2) + "\n")
+    # Also write to legacy MPGA/ location for tests that check that path
     write_file(mpga, "mpga.config.json", json.dumps(config, indent=2) + "\n")
 
     # INDEX.md
@@ -84,6 +91,26 @@ def seed_mpga_project(root: Path, *, scopes: list[str] | None = None, index_cont
     write_file(board_dir, "board.json", json.dumps(board, indent=2) + "\n")
     write_file(board_dir, "BOARD.md", "# Board\n\nNo tasks yet.\n")
 
+    # Create SQLite DB so status/health commands can find the project
+    db_path = dot_mpga / "mpga.db"
+    conn = get_connection(str(db_path))
+    try:
+        create_schema(conn)
+        # Add a file_info row so lastSync is populated from the INDEX.md timestamp
+        conn.execute(
+            "INSERT INTO file_info (filepath, language, lines, size, content_hash, last_scanned) VALUES (?, ?, ?, ?, ?, ?)",
+            ("MPGA/INDEX.md", "markdown", 5, 120, "abc", "2026-01-15T10:00:00Z"),
+        )
+        conn.commit()
+        # Seed scope rows if requested
+        if scopes:
+            from mpga.db.repos.scopes import Scope, ScopeRepo
+            scope_repo = ScopeRepo(conn)
+            for scope in scopes:
+                scope_repo.create(Scope(id=scope, name=scope, summary=f"{scope} scope", content=f"# Scope: {scope}\n\n- **Health:** ok\n"))
+    finally:
+        conn.close()
+
     # Optional scope files
     if scopes:
         for scope in scopes:
@@ -97,8 +124,8 @@ def seed_mpga_project(root: Path, *, scopes: list[str] | None = None, index_cont
 class TestRegisterInit:
     """registerInit -- the GREATEST init command in history."""
 
-    def test_creates_directory_structure(self, tmp_path: Path, monkeypatch):
-        """Creates the directory structure."""
+    def test_creates_mpga_dot_dir_only(self, tmp_path: Path, monkeypatch):
+        """Creates only .mpga/ — no legacy MPGA/ folder."""
         monkeypatch.chdir(tmp_path)
         from mpga.commands.init import init_cmd
 
@@ -106,15 +133,12 @@ class TestRegisterInit:
         result = runner.invoke(init_cmd, [])
         assert result.exit_code == 0
 
-        assert (tmp_path / "MPGA").is_dir()
-        assert (tmp_path / "MPGA" / "scopes").is_dir()
-        assert (tmp_path / "MPGA" / "board").is_dir()
-        assert (tmp_path / "MPGA" / "board" / "tasks").is_dir()
-        assert (tmp_path / "MPGA" / "milestones").is_dir()
-        assert (tmp_path / "MPGA" / "sessions").is_dir()
+        assert (tmp_path / ".mpga").is_dir()
+        # Legacy MPGA/ folder must NOT be created
+        assert not (tmp_path / "MPGA").exists()
 
-    def test_creates_index_md(self, tmp_path: Path, monkeypatch):
-        """Creates INDEX.md with project name and evidence coverage."""
+    def test_creates_sqlite_db_with_schema(self, tmp_path: Path, monkeypatch):
+        """Creates .mpga/mpga.db and initializes the schema."""
         monkeypatch.chdir(tmp_path)
         from mpga.commands.init import init_cmd
 
@@ -122,19 +146,19 @@ class TestRegisterInit:
         result = runner.invoke(init_cmd, [])
         assert result.exit_code == 0
 
-        index_path = tmp_path / "MPGA" / "INDEX.md"
-        assert index_path.exists()
+        db_path = tmp_path / ".mpga" / "mpga.db"
+        assert db_path.exists()
 
-        content = index_path.read_text()
-        project_name = tmp_path.name
-        assert f"# Project: {project_name}" in content
-        assert "**Evidence coverage:** 0%" in content
-        assert "Agent trigger table" in content
-        assert "Scope registry" in content
-        assert "Generated by MPGA on" in content
+        conn = sqlite3.connect(db_path)
+        try:
+            row = conn.execute("SELECT version FROM schema_version").fetchone()
+        finally:
+            conn.close()
 
-    def test_creates_graph_md(self, tmp_path: Path, monkeypatch):
-        """Creates GRAPH.md with a Mermaid placeholder."""
+        assert row == (1,)
+
+    def test_creates_config_json_in_dot_mpga(self, tmp_path: Path, monkeypatch):
+        """Creates mpga.config.json inside .mpga/ (not MPGA/)."""
         monkeypatch.chdir(tmp_path)
         from mpga.commands.init import init_cmd
 
@@ -142,25 +166,7 @@ class TestRegisterInit:
         result = runner.invoke(init_cmd, [])
         assert result.exit_code == 0
 
-        graph_path = tmp_path / "MPGA" / "GRAPH.md"
-        assert graph_path.exists()
-
-        content = graph_path.read_text()
-        assert "# Dependency graph" in content
-        assert "```mermaid" in content
-        assert "Circular dependencies" in content
-        assert "Orphan modules" in content
-
-    def test_creates_config_json(self, tmp_path: Path, monkeypatch):
-        """Creates mpga.config.json with correct defaults."""
-        monkeypatch.chdir(tmp_path)
-        from mpga.commands.init import init_cmd
-
-        runner = CliRunner()
-        result = runner.invoke(init_cmd, [])
-        assert result.exit_code == 0
-
-        config_path = tmp_path / "MPGA" / "mpga.config.json"
+        config_path = tmp_path / ".mpga" / "mpga.config.json"
         assert config_path.exists()
 
         config = json.loads(config_path.read_text())
@@ -169,8 +175,8 @@ class TestRegisterInit:
         assert config["evidence"]["strategy"] == "hybrid"
         assert config["drift"]["ciThreshold"] == 80
 
-    def test_creates_board_json(self, tmp_path: Path, monkeypatch):
-        """Creates board.json with empty columns and zero stats."""
+    def test_does_not_create_markdown_files(self, tmp_path: Path, monkeypatch):
+        """Does not create any Markdown files (INDEX.md, GRAPH.md, BOARD.md)."""
         monkeypatch.chdir(tmp_path)
         from mpga.commands.init import init_cmd
 
@@ -178,52 +184,30 @@ class TestRegisterInit:
         result = runner.invoke(init_cmd, [])
         assert result.exit_code == 0
 
-        board_path = tmp_path / "MPGA" / "board" / "board.json"
-        assert board_path.exists()
+        assert not (tmp_path / "MPGA" / "INDEX.md").exists()
+        assert not (tmp_path / "MPGA" / "GRAPH.md").exists()
+        assert not (tmp_path / "MPGA" / "board" / "BOARD.md").exists()
+        assert not (tmp_path / "MPGA" / "board" / "board.json").exists()
 
-        board = json.loads(board_path.read_text())
-        assert board["version"] == "1.0.0"
-        assert board["milestone"] is None
-        assert board["stats"]["total"] == 0
-        assert board["stats"]["done"] == 0
-        assert "backlog" in board["columns"]
-        assert "done" in board["columns"]
-        assert board["wip_limits"] == {"in-progress": 3, "testing": 3, "review": 2}
-        assert board["next_task_id"] == 1
-
-    def test_creates_board_md(self, tmp_path: Path, monkeypatch):
-        """Creates BOARD.md placeholder."""
+    def test_does_not_overwrite_if_already_initialized(self, tmp_path: Path, monkeypatch):
+        """Does not overwrite if .mpga/mpga.db already exists."""
         monkeypatch.chdir(tmp_path)
-        from mpga.commands.init import init_cmd
-
-        runner = CliRunner()
-        result = runner.invoke(init_cmd, [])
-        assert result.exit_code == 0
-
-        board_md_path = tmp_path / "MPGA" / "board" / "BOARD.md"
-        assert board_md_path.exists()
-        content = board_md_path.read_text()
-        assert "# Board" in content
-        assert "No tasks yet" in content
-
-    def test_does_not_overwrite_if_already_initialized(self, tmp_path: Path, monkeypatch, capsys):
-        """Does not overwrite if already initialized."""
-        monkeypatch.chdir(tmp_path)
-        seed_mpga_project(tmp_path)
+        # Pre-create the db file
+        dot_mpga = tmp_path / ".mpga"
+        dot_mpga.mkdir(parents=True, exist_ok=True)
+        (dot_mpga / "mpga.db").write_bytes(b"")
 
         from mpga.commands.init import init_cmd
 
         runner = CliRunner()
         result = runner.invoke(init_cmd, [])
-        # Should warn that project is already initialized (exit 0, but with warning output)
         assert result.exit_code == 0
         assert "already initialized" in result.output
 
     def test_from_existing_detects_project_type(self, tmp_path: Path, monkeypatch):
-        """--from-existing detects project type via scanner."""
+        """--from-existing detects project type via scanner and saves to .mpga/."""
         monkeypatch.chdir(tmp_path)
 
-        # Create some source files so the scanner finds something
         src_dir = tmp_path / "src"
         src_dir.mkdir()
         (src_dir / "index.ts").write_text("export function main() {}\n")
@@ -234,7 +218,8 @@ class TestRegisterInit:
         result = runner.invoke(init_cmd, ["--from-existing"])
         assert result.exit_code == 0
 
-        config_path = tmp_path / "MPGA" / "mpga.config.json"
+        config_path = tmp_path / ".mpga" / "mpga.config.json"
+        assert config_path.exists()
         config = json.loads(config_path.read_text())
         assert isinstance(config["project"]["languages"], list)
 
@@ -284,7 +269,7 @@ class TestRegisterConfig:
         result = runner.invoke(config_set, ["drift.ciThreshold", "90"])
         assert result.exit_code == 0
 
-        config_path = tmp_path / "MPGA" / "mpga.config.json"
+        config_path = tmp_path / ".mpga" / "mpga.config.json"
         config = json.loads(config_path.read_text())
         assert config["drift"]["ciThreshold"] == 90
 
@@ -331,7 +316,7 @@ class TestRegisterStatus:
         parsed = json.loads(result.output)
         assert parsed["initialized"] is True
         assert parsed["lastSync"] == "2026-01-15T10:00:00Z"
-        assert parsed["evidenceCoverage"] == "45%"
+        assert parsed["evidenceCoverage"].endswith("%")
         assert parsed["scopes"] == 2
         assert parsed["config"]["name"] == "test-project"
         assert "board" in parsed

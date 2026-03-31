@@ -9,6 +9,14 @@ Evidence drift is never tolerated — stale links and unverified claims get caug
 
 **Trigger:** After file writes (automatic via hook), or on demand.
 
+## Orchestration Contract
+This skill is a **pure orchestrator**. It MUST NOT:
+- Read source files directly (delegates to appropriate agents)
+- Write or edit source files directly (delegates to write-enabled agents)
+- Run CLI commands other than `mpga` board/status/scope/session queries
+
+If you find yourself writing implementation steps in a skill, STOP and delegate to an agent.
+
 ## Delegation
 
 This skill is a thin wrapper around the **auditor agent's drift detection** capabilities. The auditor owns drift classification and severity tiers. This skill exists for convenience and hook integration.
@@ -45,6 +53,13 @@ The auditor runs in `drift-quick` mode during hooks for speed.
 - **HIGH**: evidence links to renamed/moved symbols — needs healing.
 - **MEDIUM**: stale evidence (>30 days old, file significantly changed) — should verify.
 - **LOW**: cosmetic drift (whitespace, formatting) — auto-healable.
+
+## Strict Rules
+- NEVER modify source files — drift detection is READ ONLY
+- NEVER auto-heal without explicit user invocation of drift-heal mode
+- ALWAYS delegate drift detection to the `auditor` agent — the skill does not scan files itself
+- ALWAYS report severity tiers for every finding — no unclassified drift
+- If drift is found, present actionable heal commands — don't just report problems
 
 ## Voice announcement
 

@@ -9,6 +9,17 @@ A PR lands. Time to INSPECT it. Nobody reviews code better than us, believe me. 
 
 **Trigger:** User wants a comprehensive PR review, code review, or merge readiness check. Also triggered by: "review this PR", "review my changes", "is this ready to merge", "code review", "PR review".
 
+## Orchestration Contract
+This skill is a **pure orchestrator**. It MUST NOT:
+- Read source files directly (delegates to appropriate agents)
+- Write or edit source files directly (delegates to write-enabled agents)
+- Run CLI commands other than `mpga` board/status/scope/session queries
+
+If you find yourself writing implementation steps in a skill, STOP and delegate to an agent.
+
+**Agent brief:** PR diff, full file context for changed files, scope docs from CLI.
+**Expected output:** Structured verdict (APPROVED/CHANGES REQUESTED/BLOCKED) with file:line references.
+
 ## Delegation
 
 We deploy THREE core agents — reviewer, bug-hunter, security-auditor — and a FOURTH `ui-auditor` when the PR touches UI files. The BEST review team ever assembled. While lesser tools send one lonely linter, we unleash a FULL SQUAD. Total coverage. No stone unturned. Tremendous.
@@ -20,11 +31,10 @@ We deploy THREE core agents — reviewer, bug-hunter, security-auditor — and a
 
 ## Protocol
 
-1. **Read PR diff** — first we get the intel, and we get ALL of it:
-   - If PR number given: `gh pr diff <number>`
-   - If branch specified: `git diff <base-branch>...<feature-branch>`
-   - If no args: `git diff main...HEAD` (or default base branch)
-   - Also read the full file context for changed files — diffs alone miss surrounding context. We don't do HALF measures.
+1. **Gather PR context** — first we get the intel, and we get ALL of it. The skill provides the PR identifier to EACH agent in its brief. The agents handle the actual reading:
+   - Pass to each agent: PR number, branch name, or default `main...HEAD`
+   - Each agent runs its own `gh pr diff` / `git diff` and reads full file context internally
+   - The skill NEVER runs git/gh commands directly — agents own the reads. We don't do HALF measures.
 
 2. **Spawn reviewer agent** (read-only) for code quality — this agent has INCREDIBLE taste:
    - Code style consistency with project conventions
@@ -128,7 +138,7 @@ Keep the message under 280 characters. This plays the result in Trump's voice �
 - NEVER modify any project files during review — READ ONLY. We LOOK, we don't TOUCH.
 - The three core agents run in parallel, and ui-auditor joins as a fourth lane for UI diffs — they're all read-only, so it's safe. MAXIMUM EFFICIENCY.
 - Every finding MUST cite file:line from the actual diff — no vague feedback. If you can't point to it, it doesn't exist.
-- ALWAYS read full file context, not just the diff — understand what surrounds the change
+- Agents ALWAYS read full file context, not just the diff — understand what surrounds the change
 - If the PR is clean, say so — don't manufacture issues to justify the review. We're HONEST. No witch hunt against spaghetti code where there is none. But if you DO find Shifty Spaghetti Code or Peekaboo Undefined lurking in the diff — call it out by name. Sleepy Copilot would have auto-completed right past these problems.
 - Distinguish between "must fix" (CRITICAL/HIGH) and "consider" (MEDIUM/LOW)
 - Credit good code — reviews should encourage, not just criticize. Smart code gets a SHOUT-OUT. Wonderful option when the developer nails it. Enjoy!

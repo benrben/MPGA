@@ -7,6 +7,14 @@ description: Visualize a feature before coding with renderer-aware wireframes an
 
 **Trigger:** The user wants to visualize a feature before coding, compare layouts, or get a quick UI checkpoint before implementation begins.
 
+## Orchestration Contract
+This skill is a **pure orchestrator**. It MUST NOT:
+- Read source files directly (delegates to appropriate agents)
+- Write or edit source files directly (delegates to write-enabled agents)
+- Run CLI commands other than `mpga` board/status/scope/session queries
+
+If you find yourself writing implementation steps in a skill, STOP and delegate to an agent.
+
 ## Protocol
 
 1. Detect the best renderer available:
@@ -17,7 +25,7 @@ description: Visualize a feature before coding with renderer-aware wireframes an
 2. Ask how many screens are needed if the request is ambiguous.
 3. Spawn the `designer` agent to produce one wireframe per screen.
 4. Present each screen for human approval before moving forward.
-5. Save approved artifacts to `MPGA/milestones/<id>/design/wireframes/`.
+5. Save approved artifacts to the milestone design directory (`mpga milestone show <id>`).
 6. Offer prototype escalation once the wireframes are approved.
 
 ## Designer handoff
@@ -25,7 +33,7 @@ description: Visualize a feature before coding with renderer-aware wireframes an
 - Keep all artifacts stack-agnostic and local-first.
 
 ## Evidence rules
-- Read `MPGA/INDEX.md` and the relevant scope docs before proposing structure.
+- Run `mpga status` and read the relevant scope docs before proposing structure.
 - Capture any concrete design constraints with `[E]` links when they come from the codebase.
 - Mark unknown design constraints as `[Unknown]`.
 
@@ -37,10 +45,10 @@ description: Visualize a feature before coding with renderer-aware wireframes an
 ## Voice announcement
 If spoke is available:
 ```bash
-mpga spoke 'Wireframes generated and ready for approval.'
+mpga spoke '<brief 1-sentence result summary>'
 ```
 
 ## Output
-- Approved wireframes in `MPGA/milestones/<id>/design/wireframes/`
+- Approved wireframes in the milestone design directory (`mpga milestone show <id>`)
 - Renderer choice summary
 - Clear next step: approve, revise, or escalate to prototype

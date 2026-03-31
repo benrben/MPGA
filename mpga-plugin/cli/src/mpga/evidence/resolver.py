@@ -4,6 +4,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
 
+from mpga.db.connection import get_connection
+from mpga.db.repos.symbols import SymbolRepo
+from mpga.db.schema import create_schema
 from mpga.evidence.ast import find_symbol, verify_range
 from mpga.evidence.parser import EvidenceLink, is_symbol_based
 
@@ -30,7 +33,11 @@ class ResolvedEvidence:
     healed_from: str | None = None  # description of what changed
 
 
-def resolve_evidence(link: EvidenceLink, project_root: str) -> ResolvedEvidence:
+def _db_exists(project_root: str) -> bool:
+    return (Path(project_root) / ".mpga" / "mpga.db").exists()
+
+
+def _resolve_from_files(link: EvidenceLink, project_root: str) -> ResolvedEvidence:
     if not link.filepath:
         return ResolvedEvidence(status="stale", confidence=0)
 
@@ -42,8 +49,8 @@ def resolve_evidence(link: EvidenceLink, project_root: str) -> ResolvedEvidence:
     if not link.symbol and not link.start_line and not link.end_line:
         return ResolvedEvidence(status="valid", confidence=CONFIDENCE_FILE_ONLY)
 
-    # Step 1: Try exact line range (only for legacy range-based links)
-    if link.start_line and link.end_line:
+    # Step 1: Try exact line range only when there is no symbol anchor.
+    if link.start_line and link.end_line and not link.symbol:
         range_valid = verify_range(
             link.filepath,
             link.start_line,
@@ -83,10 +90,31 @@ def resolve_evidence(link: EvidenceLink, project_root: str) -> ResolvedEvidence:
                     ),
                 )
             else:
-                # Legacy range-based link: compare exact line range
+                # Legacy range-based link: trust the symbol anchor for start-line
+                # drift, but preserve valid links whose stored range still spans
+                # the symbol body even if the extractor returns a shorter end line.
+                range_valid = bool(
+                    link.start_line
+                    and link.end_line
+                    and verify_range(
+                        link.filepath,
+                        link.start_line,
+                        link.end_line,
+                        link.symbol,
+                        project_root,
+                    )
+                )
+                if link.start_line == location.start_line and range_valid:
+                    return ResolvedEvidence(
+                        status="valid",
+                        confidence=CONFIDENCE_EXACT_RANGE,
+                        start_line=link.start_line,
+                        end_line=link.end_line,
+                    )
+
                 healed = (
                     link.start_line != location.start_line
-                    or link.end_line != location.end_line
+                    or not range_valid
                 )
                 return ResolvedEvidence(
                     status="healed" if healed else "valid",
@@ -100,6 +128,24 @@ def resolve_evidence(link: EvidenceLink, project_root: str) -> ResolvedEvidence:
                         else None
                     ),
                 )
+
+    # Step 2b: For range links with symbols, fall back to the original range only
+    # when we could not resolve a symbol anchor.
+    if link.start_line and link.end_line and link.symbol:
+        range_valid = verify_range(
+            link.filepath,
+            link.start_line,
+            link.end_line,
+            link.symbol,
+            project_root,
+        )
+        if range_valid:
+            return ResolvedEvidence(
+                status="valid",
+                confidence=CONFIDENCE_EXACT_RANGE,
+                start_line=link.start_line,
+                end_line=link.end_line,
+            )
 
     # Step 3: Fuzzy search (symbol name anywhere in file)
     if link.symbol:
@@ -130,6 +176,128 @@ def resolve_evidence(link: EvidenceLink, project_root: str) -> ResolvedEvidence:
 
     # Step 4: File exists but symbol not found
     return ResolvedEvidence(status="stale", confidence=0)
+
+
+def resolve_from_db(link: EvidenceLink, project_root: str) -> ResolvedEvidence:
+    if not link.filepath:
+        return ResolvedEvidence(status="stale", confidence=0)
+
+    full_path = Path(project_root) / link.filepath
+    if not full_path.exists():
+        return ResolvedEvidence(status="stale", confidence=0)
+
+    if not link.symbol and not link.start_line and not link.end_line:
+        return ResolvedEvidence(status="valid", confidence=CONFIDENCE_FILE_ONLY)
+
+    if link.start_line and link.end_line and not link.symbol:
+        range_valid = verify_range(
+            link.filepath,
+            link.start_line,
+            link.end_line,
+            link.symbol,
+            project_root,
+        )
+        if range_valid:
+            return ResolvedEvidence(
+                status="valid",
+                confidence=CONFIDENCE_EXACT_RANGE,
+                start_line=link.start_line,
+                end_line=link.end_line,
+            )
+
+    db_path = Path(project_root) / ".mpga" / "mpga.db"
+    conn = get_connection(str(db_path))
+    try:
+        create_schema(conn)
+        repo = SymbolRepo(conn)
+        symbol_rows = repo.find_by_filepath(link.filepath)
+        if link.symbol:
+            symbol_rows = [row for row in symbol_rows if row.name == link.symbol] or [
+                row
+                for row in repo.find_by_name(link.symbol)
+                if row.filepath == link.filepath and row.name == link.symbol
+            ]
+    finally:
+        conn.close()
+
+    if link.symbol and symbol_rows:
+        location = symbol_rows[0]
+        if is_symbol_based(link):
+            hint_drifted = (
+                link.start_line is not None
+                and link.start_line != location.start_line
+            )
+            return ResolvedEvidence(
+                status="healed" if hint_drifted else "valid",
+                confidence=CONFIDENCE_AST_ANCHOR,
+                start_line=location.start_line,
+                end_line=location.end_line,
+                healed_from=(
+                    f"line hint drifted: was {link.start_line}, now {location.start_line}"
+                    if hint_drifted
+                    else None
+                ),
+            )
+
+        range_valid = bool(
+            link.start_line
+            and link.end_line
+            and verify_range(
+                link.filepath,
+                link.start_line,
+                link.end_line,
+                link.symbol,
+                project_root,
+            )
+        )
+        if link.start_line == location.start_line and range_valid:
+            return ResolvedEvidence(
+                status="valid",
+                confidence=CONFIDENCE_EXACT_RANGE,
+                start_line=link.start_line,
+                end_line=link.end_line,
+            )
+
+        healed = (
+            link.start_line != location.start_line
+            or not range_valid
+        )
+        return ResolvedEvidence(
+            status="healed" if healed else "valid",
+            confidence=CONFIDENCE_AST_ANCHOR,
+            start_line=location.start_line,
+            end_line=location.end_line,
+            healed_from=(
+                f"line range changed: was {link.start_line}-{link.end_line}, "
+                f"now {location.start_line}-{location.end_line}"
+                if healed
+                else None
+            ),
+        )
+
+    if link.start_line and link.end_line and link.symbol:
+        range_valid = verify_range(
+            link.filepath,
+            link.start_line,
+            link.end_line,
+            link.symbol,
+            project_root,
+        )
+        if range_valid:
+            return ResolvedEvidence(
+                status="valid",
+                confidence=CONFIDENCE_EXACT_RANGE,
+                start_line=link.start_line,
+                end_line=link.end_line,
+            )
+
+    return _resolve_from_files(link, project_root)
+
+
+def resolve_evidence(link: EvidenceLink, project_root: str) -> ResolvedEvidence:
+    if _db_exists(project_root):
+        return resolve_from_db(link, project_root)
+    return _resolve_from_files(link, project_root)
 
 
 @dataclass

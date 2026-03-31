@@ -8,6 +8,9 @@ from typing import Any
 
 from mpga.board.board import BoardLane, BoardRun, BoardState
 from mpga.board.task import Task, load_all_tasks
+from mpga.db.connection import get_connection
+from mpga.db.repos.tasks import TaskRepo
+from mpga.db.schema import create_schema
 
 
 @dataclass
@@ -73,7 +76,7 @@ def read_recent_board_events(board_dir: str, limit: int = 20) -> list[BoardLiveE
             except (json.JSONDecodeError, ValueError):
                 continue
         return events
-    except Exception:
+    except OSError:
         return []
 
 
@@ -94,13 +97,31 @@ def _summarize_task(task: Task) -> BoardLiveTaskSummary:
     )
 
 
+def _load_db_tasks(board_dir: str) -> list[Task]:
+    project_root = Path(board_dir).parent.parent
+    db_path = project_root / ".mpga" / "mpga.db"
+    if not db_path.exists():
+        return []
+
+    conn = get_connection(str(db_path))
+    try:
+        create_schema(conn)
+        return TaskRepo(conn).filter()
+    finally:
+        conn.close()
+
+
 def build_board_live_snapshot(
     board: BoardState,
     tasks_dir: str,
     board_dir: str,
     preloaded_tasks: list[Task] | None = None,
 ) -> BoardLiveSnapshot:
-    tasks = preloaded_tasks if preloaded_tasks is not None else load_all_tasks(tasks_dir)
+    if preloaded_tasks is not None:
+        tasks = preloaded_tasks
+    else:
+        db_tasks = _load_db_tasks(board_dir)
+        tasks = db_tasks if db_tasks else load_all_tasks(tasks_dir)
     columns: dict[str, list[BoardLiveTaskSummary]] = {
         "backlog": [],
         "todo": [],

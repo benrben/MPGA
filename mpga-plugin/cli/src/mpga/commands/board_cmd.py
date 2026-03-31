@@ -9,7 +9,7 @@ from __future__ import annotations
 import click
 
 from mpga.commands import board_handlers as h
-from mpga.commands.board_handlers import handle_board_search
+from mpga.commands.board_handlers import BoardSearchFilters, handle_board_search
 
 
 @click.group("board", help="The GREATEST task board ever built")
@@ -19,12 +19,9 @@ def board() -> None:
 
 # -- live -------------------------------------------------------------------
 
-@board.command("live", help="Generate TREMENDOUS auto-refresh HTML board -- BEAUTIFUL")
-@click.option("--serve", is_flag=True, default=False, help="Serve the live board through a local HTTP server")
-@click.option("--open", "open_browser", is_flag=True, default=False, help="Open the served board in the default browser")  # noqa: E501
-@click.option("--port", type=int, default=4173, help="Port for the local live board server")
-def board_live(serve: bool, open_browser: bool, port: int) -> None:
-    h.handle_board_live(serve=serve, open_browser=open_browser, port=port)
+@board.command("live", help="Persist the board to the SQLite mirror -- FAST and RELIABLE")
+def board_live() -> None:
+    h.handle_board_live()
 
 
 # -- show -------------------------------------------------------------------
@@ -32,8 +29,9 @@ def board_live(serve: bool, open_browser: bool, port: int) -> None:
 @board.command("show", help="Display the GREATEST board you've ever seen")
 @click.option("--json", "json_output", is_flag=True, default=False, help="Machine-readable output")
 @click.option("--milestone", default=None, help="Specific milestone board")
-def board_show(json_output: bool, milestone: str | None) -> None:
-    h.handle_board_show(json_output=json_output, milestone=milestone)
+@click.option("--full", is_flag=True, default=False, help="Show the full board instead of the compressed summary")
+def board_show(json_output: bool, milestone: str | None, full: bool) -> None:
+    h.handle_board_show(json_output=json_output, milestone=milestone, full=full)
 
 
 # -- add --------------------------------------------------------------------
@@ -202,6 +200,7 @@ def board_archive() -> None:
 @click.option("--scope", default=None, help="Filter by scope")
 @click.option("--agent", default=None, help="Filter by assigned agent")
 @click.option("--tags", default=None, help="Filter by tags (comma-separated)")
+@click.option("--full", is_flag=True, default=False, help="Show full task details instead of compressed summaries")
 def board_search(
     query: str,
     priority: str | None,
@@ -209,12 +208,16 @@ def board_search(
     scope: str | None,
     agent: str | None,
     tags: str | None,
+    full: bool,
 ) -> None:
     handle_board_search(
         query,
-        priority=priority,
-        column=column,
-        scope=scope,
-        agent=agent,
-        tags=tags,
+        filters=BoardSearchFilters(
+            priority=priority,
+            column=column,
+            scope=scope,
+            agent=agent,
+            tags=tags,
+        ),
+        full=full,
     )

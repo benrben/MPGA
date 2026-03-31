@@ -209,27 +209,9 @@ def victory(msg: str) -> None:
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
             )
-    except Exception:
+    except (OSError, subprocess.SubprocessError):
         pass  # spoke is optional
 
-
-# ---------------------------------------------------------------------------
-# TTS side-effects
-# ---------------------------------------------------------------------------
-
-
-def spoke(msg: str) -> None:
-    """Fire-and-forget TTS via mpga spoke. Message capped at 500 chars. Graceful no-op if unavailable."""
-    msg = msg[:500]
-    try:
-        subprocess.Popen(
-            ["mpga", "spoke", msg],
-            start_new_session=True,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        )
-    except Exception:
-        pass
 
 
 def progress_bar(value: int, total: int, width: int = DEFAULT_PROGRESS_BAR_WIDTH) -> str:

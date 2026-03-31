@@ -253,20 +253,39 @@ class TestEvidenceEndpoint:
             "Non-matching evidence item 'unrelated fixture' should not appear in results"
         )
 
-    def test_evidence_search_prevents_sql_injection(self, client):
-        """Evidence search using a SQL injection string returns 200 without server error."""
-        # Arrange — malicious query string; the endpoint must not crash
-        injection_query = "' OR '1'='1"
+    def test_evidence_search_prevents_sql_injection(self, client, db_conn):
+        """Evidence search using a SQL injection string prevents SQL injection bypass."""
+        # Arrange — seed two rows: one matching 'safe' and one with 'unrelated' description
+        db_conn.executemany(
+            """
+            INSERT INTO evidence
+                (raw, type, filepath, start_line, end_line, symbol, description,
+                 confidence, scope_id, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            [
+                ("[E] src/safe.py:10", "file", "src/safe.py", 10, 10, None,
+                 "safe description", 1.0, "SC-core", "2026-01-01T00:00:00"),
+                ("[E] src/unrelated.py:20", "file", "src/unrelated.py", 20, 20, None,
+                 "unrelated description", 1.0, "SC-core", "2026-01-01T00:00:00"),
+            ],
+        )
+        db_conn.commit()
 
-        # Act
+        # Act — query with SQL injection attempt: the WHERE clause becomes
+        # WHERE description LIKE '%' OR '1'='1%' — if parameterized, this is a literal string search
+        injection_query = "' OR '1'='1"
         response = client.get(f"/db/api/evidence?q={injection_query}")
 
-        # Assert — parameterized query should absorb this safely; no 500
+        # Assert — parameterized query should treat the injection as a literal string to search
         assert response.status_code == 200
         payload = json.loads(response.data)
         assert "evidence" in payload
-        # The injection should not return all rows (no bypass)
-        assert isinstance(payload["evidence"], list)
+        # The injection query should match zero rows (not bypass the WHERE clause)
+        assert len(payload["evidence"]) == 0, (
+            "SQL injection query should not match any rows. "
+            "If it returned rows, the query is not parameterized."
+        )
 
 
 # ---------------------------------------------------------------------------

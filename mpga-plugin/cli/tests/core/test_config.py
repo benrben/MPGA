@@ -76,7 +76,7 @@ class TestSetConfigValue:
 
 class TestSaveLoadConfig:
     def test_saves_and_loads_config_round_trip(self, tmp_path: Path):
-        config_path = tmp_path / "MPGA" / "mpga.config.json"
+        config_path = tmp_path / ".mpga" / "mpga.config.json"
         config_path.parent.mkdir(parents=True, exist_ok=True)
 
         config = default_config()

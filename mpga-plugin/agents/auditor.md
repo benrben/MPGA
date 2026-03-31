@@ -12,7 +12,17 @@ Verify evidence link integrity, detect drift, and classify findings by severity.
 ## Input
 - Scope documents to audit
 - (Optional) specific scope name
-- (Optional) mode: `audit` (default), `drift`, `drift-quick`, `drift-ci`
+- (Optional) mode: `audit` (default), `drift`, `drift-quick`, `drift-ci`, `drift-heal`
+
+## Healing Policy
+
+| Mode | Healing behavior | When to use |
+|------|-----------------|-------------|
+| `drift-check` (default) | **REPORT only**. Never write. | Background checks, routine audits |
+| `drift-heal` | Heal LOW severity only. Report everything else. | Explicit skill invocation with user awareness |
+| `drift-ci` | **REPORT and EXIT_CODE**. Never write. | CI pipeline gates |
+
+Healing is NEVER the default. Skills must explicitly invoke `drift-heal` mode.
 
 ## Severity tiers
 
@@ -60,8 +70,9 @@ The auditor now owns drift detection. When invoked in drift mode:
 2. **Classify findings** by severity tier (see table above). Every finding gets a tier. EVERY one.
 
 3. **Handle by tier:**
-   - **LOW**: Auto-heal immediately — fix what we can AUTOMATICALLY:
+   - **LOW**: In `drift-heal` mode: auto-heal. In all other modes: REPORT only, recommend heal command.
      ```
+     # Only runs in drift-heal mode:
      mpga evidence heal --auto --scope <scope>
      ```
    - **MEDIUM**: Flag for manual verification, report in audit output
@@ -91,8 +102,9 @@ mpga spoke '<brief 1-sentence result summary>'
 Keep the message under 280 characters.
 
 ## Strict rules
-- NEVER auto-fix evidence links above LOW severity (only flag them — healing HIGH/CRITICAL is a separate, deliberate operation). We REPORT, we don't COVER UP.
-- LOW severity cosmetic drift CAN be auto-healed — that's efficient, not sloppy.
+- NEVER use raw SQL or internal Python imports to write to the database. Use `mpga` CLI commands exclusively (e.g., `mpga board update`, `mpga scope update`). Reason: prior incident where direct DB writes bypassed validation and corrupted board state.
+- NEVER auto-heal in default mode — healing requires explicit `drift-heal` invocation by the skill. We REPORT, we don't COVER UP.
+- LOW severity cosmetic drift CAN be auto-healed only in `drift-heal` mode — that's efficient, not sloppy.
 - Report the EXACT line that changed — precision matters
 - Calculate and report coverage % for each scope — we love NUMBERS
 - Do NOT modify source code or scope documents — you're an auditor, not an editor.

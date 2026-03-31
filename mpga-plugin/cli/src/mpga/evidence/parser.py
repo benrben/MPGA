@@ -363,14 +363,34 @@ def parse_evidence_links_on_line(line: str) -> list[EvidenceLink]:
     return results
 
 
+# Matches HTML comments including multi-line ones: <!-- ... -->
+_HTML_COMMENT_RE = re.compile(r"<!--.*?-->", re.DOTALL)
+
+
+def _strip_html_comments(content: str) -> str:
+    """Remove all HTML comment blocks (<!-- ... -->) from *content*.
+
+    Multi-line comments are handled via the DOTALL flag.  Line structure is
+    preserved by replacing each comment span with the same number of newlines it
+    contained so that non-commented lines retain their original line numbers.
+    """
+    def _replace_with_newlines(m: re.Match) -> str:  # type: ignore[type-arg]
+        # Preserve the newlines so surrounding line numbers are stable
+        return "\n" * m.group(0).count("\n")
+
+    return _HTML_COMMENT_RE.sub(_replace_with_newlines, content)
+
+
 def parse_evidence_links(content: str) -> list[EvidenceLink]:
     """Parse all evidence links from a block of markdown content.
 
     Splits the content into lines and extracts all recognised evidence links from
-    each line (a line may contain multiple markers).
+    each line (a line may contain multiple markers).  HTML comment blocks
+    (``<!-- ... -->``) are stripped first so that commented-out evidence links
+    are not counted as active.
     """
     results: list[EvidenceLink] = []
-    for line in content.split("\n"):
+    for line in _strip_html_comments(content).split("\n"):
         results.extend(parse_evidence_links_on_line(line))
     return results
 

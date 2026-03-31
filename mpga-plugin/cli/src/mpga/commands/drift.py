@@ -11,7 +11,7 @@ import click
 from mpga.core.config import find_project_root, load_config
 from mpga.core.logger import console, log
 from mpga.commands.evidence import EVIDENCE_HEALTH_GOOD_PCT, EVIDENCE_HEALTH_WARN_PCT
-from mpga.evidence.drift import heal_scope_file, run_drift_check
+from mpga.evidence.drift import apply_healed_items_to_db, run_drift_check
 
 
 @click.command("drift")
@@ -96,11 +96,10 @@ def drift(
         for scope_report in report.scopes:
             if not scope_report.healed_items:
                 continue
-            result = heal_scope_file(scope_report)
-            if result.healed > 0:
-                Path(scope_report.scope_path).write_text(result.content, encoding="utf-8")
-                log.success(f"{scope_report.scope}: healed {result.healed} link(s)")
-                total_healed += result.healed
+            healed = apply_healed_items_to_db(str(project_root), scope_report)
+            if healed > 0:
+                log.success(f"{scope_report.scope}: healed {healed} link(s)")
+                total_healed += healed
         if total_healed > 0:
             log.success(f"Total healed: {total_healed}")
         stale = sum(r.stale_links for r in report.scopes)

@@ -8,6 +8,9 @@ import click
 
 from mpga.core.config import find_project_root
 from mpga.core.logger import log
+from mpga.db.connection import get_connection
+from mpga.db.repos.design_tokens import DesignTokenRepo
+from mpga.db.schema import create_schema
 from mpga.generators.design_tokens import (
     empty_token_set,
     extract_tokens_from_css,
@@ -32,7 +35,7 @@ def _project_root() -> Path:
 
 
 def _design_system_dir(project_root: Path) -> Path:
-    return project_root / "MPGA" / "design-system"
+    return project_root / ".mpga" / "design-system"
 
 
 def _tokens_paths(project_root: Path) -> tuple[Path, Path]:
@@ -80,6 +83,24 @@ def _write_tokens(project_root: Path, tokens: dict[str, dict[str, str]]) -> None
         )
 
 
+def _sync_tokens_to_db(project_root: Path, tokens: dict[str, dict[str, str]]) -> None:
+    db_path = project_root / ".mpga" / "mpga.db"
+    if not db_path.exists():
+        return
+
+    conn = get_connection(str(db_path))
+    try:
+        create_schema(conn)
+        repo = DesignTokenRepo(conn)
+        conn.execute("DELETE FROM design_tokens")
+        for category, entries in tokens.items():
+            for name, value in entries.items():
+                repo.upsert(category, name, value, source_file=".mpga/design-system/tokens.json")
+        conn.commit()
+    finally:
+        conn.close()
+
+
 def _is_custom_property_value(line: str, match_start: int) -> bool:
     segment_start = max(
         line.rfind("{", 0, match_start),
@@ -123,6 +144,7 @@ def design_system_init() -> None:
 
     normalized = normalize_tokens(tokens)
     _write_tokens(project_root, normalized)
+    _sync_tokens_to_db(project_root, normalized)
     log.success(f"Generated design tokens in {_design_system_dir(project_root)}")
 
 
@@ -142,6 +164,7 @@ def design_system_add_token(name: str, value: str, category: str) -> None:
     tokens = _load_tokens(project_root)
     tokens[category][name] = value
     _write_tokens(project_root, tokens)
+    _sync_tokens_to_db(project_root, tokens)
     log.success(f"Added {category} token '{name}'")
 
 

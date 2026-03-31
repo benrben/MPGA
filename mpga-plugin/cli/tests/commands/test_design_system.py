@@ -36,7 +36,7 @@ class TestDesignSystemCommand:
         result = runner.invoke(design_system, ["init"])
 
         assert result.exit_code == 0
-        tokens_dir = tmp_path / "MPGA" / "design-system"
+        tokens_dir = tmp_path / ".mpga" / "design-system"
         assert (tokens_dir / "tokens.json").exists()
         assert (tokens_dir / "tokens.css").exists()
 
@@ -69,7 +69,8 @@ class TestDesignSystemCommand:
         monkeypatch,
     ):
         """audit reports 100% compliance when the CSS uses custom properties."""
-        design_dir = _seed_project(tmp_path) / "design-system"
+        _seed_project(tmp_path)
+        design_dir = tmp_path / ".mpga" / "design-system"
         design_dir.mkdir(parents=True, exist_ok=True)
         (design_dir / "tokens.json").write_text(
             json.dumps(
@@ -100,7 +101,8 @@ class TestDesignSystemCommand:
 
     def test_add_token_updates_json_and_css(self, tmp_path: Path, monkeypatch):
         """add-token updates both tokens.json and tokens.css."""
-        design_dir = _seed_project(tmp_path) / "design-system"
+        _seed_project(tmp_path)
+        design_dir = tmp_path / ".mpga" / "design-system"
         design_dir.mkdir(parents=True, exist_ok=True)
         (design_dir / "tokens.json").write_text(
             json.dumps(
@@ -132,6 +134,52 @@ class TestDesignSystemCommand:
         assert "--color-primary: #2563eb;" in (design_dir / "tokens.css").read_text(
             encoding="utf-8"
         )
+
+    def test_add_token_persists_sqlite_token(self, tmp_path: Path, monkeypatch):
+        """add-token mirrors the token into SQLite when the DB exists."""
+        _seed_project(tmp_path)
+        design_dir = tmp_path / ".mpga" / "design-system"
+        design_dir.mkdir(parents=True, exist_ok=True)
+        (design_dir / "tokens.json").write_text(
+            json.dumps(
+                {
+                    "color": {},
+                    "spacing": {},
+                    "typography": {},
+                    "breakpoint": {},
+                },
+                indent=2,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        (design_dir / "tokens.css").write_text(":root {\n}\n", encoding="utf-8")
+        monkeypatch.setattr("mpga.commands.design_system.find_project_root", lambda: tmp_path)
+
+        from mpga.commands.design_system import design_system
+        from mpga.db.connection import get_connection
+        from mpga.db.schema import create_schema
+
+        conn = get_connection(str(tmp_path / ".mpga" / "mpga.db"))
+        create_schema(conn)
+        conn.close()
+
+        runner = CliRunner()
+        result = runner.invoke(
+            design_system,
+            ["add-token", "--name", "primary", "--value", "#2563eb", "--category", "color"],
+        )
+
+        assert result.exit_code == 0
+        conn = get_connection(str(tmp_path / ".mpga" / "mpga.db"))
+        try:
+            row = conn.execute(
+                "SELECT category, name, value FROM design_tokens WHERE category = 'color' AND name = 'primary'"
+            ).fetchone()
+        finally:
+            conn.close()
+
+        assert row == ("color", "primary", "#2563eb")
 
     def test_audit_ignores_token_definitions_when_scoring_compliance(
         self,

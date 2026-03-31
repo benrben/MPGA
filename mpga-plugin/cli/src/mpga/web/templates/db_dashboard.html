@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MPGA Database Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            overflow-y: auto;
+            border-right: 1px solid #34495e;
+        }
+
+        .sidebar h1 {
+            font-size: 18px;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #34495e;
+        }
+
+        .nav {
+            list-style: none;
+        }
+
+        .nav li {
+            margin: 10px 0;
+        }
+
+        .nav a {
+            color: #ecf0f1;
+            text-decoration: none;
+            padding: 10px 15px;
+            display: block;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .nav a:hover {
+            background: #34495e;
+        }
+
+        .nav a.active {
+            background: #3498db;
+            color: white;
+        }
+
+        #content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            background: white;
+        }
+
+        .header {
+            margin-bottom: 30px;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 20px;
+        }
+
+        .header h2 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table thead {
+            background: #ecf0f1;
+        }
+
+        table th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #bdc3c7;
+        }
+
+        table td {
+            padding: 12px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-fresh {
+            background: #d5f4e6;
+            color: #0a6e40;
+        }
+
+        .status-stale {
+            background: #fce4ec;
+            color: #a30337;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+
+        .error {
+            background: #fadbd8;
+            border: 1px solid #f5b7b1;
+            color: #c0392b;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+
+        .pagination {
+            margin-top: 30px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .pagination button {
+            padding: 8px 12px;
+            border: 1px solid #bdc3c7;
+            background: white;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .pagination button:hover {
+            background: #ecf0f1;
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .search-box {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .search-box button {
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .search-box button:hover {
+            background: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h1>MPGA Dashboard</h1>
+            <ul class="nav">
+                <li><a href="#" onclick="loadScopes(); return false;" class="nav-link">Scopes</a></li>
+                <li><a href="#" onclick="loadEvidence(); return false;" class="nav-link">Evidence</a></li>
+                <li><a href="#" onclick="loadTasks(); return false;" class="nav-link">Tasks</a></li>
+                <li><a href="#" onclick="loadMilestones(); return false;" class="nav-link">Milestones</a></li>
+                <li><a href="#" onclick="loadSchema(); return false;" class="nav-link">Schema</a></li>
+            </ul>
+        </div>
+
+        <div id="content">
+            <div class="header">
+                <h2>Welcome to MPGA Database Dashboard</h2>
+                <p>Select a view from the sidebar to explore the database.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =====================================================================
+        // Utility Functions
+        // =====================================================================
+
+        function escape(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function setActiveNav(selector) {
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            document.querySelector(selector)?.classList.add('active');
+        }
+
+        async function fetchAPI(endpoint) {
+            try {
+                const response = await fetch(`/db/api${endpoint}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error(`Error fetching ${endpoint}:`, error);
+                throw error;
+            }
+        }
+
+        // =====================================================================
+        // Scope View
+        // =====================================================================
+
+        async function loadScopes() {
+            setActiveNav('a:nth-of-type(1)');
+            const content = document.getElementById('content');
+            content.innerHTML = '<div class="loading">Loading scopes...</div>';
+
+            try {
+                const data = await fetchAPI('/scopes');
+                renderScopesTable(data.scopes);
+            } catch (error) {
+                content.innerHTML = `<div class="error">Failed to load scopes: ${escape(error.message)}</div>`;
+            }
+        }
+
+        function renderScopesTable(scopes) {
+            const content = document.getElementById('content');
+
+            // Build static structural HTML (no user data)
+            content.innerHTML = `
+                <div class="header">
+                    <h2>Scopes</h2>
+                    <p>Project scopes tracked in MPGA</p>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Scope ID</th>
+                            <th>Name</th>
+                            <th>Status</th>
+                            <th>Valid Evidence</th>
+                            <th>Total Evidence</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scopes-tbody"></tbody>
+                </table>
+            `;
+
+            // Populate rows using DOM APIs — textContent handles escaping automatically
+            const tbody = document.getElementById('scopes-tbody');
+            scopes.forEach(scope => {
+                const tr = document.createElement('tr');
+
+                const tdId = document.createElement('td');
+                const code = document.createElement('code');
+                code.textContent = scope.id;
+                tdId.appendChild(code);
+                tr.appendChild(tdId);
+
+                const tdName = document.createElement('td');
+                tdName.textContent = scope.name;
+                tr.appendChild(tdName);
+
+                const tdStatus = document.createElement('td');
+                const badge = document.createElement('span');
+                badge.className = 'status-badge status-' + (scope.status || '').replace(/[^a-z0-9-]/gi, '');
+                badge.textContent = scope.status;
+                tdStatus.appendChild(badge);
+                tr.appendChild(tdStatus);
+
+                const tdValid = document.createElement('td');
+                tdValid.textContent = String(scope.evidence_valid);
+                tr.appendChild(tdValid);
+
+                const tdTotal = document.createElement('td');
+                tdTotal.textContent = String(scope.evidence_total);
+                tr.appendChild(tdTotal);
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        // =====================================================================
+        // Evidence View
+        // =====================================================================
+
+        let currentEvidencePage = 1;
+        let currentEvidenceSearch = '';
+
+        async function loadEvidence(page = 1, q = '') {
+            setActiveNav('a:nth-of-type(2)');
+            currentEvidencePage = page;
+            currentEvidenceSearch = q;
+
+            const content = document.getElementById('content');
+            content.innerHTML = '<div class="loading">Loading evidence...</div>';
+
+            try {
+                let url = '/evidence?page=' + page + '&limit=50';
+                if (q) {
+                    url += '&q=' + encodeURIComponent(q);
+                }
+                const data = await fetchAPI(url);
+                renderEvidenceView(data.evidence, page);
+            } catch (error) {
+                content.innerHTML = `<div class="error">Failed to load evidence: ${escape(error.message)}</div>`;
+            }
+        }
+
+        function renderEvidenceView(evidence, page = 1) {
+            const content = document.getElementById('content');
+            const html = `
+                <div class="header">
+                    <h2>Evidence</h2>
+                    <p>Documented evidence links and assertions</p>
+                </div>
+                <div class="search-box">
+                    <input type="text" id="evidence-search" placeholder="Search evidence description..." value="${escape(currentEvidenceSearch)}">
+                    <button onclick="handleEvidenceSearch()">Search</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Raw</th>
+                            <th>Type</th>
+                            <th>Filepath</th>
+                            <th>Description</th>
+                            <th>Confidence</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${evidence.map(e => `
+                            <tr>
+                                <td><code>${escape(e.raw)}</code></td>
+                                <td>${escape(e.type)}</td>
+                                <td>${escape(e.filepath)}</td>
+                                <td>${escape(e.description || '')}</td>
+                                <td>${escape(String(e.confidence))}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+                <div class="pagination">
+                    <button onclick="loadEvidence(${Math.max(1, page - 1)}, '${escape(currentEvidenceSearch)}')" ${page === 1 ? 'disabled' : ''}>← Previous</button>
+                    <span>Page ${page}</span>
+                    <button onclick="loadEvidence(${page + 1}, '${escape(currentEvidenceSearch)}')" ${evidence.length < 50 ? 'disabled' : ''}>Next →</button>
+                </div>
+            `;
+            content.innerHTML = html;
+            document.getElementById('evidence-search').focus();
+        }
+
+        function handleEvidenceSearch() {
+            const query = document.getElementById('evidence-search').value;
+            loadEvidence(1, query);
+        }
+
+        // =====================================================================
+        // Tasks View (Placeholder)
+        // =====================================================================
+
+        async function loadTasks() {
+            // TODO: Implement full tasks view — fetch from /api/tasks
+            setActiveNav('a:nth-of-type(3)');
+            const content = document.getElementById('content');
+            content.innerHTML = `
+                <div class="header">
+                    <h2>Tasks</h2>
+                    <p>MPGA task board</p>
+                </div>
+                <div style="padding: 2rem; color: #6b7280;">
+                    <p>Task board view is coming soon.</p>
+                    <p>Use <code>mpga board show</code> in the terminal to view tasks.</p>
+                </div>
+            `;
+        }
+
+        // =====================================================================
+        // Milestones View
+        // =====================================================================
+
+        async function loadMilestones() {
+            // TODO: Implement full milestones view — fetch from /api/milestones
+            setActiveNav('a:nth-of-type(4)');
+            const content = document.getElementById('content');
+            content.innerHTML = `
+                <div class="header">
+                    <h2>Milestones</h2>
+                    <p>Project milestones and releases</p>
+                </div>
+                <div style="padding: 2rem; color: #6b7280;">
+                    <p>Milestones view is coming soon.</p>
+                    <p>Use <code>mpga milestone list</code> in the terminal to view milestones.</p>
+                </div>
+            `;
+        }
+
+        // =====================================================================
+        // Schema View
+        // =====================================================================
+
+        async function loadSchema() {
+            setActiveNav('a:nth-of-type(5)');
+            const content = document.getElementById('content');
+            content.innerHTML = '<div class="loading">Loading schema...</div>';
+
+            try {
+                const data = await fetchAPI('/schema');
+                renderSchemaView(data.tables);
+            } catch (error) {
+                content.innerHTML = `<div class="error">Failed to load schema: ${escape(error.message)}</div>`;
+            }
+        }
+
+        function renderSchemaView(tables) {
+            const content = document.getElementById('content');
+            const html = `
+                <div class="header">
+                    <h2>Database Schema</h2>
+                    <p>Database tables and relationships</p>
+                </div>
+                <div>
+                    ${tables.map(table => `
+                        <div style="margin: 30px 0; padding: 20px; background: #f8f9fa; border-radius: 4px;">
+                            <h3 style="margin-bottom: 15px;">${escape(table.name)}</h3>
+                            <h4 style="font-size: 14px; margin: 15px 0 10px 0; color: #7f8c8d;">Columns</h4>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Type</th>
+                                        <th>Nullable</th>
+                                        <th>Default</th>
+                                        <th>PK</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${table.columns.map(col => `
+                                        <tr>
+                                            <td>${escape(col.name)}</td>
+                                            <td><code>${escape(col.type)}</code></td>
+                                            <td>${col.notnull ? 'NO' : 'YES'}</td>
+                                            <td>${col.dflt_value ? '<code>' + escape(String(col.dflt_value)) + '</code>' : '—'}</td>
+                                            <td>${col.pk ? '✓' : '—'}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                            ${table.foreign_keys.length > 0 ? `
+                                <h4 style="font-size: 14px; margin: 15px 0 10px 0; color: #7f8c8d;">Foreign Keys</h4>
+                                <ul style="margin-left: 20px;">
+                                    ${table.foreign_keys.map(fk => `
+                                        <li>${escape(fk.from)} → ${escape(fk.table)}.${escape(fk.to)}</li>
+                                    `).join('')}
+                                </ul>
+                            ` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            content.innerHTML = html;
+        }
+
+        // =====================================================================
+        // Initialize
+        // =====================================================================
+
+        // Load scopes by default when page loads
+        window.addEventListener('load', loadScopes);
+    </script>
+</body>
+</html>

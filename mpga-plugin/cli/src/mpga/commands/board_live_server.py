@@ -40,7 +40,7 @@ class _BoardLiveHandler(SimpleHTTPRequestHandler):
         content_type = CONTENT_TYPES.get(p.suffix, "application/octet-stream")
         try:
             data = p.read_bytes()
-        except Exception:
+        except OSError:
             self.send_error(500, "Internal Server Error")
             return
 

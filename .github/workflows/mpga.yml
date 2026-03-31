@@ -1,6 +1,5 @@
 # MPGA Evidence Check — GitHub Actions workflow
-# Add this to your project's .github/workflows/ directory
-# to enforce evidence health on pull requests.
+# Enforces evidence health on pull requests.
 
 name: MPGA Evidence Check
 
@@ -8,7 +7,7 @@ on:
   pull_request:
     paths:
       - 'src/**'
-      - 'MPGA/**'
+      - 'mpga-plugin/**'
 
 jobs:
   evidence:
@@ -19,15 +18,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          node-version: '20'
+          python-version: "3.11"
 
       - name: Install MPGA CLI
-        run: npm install -g mpga
-        # Or use local build:
-        # run: cd cli && npm install && npm run build && npm link
+        run: pip install -e .
+        working-directory: mpga-plugin/cli
 
       - name: Verify evidence links
         run: mpga evidence verify

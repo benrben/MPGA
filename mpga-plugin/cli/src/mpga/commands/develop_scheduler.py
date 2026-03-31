@@ -31,10 +31,11 @@ from mpga.board.task import (
     render_task_file,
 )
 from mpga.core.config import find_project_root
-
-# ---------------------------------------------------------------------------
-# Data types
-# ---------------------------------------------------------------------------
+from mpga.db.connection import get_connection
+from mpga.db.repos.lanes import Lane, LaneRepo, Run, RunRepo
+from mpga.db.repos.locks import LockRepo
+from mpga.db.repos.tasks import TaskRepo
+from mpga.db.schema import create_schema
 
 
 @dataclass
@@ -55,10 +56,6 @@ class TddCheckpoint:
     last_impl_file: str | None = None
     failing_test: str | None = None
 
-
-# ---------------------------------------------------------------------------
-# TDD Checkpoint section helpers
-# ---------------------------------------------------------------------------
 
 
 def render_checkpoint_section(checkpoint: TddCheckpoint) -> str:
@@ -107,10 +104,6 @@ def parse_checkpoint_section(body: str) -> TddCheckpoint | None:
     return checkpoint
 
 
-# ---------------------------------------------------------------------------
-# TDD Checkpoint load / save
-# ---------------------------------------------------------------------------
-
 
 def save_tdd_checkpoint(
     tasks_dir: str,
@@ -157,10 +150,6 @@ def load_tdd_checkpoint(tasks_dir: str, task_id: str) -> TddCheckpoint | None:
 
     return parse_checkpoint_section(task.body)
 
-
-# ---------------------------------------------------------------------------
-# File-group merging
-# ---------------------------------------------------------------------------
 
 
 def _merge_file_groups(groups: list[list[str]]) -> list[list[str]]:
@@ -323,6 +312,103 @@ def persist_lane_transition(
         write_board_live_snapshot(board, tasks_dir, board_dir)
         write_board_live_html(board_dir)
 
+        db_path = Path(board_dir).parent.parent / ".mpga" / "mpga.db"
+        conn = get_connection(str(db_path))
+        try:
+            create_schema(conn)
+            for scope_id in task.scopes:
+                conn.execute(
+                    """
+                    INSERT OR IGNORE INTO scopes
+                        (id, name, summary, content, status,
+                         evidence_total, evidence_valid, last_verified,
+                         created_at, updated_at)
+                    VALUES (?, ?, NULL, NULL, 'fresh', 0, 0, NULL, datetime('now'), datetime('now'))
+                    """,
+                    (scope_id, scope_id),
+                )
+
+            task_repo = TaskRepo(conn)
+            if task_repo.get(task.id) is None:
+                task_repo.create(task)
+            else:
+                task_repo.update(task)
+
+            lane_repo = LaneRepo(conn)
+            existing_lane = lane_repo.get(opts.lane_id)
+            if existing_lane is None:
+                lane_repo.create(
+                    Lane(
+                        id=opts.lane_id,
+                        status=lane_status,
+                        scope=opts.scope,
+                        current_agent=opts.agent if opts.agent else None,
+                    )
+                )
+            else:
+                conn.execute(
+                    """
+                    UPDATE lanes
+                    SET status = ?, scope = ?, current_agent = ?, updated_at = datetime('now')
+                    WHERE id = ?
+                    """,
+                    (lane_status, opts.scope, opts.agent if opts.agent else None, opts.lane_id),
+                )
+
+            run_id = f"{opts.lane_id}:{opts.task_id}"
+            run_repo = RunRepo(conn)
+            existing_run = run_repo.get(run_id)
+            if existing_run is None:
+                run_repo.create(
+                    Run(
+                        id=run_id,
+                        lane_id=opts.lane_id,
+                        task_id=opts.task_id,
+                        status=opts.status,
+                        agent=opts.agent if opts.agent else None,
+                        started_at=task.started_at,
+                        finished_at=task.finished_at,
+                    )
+                )
+            else:
+                conn.execute(
+                    """
+                    UPDATE runs
+                    SET lane_id = ?, task_id = ?, status = ?, agent = ?, started_at = ?, finished_at = ?
+                    WHERE id = ?
+                    """,
+                    (
+                        opts.lane_id,
+                        opts.task_id,
+                        opts.status,
+                        opts.agent if opts.agent else None,
+                        task.started_at,
+                        task.finished_at,
+                        run_id,
+                    ),
+                )
+
+            conn.execute("DELETE FROM file_locks WHERE task_id = ?", (opts.task_id,))
+            conn.execute("DELETE FROM scope_locks WHERE task_id = ?", (opts.task_id,))
+            lock_repo = LockRepo(conn)
+            for file_path in files:
+                lock_repo.acquire_file(
+                    file_path,
+                    opts.task_id,
+                    lane_id=opts.lane_id,
+                    agent=opts.agent if opts.agent else None,
+                )
+            if opts.scope and not is_terminal:
+                lock_repo.acquire_scope(
+                    opts.scope,
+                    opts.task_id,
+                    lane_id=opts.lane_id,
+                    agent=opts.agent if opts.agent else None,
+                )
+            conn.commit()
+        finally:
+            conn.close()
+
     with_board_lock(board_dir, _inner)
 
 
@@ -339,7 +425,7 @@ def run_develop_task(
     dashboard: bool = False,
 ) -> list[str]:
     project_root = find_project_root() or str(Path.cwd())
-    board_dir = str(Path(project_root) / "MPGA" / "board")
+    board_dir = str(Path(project_root) / ".mpga" / "board")
     tasks_dir = str(Path(board_dir) / "tasks")
 
     task_file = find_task_file(tasks_dir, task_id)

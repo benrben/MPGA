@@ -27,7 +27,7 @@ Runs: `mpga milestone status` + shows board summary
 /mpga:milestone complete
 ```
 Runs:
-1. `mpga verify` (full verification pass)
+1. `mpga health` (full verification pass)
 2. `mpga milestone complete`
 3. `mpga board archive` — Great job! Enjoy!
 

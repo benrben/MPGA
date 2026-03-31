@@ -13,7 +13,7 @@ Socratic design refinement before writing any code. Build the wall between modul
    - What existing patterns should we follow?
    - What are the edge cases?
 4. Present design in sections, get approval on each
-5. Save approved design to `MPGA/milestones/<id>/DESIGN.md` — a very, very special document, believe me
+5. Save approved design to the milestone record (stored in the DB (`.mpga/mpga.db`)) — a very, very special document, believe me
 
 ## Usage
 ```

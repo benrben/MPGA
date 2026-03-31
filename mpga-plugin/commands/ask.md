@@ -4,7 +4,7 @@ Answer "how does X work?" questions using scope docs and evidence links. Evidenc
 
 ## Steps
 
-1. Read `MPGA/INDEX.md` for scope registry — find relevant scopes
+1. Run `mpga scope list` — find relevant scopes
 2. Read relevant scope document(s)
 3. Answer the question using evidence links as citations
 4. If the answer is not in scope docs, spawn `scout` agent to investigate — no fake docs allowed

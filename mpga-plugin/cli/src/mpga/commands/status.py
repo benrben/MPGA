@@ -1,50 +1,98 @@
 from __future__ import annotations
 
 import json
-import re
 import sys
 from pathlib import Path
 
 import click
 
-from mpga.core.config import find_project_root, get_last_sync, load_config
+from mpga.core.config import find_project_root, load_config
 from mpga.core.logger import log, mini_banner, progress_bar
+from mpga.db.connection import get_connection
+from mpga.db.repos.scopes import ScopeRepo
+from mpga.db.repos.tasks import TaskRepo
+from mpga.db.schema import create_schema
+
+_IN_FLIGHT_COLUMNS = {"in-progress", "testing", "review"}
+
+
+def _summarize_tasks(tasks) -> dict[str, object]:
+    columns: dict[str, list[str]] = {
+        "backlog": [],
+        "todo": [],
+        "in-progress": [],
+        "testing": [],
+        "review": [],
+        "done": [],
+    }
+    for task in tasks:
+        columns.setdefault(task.column, []).append(task.id)
+
+    total = len(tasks)
+    done = sum(1 for task in tasks if task.column == "done")
+    in_flight = sum(1 for task in tasks if task.column in _IN_FLIGHT_COLUMNS)
+    blocked = sum(1 for task in tasks if task.status == "blocked")
+    progress_pct = round((done / total) * 100) if total else 0
+    return {
+        "stats": {
+            "total": total,
+            "done": done,
+            "in_flight": in_flight,
+            "blocked": blocked,
+            "progress_pct": progress_pct,
+        },
+        "columns": columns,
+    }
+
+
+def _load_db_status(project_root: Path) -> dict[str, object] | None:
+    db_path = project_root / ".mpga" / "mpga.db"
+    if not db_path.exists():
+        return None
+
+    conn = get_connection(str(db_path))
+    try:
+        create_schema(conn)
+        tasks = TaskRepo(conn).filter()
+        scopes = ScopeRepo(conn).list_all()
+
+        board_state = _summarize_tasks(tasks) if tasks else None
+        last_scanned = conn.execute("SELECT MAX(last_scanned) FROM file_info").fetchone()
+        last_sync = last_scanned[0] if last_scanned and last_scanned[0] else "never"
+
+        total_ev = conn.execute("SELECT COUNT(*) FROM evidence").fetchone()[0]
+        valid_ev = conn.execute(
+            "SELECT COUNT(*) FROM evidence WHERE type = 'valid'"
+        ).fetchone()[0]
+        evidence_pct = round(valid_ev / total_ev * 100) if total_ev else 0
+
+        return {
+            "board_state": board_state,
+            "scopes": scopes,
+            "last_sync": last_sync,
+            "evidence_pct": evidence_pct,
+        }
+    finally:
+        conn.close()
+
 
 
 @click.command("status")
 @click.option("--json", "as_json", is_flag=True, help="Output as JSON")
 def status_cmd(as_json: bool) -> None:
     """Show project health dashboard."""
-    project_root = find_project_root() or Path.cwd()
-    mpga_dir = Path(project_root) / "MPGA"
+    project_root = Path(find_project_root() or Path.cwd())
     config = load_config(project_root)
 
-    if not mpga_dir.exists():
-        log.error("MPGA not initialized. Run `mpga init` first.")
+    db_status = _load_db_status(project_root)
+    if db_status is None:
+        log.error("No MPGA database found. Run `mpga init` first.")
         sys.exit(1)
 
-    index_path = mpga_dir / "INDEX.md"
-    board_path = mpga_dir / "board" / "board.json"
-    scopes_dir = mpga_dir / "scopes"
-
-    # Read board state
-    board_state: dict | None = None
-    if board_path.exists():
-        board_state = json.loads(board_path.read_text(encoding="utf-8"))
-
-    # Count scopes
-    scopes: list[str] = []
-    if scopes_dir.exists():
-        scopes = [f.name for f in scopes_dir.iterdir() if f.suffix == ".md"]
-
-    # Read INDEX.md for last sync info
-    last_sync = get_last_sync(mpga_dir)
-    evidence_coverage = "0%"
-    if index_path.exists():
-        content = index_path.read_text(encoding="utf-8")
-        cov_match = re.search(r"\*\*Evidence coverage:\*\* ([\d.]+%)", content)
-        if cov_match:
-            evidence_coverage = cov_match.group(1)
+    board_state: dict | None = db_status["board_state"]
+    scopes = db_status["scopes"]
+    last_sync = str(db_status["last_sync"])
+    evidence_coverage = f"{db_status['evidence_pct']}%"
 
     if as_json:
         board_stats = board_state.get("stats") if board_state else None
@@ -65,35 +113,21 @@ def status_cmd(as_json: bool) -> None:
 
     mini_banner()
 
-    # -- Knowledge Layer --
     log.header(f"Status \u2014 {config.project.name} (Looking TREMENDOUS)")
 
     log.section("  \U0001f4da Knowledge Layer")
     log.kv("Last sync", last_sync, 4)
     log.kv("Scopes", str(len(scopes)), 4)
     log.kv("Evidence", evidence_coverage, 4)
-    log.kv(
-        "INDEX.md",
-        "[green]\u2713 present[/]" if index_path.exists() else "[red]\u2717 missing[/]",
-        4,
-    )
 
     if scopes:
         log.section("  \U0001f5c2  Scopes")
-        for scope_file in scopes:
-            scope_name = scope_file.replace(".md", "")
-            scope_path = scopes_dir / scope_file
-            scope_content = scope_path.read_text(encoding="utf-8")
-            health_match = re.search(r"\*\*Health:\*\* (.+)", scope_content)
-            health = health_match.group(1) if health_match else "[dim]unknown[/]"
-            click.echo(f"    {scope_name:<22} {health}")
+        for scope in scopes:
+            click.echo(f"    {scope.name:<22} {scope.status}")
 
-    # -- Board --
     if board_state:
         stats = board_state.get("stats", {})
         log.section("  \U0001f4cb Task Board")
-        milestone = board_state.get("milestone") or "[dim]none[/]"
-        log.kv("Milestone", str(milestone), 4)
         done = stats.get("done", 0)
         total = stats.get("total", 0)
         log.kv(
@@ -116,7 +150,6 @@ def status_cmd(as_json: bool) -> None:
         if col_parts:
             log.kv("Columns", "  ".join(col_parts), 4)
 
-    # -- Config --
     log.section("  \u2699  Configuration")
     log.kv("Project", config.project.name, 4)
     log.kv("Languages", ", ".join(config.project.languages), 4)

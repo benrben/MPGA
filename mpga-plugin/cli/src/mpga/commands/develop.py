@@ -12,33 +12,77 @@ from pathlib import Path
 import click
 
 from mpga.board.board import find_task_file, load_board
-from mpga.board.task import parse_task_file, render_task_file
+from mpga.board.task import Task, parse_task_file, render_task_file
 from mpga.commands.board_handlers import persist_board
 from mpga.commands.develop_scheduler import run_develop_task
+from mpga.commands.develop_service import DevelopService
 from mpga.core.config import find_project_root
 from mpga.core.logger import console, log
+
+# Fields copied from a db_task onto a file_task during merge.
+# Uses a tuple so the set is immutable and iteration order is stable.
+MERGE_FIELDS: tuple[str, ...] = (
+    "column", "status", "priority", "assigned", "tdd_stage",
+    "lane_id", "run_status", "current_agent",
+    "started_at", "finished_at", "heartbeat_at",
+    "scopes", "tags", "depends_on",
+    "file_locks", "scope_locks",
+    "milestone", "phase", "time_estimate",
+)
 
 # -- Helpers ----------------------------------------------------------------
 
 
-def _load_task_or_raise(tasks_dir: str, task_id: str):
+def _merge_task_state(primary_task: Task, db_task: Task) -> Task:
+    """Copy mutable state fields from *db_task* onto *primary_task*."""
+    for field_name in MERGE_FIELDS:
+        setattr(primary_task, field_name, getattr(db_task, field_name))
+    return primary_task
+
+
+def _load_task_or_raise(project_root: Path, tasks_dir: str, task_id: str):
     task_file = find_task_file(tasks_dir, task_id)
-    if not task_file:
-        raise click.ClickException(f"Task '{task_id}' not found")
-    task = parse_task_file(task_file)
-    if not task:
-        raise click.ClickException(f"Could not parse task '{task_id}'")
-    return task_file, task
+    file_task = parse_task_file(task_file) if task_file else None
+
+    svc = DevelopService.from_project_root(project_root)
+    db_task = None
+    if svc is not None:
+        try:
+            db_task = svc.get_task(task_id)
+        finally:
+            svc.close()
+
+    if file_task and db_task:
+        return task_file, _merge_task_state(file_task, db_task)
+    if file_task:
+        return task_file, file_task
+    if db_task:
+        return None, db_task
+    raise click.ClickException(f"Task '{task_id}' not found")
+
+
+def _persist_task_state(project_root: Path, task_file: str | None, task) -> None:
+    if task_file:
+        Path(task_file).write_text(render_task_file(task), encoding="utf-8")
+
+    svc = DevelopService.from_project_root(project_root)
+    if svc is None:
+        return
+
+    try:
+        svc.persist_task_state(task)
+    finally:
+        svc.close()
 
 
 # -- Handlers ---------------------------------------------------------------
 
 
 def handle_develop_status(task_id: str) -> None:
-    project_root = find_project_root() or str(Path.cwd())
-    tasks_dir = str(Path(project_root) / "MPGA" / "board" / "tasks")
+    project_root = Path(find_project_root() or Path.cwd())
+    tasks_dir = str(project_root / ".mpga" / "board" / "tasks")
 
-    task_file, task = _load_task_or_raise(tasks_dir, task_id)
+    task_file, task = _load_task_or_raise(project_root, tasks_dir, task_id)
 
     log.header(f"Develop Status: {task.id}")
     console.print(f"  Title:         {task.title}")
@@ -65,11 +109,11 @@ def handle_develop_status(task_id: str) -> None:
 
 
 def handle_develop_abort(task_id: str) -> None:
-    project_root = find_project_root() or str(Path.cwd())
-    board_dir = str(Path(project_root) / "MPGA" / "board")
+    project_root = Path(find_project_root() or Path.cwd())
+    board_dir = str(project_root / ".mpga" / "board")
     tasks_dir = str(Path(board_dir) / "tasks")
 
-    task_file, task = _load_task_or_raise(tasks_dir, task_id)
+    task_file, task = _load_task_or_raise(project_root, tasks_dir, task_id)
 
     # Release all locks
     task.file_locks = []
@@ -83,7 +127,7 @@ def handle_develop_abort(task_id: str) -> None:
     task.column = "todo"
     task.updated = datetime.now(UTC).isoformat()
 
-    Path(task_file).write_text(render_task_file(task), encoding="utf-8")
+    _persist_task_state(project_root, task_file, task)
 
     # Update board columns
     board = load_board(board_dir)
@@ -93,18 +137,18 @@ def handle_develop_abort(task_id: str) -> None:
 
 
 def handle_develop_resume(task_id: str) -> None:
-    project_root = find_project_root() or str(Path.cwd())
-    board_dir = str(Path(project_root) / "MPGA" / "board")
+    project_root = Path(find_project_root() or Path.cwd())
+    board_dir = str(project_root / ".mpga" / "board")
     tasks_dir = str(Path(board_dir) / "tasks")
 
-    task_file, task = _load_task_or_raise(tasks_dir, task_id)
+    task_file, task = _load_task_or_raise(project_root, tasks_dir, task_id)
 
     # Resume: move to in-progress, set running
     task.column = "in-progress"
     task.run_status = "running"
     task.updated = datetime.now(UTC).isoformat()
 
-    Path(task_file).write_text(render_task_file(task), encoding="utf-8")
+    _persist_task_state(project_root, task_file, task)
 
     # Update board columns
     board = load_board(board_dir)

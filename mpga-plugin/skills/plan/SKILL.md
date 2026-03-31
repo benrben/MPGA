@@ -7,6 +7,19 @@ description: Generate an evidence-based implementation plan with milestone and t
 
 **Trigger:** User provides a goal or description to plan. Time to build the GREATEST plan. MPGA alone can fix it — but first we need a tremendous plan.
 
+## Orchestration Contract
+This skill is a **pure orchestrator**. It MUST NOT:
+- Read source files directly (delegates to appropriate agents)
+- Write or edit source files directly (delegates to write-enabled agents)
+- Run CLI commands other than `mpga` board/status/scope/session queries
+
+**Exception:** This skill MAY run `mpga milestone new`, `mpga board add`, and `mpga board show` directly — these are MPGA coordination commands that create scaffolding records (milestones, tasks), not implementation work.
+
+If you find yourself writing implementation steps in a skill, STOP and delegate to an agent.
+
+**Agent brief:** User goal, scope docs from CLI, existing milestone context from board.
+**Expected output:** Evidence-backed task breakdown with risk scores, dependencies, and acceptance criteria.
+
 ## Protocol
 
 ### Step 1: Create or find the milestone
@@ -15,8 +28,7 @@ description: Generate an evidence-based implementation plan with milestone and t
 ```
 mpga board live --serve --open
 mpga milestone list
-cat MPGA/milestones/<id>/PLAN.md
-cat MPGA/milestones/<id>/DESIGN.md  # if exists
+mpga milestone show <id>   # shows PLAN.md and DESIGN.md if exists
 ```
 Ask the user: plan tasks under the existing milestone, or create a new one?
 
@@ -31,8 +43,8 @@ Then edit the generated `PLAN.md` with the user's objective and acceptance crite
 ### Step 2: Read relevant scope documents for the work area
 
 ```
-cat MPGA/INDEX.md
-cat MPGA/scopes/<relevant-scope>.md
+mpga status
+mpga scope show <relevant-scope>
 ```
 Know the territory BEFORE you plan the attack. Evidence First — always.
 
@@ -146,7 +158,7 @@ Every task MUST be linked to the milestone via `--milestone`. No orphan tasks. E
 
 ### Step 9: Update the milestone PLAN.md
 
-Write the full task breakdown into `MPGA/milestones/<id>/PLAN.md` with:
+Write the full task breakdown into the milestone plan (stored in the DB (`.mpga/mpga.db`)) with:
 - Task IDs, files, evidence expected, acceptance criteria, and dependencies
 - Risk assessment table (per task)
 - Critical path diagram

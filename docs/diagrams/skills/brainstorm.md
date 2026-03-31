@@ -17,13 +17,13 @@ flowchart TD
     I -->|No — revise| H
     I -->|Yes| J{More sections?}
     J -->|Yes| H
-    J -->|No — all approved| K[Save DESIGN.md — a MASTERPIECE\nMPGA/milestones/id/DESIGN.md]
+    J -->|No — all approved| K[Save DESIGN.md — a MASTERPIECE\nstored in DB via mpga milestone show]
     K --> O[mpga spoke — if available]
 ```
 
 ## Inputs — The Raw Materials
 - Feature or project idea — YOUR brilliant vision
-- MPGA/INDEX.md and relevant scope documents
+- `mpga status` and relevant scope documents via `mpga scope show`
 - Existing code patterns as evidence — we deal in FACTS
 
 ## Outputs — A BEAUTIFUL Blueprint

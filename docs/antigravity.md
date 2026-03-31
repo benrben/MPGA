@@ -23,7 +23,7 @@ project-root/
 │       ├── mpga-sync-project/SKILL.md
 │       ├── mpga-plan/SKILL.md
 │       ├── mpga-develop/SKILL.md
-│       └── ...                        # all 11 skills
+│       └── ...                        # all skills
 ├── .agents/
 │   └── workflows/
 │       ├── mpga-plan.md               # Step-by-step planning workflow
@@ -38,7 +38,7 @@ project-root/
 
 ## `GEMINI.md` (constitution)
 
-The primary always-on context file. Generated from `MPGA/INDEX.md`. Contains the read-before-coding protocol, evidence rules, TDD protocol, active milestone, and verification commands. Antigravity reads this at the start of every session.
+The primary always-on context file. Generated via `mpga export --antigravity`. Contains the read-before-coding protocol, evidence rules, TDD protocol, active milestone, and verification commands. Antigravity reads this at the start of every session.
 
 Also generate `AGENTS.md` for tools that read it instead:
 
@@ -64,7 +64,7 @@ Antigravity's native step-by-step workflow format — its closest analog to Clau
 ## Subagents
 
 Antigravity doesn't use the same named-agent file model as Claude Code, Cursor, or Codex. Instead:
-- MPGA exports the 11 workflow skills directly
+- MPGA exports all workflow skills directly
 - Multi-step orchestration happens via **workflows** (`.agents/workflows/mpga-develop.md` runs the full red → green → blue → review cycle)
 - The agent responsibilities still exist conceptually, but they are encoded through the exported skills/workflows rather than separate agent files
 
@@ -85,7 +85,7 @@ bash path/to/mpga-plugin/bin/mpga.sh export --antigravity --global
 ```
 
 Writes:
-- `~/.gemini/antigravity/skills/mpga-*/` — 11 skills (global)
+- `~/.gemini/antigravity/skills/mpga-*/` — all skills (global)
 - `~/.antigravity/rules/mpga-global.md` — MPGA methodology for all projects
 
 ## Keep it updated

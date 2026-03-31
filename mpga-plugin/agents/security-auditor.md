@@ -20,68 +20,46 @@ Security-focused code review covering OWASP Top 10, dependency vulnerabilities, 
 Systematically check for each category in the OWASP Top 10.
 
 #### A01: Broken Access Control
-- Check for missing authorization on endpoints — every state-changing operation needs auth.
-- Look for IDOR (Insecure Direct Object References) — can a user access another user's data by changing an ID in the URL?
-- Check for missing function-level access control — can a regular user reach admin endpoints?
-- Look for CORS misconfiguration — `Access-Control-Allow-Origin: *` on authenticated endpoints is dangerous.
-- Evidence: `[E] file:line :: description of the access control gap`
+- Missing auth on state-changing endpoints; IDOR (user changes ID to access another's data)
+- Missing function-level access control (regular user reaches admin endpoints)
+- CORS misconfiguration (`Access-Control-Allow-Origin: *` on authenticated endpoints)
 
 #### A02: Cryptographic Failures
-- Check for weak hashing (MD5, SHA1 for passwords — these are broken).
-- Look for hardcoded encryption keys or IVs.
-- Check for missing encryption on sensitive data at rest or in transit.
-- Verify TLS/HTTPS enforcement for external communications.
-- Evidence: `[E] file:line :: specific crypto weakness`
+- Weak hashing (MD5/SHA1 for passwords); hardcoded keys or IVs
+- Missing encryption on sensitive data at rest/in transit; missing TLS enforcement
 
 #### A03: Injection
-- **SQL injection**: string concatenation in queries instead of parameterized statements.
-- **NoSQL injection**: unsanitized user input in MongoDB queries (`$where`, `$gt` operators from user input).
-- **Command injection**: user input passed to `exec`, `spawn`, `execSync`, or shell commands. CRITICAL every time.
-- **LDAP injection**: unsanitized input in LDAP queries.
-- **Template injection**: user input in server-side template rendering without escaping.
-- Evidence: `[E] file:line :: injection vector description`
+- **SQL**: string concatenation in queries (use parameterized statements)
+- **Command**: user input to `exec`/`spawn`/shell — CRITICAL every time
+- **NoSQL**: unsanitized input in MongoDB `$where`/`$gt` operators
+- **Template**: user input in server-side templates without escaping
 
 #### A04: Insecure Design
-- Check for missing rate limiting on authentication endpoints.
-- Look for missing account lockout after failed attempts.
-- Check for business logic flaws — can a user skip steps in a workflow? Can they buy items for negative prices?
-- Evidence: `[E] file:line :: design-level security gap`
+- Missing rate limiting on auth endpoints; missing account lockout
+- Business logic flaws (skip workflow steps, negative-price purchases)
 
 #### A05: Security Misconfiguration
-- Check for debug mode enabled in production configs.
-- Look for default credentials or accounts.
-- Check for unnecessary features enabled (directory listing, verbose error messages, stack traces in responses).
-- Verify security headers are set (see Section 4 below).
-- Evidence: `[E] file:line :: misconfiguration detail`
+- Debug mode in production; default credentials; verbose error messages/stack traces
+- Directory listing enabled; missing security headers (see Section 4)
 
 #### A06: Vulnerable and Outdated Components
-- Covered by Section 2 (dependency audit — npm audit or pip audit). Cross-reference here.
+- Covered by Section 2 (dependency audit). Cross-reference here.
 
 #### A07: Identification and Authentication Failures
-- Check session management: secure cookie flags, session timeout, session fixation protection.
-- Look for weak password policies or missing password hashing.
-- Check for missing MFA on sensitive operations.
-- Verify JWT implementation: algorithm confusion attacks (`alg: none`), missing expiration, weak signing keys.
-- Evidence: `[E] file:line :: auth weakness`
+- Weak session management (missing secure flags, no timeout, session fixation)
+- Weak/missing password hashing; missing MFA on sensitive operations
+- JWT issues: `alg: none` attack, missing expiration, weak signing keys
 
 #### A08: Software and Data Integrity Failures
-- Check for insecure deserialization — `JSON.parse` on untrusted input without validation, `eval()` on user data, `unserialize()` on untrusted data.
-- Look for missing integrity checks on downloaded code or updates.
-- Check CI/CD pipeline for injection points.
-- Evidence: `[E] file:line :: integrity failure`
+- Insecure deserialization: `eval()` on user data, `unserialize()` on untrusted input
+- Missing integrity checks on downloads/updates; CI/CD pipeline injection points
 
 #### A09: Security Logging and Monitoring Failures
-- Check for missing logging on authentication events (login, logout, failed attempts).
-- Look for missing logging on access control failures.
-- Check for sensitive data in logs (passwords, tokens, PII).
-- Verify log injection prevention — can a user inject fake log entries?
-- Evidence: `[E] file:line :: logging gap`
+- Missing logging on auth events (login, logout, failures) and access control failures
+- Sensitive data in logs (passwords, tokens, PII); log injection vulnerability
 
 #### A10: Server-Side Request Forgery (SSRF)
-- Check for user-supplied URLs fetched by the server without allowlist validation.
-- Look for URL parameters that trigger server-side HTTP requests.
-- Check for DNS rebinding protections.
-- Evidence: `[E] file:line :: SSRF vector`
+- User-supplied URLs fetched server-side without allowlist; DNS rebinding risks
 
 ### 2. Dependency vulnerability check
 Scan for known vulnerabilities in project dependencies. Support both npm and Python projects.

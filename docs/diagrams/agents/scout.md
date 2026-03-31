@@ -4,7 +4,7 @@
 
 ```mermaid
 flowchart TD
-    A[Receive assigned directory/scope — the TERRITORY] --> B[Read MPGA/INDEX.md — get the LAY of the land]
+    A[Receive assigned directory/scope — the TERRITORY] --> B[Run mpga status — get the LAY of the land]
     B --> C{Scope doc exists?}
     C -->|Yes| D[Read existing scope document — what do we KNOW already?]
     C -->|No| D2[Create scope scaffold from template — FRESH START]
@@ -31,8 +31,8 @@ flowchart TD
 ## Inputs — The Expedition Briefing
 
 - A specific directory or scope to explore — the TARGET territory
-- The corresponding scope document path in MPGA/scopes/ — the EXISTING intel
-- MPGA/INDEX.md for project map context — the MASTER map
+- The corresponding scope name — query with `mpga scope show <scope>`
+- Project map context — query with `mpga status`
 
 ## Outputs — The DISCOVERY Report
 

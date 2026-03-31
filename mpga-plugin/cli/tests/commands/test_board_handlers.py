@@ -151,8 +151,8 @@ class TestHandleBoardClaim:
             lambda _t, _d: str(task_file),
         )
         monkeypatch.setattr("mpga.commands.board_handlers.parse_task_file", lambda _: make_task("todo"))
-        monkeypatch.setattr("mpga.commands.board_handlers.render_task_file", lambda t: "---\nid: T001\n---\n")
-        monkeypatch.setattr("mpga.commands.board_handlers.persist_board", lambda *a: None)
+        monkeypatch.setattr("mpga.commands.board_handlers.persist_board", lambda *a, **kw: None)
+        monkeypatch.setattr("mpga.commands.board_handlers._sync_task_to_db", lambda *a: None)
 
         from mpga.commands.board_handlers import handle_board_claim
 
@@ -178,8 +178,8 @@ class TestHandleBoardClaim:
             lambda _t, _d: str(task_file),
         )
         monkeypatch.setattr("mpga.commands.board_handlers.parse_task_file", lambda _: make_task("todo"))
-        monkeypatch.setattr("mpga.commands.board_handlers.render_task_file", lambda t: "---\nid: T001\n---\n")
-        monkeypatch.setattr("mpga.commands.board_handlers.persist_board", lambda *a: None)
+        monkeypatch.setattr("mpga.commands.board_handlers.persist_board", lambda *a, **kw: None)
+        monkeypatch.setattr("mpga.commands.board_handlers._sync_task_to_db", lambda *a: None)
 
         from mpga.commands.board_handlers import handle_board_claim
 

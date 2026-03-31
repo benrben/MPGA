@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -15,9 +16,9 @@ class KnowledgeLayerConfig:
 @dataclass
 class ProjectConfig:
     name: str = ""
-    languages: list[str] = field(default_factory=lambda: ["typescript"])
+    languages: list[str] = field(default_factory=lambda: ["python"])
     entry_points: list[str] = field(default_factory=list)
-    ignore: list[str] = field(default_factory=lambda: ["node_modules", "dist", ".git", "MPGA/"])
+    ignore: list[str] = field(default_factory=lambda: ["node_modules", "dist", ".git"])
 
 
 @dataclass
@@ -102,8 +103,16 @@ def default_config() -> MpgaConfig:
     return cfg
 
 
-# Convenience alias for tests and code that expects a constant-like name
-DEFAULT_CONFIG = default_config()
+def get_default_config() -> MpgaConfig:
+    """Return a fresh deep copy of the default config so mutations don't bleed through."""
+    return copy.deepcopy(_DEFAULT_CONFIG_TEMPLATE)
+
+
+# Internal template — never mutate this directly
+_DEFAULT_CONFIG_TEMPLATE: MpgaConfig = default_config()
+
+# Convenience alias kept for backwards compatibility; prefer get_default_config()
+DEFAULT_CONFIG = get_default_config()
 
 
 # -- JSON key mapping (camelCase <-> snake_case) --------------------------------
@@ -198,25 +207,14 @@ def _config_to_dict(cfg: MpgaConfig) -> dict[str, Any]:
 # -- Filesystem operations -------------------------------------------------------
 
 
-def get_last_sync(mpga_dir: "Path") -> str:
-    """Read the last sync timestamp from MPGA/INDEX.md."""
-    import re
-    index_path = mpga_dir / "INDEX.md"
-    if not index_path.exists():
-        return "never"
-    content = index_path.read_text(encoding="utf-8")
-    m = re.search(r"\*\*Last sync:\*\* (.+)", content)
-    if m and "run" not in m.group(1):
-        return m.group(1)
-    return "never"
-
-
 def find_project_root(start_dir: str | Path | None = None) -> Path | None:
     d = Path(start_dir) if start_dir else Path.cwd()
     while True:
-        if (d / "mpga.config.json").exists():
+        if (d / ".mpga" / "mpga.db").exists():
             return d
-        if (d / "MPGA" / "mpga.config.json").exists():
+        if (d / ".mpga" / "mpga.config.json").exists():
+            return d
+        if (d / "mpga.config.json").exists():
             return d
         parent = d.parent
         if parent == d:
@@ -226,9 +224,9 @@ def find_project_root(start_dir: str | Path | None = None) -> Path | None:
 
 def load_config(project_root: str | Path | None = None) -> MpgaConfig:
     root = Path(project_root) if project_root else (find_project_root() or Path.cwd())
-    config_path = root / "mpga.config.json"
+    config_path = root / ".mpga" / "mpga.config.json"
     if not config_path.exists():
-        config_path = root / "MPGA" / "mpga.config.json"
+        config_path = root / "mpga.config.json"
 
     if not config_path.exists():
         cfg = default_config()

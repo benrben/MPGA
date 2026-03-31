@@ -112,3 +112,22 @@ def test_writes_snapshot_json_into_live_board_directory(board_dirs):
     assert Path(filepath).exists()
     raw = json.loads(Path(filepath).read_text())
     assert raw["columns"]["todo"][0]["title"] == "Persist me"
+
+
+def test_builds_snapshot_from_sqlite_when_task_files_are_missing(board_dirs):
+    board_dir, tasks_dir = board_dirs
+    # Derive project_root from board_dir (board_dir = project_root / MPGA / board)
+    project_root = board_dir.parent.parent
+    (project_root / ".mpga").mkdir(parents=True, exist_ok=True)
+
+    board = create_empty_board()
+    add_task(board, str(tasks_dir), AddTaskOptions(title="Persist me", column="todo"))
+    recalc_stats(board, str(tasks_dir))
+
+    from mpga.commands.board_handlers import _refresh_sqlite_board_mirror
+
+    _refresh_sqlite_board_mirror(str(board_dir), str(tasks_dir), project_root=project_root)
+    next(tasks_dir.iterdir()).unlink()
+
+    snapshot = build_board_live_snapshot(board, str(tasks_dir), str(board_dir))
+    assert snapshot.columns["todo"][0].title == "Persist me"

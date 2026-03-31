@@ -4,7 +4,7 @@ Ad-hoc task mode for small fixes or changes without a full milestone workflow. B
 
 ## Steps
 
-1. Read `MPGA/INDEX.md` for project context
+1. Run `mpga status` for project context
 2. Find relevant scope doc(s) for the task
 3. Create a mini-plan (1-3 tasks) on the board:
    `mpga board add "<sub-task>" --priority medium`
