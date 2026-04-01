@@ -522,7 +522,7 @@ class TestWireframeCommand:
 # ── T005: Honor renderer detection result in wireframe CLI ───────────────────
 #
 # Coverage checklist for: T005 — Honor renderer detection result in wireframe CLI
-# Evidence: [E] mpga-plugin/cli/src/mpga/commands/wireframe.py:92-95 :: _detect_renderer()
+# Evidence: [E] mpga-plugin/cli/src/mpga/commands/wireframe.py:88-91 :: _detect_renderer()
 #           [E] mpga-plugin/cli/src/mpga/commands/wireframe.py:192-215 :: wireframe_cmd()
 #
 # Acceptance criteria → Test status
@@ -553,11 +553,11 @@ class TestWireframeCommand:
 class TestWireframeRendererDetection:
     """Tests that wireframe_cmd honors the renderer detected by _detect_renderer().
 
-    Evidence: [E] mpga-plugin/cli/src/mpga/commands/wireframe.py:92-95 :: _detect_renderer()
-              [E] mpga-plugin/cli/src/mpga/commands/wireframe.py:199-204 :: wireframe_cmd()
-    The renderer variable is captured at line 199 but only used in the log at line 213.
-    Line 204 always calls _render_html() regardless of renderer — this suite forces
-    the command to actually branch on the renderer value.
+    Evidence: [E] mpga-plugin/cli/src/mpga/commands/wireframe.py:88-91 :: _detect_renderer()
+              [E] mpga-plugin/cli/src/mpga/commands/wireframe.py:203-208 :: if renderer == "html":
+    The renderer variable drives a branching guard at line 203. When renderer == "html",
+    HTML files are written. When renderer == "excalidraw", HTML generation is skipped.
+    ASCII output remains unconditional (lines 199-201) for all renderers.
     """
 
     def test_render_html_is_not_called_when_excalidraw_renderer_detected(
@@ -565,12 +565,11 @@ class TestWireframeRendererDetection:
         tmp_path: Path,
         monkeypatch,
     ):
-        """_render_html must NOT be the sole output path when excalidraw renderer is active.
+        """_render_html is NOT called when excalidraw renderer is active.
 
-        AC4 RED test — [E] wireframe.py:199-204 :: wireframe_cmd()
-        Currently line 204 calls _render_html() unconditionally, even when
-        _detect_renderer() returns ("excalidraw", ...). When the excalidraw renderer is
-        detected, the command must route to a different code path, not _render_html().
+        AC4 GREEN test — [E] wireframe.py:203-208 :: if renderer == "html":
+        When _detect_renderer() returns ("excalidraw", ...), the command branches away
+        from _render_html() and does not write .html files. ASCII art is still rendered.
         This test patches _render_html to a sentinel and asserts it is NOT called when
         EXCALIDRAW_MCP_AVAILABLE=1 is set.
         """
