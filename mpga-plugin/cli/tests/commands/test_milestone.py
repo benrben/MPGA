@@ -200,7 +200,7 @@ class TestCompleteActiveMilestone:
             conn.close()
 
         assert row is not None
-        assert row[0] == "completed"
+        assert row[0] == "archived"
         assert "Tasks completed:" in row[1]
 
 
@@ -492,7 +492,7 @@ class TestMilestoneComplete:
 #          → it('does not write BOARD.md when completing a milestone')
 # [x] AC2: milestone_new() no longer writes BOARD.md
 #          → it('does not write BOARD.md when creating a new milestone')
-# [ ] AC3: grep for BOARD.md write in milestone.py returns zero results
+# [x] AC3: grep for BOARD.md write in milestone.py returns zero results
 #          → structural/static (confirmed by green-dev)
 # [ ] AC4: Milestone commands complete without error
 #          → covered by existing exit_code == 0 tests above
@@ -513,8 +513,8 @@ class TestT019NoBoardMdWrites:
     def test_complete_active_milestone_does_not_write_board_md(self, tmp_path: Path):
         """complete_active_milestone() must not create or overwrite BOARD.md.
 
-        Evidence: [E] mpga-plugin/cli/src/mpga/commands/milestone.py:99-101
-        Currently FAILS because the production code writes BOARD.md at that site.
+        Evidence: [E] mpga-plugin/cli/src/mpga/commands/milestone.py — BOARD.md write removed
+        Asserts that BOARD.md is never created by complete_active_milestone().
         """
         # Arrange — board with an active milestone, no BOARD.md present
         board_dir = tmp_path / "MPGA" / "board"
@@ -540,8 +540,8 @@ class TestT019NoBoardMdWrites:
     def test_milestone_new_does_not_write_board_md(self, tmp_path: Path, monkeypatch):
         """milestone_new() must not create or overwrite BOARD.md.
 
-        Evidence: [E] mpga-plugin/cli/src/mpga/commands/milestone.py:211-212
-        Currently FAILS because the production code writes BOARD.md at that site.
+        Evidence: [E] mpga-plugin/cli/src/mpga/commands/milestone.py — BOARD.md write removed
+        Asserts that BOARD.md is never created by milestone_new().
         """
         # Arrange — minimal project with board.json but NO BOARD.md
         board_dir = tmp_path / "MPGA" / "board"
@@ -567,4 +567,140 @@ class TestT019NoBoardMdWrites:
         assert result.exit_code == 0
         assert not board_md_path.exists(), (
             "milestone_new() must not write BOARD.md"
+        )
+
+
+# ---------------------------------------------------------------------------
+# Tests: T022 — Replace os.rename archive with DB status update
+#
+# Coverage checklist for: T022 — Replace os.rename archive with DB status update
+#
+# Acceptance criteria → Test status
+# ──────────────────────────────────
+# [x] AC1: complete_active_milestone() does NOT rename/move any directory
+#          → test_no_directory_rename_on_completion (regression guard)
+# [x] AC2: After completion, milestone status in DB is 'archived'
+#          → test_milestone_status_is_archived_in_db  ← RED (current code sets 'completed')
+# [x] AC3: The function still returns CompleteMilestoneOk (no regression)
+#          → test_returns_complete_milestone_ok (degenerate regression guard)
+# [ ] AC4: Existing 20 milestone tests still pass
+#          → green-dev responsibility; no new test needed
+#
+# Untested branches / edge cases:
+# - [ ] milestone directory absent: no rename attempted, no FileNotFoundError raised
+# - [ ] milestone already has status 'archived' before call: idempotent update
+#
+# Evidence:
+#   [E] mpga-plugin/cli/src/mpga/commands/milestone.py:70-121 :: complete_active_milestone()
+#   Current code uses status="completed" (line 110, 113). T022 requires status="archived".
+# ---------------------------------------------------------------------------
+
+
+class TestT022NoRename:
+    """T022: complete_active_milestone() uses DB status update, not os.rename."""
+
+    # -----------------------------------------------------------------------
+    # TPP step 1 (degenerate): regression guard — function still returns Ok
+    # -----------------------------------------------------------------------
+
+    def test_returns_complete_milestone_ok(self, tmp_path: Path):
+        """complete_active_milestone() returns CompleteMilestoneOk after T022 changes.
+
+        Evidence: [E] mpga-plugin/cli/src/mpga/commands/milestone.py:70-121
+        Degenerate regression guard — the return type must not change.
+        """
+        # Arrange
+        board_dir = tmp_path / "MPGA" / "board"
+        tasks_dir = board_dir / "tasks"
+        tasks_dir.mkdir(parents=True, exist_ok=True)
+        (board_dir / "board.json").write_text(
+            make_board_json({"milestone": "M001-t022"})
+        )
+
+        # Act
+        from mpga.commands.milestone import CompleteMilestoneOk, complete_active_milestone
+
+        result = complete_active_milestone(str(tmp_path))
+
+        # Assert
+        assert isinstance(result, CompleteMilestoneOk)
+        assert result.ok is True
+        assert result.milestone_slug == "M001-t022"
+
+    # -----------------------------------------------------------------------
+    # TPP step 2 (constant): no directory was renamed or moved
+    # -----------------------------------------------------------------------
+
+    def test_no_directory_rename_on_completion(self, tmp_path: Path):
+        """complete_active_milestone() must not rename or move any directory.
+
+        Evidence: [E] mpga-plugin/cli/src/mpga/commands/milestone.py:70-121
+        The milestone source directory (if present) must remain at its original
+        location after the call — no os.rename / shutil.move must have occurred.
+        """
+        # Arrange — create a milestone directory that would be a rename target
+        board_dir = tmp_path / "MPGA" / "board"
+        tasks_dir = board_dir / "tasks"
+        milestones_dir = tmp_path / "MPGA" / "milestones"
+        source_dir = milestones_dir / "M001-t022"
+        tasks_dir.mkdir(parents=True, exist_ok=True)
+        source_dir.mkdir(parents=True, exist_ok=True)
+        (board_dir / "board.json").write_text(
+            make_board_json({"milestone": "M001-t022"})
+        )
+        archive_dir = milestones_dir / "archive" / "M001-t022"
+
+        # Act
+        from mpga.commands.milestone import complete_active_milestone
+
+        result = complete_active_milestone(str(tmp_path))
+
+        # Assert — source must still exist, archive must NOT have been created
+        assert result.ok is True
+        assert source_dir.exists(), (
+            "milestone directory must not have been renamed away"
+        )
+        assert not archive_dir.exists(), (
+            "complete_active_milestone() must not create an archive directory"
+        )
+
+    # -----------------------------------------------------------------------
+    # TPP step 3 (variable): DB status is 'archived' after completion
+    # -----------------------------------------------------------------------
+
+    def test_milestone_status_is_archived_in_db(self, tmp_path: Path):
+        """After complete_active_milestone(), milestone status in DB must be 'archived'.
+
+        Evidence: [E] mpga-plugin/cli/src/mpga/commands/milestone.py:110-116
+        T022 requires status='archived'. Current production code sets 'completed',
+        so this test is RED until green-dev makes the change.
+        """
+        # Arrange
+        board_dir = tmp_path / "MPGA" / "board"
+        tasks_dir = board_dir / "tasks"
+        tasks_dir.mkdir(parents=True, exist_ok=True)
+        (board_dir / "board.json").write_text(
+            make_board_json({"milestone": "M001-t022"})
+        )
+
+        # Act
+        from mpga.commands.milestone import complete_active_milestone
+        from mpga.db.connection import get_connection
+
+        result = complete_active_milestone(str(tmp_path))
+        assert result.ok is True
+
+        # Assert — status column must be 'archived'
+        conn = get_connection(str(tmp_path / ".mpga" / "mpga.db"))
+        try:
+            row = conn.execute(
+                "SELECT status FROM milestones WHERE id = 'M001-t022'"
+            ).fetchone()
+        finally:
+            conn.close()
+
+        assert row is not None, "milestone row must exist in DB"
+        assert row[0] == "archived", (
+            f"expected status='archived', got status='{row[0]}' — "
+            "T022 requires DB status update to 'archived', not 'completed'"
         )

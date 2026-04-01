@@ -1,15 +1,16 @@
-"""Tests for mpga.commands.migrate: migrate_board and migrate_tasks.
+"""Tests for mpga.commands.migrate: migrate_board, migrate_tasks, and the
+Click command registered as 'mpga migrate'.
 
 Coverage checklist for: T014 — Fix missing mpga.commands.migrate module
 
 Acceptance criteria → Test status
 ──────────────────────────────────
-[ ] AC1: migrate_board is importable and callable   → it('module exposes migrate_board callable')
-[ ] AC2: migrate_tasks is importable and callable   → it('module exposes migrate_tasks callable')
-[ ] AC3: migrate_board with empty board dir         → it('migrate_board with no board.json writes nothing')
-[ ] AC4: migrate_tasks with empty tasks dir         → it('migrate_tasks with no task files writes nothing')
-[ ] AC5: migrate_board with board.json inserts row  → it('migrate_board inserts board key-value rows')
-[ ] AC6: migrate_tasks inserts task row             → it('migrate_tasks inserts a task into the tasks table')
+[x] AC1: migrate_board is importable and callable   → it('module exposes migrate_board callable')
+[x] AC2: migrate_tasks is importable and callable   → it('module exposes migrate_tasks callable')
+[x] AC3: migrate_board with empty board dir         → it('migrate_board with no board.json writes nothing')
+[x] AC4: migrate_tasks with empty tasks dir         → it('migrate_tasks with no task files writes nothing')
+[x] AC5: migrate_board with board.json inserts row  → it('migrate_board inserts board key-value rows')
+[x] AC6: migrate_tasks inserts task row             → it('migrate_tasks inserts a task into the tasks table')
 
 Untested branches / edge cases:
 - [ ] board.json with milestone field populated
@@ -23,6 +24,26 @@ Evidence:
   [E] mpga-plugin/cli/src/mpga/db/schema.py:124-127  board table (key, value)
   [E] mpga-plugin/cli/src/mpga/db/schema.py:53-73   tasks table
   [E] mpga-plugin/cli/src/mpga/db/schema.py:75-93   task_scopes, task_tags, task_deps
+
+──────────────────────────────────────────────────────────────────────────────
+Coverage checklist for: T015 — Register mpga migrate as Click command in CLI registry
+
+Acceptance criteria → Test status
+──────────────────────────────────
+[x] AC1: 'migrate' is in _COMMANDS dict in cli.py    → it('migrate key exists in CLI _COMMANDS registry')
+[x] AC2: migrate_cmd is importable and is a Click command
+                                                      → it('migrate_cmd is a Click BaseCommand')
+[x] AC3: mpga migrate --help exits 0 and shows usage → it('migrate --help exits 0 and prints usage')
+[x] AC4: mpga migrate calls run_migrations()         → it('migrate command invokes run_migrations')
+
+Untested branches / edge cases:
+- [ ] migrate with --db pointing to a non-existent path
+- [ ] migrate when schema_version table is already populated (idempotent)
+
+Evidence:
+  [E] mpga-plugin/cli/src/mpga/cli.py:53-98   — _COMMANDS dict, no 'migrate' entry today
+  [E] mpga-plugin/cli/src/mpga/commands/migrate.py  — no @click.command decorators today
+  [E] mpga-plugin/cli/src/mpga/db/migrations.py:13  — run_migrations(conn, migrations_dir)
 """
 
 from __future__ import annotations
@@ -229,3 +250,137 @@ Body text here.
         assert len(rows) == 1, f"Expected 1 task row, got {len(rows)}"
         assert rows[0][0] == "T001"
         assert rows[0][1] == "Test task"
+
+
+# ===========================================================================
+# T015: Register mpga migrate as Click command in CLI registry
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# TPP step 1 (null/degenerate): registry lookup — 'migrate' key must exist in
+# _COMMANDS before any command object is instantiated.
+# Evidence: [E] mpga-plugin/cli/src/mpga/cli.py:53-98
+# ---------------------------------------------------------------------------
+
+
+class TestMigrateRegisteredInCLI:
+    """'migrate' must appear in the _COMMANDS registry in cli.py.
+
+    This is the degenerate check — no filesystem, no DB, just a dict lookup.
+    Evidence: [E] mpga-plugin/cli/src/mpga/cli.py:53-98
+    """
+
+    def test_migrate_key_exists_in_commands_registry(self):
+        """'migrate' is present in the _COMMANDS dict in mpga.cli."""
+        # Arrange / Act — import the registry directly
+        from mpga.cli import _COMMANDS
+
+        # Assert
+        assert "migrate" in _COMMANDS, (
+            "'migrate' not found in _COMMANDS — add the entry to cli.py"
+        )
+
+
+# ---------------------------------------------------------------------------
+# TPP step 2 (constant → variable): the mapped attribute must be a Click command
+# Evidence: [E] mpga-plugin/cli/src/mpga/commands/migrate.py
+# ---------------------------------------------------------------------------
+
+
+class TestMigrateCmdIsClickCommand:
+    """migrate_cmd must be a Click BaseCommand (decorated with @click.command).
+
+    Evidence: [E] mpga-plugin/cli/src/mpga/commands/migrate.py
+    """
+
+    def test_migrate_cmd_is_a_click_base_command(self):
+        """migrate_cmd imported from mpga.commands.migrate is a Click BaseCommand."""
+        # Arrange
+        import click
+
+        # Act
+        from mpga.commands.migrate import migrate_cmd  # noqa: F401 — will fail until green-dev adds decorator
+
+        # Assert
+        assert isinstance(migrate_cmd, click.Command), (
+            "migrate_cmd must be decorated with @click.command"
+        )
+
+
+# ---------------------------------------------------------------------------
+# TPP step 3 (selection): --help exits 0 and emits usage text
+# Evidence: [E] mpga-plugin/cli/src/mpga/cli.py:101-104 (main group)
+#           [E] mpga-plugin/cli/src/mpga/commands/migrate.py
+# ---------------------------------------------------------------------------
+
+
+class TestMigrateHelpExitsZero:
+    """'mpga migrate --help' must exit 0 and include 'Usage:' in output.
+
+    Evidence: [E] mpga-plugin/cli/src/mpga/cli.py:101-104
+              [E] mpga-plugin/cli/src/mpga/commands/migrate.py
+    """
+
+    def test_migrate_help_exits_zero_and_shows_usage(self):
+        """migrate --help exits 0 and includes usage text."""
+        # Arrange
+        from click.testing import CliRunner
+        from mpga.commands.migrate import migrate_cmd
+
+        runner = CliRunner()
+
+        # Act
+        result = runner.invoke(migrate_cmd, ["--help"])
+
+        # Assert
+        assert result.exit_code == 0, (
+            f"Expected exit code 0 from --help, got {result.exit_code}. "
+            f"Output: {result.output}"
+        )
+        assert "Usage:" in result.output, (
+            f"Expected 'Usage:' in --help output. Got: {result.output!r}"
+        )
+
+
+# ---------------------------------------------------------------------------
+# TPP step 4 (iteration): invoking the command calls run_migrations()
+# Evidence: [E] mpga-plugin/cli/src/mpga/db/migrations.py:13
+# ---------------------------------------------------------------------------
+
+
+class TestMigrateCommandInvokesRunMigrations:
+    """'mpga migrate' must call run_migrations() from db/migrations.py.
+
+    Evidence: [E] mpga-plugin/cli/src/mpga/db/migrations.py:13
+              [E] mpga-plugin/cli/src/mpga/commands/migrate.py
+    """
+
+    def test_migrate_command_calls_run_migrations(self, tmp_path: Path, monkeypatch):
+        """migrate command invokes run_migrations exactly once when executed."""
+        # Arrange
+        from click.testing import CliRunner
+        from mpga.commands.migrate import migrate_cmd
+
+        calls: list[tuple] = []
+
+        def fake_run_migrations(conn, migrations_dir=None):  # noqa: ANN001
+            calls.append((conn, migrations_dir))
+
+        monkeypatch.setattr("mpga.commands.migrate.run_migrations", fake_run_migrations)
+
+        # Seed a minimal .mpga/mpga.db so the command can find the database
+        dot_mpga = tmp_path / ".mpga"
+        dot_mpga.mkdir(parents=True, exist_ok=True)
+
+        runner = CliRunner()
+
+        # Act — invoke with a known --db path to avoid touching the real project
+        result = runner.invoke(migrate_cmd, ["--db", str(dot_mpga / "mpga.db")])
+
+        # Assert
+        assert result.exit_code == 0, (
+            f"Expected exit code 0, got {result.exit_code}. Output: {result.output}"
+        )
+        assert len(calls) == 1, (
+            f"Expected run_migrations to be called once, got {len(calls)} calls"
+        )

@@ -208,33 +208,15 @@ def test_t063_rally_parallel_agent_invocation():
 
 
 # ---------------------------------------------------------------------------
-# T008: cli-runner agent definition
+# T008: cli-runner agent PRUNED (redundant safety layer — Claude Code handles this)
 # ---------------------------------------------------------------------------
 
-def test_t008_cli_runner_agent_exists():  # T008
-    """RED: cli-runner.md must exist with correct name, allowlist safety, and mpga command references."""
+def test_t008_cli_runner_agent_pruned():  # T008
+    """GREEN: cli-runner agent must NOT exist — pruned as redundant safety proxy with no consumers."""
     agent_file = AGENTS_DIR / "cli-runner.md"
-    assert agent_file.exists(), (
-        "mpga-plugin/agents/cli-runner.md does not exist. "
-        "Create the cli-runner agent definition file."
-    )
-    content = agent_file.read_text()
-
-    # Must declare name as cli-runner in frontmatter
-    assert "cli-runner" in content, (
-        "cli-runner.md must contain 'cli-runner' (e.g. in the name: frontmatter field)."
-    )
-
-    # Must mention allowlist (safety requirement)
-    has_allowlist = "allowlist" in content.lower() or "allow list" in content.lower()
-    assert has_allowlist, (
-        "cli-runner.md must mention 'allowlist' or 'allow list' as a safety mechanism "
-        "to restrict which commands can be executed."
-    )
-
-    # Must mention mpga commands
-    assert "mpga" in content, (
-        "cli-runner.md must mention 'mpga' commands as the commands this agent executes."
+    assert not agent_file.exists(), (
+        "cli-runner.md should have been deleted. "
+        "It was a redundant safety layer — Claude Code tool permissions handle this already."
     )
 
 
