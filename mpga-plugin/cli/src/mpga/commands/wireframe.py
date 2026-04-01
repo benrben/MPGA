@@ -194,7 +194,6 @@ def wireframe_cmd(description: str, screens: int, agent: str | None) -> None:
 
     renderer, reason = _detect_renderer()
     title = _title_from_description(description)
-    css = _WIREFRAME_CSS
 
     for screen_number in range(1, screens + 1):
         ascii_art = _render_ascii(title, description, screen_number, screens)
@@ -202,7 +201,7 @@ def wireframe_cmd(description: str, screens: int, agent: str | None) -> None:
         click.echo(ascii_art)
 
         if renderer == "html":
-            html = _render_html(title, description, css, screen_number, screens)
+            html = _render_html(title, description, _WIREFRAME_CSS, screen_number, screens)
             (wireframes_dir / f"screen-{screen_number}.html").write_text(html, encoding="utf-8")
 
             if screen_number == 1:
