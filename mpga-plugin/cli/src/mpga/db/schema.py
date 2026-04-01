@@ -460,7 +460,6 @@ def create_schema(conn: sqlite3.Connection) -> None:
 
     # Backfill new milestone columns for existing databases
     for col_def in ("plan TEXT", "context TEXT"):
-        col_name = col_def.split()[0]
         try:
             conn.execute(f"ALTER TABLE milestones ADD COLUMN {col_def}")
             conn.commit()

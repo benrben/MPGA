@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from html import escape
 import os
+from html import escape
 from pathlib import Path
 
 import click

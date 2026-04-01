@@ -167,11 +167,21 @@ Run `mpga sync && mpga export --claude` to update.
 - Prefer scope-local work queues so independent scopes can move in parallel
 
 ## Available MPGA commands \u2014 each one a WINNER
+
+### Layer 1: Core workflow
 - /mpga:status \u2014 project health dashboard
 - /mpga:board \u2014 task board
 - /mpga:plan \u2014 evidence-based planning
 - /mpga:execute \u2014 TDD cycle execution
 - /mpga:quick "<task>" \u2014 ad-hoc task with TDD
+
+### Layer 2: Memory & indexing
+- `mpga memory search <query>` \u2014 search the observation memory store
+- `mpga index url <url>` \u2014 index an external URL into the context DB
+
+### Layer 3: Advanced
+- /mpga:drift \u2014 detect stale evidence links
+- /mpga:ship \u2014 pre-ship gates and PR generation
 
 ## Routing rules
 - `/api/*` routes return JSON from the SQLite-backed API

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+from datetime import datetime
 from pathlib import Path
 
 import click
@@ -243,6 +244,36 @@ def hook_pre_compact() -> None:
         _close_conn(conn)
 
 
+def _extract_skill_name(prompt: str) -> str | None:
+    """Extract skill name from a slash-command prompt, or return None if not a slash command.
+
+    Examples:
+        "/mpga-develop do task T001" -> "mpga-develop"
+        "/mpga:develop run cycle"    -> "mpga-develop"
+        "plain text"                 -> None
+    """
+    stripped = prompt.lstrip()
+    if not stripped.startswith("/"):
+        return None
+    # Take only the first word (the command token), strip the leading /
+    first_word = stripped.split()[0][1:]  # remove leading slash
+    # Normalize colon to dash (e.g. mpga:develop -> mpga-develop)
+    return first_word.replace(":", "-")
+
+
+def _write_active_skill(project_root: Path, session_id: str, prompt: str) -> None:
+    """Write .mpga/session/<session_id>/active_skill.json based on the prompt."""
+    skill_name = _extract_skill_name(prompt)
+    skill_dir = project_root / ".mpga" / "session" / session_id
+    skill_dir.mkdir(parents=True, exist_ok=True)
+    active_skill_path = skill_dir / "active_skill.json"
+    if skill_name is not None:
+        payload = {"skill": skill_name, "session_id": session_id}
+    else:
+        payload = {}
+    active_skill_path.write_text(json.dumps(payload), encoding="utf-8")
+
+
 @hook.command("capture-user-prompt", help="Capture user decisions and intents as observations")
 def hook_capture_user_prompt() -> None:
     import sys
@@ -256,7 +287,14 @@ def hook_capture_user_prompt() -> None:
     except json.JSONDecodeError:
         data = {"user_message": raw}
 
-    prompt_text = data.get("user_message", "")
+    # Fix T003: read 'user_prompt' field (UserPromptSubmit payload), fall back to 'user_message'
+    prompt_text = data.get("user_prompt", "") or data.get("user_message", "")
+    session_id = data.get("session_id") or "unknown"
+
+    # Write active_skill.json regardless of whether prompt_text is empty
+    project_root = _project_root()
+    _write_active_skill(project_root, session_id, prompt_text)
+
     if not prompt_text.strip():
         return
 
@@ -276,7 +314,7 @@ def hook_capture_user_prompt() -> None:
         from mpga.db.repos.observations import ObservationRepo, Observation
         from mpga.core.config import load_config
 
-        skip = set(load_config(_project_root()).memory.skip_tools)
+        skip = set(load_config(project_root).memory.skip_tools)
         obs_repo = ObservationRepo(conn)
         obs_repo.create(Observation(
             session_id=data.get("session_id"),
@@ -323,6 +361,110 @@ def hook_capture_observation() -> None:
             tool_input=json.dumps(data.get("tool_input", ""))[:2000],
             tool_output=json.dumps(data.get("tool_output", ""))[:2000],
         ))
+    finally:
+        _close_conn(conn)
+
+
+@hook.command("post-stop", help="Process Stop/StopFailure hooks for quality feedback")
+def hook_post_stop() -> None:
+    import sys
+
+    raw = sys.stdin.read()
+    if not raw.strip():
+        return
+
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError:
+        return
+
+    from mpga.commands.hook_post_stop import PostStopEnvelope, route_action, Action
+    envelope = PostStopEnvelope.from_dict(data)
+
+    conn, _repo = _open_repo()
+    try:
+        from mpga.db.repos.observations import ObservationRepo, Observation, QueueItem
+
+        obs_repo = ObservationRepo(conn)
+
+        # Always log a stop_event observation
+        obs_repo.create(Observation(
+            session_id=envelope.session_id,
+            title=f"{envelope.hook_event_name}: {envelope.error or envelope.stop_reason or 'completed'}",
+            type="stop_event",
+            tool_name=envelope.hook_event_name,
+            narrative=f"error={envelope.error!r} stop_reason={envelope.stop_reason!r}",
+        ))
+
+        # Route and enqueue if needed
+        action = route_action(data, conn=conn)
+        if action in (Action.ENQUEUE_IMPROVEMENT, Action.ENQUEUE_IMPROVEMENT_HIGH_PRIORITY):
+            obs_repo.enqueue(QueueItem(
+                session_id=envelope.session_id,
+                tool_name="post-stop",
+                tool_input=json.dumps(data)[:2000],
+                tool_output=action.value,
+            ))
+    finally:
+        _close_conn(conn)
+
+
+def backup_file(file_path: str, name: str, project_root: Path | None = None) -> Path:
+    """Copy file at *file_path* to .mpga/backups/<name>/<timestamp>.md.
+
+    Also writes a companion .path file containing the original file path so
+    the rollback command knows where to restore the content.
+
+    Returns the backup Path.
+    """
+    if project_root is None:
+        project_root = _project_root()
+    ts = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+    backup_dir = project_root / ".mpga" / "backups" / name
+    backup_dir.mkdir(parents=True, exist_ok=True)
+    backup_path = backup_dir / f"{ts}.md"
+    backup_path.write_text(Path(file_path).read_text(encoding="utf-8"), encoding="utf-8")
+    (backup_dir / f"{ts}.path").write_text(file_path, encoding="utf-8")
+    return backup_path
+
+
+@hook.command("rollback", help="Restore latest backup for a skill/agent by name")
+@click.argument("name")
+def hook_rollback(name: str) -> None:
+    project_root = _project_root()
+    backup_dir = project_root / ".mpga" / "backups" / name
+
+    if not backup_dir.exists():
+        raise click.ClickException(f"No backups found for '{name}' — {backup_dir} does not exist")
+
+    md_backups = sorted(backup_dir.glob("*.md"))
+    if not md_backups:
+        raise click.ClickException(f"No backup files found in {backup_dir}")
+
+    latest_md = md_backups[-1]
+    ts_stem = latest_md.stem
+    path_file = backup_dir / f"{ts_stem}.path"
+
+    if not path_file.exists():
+        raise click.ClickException(
+            f"Companion .path file not found for backup {latest_md.name} — cannot determine restore target"
+        )
+
+    original_path = Path(path_file.read_text(encoding="utf-8").strip())
+    original_path.write_text(latest_md.read_text(encoding="utf-8"), encoding="utf-8")
+    click.echo(f"Restored {name} from backup {ts_stem}")
+
+
+@hook.command("process-queue", help="Process queued post-stop improvement items")
+def hook_process_queue() -> None:
+    """Drain the improvement queue and apply LLM-generated improvements."""
+    from mpga.commands.hook_post_stop import process_improvement_queue
+
+    conn, _repo = _open_repo()
+    try:
+        project_root = _project_root()
+        count = process_improvement_queue(conn, project_root)
+        click.echo(f"Processed {count} improvement item(s).")
     finally:
         _close_conn(conn)
 
