@@ -104,13 +104,13 @@ def complete_active_milestone(project_root: str) -> CompleteMilestoneResult:
                 Milestone(
                     id=milestone_slug,
                     name=milestone_slug,
-                    status="completed",
+                    status="archived",
                     summary=summary_content,
                     completed_at=datetime.now(UTC).isoformat(),
                 )
             )
         else:
-            milestone.status = "completed"
+            milestone.status = "archived"
             milestone.summary = summary_content
             milestone.completed_at = datetime.now(UTC).isoformat()
             repo.update(milestone)

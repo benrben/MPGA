@@ -7,6 +7,22 @@ import re
 import sqlite3
 from pathlib import Path
 
+import click
+
+from mpga.db.migrations import run_migrations
+
+
+@click.command("migrate")
+@click.option("--db", default=None, help="Path to the SQLite database file.")
+def migrate_cmd(db: str | None) -> None:
+    """Apply pending SQL migrations to the MPGA database."""
+    from mpga.db.connection import get_connection
+
+    db_path = db or ".mpga/mpga.db"
+    conn = get_connection(db_path)
+    run_migrations(conn)
+    conn.close()
+
 
 def migrate_board(conn: sqlite3.Connection, board_dir: str) -> None:
     """Read board.json from board_dir (if present) and insert key-value rows into the board table."""

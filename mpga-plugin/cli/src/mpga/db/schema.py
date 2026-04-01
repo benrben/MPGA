@@ -273,6 +273,20 @@ CREATE TABLE IF NOT EXISTS indexed_content (
     content_hash TEXT
 );
 
+-- Scout cache
+CREATE TABLE IF NOT EXISTS scout_cache (
+    scope TEXT PRIMARY KEY,
+    scouted_at TEXT NOT NULL,
+    summary TEXT
+);
+
+-- TDD checkpoint tracking
+CREATE TABLE IF NOT EXISTS tdd_checkpoints (
+    task_id TEXT PRIMARY KEY,
+    tdd_stage TEXT,
+    updated_at TEXT
+);
+
 -- Schema version tracking
 CREATE TABLE IF NOT EXISTS schema_version (
     version INT PRIMARY KEY,

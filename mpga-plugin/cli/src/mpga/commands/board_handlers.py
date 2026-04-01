@@ -21,6 +21,7 @@ from mpga.board.board import (
     check_wip_limit,
     find_task_file,
     load_board,
+    load_board_from_db,
     move_task,
     recalc_stats,
     save_board,
@@ -90,7 +91,14 @@ def handle_board_show(
 ) -> None:
     project_root, board_dir, tasks_dir = _board_context()
 
-    board = load_board(board_dir)
+    db_path = Path(project_root) / ".mpga" / "mpga.db"
+    if db_path.exists():
+        from mpga.db.connection import get_connection
+        conn = get_connection(str(db_path))
+        board = load_board_from_db(conn)
+        conn.close()
+    else:
+        board = load_board(board_dir)
     tasks = _load_board_tasks(project_root, tasks_dir)
     recalc_stats(board, tasks_dir, tasks)
 

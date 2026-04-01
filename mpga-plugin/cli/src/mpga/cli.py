@@ -95,6 +95,10 @@ _COMMANDS: dict[str, tuple[str, str]] = {
     "ctx":        ("mpga.commands.ctx", "ctx"),
     # API server
     "serve":      ("mpga.commands.serve", "serve_cmd"),
+    # Database migrations
+    "migrate":    ("mpga.commands.migrate", "migrate_cmd"),
+    # Scout
+    "scout":      ("mpga.commands.scout", "scout"),
 }
 
 
