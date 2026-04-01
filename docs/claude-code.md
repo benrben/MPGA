@@ -33,6 +33,8 @@ This runs:
 2. `mpga sync` — scans codebase, generates INDEX.md, GRAPH.md, and scope docs
 3. `mpga health` — shows initial health report
 
+Board state, task state, scope docs, milestones, and configuration are all stored in the SQLite DB (`.mpga/mpga.db`). Access everything through `mpga` CLI commands — never read or write the DB directly.
+
 ## What gets installed
 
 ### Plugin (shared, install once)

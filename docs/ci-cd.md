@@ -123,20 +123,20 @@ repos:
 
 ## Thresholds
 
-Configure in the DB (`.mpga/mpga.db`) — or override at call time via flags:
+Thresholds are stored in the DB (`.mpga/mpga.db`) — configure them with `mpga config` commands or override at call time via flags:
 
-```json
-{
-  "drift": {
-    "ciThreshold": 80
-  },
-  "evidence": {
-    "coverageThreshold": 0.20
-  }
-}
+```bash
+# Show current configuration
+mpga config show
+
+# Set CI drift threshold
+mpga config set drift.ciThreshold 80
+
+# Set evidence coverage threshold
+mpga config set evidence.coverageThreshold 20
 ```
 
-Or override at call time:
+Override at call time (without persisting to DB):
 
 ```bash
 mpga drift --ci --threshold 90       # Stricter

@@ -45,3 +45,7 @@ flowchart TD
 - Renderer log line showing which fallback tier was used — FULL accountability
 - Accessibility notes for every artifact — because GREAT design includes EVERYONE
 - Zero framework dependencies, zero CDN links, zero `<script>` tags — LOCAL FIRST, always
+
+## Preferred formats
+
+The recommended wireframe formats are **minimal HTML** (self-contained, inline CSS, no dependencies) and **ASCII** (works everywhere — SSH, CI, any terminal). The `mpga wireframe` CLI generates `.html` and `.txt` files only — no SVG output. SVG appears as a conceptual fallback tier in the decision flowchart above, but it is not produced by the CLI and should not be expected as a CLI output.

@@ -72,6 +72,12 @@ mpga scope add payments    # Create new empty scope doc
 mpga scope query "login"   # Search scopes for keyword
 ```
 
+### Database migrations
+
+```bash
+mpga migrate        # Apply pending SQL migrations to .mpga/mpga.db
+```
+
 ### Task board
 
 ```bash
@@ -90,6 +96,18 @@ mpga milestone new "Auth refactor"
 mpga milestone list
 mpga milestone status
 mpga milestone complete
+```
+
+### Configuration
+
+All project configuration is stored in the SQLite DB (`.mpga/mpga.db`) — no scattered config files:
+
+```bash
+mpga config show                              # Show all settings
+mpga config get evidence.min_coverage         # Get a single value
+mpga config set evidence.min_coverage 90      # Set a value
+mpga config set drift.ciThreshold 80          # Set CI drift threshold
+mpga config reset                             # Reset to defaults
 ```
 
 ### Session handoff

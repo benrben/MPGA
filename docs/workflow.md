@@ -10,6 +10,10 @@ Parallelize reads, not writes.
 - Read-only helpers like `scout`, `auditor`, and `campaigner` can run in parallel
 - Plans should isolate independent scopes into separate task lanes
 
+## Architecture note
+
+Board state and task state are SQLite-backed — stored in `.mpga/mpga.db`. All reads and writes go through `mpga` CLI commands (e.g. `mpga board show`, `mpga board move`, `mpga board update`). Do not read or write the DB directly.
+
 ## Execution model
 
 | Stage | Primary actors | Parallel-safe | Notes |
